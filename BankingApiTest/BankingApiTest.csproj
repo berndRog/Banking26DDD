@@ -16,14 +16,11 @@
 
   <ItemGroup>
     <Using Include="Xunit"/>
+    <Using Include="Xunit.Assert" Static="true"/>
   </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\BankingApi\BankingApi.csproj" />
   </ItemGroup>
-
-  <ItemGroup>
-    <Folder Include="_2_Modules\Core\Infrastructure\" />
-  </ItemGroup>
-
+  
 </Project>

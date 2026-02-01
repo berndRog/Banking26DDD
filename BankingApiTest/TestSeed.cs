@@ -3,6 +3,7 @@ using BankingApi._2_Modules.Owners._3_Domain.Aggregates;
 using BankingApi._4_BuildingBlocks._1_Ports.Inbound;
 using BankingApi._4_BuildingBlocks._3_Domain.ValueObjects;
 using BankingApi._4_BuildingBlocks.Utils;
+using BankingApi.Modules.Core.Domain.Aggregates;
 namespace BankingApiTest;
 
 public sealed class TestSeed {
@@ -10,7 +11,7 @@ public sealed class TestSeed {
    public DateTimeOffset FixedNow => DateTimeOffset.Parse("2025-01-01T00:00:00Z");
    public IClock Clock => new FakeClock(FixedNow);
    
-   
+   #region define test data properties
    public Owner Owner1{ get; private set; }
    public Owner Owner2{ get; private set; }
    public Owner Owner3{ get; }
@@ -31,9 +32,10 @@ public sealed class TestSeed {
    public Account Account7{ get; }
    public Account Account8{ get; }
    
-   public IReadOnlyList<Account> Accounts => [
-      Account1, Account2, Account3, Account4, Account5, Account6, Account7, Account8
-   ];
+   public IReadOnlyList<Account> Accounts => new List<Account>() {
+      Account1, Account2, Account3, Account4, 
+      Account5, Account6, Account7, Account8
+   };
    
    public Beneficiary Beneficiary1{ get; }
    public Beneficiary Beneficiary2{ get; }
@@ -47,16 +49,16 @@ public sealed class TestSeed {
    public Beneficiary Beneficiary10{ get; }
    public Beneficiary Beneficiary11{ get; }
    
-   public IReadOnlyList<Beneficiary> Beneficiaries => [
+   public IReadOnlyList<Beneficiary> Beneficiaries => new List<Beneficiary>() {
       Beneficiary1, Beneficiary2, Beneficiary3, Beneficiary4, Beneficiary5,
       Beneficiary6, Beneficiary7, Beneficiary8, Beneficiary9, Beneficiary10,
       Beneficiary11
-   ];
+   };
 
-   // public Transfer Transfer1{ get;}
-   // public Transfer Transfer2{ get; }
-   // public Transfer Transfer3{ get; }
-   // public Transfer Transfer4{ get; }
+   public Transfer Transfer1{ get;}
+   public Transfer Transfer2{ get; }
+   public Transfer Transfer3{ get; }
+   public Transfer Transfer4{ get; }
    // public Transfer Transfer5{ get; }
    // public Transfer Transfer6{ get; }
    // public Transfer Transfer7{ get; }
@@ -64,6 +66,12 @@ public sealed class TestSeed {
    // public Transfer Transfer9{ get; }
    // public Transfer Transfer10{ get; }
    // public Transfer Transfer11{ get; }
+   
+   public IReadOnlyList<Transfer> Transfers => new List<Transfer>() {
+      Transfer1, Transfer2, Transfer3, Transfer4
+      // , Transfer5, Transfer6, Transfer7, Transfer8, Transfer9,
+      // Transfer10, Transfer11
+   };
 
    // public Transaction Transaction1{ get; }
    // public Transaction Transaction2{ get; }
@@ -93,7 +101,7 @@ public sealed class TestSeed {
    public Address Address1 { get; private set; } = null!;
    public Address Address2 { get; private set; } = null!;
    public Address Address3 { get; private set;} = null!;
-
+   #endregion
 
 
    public TestSeed() {
@@ -291,6 +299,88 @@ public sealed class TestSeed {
          name: Owner1.DisplayName,
          iban: Account2.Iban
       );
+      
+      
+      
+      Transfer1 = CreateTransfer(
+         id: "00010000-0000-0000-0000-000000000000",
+         fromAccountId: Account1.Id,       // Account1.Id,
+         beneficiary: Beneficiary1,        // Account3.Id,
+         amount: 345.0m,
+         purpose: "Erika an Chris1"
+      );
+      Transfer2 = CreateTransfer(
+         id: "00020000-0000-0000-0000-000000000000",
+         fromAccountId: Account1.Id,      // Account1.Id,
+         beneficiary: Beneficiary2,       // Account2.Id,
+         amount: 231.0m,
+         purpose: "Erika an Chris2"
+
+      );
+      Transfer3 = CreateTransfer(
+         id: "00030000-0000-0000-0000-000000000000",
+         fromAccountId: Account2.Id,      // Account2.Id,
+         beneficiary: Beneficiary3,       // Account4.Id,
+         amount: 289.00m,
+         purpose: "Erika an Arne"
+      );
+      Transfer4 = CreateTransfer(
+         id: "00040000-0000-0000-0000-000000000000",
+         fromAccountId: Account2.Id,      // Account2.Id,
+         beneficiary: Beneficiary4,       // Account4.Id,
+         amount: 289.00m,
+         purpose: "Erika an Benno"
+      );
+      
+      /*
+              Transfer5 = new Transfer(
+                 id: new Guid("00050000-0000-0000-0000-000000000000"),
+                 date: new DateTime(2023, 05, 01, 12, 00, 00).ToUniversalTime(),
+                 description: "Max an Arne",
+                 amount: 167.0m
+              );
+              Transfer6 = new Transfer(
+                 id: new Guid("00060000-0000-0000-0000-000000000000"),
+                 date: new DateTime(2023, 06, 01, 13, 00, 00).ToUniversalTime(),
+                 description: "Max an Benno",
+                 amount: 289.0m
+              );
+              Transfer7 = new Transfer(
+                 id: new Guid("00070000-0000-0000-0000-000000000000"),
+                 date: new DateTime(2023, 07, 01, 14, 00, 00).ToUniversalTime(),
+                 description: "Max an Dana",
+                 amount: 312.0m
+              );
+              Transfer8 = new Transfer(
+                 id: new Guid("00080000-0000-0000-0000-000000000000"),
+                 date: new DateTime(2023, 08, 01, 15, 00, 00).ToUniversalTime(),
+                 description: "Arne an Max",
+                 amount: 278.0m
+              );
+              Transfer9 = new Transfer(
+                 id: new Guid("00090000-0000-0000-0000-000000000000"),
+                 date: new DateTime(2023, 09, 01, 16, 00, 00).ToUniversalTime(),
+                 description: "Arne an Christ2",
+                 amount: 356.0m
+              );
+              Transfer10 = new Transfer(
+                 id: new Guid("00100000-0000-0000-0000-000000000000"),
+                 date: new DateTime(2023, 10, 01, 17, 00, 00).ToUniversalTime(),
+                 description: "Benno an Erika1",
+                 amount: 398.0m
+              );
+              Transfer11 = new Transfer(
+                 id: new Guid("00110000-0000-0000-0000-000000000000"),
+                 date: new DateTime(2023, 11, 01, 18, 00, 00).ToUniversalTime(),
+                 description: "Benno an Erika2",
+                 amount: 89.0m
+              );
+       *
+       *
+       * 
+       */
+      
+      
    }
 
 
@@ -375,6 +465,30 @@ public sealed class TestSeed {
          accountId: accountId,
          name: name,
          iban: iban,
+         id: id
+      );
+      Assert.True(result.IsSuccess);
+      return result.Value!;
+   }
+   
+   private Transfer CreateTransfer(
+      string id,
+      Guid fromAccountId,
+      Beneficiary beneficiary,
+      decimal amount,
+      string purpose
+   ) {
+      var toAccount = Accounts.First(a => a.Iban == beneficiary.Iban);
+      
+      var result = Transfer.Create(
+         clock: Clock,
+         fromAccountId: fromAccountId,
+         toAccountId: toAccount.Id,
+         amount: amount,
+         purpose: purpose,
+         recipientName: beneficiary.Name,
+         recipientIban: beneficiary.Iban,
+         idempotencyKey: Guid.NewGuid().ToString(),
          id: id
       );
       Assert.True(result.IsSuccess);

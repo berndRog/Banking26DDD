@@ -1,14 +1,13 @@
-
 using BankingApi._2_Modules.Accounts._3_Domain.Enums;
 using BankingApi._4_BuildingBlocks._3_Domain.Entities;
 
 public sealed class Transaction: Entity<Guid> {
 
    public TransactionType Type { get; private set; }
-   // Zu welchem Konto wirkt diese Buchung?
+   // Which Accout is affected?
    public Guid AccountId { get; private set; }
-
-   public decimal Amount { get; private set; } = default!;
+   public decimal Amount { get; private set; } 
+   public string Purpose { get; private set; } = default!;
    public DateTimeOffset BookedAt { get; private set; }
 
    // EF Core ctor 
@@ -20,6 +19,7 @@ public sealed class Transaction: Entity<Guid> {
       TransactionType type, 
       Guid accountId, 
       Decimal amount, 
+      string purpose,
       DateTimeOffset bookedAt
    ) {
       //if (amount.Amount <= 0) 
@@ -29,12 +29,36 @@ public sealed class Transaction: Entity<Guid> {
       Type = type;
       AccountId = accountId;
       Amount = amount;
+      Purpose = purpose;
       BookedAt = bookedAt;
    }
 
-   internal static Transaction CreateDebit(Guid accountId, decimal amount)
-      => new(Guid.NewGuid(), TransactionType.Debit, accountId, amount, DateTimeOffset.UtcNow);
+   //--- Factory methods -----------------------------------------------
+   public static Transaction CreateDebit(
+      Guid accountId, 
+      decimal amount, 
+      string purpose,
+      DateTimeOffset bookedAt
+   ) => new(
+      id: Guid.NewGuid(), 
+      type: TransactionType.Debit, 
+      accountId: accountId, 
+      amount: amount,
+      purpose: purpose,
+      bookedAt: bookedAt
+  );
 
-   internal static Transaction CreateCredit(Guid accountId, decimal amount)
-      => new(Guid.NewGuid(), TransactionType.Credit, accountId, amount, DateTimeOffset.UtcNow);
+   public static Transaction CreateCredit(
+      Guid accountId, 
+      decimal amount,
+      string purpose,
+      DateTimeOffset bookedAt
+   ) => new(
+      id: Guid.NewGuid(), 
+      type: TransactionType.Credit, 
+      accountId: accountId, 
+      amount: amount, 
+      purpose: purpose,
+      bookedAt: bookedAt
+   );
 }

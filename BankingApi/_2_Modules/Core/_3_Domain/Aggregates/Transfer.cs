@@ -26,16 +26,14 @@ public sealed class Transfer : AggregateRoot<Guid> {
 
    // State
    public TransferStatus Status { get; private set; }
-   public DateTimeOffset? BookedAt { get; private set; }
-   public string? FailureReason { get; private set; }
+   public DateTimeOffset BookedAt { get; private set; } = default!;
 
    // Child entities
    public IReadOnlyList<Transaction> Transactions => _transactions;
 
    //--- Ctor's ----------------------------------------------------------
    // EF Core ctor
-   private Transfer() : base(new BankingSystemClock()) {
-   }
+   private Transfer() : base(new BankingSystemClock()) { }
 
    // Domain ctor 
    private Transfer(
@@ -117,28 +115,19 @@ public sealed class Transfer : AggregateRoot<Guid> {
       if (Status != TransferStatus.Initiated)
          return Result.Failure(TransferErrors.OnlyInitiatedCanBeBooked);
 
+      // local invariant: transactions should be empty before booking
       _transactions.Clear();
 
-      _transactions.Add(Transaction.CreateDebit(FromAccountId, Amount));
-      _transactions.Add(Transaction.CreateCredit(ToAccountId, Amount));
-
+      // create debit and credit transactions
+      BookedAt = _clock.UtcNow;
+      var transactionDebit = Transaction.CreateDebit(FromAccountId, Amount, Purpose, BookedAt);
+      var transactionCredit = Transaction.CreateCredit(ToAccountId, Amount, Purpose, BookedAt);
+      _transactions.Add(transactionDebit);
+      _transactions.Add(transactionCredit);
+      
+      // update status
       Status = TransferStatus.Booked;
-      BookedAt = DateTimeOffset.UtcNow;
-      FailureReason = null;
-
       Touch(); // updates UpdatedAt
-
       return Result.Success();
-   }
-
-   // Marks the transfer as failed
-   public void Fail(string reason) {
-      Status = TransferStatus.Failed;
-      FailureReason = string.IsNullOrWhiteSpace(reason) ? "Transfer failed" : reason.Trim();
-
-      _transactions.Clear();
-      BookedAt = null;
-
-      Touch(); // updates UpdatedAt
    }
 }

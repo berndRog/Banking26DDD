@@ -4,7 +4,7 @@ namespace BankingApi._4_BuildingBlocks._3_Domain.Entities;
 public abstract class AggregateRoot<TId> : Entity<TId>
    where TId : notnull {
    
-   private readonly IClock _clock;
+   protected readonly IClock _clock;
    
    public int Version { get; protected set; } = 0;
    public DateTimeOffset CreatedAt { get; protected set; } 
