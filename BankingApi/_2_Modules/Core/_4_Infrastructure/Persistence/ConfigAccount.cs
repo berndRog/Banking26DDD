@@ -6,7 +6,7 @@ namespace BankingApi._2_Modules.Core._4_Infrastructure.Persistence;
 
 public sealed class ConfigAccount(
    DateTimeOffsetToIsoStringConverter dtOffToIsoStrConv,
-   NullableDateTimeOffsetToIsoStringConverter nulDtOffToIsoStrConv
+   DateTimeOffsetToIsoStringConverterNullable nulDtOffToIsoStrConv
 ) : IEntityTypeConfiguration<Account> {
    
    public void Configure(EntityTypeBuilder<Account> b)

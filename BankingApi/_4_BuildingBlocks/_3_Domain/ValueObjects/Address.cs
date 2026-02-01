@@ -1,5 +1,4 @@
 using BankingApi._4_BuildingBlocks._3_Domain.Errors;
-using CarRentalApi._4_BuildingBlocks;
 namespace BankingApi._4_BuildingBlocks._3_Domain.ValueObjects;
 
 // Address is an owned value object without identity.

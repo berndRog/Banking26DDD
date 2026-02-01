@@ -1,5 +1,15 @@
-// using BankingApi._2_Modules.Core._3_Domain.Aggregates;
-// namespace BankingApi._2_Modules.Core._1_Ports.Outbound;
+
+using BankingApi._2_Modules.Core._3_Domain.Aggregates;
+using BankingApi.Modules.Core.Domain.Aggregates;
+namespace BankingApi._2_Modules.Core._1_Ports.Outbound;
+public interface ITransferRepository
+{
+   Task<Transfer?> FindByIdempotencyKeyAsync(string key, CancellationToken ct);
+   Task AddAsync(Transfer transfer, CancellationToken ct);
+}
+
+
+
 //
 // public interface ITransferRepository {
 //    Task<Transfer?> FindByIdAsync(

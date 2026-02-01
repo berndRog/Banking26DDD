@@ -1,6 +1,5 @@
 using BankingApi._4_BuildingBlocks._1_Ports.Outbound;
 using BankingApi._4_BuildingBlocks._3_Domain.Errors;
-using CarRentalApi._4_BuildingBlocks;
 namespace BankingApi._4_BuildingBlocks._2_Application.Security;
 
 public static class AuthGuards {

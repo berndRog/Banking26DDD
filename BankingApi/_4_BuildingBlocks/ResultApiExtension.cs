@@ -1,5 +1,4 @@
 using BankingApi._4_BuildingBlocks._3_Domain.Enums;
-using CarRentalApi._4_BuildingBlocks;
 using Microsoft.AspNetCore.Mvc;
 namespace BankingApi._4_BuildingBlocks;
 

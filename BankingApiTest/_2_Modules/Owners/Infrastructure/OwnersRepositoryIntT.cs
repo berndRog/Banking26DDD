@@ -1,19 +1,23 @@
 using BankingApi._2_Modules.Owners._1_Ports.Outbound;
 using BankingApi._2_Modules.Owners._4_Infrastructure.Repositories;
 using BankingApi._3_Infrastructure.Database;
+using BankingApi._4_BuildingBlocks._1_Ports.Inbound;
 using BankingApi._4_BuildingBlocks._4_Infrastructure.Persistence;
 using Microsoft.Data.Sqlite;
 using Microsoft.EntityFrameworkCore;
 namespace BankingApiTest._2_Modules.Owners.Infrastructure;
 
 public sealed class OwnersRepositoryIntT : TestBase, IAsyncLifetime {
-   private TestSeed _seed = null!;
+
    private SqliteConnection _dbConnection = null!;
    private BankingDbContext _dbContext = null!;
    private IOwnerRepository _repository = null!;
    private IUnitOfWork _unitOfWork = null!;
-
+   private IClock _clock = null!;
+   private TestSeed _seed = null!;
+   
    public async Task InitializeAsync() {
+      _clock = new FakeClock();
       _seed = new TestSeed();
 
       _dbConnection = new SqliteConnection("Filename=:memory:");
@@ -28,7 +32,11 @@ public sealed class OwnersRepositoryIntT : TestBase, IAsyncLifetime {
       await _dbContext.Database.EnsureCreatedAsync();
 
       _repository = new OwnerRepositoryEf(_dbContext);
-      _unitOfWork = new UnitOfWork(_dbContext, CreateLogger<UnitOfWork>());
+      _unitOfWork = new UnitOfWork(
+         _dbContext, 
+         _clock,
+         CreateLogger<UnitOfWork>()
+      );
    }
 
    public async Task DisposeAsync() {

@@ -30,7 +30,7 @@ public sealed class AccountRepository(
    // Loads a single account by Id and eager-loads the Beneficiaries navigation.
    // Note: Include must be applied before executing the query
    // (e.g., before FirstOrDefaultAsync).
-   public async Task<Account?> FindByIdJoinBeneficiariesAsync(
+   public async Task<Account?> FindWithBeneficiariesByIdAsync(
       Guid id,
       CancellationToken ct = default
    ) {

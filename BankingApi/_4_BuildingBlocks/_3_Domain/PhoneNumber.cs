@@ -1,6 +1,5 @@
 using System.Text.RegularExpressions;
 using BankingApi._4_BuildingBlocks._3_Domain.Errors;
-using CarRentalApi._4_BuildingBlocks;
 namespace BankingApi._4_BuildingBlocks._3_Domain;
 
 public static class PhoneNumber {

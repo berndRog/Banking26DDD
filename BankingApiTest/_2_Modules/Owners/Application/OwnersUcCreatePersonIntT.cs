@@ -21,7 +21,9 @@ public sealed class OwnersUcCreatePersonIntT : TestBase, IAsyncLifetime {
 
    public async Task InitializeAsync() {
       _ct = CancellationToken.None;      
-
+      _clock = new FakeClock(new DateTime(2025, 01, 01));
+      _seed = new TestSeed();
+      
       _dbConnection = new SqliteConnection("Filename=:memory:");
       await _dbConnection.OpenAsync(_ct);
 
@@ -34,10 +36,12 @@ public sealed class OwnersUcCreatePersonIntT : TestBase, IAsyncLifetime {
       await _dbContext.Database.EnsureCreatedAsync(_ct);
 
       _repository = new OwnerRepositoryEf(_dbContext);
-      _unitOfWork = new UnitOfWork(_dbContext, CreateLogger<UnitOfWork>());
+      _unitOfWork = new UnitOfWork(
+         _dbContext, 
+         _clock, 
+         CreateLogger<UnitOfWork>()
+      );
       
-      _seed = new TestSeed();
-      _clock = new FakeClock(new DateTime(2025, 01, 01));
       
       _repository.Add(_seed.Owner1);
       _repository.Add(_seed.Owner2);

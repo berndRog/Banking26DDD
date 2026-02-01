@@ -24,6 +24,8 @@ public sealed class AccountUcBeneficiaryAddIntT : TestBase, IAsyncLifetime {
 
    public async Task InitializeAsync() {
       _ct = CancellationToken.None;      
+      _seed = new TestSeed();
+      _clock = new FakeClock(new DateTime(2025, 01, 01));
 
       _dbConnection = new SqliteConnection("Filename=:memory:");
       await _dbConnection.OpenAsync(_ct);
@@ -37,10 +39,11 @@ public sealed class AccountUcBeneficiaryAddIntT : TestBase, IAsyncLifetime {
       await _dbContext.Database.EnsureCreatedAsync(_ct);
 
       _repository = new AccountRepository(_dbContext);
-      _unitOfWork = new UnitOfWork(_dbContext, CreateLogger<UnitOfWork>());
-      
-      _seed = new TestSeed();
-      _clock = new FakeClock(new DateTime(2025, 01, 01));
+      _unitOfWork = new UnitOfWork(
+         _dbContext, 
+         _clock,
+         CreateLogger<UnitOfWork>()
+      );
       
       _accountUcCreate = new AccountUcCreate(
          new FakeOwnerLookup(_seed),
@@ -92,7 +95,7 @@ public sealed class AccountUcBeneficiaryAddIntT : TestBase, IAsyncLifetime {
       _dbContext.ChangeTracker.Clear();
       
       // Assert
-      var actualAccount = await _repository.FindByIdJoinBeneficiariesAsync(account.Id, _ct);
+      var actualAccount = await _repository.FindWithBeneficiariesByIdAsync(account.Id, _ct);
       Assert.NotNull(actualAccount);
       var actual = actualAccount!.Beneficiaries
          .FirstOrDefault(b => b.Id == beneficiary.Id);

@@ -1,6 +1,4 @@
 using BankingApi._4_BuildingBlocks._3_Domain.Errors;
-using BankingApi._4_BuildingBlocks.Utils;
-using CarRentalApi._4_BuildingBlocks;
 namespace BankingApi._4_BuildingBlocks._3_Domain.Entities;
 
 // Shared id generation/parsing for all entities.

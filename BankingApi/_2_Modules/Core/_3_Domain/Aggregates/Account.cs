@@ -77,8 +77,8 @@ public sealed class Account: AggregateRoot<Guid> {
 
    
    // -------------------- Money Transactions ---------------------------------
-   // deposit money into THIS account = credit
-   public Result<Account> Deposit(decimal amount) {
+   // Credit = deposit money into THIS account
+   public Result<Account> Credit(decimal amount) {
       // invariant: only positive amounts
       if (amount <= 0m)
          return Result<Account>.Failure(AccountErrors.InvalidCreditAmount);
@@ -87,8 +87,8 @@ public sealed class Account: AggregateRoot<Guid> {
       return Result<Account>.Success(this);
    }
    
-   // withdraw money from THIS account = debit
-   public Result<Account> Withdraw(decimal amount) {
+   // Debit = withdraw money from THIS account
+   public Result<Account> Debit(decimal amount) {
       // invariant: only positive amounts
       if (amount <= 0m)
          return Result<Account>.Failure(AccountErrors.InvalidDebitAmount);
@@ -130,7 +130,13 @@ public sealed class Account: AggregateRoot<Guid> {
       return Result<Beneficiary>.Success(beneficiary);
    }
    
-   // Story 3.2: delete beneficiary only
+   public Result<Beneficiary> FindBeneficiary(Guid id) {
+      var found = _beneficiaries.FirstOrDefault(b => b.Id == id);
+      return found is null
+         ? Result<Beneficiary>.Failure(BeneficiaryErrors.NotFound)
+         : Result<Beneficiary>.Success(found);
+   }
+   
    public Result<Guid> RemoveBeneficiary(Guid beneficiaryId) {
       if (beneficiaryId == Guid.Empty)
          return Result<Guid>.Failure(BeneficiaryErrors.InvalidId);

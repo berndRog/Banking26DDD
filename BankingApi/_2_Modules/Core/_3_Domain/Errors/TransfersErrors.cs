@@ -7,41 +7,57 @@ namespace BankingApi._2_Modules.Transfers._3_Domain.Errors;
 /// A transfer represents a business operation initiated by a user.
 /// </summary>
 public static class TransferErrors {
-   
-      public static readonly DomainErrors InvalidId =
-         new(ErrorCode.BadRequest, 
-            Title: "Invalid Transfer Id",
-            Message: "The given Id is invalid.");
+   public static readonly DomainErrors InvalidId = new(
+      ErrorCode.BadRequest,
+      Title: "Transfer: Invalid Id",
+      Message: "The given identifier for the transfer is invalid.");
 
-      // public static readonly DomainErrors NotFound =
-      //    new("transfer.not.found", "Transfer not found.");
-      //
-      // public static readonly DomainErrors AccountNotFound =
-      //    new("transfer.account.not.found", "Account not found.");
-      //
-      // public static readonly DomainErrors BeneficiaryNotFound =
-      //    new("transfer.beneficiary.not.found", "Beneficiary not found.");
-      //
-      // public static readonly DomainErrors SameAccount =
-      //    new("transfer.same.account", "Sender and receiver account must be different.");
-      //
-      // public static readonly DomainErrors InvalidAmount =
-      //    new("transfer.invalid.amount", "Amount must be greater than zero.");
-      //
-      // public static readonly DomainErrors FromAccountNotFound =
-      //    new("transfer.from_account_not_found", "Source account does not exist.");
-      //
-      // public static readonly DomainErrors ToAccountNotFound =
-      //    new("transfer.to_account_not_found", "Destination account does not exist.");
-      //
-      // public static readonly DomainErrors InsufficientFunds =
-      //    new("transfer.insufficient_funds", "Source account does not have sufficient funds.");
-      //
-      // public static readonly DomainErrors AlreadyReversed =
-      //    new("transfer.already_reversed",
-      //       "Transfer has already been reversed.");
-      //
-      // public static readonly DomainErrors CannotReverse =
-      //    new("transfer.cannot_reverse",
-      //       "The transfer cannot be reversed.");
+   public static readonly DomainErrors RecipientIbanRequired = new(
+      ErrorCode.BadRequest,
+      Title: "Transfer: Recipient IBAN Required",
+      Message: "The recipient IBAN is required.");
+
+   public static readonly DomainErrors FromAccountNotFound = new(
+      ErrorCode.NotFound,
+      Title: "Transfer: Sender Account Not Found",
+      Message: "The sender account for the given identifier identifier not found.");
+
+   public static readonly DomainErrors ToAccountNotFound = new(
+      ErrorCode.NotFound,
+      Title: "Transfer: Receiver Account Not Found",
+      Message: "The receiver account for the given identifier was not found.");
+
+   public static readonly DomainErrors SameAccountNotAllowed = new(
+      ErrorCode.Conflict,
+      Title: "Transfer: Invalid Accounts",
+      Message: "The Sende and Receiver Account must be different.");
+
+   public static readonly DomainErrors IdempotencyKeyRequired = new(
+      ErrorCode.BadRequest,
+      Title: "Transfer: Idempotency Key Required",
+      Message: "The idempotency key is required.");
+
+   public static readonly DomainErrors AmountMustBePositive = new(
+      ErrorCode.BadRequest,
+      Title: "Transfer: Invalid Amount",
+      Message: "The transfer amount must be positive.");
+
+   public static readonly DomainErrors ConcurrencyConflict = new(
+      ErrorCode.Conflict,
+      Title: "Transfer concurrency conflict",
+      Message: "The transfer could not be completed due to a concurrent update. Please retry the operation.");
+
+   public static readonly DomainErrors OnlyInitiatedCanBeBooked = new(ErrorCode.Conflict,
+      Title: "Transfer: Invalid State",
+      Message: "Only initiated transfers can be booked.");
+   
 }
+
+
+// public static readonly DomainErrors AlreadyReversed =
+//    new("transfer.already_reversed",
+//       "Transfer has already been reversed.");
+//
+// public static readonly DomainErrors CannotReverse =
+//    new("transfer.cannot_reverse",
+//       "The transfer cannot be reversed.");

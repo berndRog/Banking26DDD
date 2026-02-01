@@ -1,153 +1,144 @@
-/*
 using BankingApi._2_Modules.Accounts._3_Domain.Enums;
+using BankingApi._2_Modules.Transfers._3_Domain.Errors;
+using BankingApi._4_BuildingBlocks;
 using BankingApi._4_BuildingBlocks._1_Ports.Inbound;
 using BankingApi._4_BuildingBlocks._3_Domain.Entities;
 using BankingApi._4_BuildingBlocks._4_Infrastructure;
-namespace BankingApi._2_Modules.Core._3_Domain.Aggregates;
-/*
-   Transfer (Überweisung)
-      → Geschäftsvorgang, vom Nutzer ausgelöst
-   Transaction (Buchung)
-      → Kontobewegung, technisch/fachlich abgeleitet
-   Ein Transfer erzeugt immer zwei Transactions
-
-   Konto	            Transaction	   Betrag
-   Senderkonto	      Lastschrift	   −X
-   Empfängerkonto	   Gutschrift	   +X
- #1#
+namespace BankingApi.Modules.Core.Domain.Aggregates;
 
 public sealed class Transfer : AggregateRoot<Guid> {
-    
-    private readonly List<Transaction> _transactions = new();
+   private readonly List<Transaction> _transactions = new();
 
-    public Guid FromAccountId { get; private set; }
-    public Guid? ToAccountId  { get; private set; }          // intern
-
-    public decimal Amount { get; private set; } = default!;
-    public string  Purpose { get; private set; } = string.Empty;
-
-    //public string IdempotencyKey { get; private set; } = string.Empty;
-    public TransferStatus Status { get; private set; } = TransferStatus.Initiated;
-
-    public DateTimeOffset? BookedAt { get; private set; }
-    public string? FailureReason { get; private set; }
-
-    public IReadOnlyList<Transaction> Transactions => _transactions;
-
-    private Transfer():base(new BankingSystemClock()) { } // EF
-
-    private Transfer(
-        IClock clock,
-        Guid id,
-        Guid fromAccountId,
-        Guid? toAccountId,
-        string? toIbanExternal,
-        decimal amount,
-        string purpose,
-        string idempotencyKey
-    ): base(clock) {
-        Id = id;
-        FromAccountId = fromAccountId;
-        ToAccountId = toAccountId;
-        Amount = amount;
-        Purpose = purpose.Trim();
-        Status = TransferStatus.Initiated;
-    }
-
-    // --- Static Factory ----------------------------------
-    public static Transfer Create(
-        Guid id,
-        Guid fromAccountId,
-        Guid toAccountId,
-        decimal amount,
-        string purpose,
-        string idempotencyKey
-    ) {
-        GuardAmount(amount);
-        return new Transfer(id, fromAccountId, toAccountId, null, amount, purpose, idempotencyKey);
-    }
-    
-
-    // public void MarkBooked(Guid debitPostingId, Guid creditPostingId) {
-    //     // if (Status != TransferStatus.Initiated)
-    //     //     throw new DomainException("Transfer is not in Initiated state.");
-    //     //
-    //     // // Für interne Transfers: beide PostingIds müssen existieren
-    //     // if (ToAccountId is not null && creditPostingId == Guid.Empty)
-    //     //     throw new DomainException("Missing credit posting.");
-    //
-    //     _transactions.Clear();
-    //
-    //     // Debit (always)
-    //     _transactions.Add(Transaction.Create(
-    //         TransactionType.Debit, Id, FromAccountId, Amount, debitPostingId
-    //     ));
-    //
-    //     // Credit (internal)
-    //     if (ToAccountId is not null)
-    //     {
-    //         _transactions.Add(Transaction.Create(
-    //             TransactionType.Credit, Id, ToAccountId.Value, Amount, creditPostingId
-    //         ));
-    //     }
-    //
-    //     Status = TransferStatus.Booked;
-    //     BookedAt = DateTimeOffset.UtcNow;
-    //     FailureReason = null;
-    // }
-    //
-    // public void MarkFailed(string reason)
-    // {
-    //     if (Status != TransferStatus.Initiated)
-    //         throw new DomainException("Only initiated transfers can fail.");
-    //
-    //     Status = TransferStatus.Failed;
-    //     FailureReason = string.IsNullOrWhiteSpace(reason) ? "Failed" : reason.Trim();
-    //     BookedAt = null;
-    //     _transactions.Clear(); // oder behalten, falls Partial-Failures modelliert werden sollen
-    // }
-    //
-    // private static void GuardAmount(Money amount)
-    // {
-    //     if (amount.Amount <= 0) throw new DomainException("Amount must be positive.");
-    //     if (string.IsNullOrWhiteSpace(amount.Currency)) throw new DomainException("Currency required.");
-    // }
-}
-
-
-/*
-public sealed class Transfer {
-
-   public Guid Id { get; private set; }
-   public DateTimeOffset DtOffSet { get; private set; }
+   // Aggregate references (IDs only, no navigation properties)
    public Guid FromAccountId { get; private set; }
-   public Guid ToAccountId   { get; private set; }
-   public decimal Amount     { get; private set; }
-   public string Purpose     { get; private set; } = string.Empty;
-   // optional reference for reversal (Storno)
-   public Guid? ReversalOfTransferId { get; private set; }
-   public bool IsReversed => ReversalOfTransferId.HasValue;
+   public Guid ToAccountId { get; private set; }
 
-   // ctor for EF Core
-   private Transfer() { }
+   // Business data
+   public decimal Amount { get; private set; }
+   public string Purpose { get; private set; } = string.Empty;
 
-   // domain ctor
-   public Transfer(
+   // Snapshots for historical consistency (e.g. if beneficiaries are deleted)
+   public string RecipientName { get; private set; } = string.Empty; // = beneficiary name at time of transfer
+   public string RecipientIban { get; private set; } = string.Empty; // = beneficiary IBAN at time of transfer
+
+   // Idempotency (generated by client)
+   public string IdempotencyKey { get; private set; } = string.Empty;
+
+   // State
+   public TransferStatus Status { get; private set; }
+   public DateTimeOffset? BookedAt { get; private set; }
+   public string? FailureReason { get; private set; }
+
+   // Child entities
+   public IReadOnlyList<Transaction> Transactions => _transactions;
+
+   //--- Ctor's ----------------------------------------------------------
+   // EF Core ctor
+   private Transfer() : base(new BankingSystemClock()) {
+   }
+
+   // Domain ctor 
+   private Transfer(
+      IClock clock,
+      Guid id,
       Guid fromAccountId,
       Guid toAccountId,
-      DateTimeOffset dtOffset,
       decimal amount,
       string purpose,
-      Guid? reversalOfTransferId = null
-   ) {
-      Id = Guid.NewGuid();
+      string recipientName, // beneficiary name at time of transfer
+      string recipientIban, // beneficiary IBAN at time of transfer
+      string idempotencyKey,
+      TransferStatus status
+   ) : base(clock) {
+      Id = id;
       FromAccountId = fromAccountId;
-      ToAccountId   = toAccountId;
-      DtOffSet      = dtOffset;
-      Amount        = amount;
-      Purpose       = purpose;
-      ReversalOfTransferId = reversalOfTransferId;
+      ToAccountId = toAccountId;
+      Amount = amount;
+      Purpose = purpose;
+      RecipientName = recipientName;
+      RecipientIban = recipientIban;
+      IdempotencyKey = idempotencyKey;
+      Status = status;
+   }
+
+   //--- Factory method to create a new Transfer -------------------------
+   public static Result<Transfer> Create(
+      IClock clock,
+      Guid fromAccountId,
+      Guid toAccountId,
+      decimal amount,
+      string purpose,
+      string recipientName,
+      string recipientIban,
+      string idempotencyKey,
+      string? id
+   ) {
+      // trim early
+      purpose = purpose?.Trim() ?? string.Empty;
+      recipientName = recipientName.Trim();
+      recipientIban = recipientIban.Trim();
+      idempotencyKey = idempotencyKey.Trim();
+
+      if (fromAccountId == toAccountId)
+         return Result<Transfer>.Failure(TransferErrors.SameAccountNotAllowed);
+
+      if (amount <= 0m)
+         return Result<Transfer>.Failure(TransferErrors.AmountMustBePositive);
+
+      if (string.IsNullOrWhiteSpace(recipientIban))
+         return Result<Transfer>.Failure(TransferErrors.RecipientIbanRequired);
+      if (string.IsNullOrWhiteSpace(idempotencyKey))
+         return Result<Transfer>.Failure(TransferErrors.IdempotencyKeyRequired);
+
+      var idResult = EntityId.Resolve(id, TransferErrors.InvalidId);
+      if (idResult.IsFailure)
+         return Result<Transfer>.Failure(idResult.Error);
+      var transferId = idResult.Value;
+
+      var transfer = new Transfer(
+         clock: clock,
+         id: transferId,
+         fromAccountId: fromAccountId,
+         toAccountId: toAccountId,
+         amount: amount,
+         purpose: purpose,
+         recipientName: recipientName,
+         recipientIban: recipientIban,
+         idempotencyKey: idempotencyKey,
+         status: TransferStatus.Initiated
+         // UpdatedAt are set in SaveChanges
+      );
+
+      return Result<Transfer>.Success(transfer);
+   }
+
+   // Books the transfer and creates exactly two transactions
+   public Result Book() {
+      if (Status != TransferStatus.Initiated)
+         return Result.Failure(TransferErrors.OnlyInitiatedCanBeBooked);
+
+      _transactions.Clear();
+
+      _transactions.Add(Transaction.CreateDebit(FromAccountId, Amount));
+      _transactions.Add(Transaction.CreateCredit(ToAccountId, Amount));
+
+      Status = TransferStatus.Booked;
+      BookedAt = DateTimeOffset.UtcNow;
+      FailureReason = null;
+
+      Touch(); // updates UpdatedAt
+
+      return Result.Success();
+   }
+
+   // Marks the transfer as failed
+   public void Fail(string reason) {
+      Status = TransferStatus.Failed;
+      FailureReason = string.IsNullOrWhiteSpace(reason) ? "Transfer failed" : reason.Trim();
+
+      _transactions.Clear();
+      BookedAt = null;
+
+      Touch(); // updates UpdatedAt
    }
 }
-#1#
-*/

@@ -2,7 +2,7 @@ using System.Globalization;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace BankingApi._3_Infrastructure.Database;
 
-public sealed class NullableDateTimeOffsetToIsoStringConverter()
+public sealed class DateTimeOffsetToIsoStringConverterNullable()
    : ValueConverter<DateTimeOffset?, string?>(
       dto => dto.HasValue
          ? dto.Value.ToUniversalTime()

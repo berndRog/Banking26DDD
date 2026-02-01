@@ -23,7 +23,9 @@ public sealed class AccountUcAddBeneficiaryIntT : TestBase, IAsyncLifetime {
 
    public async Task InitializeAsync() {
       _ct = CancellationToken.None;      
-
+      _seed = new TestSeed();
+      _clock = new FakeClock(new DateTime(2025, 01, 01));
+      
       _dbConnection = new SqliteConnection("Filename=:memory:");
       await _dbConnection.OpenAsync(_ct);
 
@@ -35,12 +37,15 @@ public sealed class AccountUcAddBeneficiaryIntT : TestBase, IAsyncLifetime {
       _dbContext = new BankingDbContext(options);
       await _dbContext.Database.EnsureCreatedAsync(_ct);
       
-      _seed = new TestSeed();
-      _clock = new FakeClock(new DateTime(2025, 01, 01));
+
       
       _ownerLookup = new FakeOwnerLookup(_seed);
       _repository = new AccountRepository(_dbContext);
-      _unitOfWork = new UnitOfWork(_dbContext, CreateLogger<UnitOfWork>());
+      _unitOfWork = new UnitOfWork(
+         _dbContext, 
+         _clock,
+         CreateLogger<UnitOfWork>()
+      );
       
       _repository.Add(_seed.Account1);
       _repository.Add(_seed.Account2);

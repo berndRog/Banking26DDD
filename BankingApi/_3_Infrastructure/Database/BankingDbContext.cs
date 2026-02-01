@@ -23,16 +23,16 @@ public sealed class BankingDbContext(
       // into DI just for EF.
       // ------------------------------------------------------------
       var dtOffToIsoStrConv = new DateTimeOffsetToIsoStringConverter();
-      var nulDtOffToIsoStrConv = new NullableDateTimeOffsetToIsoStringConverter();
+      var dtOffToIsoStrConvNul = new DateTimeOffsetToIsoStringConverterNullable();
 
       // ------------------------------------------------------------
       // Apply entity mappings (aggregate roots first).
       // ------------------------------------------------------------
       modelBuilder.ApplyConfiguration(
-         new ConfigOwner(dtOffToIsoStrConv, nulDtOffToIsoStrConv));
+         new ConfigOwner(dtOffToIsoStrConv, dtOffToIsoStrConvNul));
 
       modelBuilder.ApplyConfiguration(
-         new ConfigAccount(dtOffToIsoStrConv, nulDtOffToIsoStrConv));
+         new ConfigAccount(dtOffToIsoStrConv, dtOffToIsoStrConvNul));
 
       // Child entities can still have their own configuration class
       // (keeps EF mapping simple and avoids inline EF metadata tricks).

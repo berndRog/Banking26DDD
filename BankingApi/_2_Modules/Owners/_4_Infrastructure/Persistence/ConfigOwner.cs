@@ -8,8 +8,8 @@ namespace BankingApi._2_Modules.Owners._4_Infrastructure.Persistence;
 // <- anpassen
 
 public sealed class ConfigOwner(
-   DateTimeOffsetToIsoStringConverter dtOffToIsoStrConv,
-   NullableDateTimeOffsetToIsoStringConverter nulDtOffToIsoStrConv
+   DateTimeOffsetToIsoStringConverter dtConv,
+   DateTimeOffsetToIsoStringConverterNullable dtConvNul
 ) : IEntityTypeConfiguration<Owner> {
    public void Configure(EntityTypeBuilder<Owner> builder) {
       builder.ToTable("Owners");
@@ -20,11 +20,11 @@ public sealed class ConfigOwner(
       builder.Property(o => o.Version).IsConcurrencyToken().IsRequired();
 
       builder.Property(o => o.CreatedAt)
-         .HasConversion(dtOffToIsoStrConv)
+         .HasConversion(dtConv)
          .IsRequired();
 
       builder.Property(o => o.UpdatedAt)
-         .HasConversion(dtOffToIsoStrConv)
+         .HasConversion(dtConv)
          .IsRequired();
 
       builder.Ignore("_clock");
@@ -40,7 +40,7 @@ public sealed class ConfigOwner(
       builder.HasIndex(o => o.Subject).IsUnique();
 
       builder.Property(o => o.DeactivatedAt)
-         .HasConversion(nulDtOffToIsoStrConv)
+         .HasConversion(dtConvNul)
          .IsRequired(false);
 
       builder.Ignore(o => o.DisplayName);

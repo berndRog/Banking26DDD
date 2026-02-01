@@ -20,7 +20,7 @@ public sealed class AccountUcBeneficiaryAdd(
       CancellationToken ct = default
    ) {
 
-      var account = await accountRepository.FindByIdJoinBeneficiariesAsync(accountId, ct);
+      var account = await accountRepository.FindWithBeneficiariesByIdAsync(accountId, ct);
       if (account is null) 
          return Result<Beneficiary>.Failure(BeneficiaryErrors.AccountNotFound);
       
