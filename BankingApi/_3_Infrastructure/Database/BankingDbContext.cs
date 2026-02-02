@@ -2,6 +2,7 @@ using BankingApi._2_Modules.Core._3_Domain.Aggregates;
 using BankingApi._2_Modules.Core._4_Infrastructure.Persistence;
 using BankingApi._2_Modules.Owners._3_Domain.Aggregates;
 using BankingApi._2_Modules.Owners._4_Infrastructure.Persistence;
+using BankingApi.Modules.Core.Domain.Aggregates;
 using Microsoft.EntityFrameworkCore;
 namespace BankingApi._3_Infrastructure.Database;
 
@@ -11,8 +12,8 @@ public sealed class BankingDbContext(
    public DbSet<Owner> Owners => Set<Owner>();
    public DbSet<Account> Accounts => Set<Account>();
    public DbSet<Beneficiary> Beneficiaries => Set<Beneficiary>();
-   //public DbSet<Transfer> Transfers => Set<Transfer>();
-   //public DbSet<Transaction> Transactions => Set<Transaction>();
+   public DbSet<Transfer> Transfers => Set<Transfer>();
+   public DbSet<Transaction> Transactions => Set<Transaction>();
 
    protected override void OnModelCreating(ModelBuilder modelBuilder) {
       base.OnModelCreating(modelBuilder);

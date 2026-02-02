@@ -22,45 +22,47 @@ public sealed class TransfersUcSendMoney(
       CancellationToken ct = default
    ) {
       // 0) Idempotency fast-path
-      var existing = await transferRepository.FindByIdempotencyKeyAsync(cmd.IdempotencyKey, ct);
-      if (existing is not null)
-         return Result<Transfer>.Success(existing);
+      //var existing = await transferRepository.FindByIdempotencyKeyAsync(cmd.IdempotencyKey, ct);
+      //if (existing is not null)
+      //   return Result<Transfer>.Success(existing);
 
       // 1) Load sender (needs beneficiaries)
-      var from = await accountRepository.FindWithBeneficiariesByIdAsync(cmd.FromAccountId, ct);
-      if (from is null)
+      var fromAccount = await accountRepository.FindWithBeneficiariesByIdAsync(cmd.FromAccountId, ct);
+      if (fromAccount is null)
          return Result<Transfer>.Failure(TransferErrors.FromAccountNotFound);
 
       // 2) Resolve beneficiary -> receiver IBAN
-      var benResult = from.FindBeneficiary(cmd.BeneficiaryId);
-      if (benResult.IsFailure)
-         return Result<Transfer>.Failure(benResult.Error!);
-
-      var beneficiary = benResult.Value!;
+      var resultBeneficiary = fromAccount.FindBeneficiary(cmd.BeneficiaryId);      
+      if (resultBeneficiary.IsFailure)
+         return Result<Transfer>.Failure(resultBeneficiary.Error!);
+      var beneficiary = resultBeneficiary.Value;
+      // var benResult = from.FindBeneficiary(cmd.BeneficiaryId);
+      // if (benResult.IsFailure)
+      //    return Result<Transfer>.Failure(benResult.Error!);
+      // var beneficiary = benResult.Value!;
       var toIban = beneficiary.Iban; // string (normalized)
 
       // 3) Resolve receiver account by IBAN (internal bank assumption)
-      var to = await accountRepository.FindByIbanAsync(toIban, ct);
-      if (to is null)
+      var toAccount = await accountRepository.FindByIbanAsync(toIban, ct);
+      if (toAccount is null)
          return Result<Transfer>.Failure(TransferErrors.ToAccountNotFound);
-
-      if (to.Id == from.Id)
+      if (toAccount.Id == fromAccount.Id)
          return Result<Transfer>.Failure(TransferErrors.SameAccountNotAllowed);
 
       // 4) Domain: debit/credit (balances)
-      var debitResult = from.Debit(cmd.Amount);
+      var debitResult = fromAccount.Debit(cmd.Amount);
       if (debitResult.IsFailure)
          return Result<Transfer>.Failure(debitResult.Error!);
 
-      var creditResult = to.Credit(cmd.Amount);
+      var creditResult = toAccount.Credit(cmd.Amount);
       if (creditResult.IsFailure)
          return Result<Transfer>.Failure(creditResult.Error!);
 
       // 5) Create transfer + 2 transactions (child entities)
       var result = Transfer.Create(
          clock: clock,
-         fromAccountId: from.Id,
-         toAccountId: to.Id,
+         fromAccountId: fromAccount.Id,
+         toAccountId: toAccount.Id,
          amount: cmd.Amount,
          purpose: cmd.Purpose,
          recipientName: beneficiary.Name,
@@ -73,14 +75,14 @@ public sealed class TransfersUcSendMoney(
       var transfer = result.Value!;
 
       transfer.Book(); // erzeugt 2 Transactions: Debit(from), Credit(to)
-      await transferRepository.AddAsync(transfer, ct);
+      transferRepository.Add(transfer);
 
       // 6) Persist atomar (Outcome statt Exceptions)
       var outcome = await unitOfWork.SaveAllChangesSendMoneyAsync("Send money", ct);
       if (outcome.IsSuccess) {
          logger.LogInformation(
             "Transfer booked ({TransferId}) from ({From}) to ({To}) amount ({Amount})",
-            transfer.Id.To8(), from.Id.To8(), to.Id.To8(), cmd.Amount);
+            transfer.Id.To8(), fromAccount.Id.To8(), toAccount.Id.To8(), cmd.Amount);
          return Result<Transfer>.Success(transfer);
       }
       if (outcome.FailureKind == SaveFailureKind.Concurrency)

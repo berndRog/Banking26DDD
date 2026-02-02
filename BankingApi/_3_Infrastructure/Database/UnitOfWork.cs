@@ -62,12 +62,10 @@ public sealed class UnitOfWork(
       _dbContext.ChangeTracker.Clear();
 
    public void LogChangeTracker(string text) {
-      if (_logger.IsEnabled(LogLevel.Debug)) {
-         _dbContext.ChangeTracker.DetectChanges();
-         _logger.LogDebug("{Message}",
-            text + Environment.NewLine +
-            _dbContext.ChangeTracker.DebugView.LongView);
-      }
+      if (!_logger.IsEnabled(LogLevel.Debug)) return;
+      _dbContext.ChangeTracker.DetectChanges();
+      var output = _dbContext.ChangeTracker.DebugView.LongView;
+      LogOutput(text, output);
    }
    
    // -----------------------------
@@ -92,20 +90,37 @@ public sealed class UnitOfWork(
    // -----------------------------
    private void LogBefore(string? text) {
       if (!_logger.IsEnabled(LogLevel.Debug)) return;
-
       if (!string.IsNullOrWhiteSpace(text)) _logger.LogDebug("{Text}", text);
-      var output = $"Before save Changes\n {_dbContext.ChangeTracker.DebugView.LongView}";
-      _logger.LogDebug("{Message}", output);
+      LogOutput("Before save Changes", _dbContext.ChangeTracker.DebugView.LongView);
    }
 
    private void LogAfter(int rows) {
       if (!_logger.IsEnabled(LogLevel.Debug)) return;
-
       _logger.LogDebug("SaveChanges affected {Result} rows", rows);
-      var output = $"After save Changes\n {_dbContext.ChangeTracker.DebugView.LongView}";
-      _logger.LogDebug("{Message}", output);
+      LogOutput("After save Changes", _dbContext.ChangeTracker.DebugView.LongView);
    }
 
+   private static List<string> SplitIntoChunks(string text, int chunkSize) {
+      var chunks = new List<string>();
+      for (int i = 0; i < text.Length; i += chunkSize) {
+         chunks.Add(text.Substring(i, Math.Min(chunkSize, text.Length - i)));
+      }
+      return chunks;
+   }
+   private void LogOutput(string text, string output) {
+      // Split into chunks of 4000 characters
+      const int chunkSize = 4000;
+      var chunks = SplitIntoChunks(output, chunkSize);
+      
+      _logger.LogDebug("{Text} - ChangeTracker Output (Part {Part}/{Total})", 
+         text, 1, chunks.Count);
+
+      for (int i = 0; i < chunks.Count; i++) {
+         _logger.LogDebug("Part {Part}/{Total}:\n{Output}",
+            i + 1, chunks.Count, chunks[i]);
+      }
+   }
+   
    // -----------------------------
    // Unique violation detection (SQLite-ready)
    // -----------------------------

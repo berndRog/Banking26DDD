@@ -1,26 +1,32 @@
-
-using BankingApi._2_Modules.Core._3_Domain.Aggregates;
 using BankingApi.Modules.Core.Domain.Aggregates;
 namespace BankingApi._2_Modules.Core._1_Ports.Outbound;
-public interface ITransferRepository
-{
+
+public interface ITransferRepository {
+   
+   Task<Transfer?> FindByIdAsync(
+      Guid id,
+      CancellationToken ct = default
+   );
+   
+   Task<Transfer?> FindWithTransactionsByIdAsync(
+      Guid id,
+      CancellationToken ct = default
+   );
+
    Task<Transfer?> FindByIdempotencyKeyAsync(string key, CancellationToken ct);
-   Task AddAsync(Transfer transfer, CancellationToken ct);
+
+   // Task<IReadOnlyList<Transfer>> SelectByAccountIdAsync(
+   //    Guid accountId,
+   //    CancellationToken ct = default
+   // );
+
+   void Add(Transfer transfer);
 }
 
-
-
 //
-// public interface ITransferRepository {
-//    Task<Transfer?> FindByIdAsync(
-//       Guid id, 
-//       CancellationToken ct = default
-//    );
+
 //    
-//    Task<IReadOnlyList<Transfer>> FindByAccountIdAsync(
-//       Guid accountId, 
-//       CancellationToken ct = default
-//    );
+
 //    
 //    void Add(Transfer transfer);
 //    
