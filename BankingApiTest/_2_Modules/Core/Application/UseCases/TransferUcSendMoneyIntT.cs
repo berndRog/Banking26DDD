@@ -131,7 +131,6 @@ public sealed class TransferUcSendMoneyIntT : TestBase, IAsyncLifetime {
       
       Assert.NotNull(actualTransfer);
       Assert.Equal(transfer.FromAccountId, actualTransfer.FromAccountId);
-      Assert.Equal(transfer.ToAccountId, actualTransfer.ToAccountId);
       Assert.Equal(transfer.Amount, actualTransfer!.Amount);
       Assert.Equal(transfer.Purpose, actualTransfer.Purpose);
       // var actual = actualAccount!.Beneficiaries

@@ -5,16 +5,17 @@ using BankingApi._4_BuildingBlocks._1_Ports.Inbound;
 using BankingApi._4_BuildingBlocks._4_Infrastructure.Persistence;
 namespace BankingApi._2_Modules.Owners._2_Application.UseCases;
 
-public sealed class OwnerUcCreatePerson(
+public sealed class OwnerUcCreate(
    IOwnerRepository _repository,
    IUnitOfWork _unitOfWork,
    IClock _clock,
-   ILogger<OwnerUcCreatePerson> _logger
+   ILogger<OwnerUcCreate> _logger
 ) {
 
    public async Task<Result<Guid>> ExecuteAsync(
       string firstname,
       string lastname,
+      string? companyName,
       string email,
       string subject = "system",
       string? id = null,
@@ -24,8 +25,20 @@ public sealed class OwnerUcCreatePerson(
       string? country = null,
       CancellationToken ct = default
    ) {
-      var result = Owner.CreatePerson(_clock,firstname, lastname, email, subject, id,
-         street, postalCode, city, country);
+      var result = Owner.Create(
+         clock: _clock,
+         firstname: firstname, 
+         lastname: lastname,
+         companyName: companyName, 
+         email: email,
+         subject: subject, 
+         id: id,
+         street: street, 
+         postalCode: postalCode, 
+         city: city, 
+         country: country
+      );
+      
       if (result.IsFailure) 
          return Result<Guid>.Failure(result.Error);
       

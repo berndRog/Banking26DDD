@@ -7,6 +7,17 @@ public interface IOwnerRepository {
       Guid ownerId, 
       CancellationToken ct = default
    );
+
+   Task<Owner?> FindByIdentitySubjectAsync(
+      string subject,
+      bool noTracking = true,
+      CancellationToken ct = default
+   );
+
+   Task<Owner?> FindByEmailAsync(
+      string email,
+      CancellationToken ct
+   );
    
    Task<bool> ExistsActiveAsync(
       Guid ownerId, 

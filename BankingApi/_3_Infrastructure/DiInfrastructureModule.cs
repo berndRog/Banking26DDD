@@ -3,8 +3,9 @@ using BankingApi._4_BuildingBlocks._4_Infrastructure.Persistence;
 using Microsoft.EntityFrameworkCore;
 namespace BankingApi._3_Infrastructure;
 
-public static class DiInfrastructureExtensions {
-   public static IServiceCollection AddDataModule(
+public static class DiInfrastructureModule {
+   
+   public static IServiceCollection AddInfrastructureModule(
       this IServiceCollection services,
       IConfiguration configuration
    ) {

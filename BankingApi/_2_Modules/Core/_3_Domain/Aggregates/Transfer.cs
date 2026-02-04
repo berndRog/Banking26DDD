@@ -11,7 +11,7 @@ public sealed class Transfer : AggregateRoot<Guid> {
 
    // Aggregate references (IDs only, no navigation properties)
    public Guid FromAccountId { get; private set; }
-   public Guid ToAccountId { get; private set; }
+   //public Guid ToAccountId { get; private set; }
 
    // Business data
    public decimal Amount { get; private set; }
@@ -40,7 +40,7 @@ public sealed class Transfer : AggregateRoot<Guid> {
       IClock clock,
       Guid id,
       Guid fromAccountId,
-      Guid toAccountId,
+      //Guid toAccountId,
       decimal amount,
       string purpose,
       string recipientName, // beneficiary name at time of transfer
@@ -50,7 +50,7 @@ public sealed class Transfer : AggregateRoot<Guid> {
    ) : base(clock) {
       Id = id;
       FromAccountId = fromAccountId;
-      ToAccountId = toAccountId;
+      //ToAccountId = toAccountId;
       Amount = amount;
       Purpose = purpose;
       RecipientName = recipientName;
@@ -63,7 +63,7 @@ public sealed class Transfer : AggregateRoot<Guid> {
    public static Result<Transfer> Create(
       IClock clock,
       Guid fromAccountId,
-      Guid toAccountId,
+      //Guid toAccountId,
       decimal amount,
       string purpose,
       string recipientName,
@@ -76,10 +76,7 @@ public sealed class Transfer : AggregateRoot<Guid> {
       recipientName = recipientName.Trim();
       recipientIban = recipientIban.Trim();
       idempotencyKey = idempotencyKey.Trim();
-
-      if (fromAccountId == toAccountId)
-         return Result<Transfer>.Failure(TransferErrors.SameAccountNotAllowed);
-
+      
       if (amount <= 0m)
          return Result<Transfer>.Failure(TransferErrors.AmountMustBePositive);
 
@@ -97,7 +94,7 @@ public sealed class Transfer : AggregateRoot<Guid> {
          clock: clock,
          id: transferId,
          fromAccountId: fromAccountId,
-         toAccountId: toAccountId,
+         //toAccountId: toAccountId,
          amount: amount,
          purpose: purpose,
          recipientName: recipientName,
@@ -111,7 +108,11 @@ public sealed class Transfer : AggregateRoot<Guid> {
    }
 
    // Books the transfer and creates exactly two transactions
-   public Result Book() {
+   public Result Book(Guid toAccountId) {
+      
+      if (FromAccountId == toAccountId)
+         return Result.Failure(TransferErrors.SameAccountNotAllowed);
+      
       if (Status != TransferStatus.Initiated)
          return Result.Failure(TransferErrors.OnlyInitiatedCanBeBooked);
 
@@ -120,8 +121,8 @@ public sealed class Transfer : AggregateRoot<Guid> {
 
       // create debit and credit transactions
       BookedAt = _clock.UtcNow;
-      var transactionDebit = Transaction.CreateDebit(FromAccountId, Amount, Purpose, BookedAt);
-      var transactionCredit = Transaction.CreateCredit(ToAccountId, Amount, Purpose, BookedAt);
+      var transactionDebit = Transaction.CreateDebit(Id, FromAccountId, Amount, Purpose, BookedAt);
+      var transactionCredit = Transaction.CreateCredit(Id, toAccountId, Amount, Purpose, BookedAt);
       _transactions.Add(transactionDebit);
       _transactions.Add(transactionCredit);
       

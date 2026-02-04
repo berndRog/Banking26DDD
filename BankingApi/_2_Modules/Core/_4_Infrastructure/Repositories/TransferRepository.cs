@@ -39,7 +39,7 @@ public sealed class TransferRepository(
       _logger.LogDebug("Loading Transfers for Account {Id}", accountId);
 
       return await _dbContext.Transfers
-         .Where(t => t.FromAccountId == accountId || t.ToAccountId == accountId)
+         .Where(t => t.FromAccountId == accountId)
          .OrderByDescending(t => t.BookedAt)
          .ToListAsync(ct);
    }

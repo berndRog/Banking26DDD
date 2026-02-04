@@ -113,43 +113,47 @@ public sealed class TestSeed {
 
       
       // ---------- Owners----------  
-      Owner1 = CreatePerson(
+      Owner1 = CreateOwner(
          id: "10000000-0000-0000-0000-000000000000",
          firstname: "Erika",
          lastname: "Mustermann",
+         companyName: null,
          email: "erika.mustermann@t-online.de",
          subject: "10000000-0000-0000-0000-000000000000",
          address: Address1);
          
           
-      Owner2 = CreatePerson(
+      Owner2 = CreateOwner(
          id: "20000000-0000-0000-0000-000000000000",
          firstname: "Max", 
          lastname: "Mustermann", 
+         companyName: null,
          email: "max.mustermann@gmail.com",
          "20000000-0000-0000-0000-000000000000",
          null
       );
       
-      Owner3 = CreatePerson(
+      Owner3 = CreateOwner(
          "30000000-0000-0000-0000-000000000000",
          firstname: "Arno",
          lastname:"Arndt",
+         companyName: null,
          email: "a.arndt@t-online.com",
          "30000000-0000-0000-0000-000000000000",
          null
       );
       
-      Owner4 = CreatePerson(
+      Owner4 = CreateOwner(
          id: "40000000-0000-0000-0000-000000000000",
          firstname: "Benno",
          lastname: "Bauer",
+         companyName: null,
          email: "b.bauer@gmail.com",
          "40000000-0000-0000-0000-000000000000",
          null
       );
 
-      Owner5 = CreateCompany(
+      Owner5 = CreateOwner(
          id: "50000000-0000-0000-0000-000000000000",
          firstname: "Christine",
          lastname: "Conrad",
@@ -159,10 +163,11 @@ public sealed class TestSeed {
          Address3
       );
       
-      Owner6 = CreatePerson(
+      Owner6 = CreateOwner(
          id: "60000000-0000-0000-0000-000000000000",
          firstname: "Dana",
          lastname: "Deppe",
+         companyName: null,
          "d.deppe@icloud.com",
          "60000000-0000-0000-0000-000000000000",
          null
@@ -385,41 +390,16 @@ public sealed class TestSeed {
 
 
    // ---------- Helper ----------
-   private Owner CreatePerson(
+   private Owner CreateOwner(
       string id,
       string firstname,
       string lastname,
+      string? companyName,
       string email,
       string subject,
       Address? address
    ) {
-      var result = Owner.CreatePerson(
-         clock: Clock,
-         firstname: firstname,
-         lastname: lastname,
-         email: email,
-         subject: subject,
-         id: id,
-         street: address?.Street,
-         postalCode: address?.PostalCode,
-         city:  address?.City, 
-         country:  address?.Country 
-      );
-
-      Assert.True(result.IsSuccess);
-      return result.Value!;
-   }
-
-   private Owner CreateCompany(
-      string id,
-      string firstname,
-      string lastname,
-      string companyName,
-      string email,
-      string subject,
-      Address? address
-   ) {
-      var result = Owner.CreateCompany(
+      var result = Owner.Create(
          clock: Clock,
          firstname: firstname,
          lastname: lastname,
@@ -436,7 +416,6 @@ public sealed class TestSeed {
       Assert.True(result.IsSuccess);
       return result.Value!;
    }
-
    
    private Account CreateAccount(
       Guid ownerId,
@@ -483,7 +462,6 @@ public sealed class TestSeed {
       var result = Transfer.Create(
          clock: Clock,
          fromAccountId: fromAccountId,
-         toAccountId: toAccount.Id,
          amount: amount,
          purpose: purpose,
          recipientName: beneficiary.Name,

@@ -36,10 +36,6 @@ public sealed class TransfersUcSendMoney(
       if (resultBeneficiary.IsFailure)
          return Result<Transfer>.Failure(resultBeneficiary.Error!);
       var beneficiary = resultBeneficiary.Value;
-      // var benResult = from.FindBeneficiary(cmd.BeneficiaryId);
-      // if (benResult.IsFailure)
-      //    return Result<Transfer>.Failure(benResult.Error!);
-      // var beneficiary = benResult.Value!;
       var toIban = beneficiary.Iban; // string (normalized)
 
       // 3) Resolve receiver account by IBAN (internal bank assumption)
@@ -62,7 +58,6 @@ public sealed class TransfersUcSendMoney(
       var result = Transfer.Create(
          clock: clock,
          fromAccountId: fromAccount.Id,
-         toAccountId: toAccount.Id,
          amount: cmd.Amount,
          purpose: cmd.Purpose,
          recipientName: beneficiary.Name,
@@ -74,7 +69,7 @@ public sealed class TransfersUcSendMoney(
          return Result<Transfer>.Failure(result.Error!);
       var transfer = result.Value!;
 
-      transfer.Book(); // erzeugt 2 Transactions: Debit(from), Credit(to)
+      transfer.Book(toAccount.Id); // creates 2 Transactions: Debit(from), Credit(to)
       transferRepository.Add(transfer);
 
       // 6) Persist atomar (Outcome statt Exceptions)

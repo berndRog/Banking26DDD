@@ -1,5 +1,7 @@
 using BankingApi._2_Modules.Core._3_Domain.Aggregates;
 using BankingApi._2_Modules.Core._4_Infrastructure.Persistence;
+using BankingApi._2_Modules.Employees._3_Domain.Aggregates;
+using BankingApi._2_Modules.Employees._4_Infrastructure.Persistence;
 using BankingApi._2_Modules.Owners._3_Domain.Aggregates;
 using BankingApi._2_Modules.Owners._4_Infrastructure.Persistence;
 using BankingApi.Modules.Core.Domain.Aggregates;
@@ -9,6 +11,7 @@ namespace BankingApi._3_Infrastructure.Database;
 public sealed class BankingDbContext(
    DbContextOptions<BankingDbContext> options
 ) : DbContext(options) {
+   public DbSet<Employee> Employess => Set<Employee>();
    public DbSet<Owner> Owners => Set<Owner>();
    public DbSet<Account> Accounts => Set<Account>();
    public DbSet<Beneficiary> Beneficiaries => Set<Beneficiary>();
@@ -23,21 +26,20 @@ public sealed class BankingDbContext(
       // This keeps mapping code explicit without pushing converters
       // into DI just for EF.
       // ------------------------------------------------------------
-      var dtOffToIsoStrConv = new DateTimeOffsetToIsoStringConverter();
-      var dtOffToIsoStrConvNul = new DateTimeOffsetToIsoStringConverterNullable();
+      var dtConv = new DateTimeOffsetToIsoStringConverter();
+      var dtConvNul = new DateTimeOffsetToIsoStringConverterNullable();
 
       // ------------------------------------------------------------
       // Apply entity mappings (aggregate roots first).
       // ------------------------------------------------------------
-      modelBuilder.ApplyConfiguration(
-         new ConfigOwner(dtOffToIsoStrConv, dtOffToIsoStrConvNul));
+      modelBuilder.ApplyConfiguration(new ConfigOwner(dtConv, dtConvNul));
+      modelBuilder.ApplyConfiguration(new ConfigEmployee(dtConv, dtConvNul));
 
-      modelBuilder.ApplyConfiguration(
-         new ConfigAccount(dtOffToIsoStrConv, dtOffToIsoStrConvNul));
-
-      // Child entities can still have their own configuration class
-      // (keeps EF mapping simple and avoids inline EF metadata tricks).
+      modelBuilder.ApplyConfiguration(new ConfigAccount(dtConv, dtConvNul));
       modelBuilder.ApplyConfiguration(new ConfigBeneficiary());
+      
+      
+      
    }
 
    /*

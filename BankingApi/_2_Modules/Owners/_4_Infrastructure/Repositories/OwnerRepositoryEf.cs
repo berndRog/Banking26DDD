@@ -17,6 +17,20 @@ public class OwnerRepositoryEf(
          .FirstOrDefaultAsync(o => o.Id == ownerId, ct);
    }
 
+   public Task<Owner?> FindByIdentitySubjectAsync(
+      string subject,
+      bool noTracking = true,
+      CancellationToken ct = default
+   ) {
+      var query = dbContext.Owners as IQueryable<Owner>;
+      if (noTracking)
+         query = query.AsNoTracking();
+
+      return query
+         .FirstOrDefaultAsync(c => c.Subject == subject, ct);
+   }
+
+   
    public async Task<bool> ExistsActiveAsync(
       Guid ownerId, 
       CancellationToken ct = default
@@ -27,6 +41,16 @@ public class OwnerRepositoryEf(
          is { IsActive: true };
    }
 
+   public async Task<Owner?> FindByEmailAsync(
+      string email,
+      CancellationToken ct
+   ) {
+      return await dbContext.Owners
+         .AsNoTracking()
+         .FirstOrDefaultAsync(c => c.Email == email, ct);
+   }
+   
+   
    public void Add(Owner owner) {
       dbContext.Owners.Add(owner);
    }

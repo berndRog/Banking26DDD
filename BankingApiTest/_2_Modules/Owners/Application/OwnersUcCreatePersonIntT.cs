@@ -16,7 +16,7 @@ public sealed class OwnersUcCreatePersonIntT : TestBase, IAsyncLifetime {
    private IUnitOfWork _unitOfWork = null!;
    private TestSeed _seed = null!;
    private IClock _clock = null!;
-   private OwnerUcCreatePerson _sut = null!;
+   private OwnerUcCreate _sut = null!;
    private CancellationToken _ct = default!; 
 
    public async Task InitializeAsync() {
@@ -49,11 +49,11 @@ public sealed class OwnersUcCreatePersonIntT : TestBase, IAsyncLifetime {
       await _unitOfWork.SaveAllChangesAsync("Seeding data", _ct);
       
       // System under test
-      _sut = new OwnerUcCreatePerson(
+      _sut = new OwnerUcCreate(
          _repository,
          _unitOfWork,
          _clock,
-         CreateLogger<OwnerUcCreatePerson>()
+         CreateLogger<OwnerUcCreate>()
       );
    }
 
@@ -79,6 +79,7 @@ public sealed class OwnersUcCreatePersonIntT : TestBase, IAsyncLifetime {
       await _sut.ExecuteAsync(
          firstname: owner.Firstname,
          lastname: owner.Lastname,
+         companyName: owner.CompanyName,
          email: owner.Email,
          subject: owner.Subject,
          id: owner.Id.ToString(),
@@ -106,6 +107,7 @@ public sealed class OwnersUcCreatePersonIntT : TestBase, IAsyncLifetime {
       await _sut.ExecuteAsync(
          firstname: owner.Firstname,
          lastname: owner.Lastname,
+         companyName: owner.CompanyName,
          email: owner.Email,
          subject: owner.Subject,
          id: owner.Id.ToString(),

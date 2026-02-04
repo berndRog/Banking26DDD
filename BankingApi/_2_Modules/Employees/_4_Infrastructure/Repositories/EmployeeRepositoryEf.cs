@@ -1,0 +1,41 @@
+using BankingApi._2_Modules.Employees._1_Ports.Outbound;
+using BankingApi._2_Modules.Employees._3_Domain.Aggregates;
+using BankingApi._2_Modules.Employees._3_Domain.Enums;
+using BankingApi._3_Infrastructure.Database;
+using Microsoft.EntityFrameworkCore;
+namespace BankingApi._2_Modules.Employees._4_Infrastructure.Repositories;
+
+public sealed class EmployeeRepositoryEf(
+   BankingDbContext _dbContext
+) : IEmployeeRepository {
+
+   public async Task<Employee?> FindByIdAsync(
+      Guid id, 
+      CancellationToken ct
+   ) => await _dbContext.Employess
+         .FirstOrDefaultAsync(e => e.Id == id, ct);
+
+   public async Task<Employee?> FindByPersonnelNumberAsync(
+      string personnelNumber,
+      CancellationToken ct
+   ) => await _dbContext.Employess
+      .FirstOrDefaultAsync(e => e.PersonnelNumber == personnelNumber, ct);
+
+   public Task<bool> ExistsPersonnelNumberAsync(string personnelNumber, CancellationToken ct) {
+      throw new NotImplementedException();
+   }
+
+   public Task<bool> ExistsEmailAsync(string email, CancellationToken ct) {
+      throw new NotImplementedException();
+   }
+
+   public async Task<IReadOnlyList<Employee>> SelectAdminsAsync(CancellationToken ct) =>
+      await _dbContext.Employess
+         .AsNoTracking()
+         .Where(e => e.AdminRights != AdminRights.None)
+         .OrderBy(e => e.Lastname)
+         .ToListAsync(ct);
+
+   public void Add(Employee employee) =>
+      _dbContext.Employess.Add(employee);
+}

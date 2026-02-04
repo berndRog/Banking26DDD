@@ -16,7 +16,7 @@ public sealed class OwnersUcCreateCompanyIntT : TestBase, IAsyncLifetime {
    private IUnitOfWork _unitOfWork = null!;
    private TestSeed _seed = null!;
    private IClock _clock = null!;
-   private OwnerUcCreateCompany _sut = null!;
+   private OwnerUcCreate _sut = null!;
    private CancellationToken _ct = default!; 
 
    public async Task InitializeAsync() {
@@ -49,11 +49,11 @@ public sealed class OwnersUcCreateCompanyIntT : TestBase, IAsyncLifetime {
       await _unitOfWork.SaveAllChangesAsync("Seeding data", _ct);
       
       // System under test
-      _sut = new OwnerUcCreateCompany(
+      _sut = new OwnerUcCreate(
          _repository,
          _unitOfWork,
          _clock,
-         CreateLogger<OwnerUcCreateCompany>()
+         CreateLogger<OwnerUcCreate>()
       );
    }
 

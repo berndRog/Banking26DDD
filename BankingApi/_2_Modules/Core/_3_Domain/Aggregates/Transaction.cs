@@ -10,22 +10,23 @@ public sealed class Transaction: Entity<Guid> {
    public string Purpose { get; private set; } = default!;
    public DateTimeOffset BookedAt { get; private set; }
 
+   public Guid TransferId { get; private set; } 
+   
    // EF Core ctor 
    private Transaction() { }
 
    // Domain ctor
    private Transaction(
       Guid id, 
+      Guid transferId,
       TransactionType type, 
       Guid accountId, 
       Decimal amount, 
       string purpose,
       DateTimeOffset bookedAt
    ) {
-      //if (amount.Amount <= 0) 
-      //   throw new DomainException("Amount must be positive.");
-
       Id = id;
+      TransferId = transferId;
       Type = type;
       AccountId = accountId;
       Amount = amount;
@@ -35,12 +36,14 @@ public sealed class Transaction: Entity<Guid> {
 
    //--- Factory methods -----------------------------------------------
    public static Transaction CreateDebit(
+      Guid transferId,
       Guid accountId, 
       decimal amount, 
       string purpose,
       DateTimeOffset bookedAt
    ) => new(
       id: Guid.NewGuid(), 
+      transferId: transferId,
       type: TransactionType.Debit, 
       accountId: accountId, 
       amount: amount,
@@ -49,12 +52,14 @@ public sealed class Transaction: Entity<Guid> {
   );
 
    public static Transaction CreateCredit(
+      Guid transferId,
       Guid accountId, 
       decimal amount,
       string purpose,
       DateTimeOffset bookedAt
    ) => new(
       id: Guid.NewGuid(), 
+      transferId: transferId,
       type: TransactionType.Credit, 
       accountId: accountId, 
       amount: amount, 

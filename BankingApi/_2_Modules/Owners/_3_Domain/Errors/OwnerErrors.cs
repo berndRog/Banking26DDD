@@ -4,12 +4,28 @@ namespace BankingApi._2_Modules.Owners._3_Domain.Errors;
 
 public static class OwnerErrors {
    
+   // Identity & state
    public static readonly DomainErrors InvalidId =
       new(ErrorCode.BadRequest, 
          Title: "Invalid Owner Id",
          Message: "The given Id is invalid.");
-   
-  
+
+
+   public static readonly DomainErrors NotPending =
+      new(
+         ErrorCode.Conflict,
+         Title: "Owner not pending",
+         Message: "Only owners in pending state can be approved or rejected."
+      );
+
+   public static readonly DomainErrors AlreadyDeactivated =
+      new(
+         ErrorCode.Conflict,
+         Title: "Owner already deactivated",
+         Message: "The owner has already been deactivated."
+      );
+
+   // Validation
    public static readonly DomainErrors FirstnameIsRequired =
       new(
          ErrorCode.BadRequest,
@@ -60,22 +76,40 @@ public static class OwnerErrors {
       );
    
    public static readonly DomainErrors EmailNotFound =
-      new(
-         ErrorCode.NotFound,
-         Title: "Owner not found by Email",
-         Message: "No owner with the given email address exists."
-      );
+      new(ErrorCode.NotFound,
+         Title: "Owner: Not found by Email",
+         Message: "No owner with the given email address exists.");
+   
+      
+   public static readonly DomainErrors CreatedAtIsRequired =
+      new(ErrorCode.BadRequest,
+         Title: "Owner: Creation Timestamp Required",
+         Message: "The creation timestamp (createdAt) must be provided.");
+
 
    public static readonly DomainErrors NotFound =
       new(
          ErrorCode.NotFound,
-         Title: "Owner not found",
+         Title: "Owner: Not found",
          Message: "No owner with the given id exists."
       );
-   // public static readonly DomainErrors NotFound =
-   //    new("owner.not_found", "Owner not found.");
-   //
-   // public static readonly DomainErrors HasAccounts =
-   //    new("owner.has_accounts", "Owner cannot be deleted because accounts exist.");
+   
+
+   
+   // Activation / rejection
+   public static readonly DomainErrors ActivationRequiresEmployee =
+      new(
+         ErrorCode.BadRequest,
+         Title: "Activation requires employee",
+         Message: "An employee must be specified to activate an owner."
+      );
+
+   public static readonly DomainErrors RejectionRequiresReason =
+      new(
+         ErrorCode.BadRequest,
+         Title: "Rejection reason required",
+         Message: "A rejection reason code must be provided."
+      );
+
 }
 

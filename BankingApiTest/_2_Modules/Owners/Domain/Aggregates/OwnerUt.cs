@@ -38,10 +38,11 @@ public sealed class OwnerUt {
    public void CreatePerson_valid_input_and_id_creates_owner() {
       // Arrange
       // Act
-      var result = Owner.CreatePerson(
+      var result = Owner.Create(
          clock: _clock,
          firstname:_firstname, 
          lastname: _lastname, 
+         companyName: _companyName,
          email: _email,
          subject: _subject,
          id: _id
@@ -68,10 +69,11 @@ public sealed class OwnerUt {
    public void CreatePerson_valid_input_and_without_id_creates_owner() {
 
       // Act
-      var result = Owner.CreatePerson(
+      var result = Owner.Create(
          clock: _clock,
          firstname:_firstname, 
          lastname: _lastname, 
+         companyName: _companyName,
          email: _email,
          subject: _subject,
          id: _id
@@ -96,7 +98,7 @@ public sealed class OwnerUt {
    [InlineData("   ")]
    public void CreatePerson_invalid_firstname_fails(string firstname) {
       // Act
-      var result = Owner.CreatePerson(
+      var result = Owner.Create(
          _clock, 
          firstname, 
          _lastname,
@@ -114,7 +116,7 @@ public sealed class OwnerUt {
    [InlineData("   ")]
    public void CreatePerson_invalid_lastname_fails(string lastname) {
       // Act
-      var result = Owner.CreatePerson(
+      var result = Owner.Create(
          _clock, 
          _firstname, 
          lastname,
@@ -134,7 +136,7 @@ public sealed class OwnerUt {
    [InlineData("a.b.de")]
    public void CreatePerson_invalid_email_fails(string email) {
       // Act
-      var result = Owner.CreatePerson(
+      var result = Owner.Create(
          _clock, 
          _firstname, 
          _lastname,
@@ -153,7 +155,7 @@ public sealed class OwnerUt {
       var id = "11111111-1111-1111-1111-111111111111";
 
       // Act
-      var result = Owner.CreatePerson(
+      var result = Owner.Create(
          _clock, 
          _firstname, 
          _lastname,
@@ -174,7 +176,7 @@ public sealed class OwnerUt {
       var id = "not-a-guid";
 
       // Act
-      var result = Owner.CreatePerson(
+      var result = Owner.Create(
          _clock, 
          _firstname, 
          _lastname,
@@ -195,10 +197,11 @@ public sealed class OwnerUt {
    public void CreatePerson_valid_input_and_id_and_address_creates_owner() {
       // Arrange
       // Act
-      var result = Owner.CreatePerson(
+      var result = Owner.Create(
          clock: _clock,
          firstname:_firstname, 
          lastname: _lastname, 
+         companyName: _companyName,
          email: _email,
          subject: _subject,
          id: _id,
@@ -234,10 +237,11 @@ public sealed class OwnerUt {
    [InlineData("   ")]
    public void CreatePerson_with_address_invalid_street_fails(string street) {
       // Act
-      var result = Owner.CreatePerson(
+      var result = Owner.Create(
          clock: _clock,
          firstname: _firstname,
          lastname: _lastname,
+         companyName: _companyName,
          email: _email,
          subject: _subject,
          id: _id,
@@ -257,10 +261,11 @@ public sealed class OwnerUt {
    [InlineData("   ")]
    public void CreatePerson_with_address_invalid_postal_code_fails(string postalCode) {
       // Act
-      var result = Owner.CreatePerson(
+      var result = Owner.Create(
          clock: _clock,
          firstname: _firstname,
          lastname: _lastname,
+         companyName: _companyName,
          email: _email,
          subject: _subject,
          id: _id,
@@ -280,10 +285,11 @@ public sealed class OwnerUt {
    [InlineData("   ")]
    public void CreatePerson_with_address_invalid_city_fails(string city) {
       // Act
-      var result = Owner.CreatePerson(
+      var result = Owner.Create(
          clock: _clock,
          firstname: _firstname,
          lastname: _lastname,
+         companyName: _companyName,
          email: _email,
          subject: _subject,
          id: _id,
@@ -303,7 +309,7 @@ public sealed class OwnerUt {
    [Fact]
    public void CreateCompany_valid_input_and_without_id_creates_owner() {
       // Act
-      var result = Owner.CreateCompany(
+      var result = Owner.Create(
          clock: _clock,
          firstname: _firstname,
          lastname: _lastname,
@@ -330,7 +336,7 @@ public sealed class OwnerUt {
    [InlineData("   ")]
    public void CreateCompany_invalid_company_name_fails(string companyName) {
       // Act
-      var result = Owner.CreateCompany(
+      var result = Owner.Create(
          clock: _clock,
          firstname: _firstname,
          lastname: _lastname,
@@ -350,7 +356,7 @@ public sealed class OwnerUt {
    [InlineData("   ")]
    public void CreateCompany_invalid_firstname_fails(string firstname) {
       // Act
-      var result = Owner.CreateCompany(
+      var result = Owner.Create(
          clock: _clock,
          firstname: firstname,
          lastname: _lastname,
@@ -370,7 +376,7 @@ public sealed class OwnerUt {
    [InlineData("   ")]
    public void CreateCompany_invalid_lastname_fails(string lastname) {
       // Act
-      var result = Owner.CreateCompany(
+      var result = Owner.Create(
          clock: _clock,
          firstname: _firstname,
          lastname: lastname,
@@ -392,7 +398,7 @@ public sealed class OwnerUt {
    [InlineData("a.b.de")]
    public void CreateCompany_invalid_email_fails(string email) {
       // Act
-      var result = Owner.CreateCompany(
+      var result = Owner.Create(
          clock: _clock,
          firstname: _firstname,
          lastname: _lastname,
@@ -412,7 +418,7 @@ public sealed class OwnerUt {
       var id = "22222222-2222-2222-2222-222222222222";
 
       // Act
-      var result = Owner.CreateCompany(
+      var result = Owner.Create(
          clock: _clock,
          firstname: _firstname,
          lastname: _lastname,
@@ -433,7 +439,7 @@ public sealed class OwnerUt {
       var id = "not-a-guid";
 
       // Act
-      var result = Owner.CreateCompany(
+      var result = Owner.Create(
          clock: _clock,
          firstname: _firstname,
          lastname: _lastname,

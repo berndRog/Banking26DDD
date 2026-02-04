@@ -2,133 +2,76 @@ using BankingApi._2_Modules.Core._3_Domain.Aggregates;
 using BankingApi._3_Infrastructure.Database;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
-namespace BankingApi._2_Modules.Core._4_Infrastructure.Persistence;
 
 public sealed class ConfigAccount(
-   DateTimeOffsetToIsoStringConverter dtOffToIsoStrConv,
-   DateTimeOffsetToIsoStringConverterNullable nulDtOffToIsoStrConv
+   DateTimeOffsetToIsoStringConverter dtConv,
+   DateTimeOffsetToIsoStringConverterNullable dtConvNul
 ) : IEntityTypeConfiguration<Account> {
-   
-   public void Configure(EntityTypeBuilder<Account> b)
-   {
-      // -----------------------------
-      // Table & key
-      // -----------------------------
-      b.ToTable("Accounts");
 
-      b.HasKey(a => a.Id);
-
-      b.Property(a => a.Id)
-         .ValueGeneratedNever(); // Id is created in the domain
-
+   public void Configure(EntityTypeBuilder<Account> builder) {
+      builder.ToTable("Accounts");
+      
+      // Key + concurrency
       // -----------------------------
-      // AggregateRoot metadata
-      // -----------------------------
-      b.Property(a => a.Version)
+      builder.HasKey(a => a.Id);
+      builder.Property(a => a.Id).ValueGeneratedNever();
+
+      builder.Property(a => a.Version)
          .IsConcurrencyToken()
          .IsRequired();
-
-      b.Property(a => a.CreatedAt)
-         .HasConversion(dtOffToIsoStrConv)
-         .IsRequired();
-
-      b.Property(a => a.UpdatedAt)
-         .HasConversion(dtOffToIsoStrConv)
-         .IsRequired();
-
-      // EF must ignore infrastructure-only fields
-      b.Ignore("_clock");
-
+      
+      // Auditing timestamps
       // -----------------------------
-      // Domain properties
-      // -----------------------------
-      b.Property(a => a.Iban)
-         .HasMaxLength(34)
+      builder.Property(a => a.CreatedAt)
+         .HasConversion(dtConv)
          .IsRequired();
 
-      b.HasIndex(a => a.Iban)
+      builder.Property(a => a.UpdatedAt)
+         .HasConversion(dtConv)
+         .IsRequired();
+
+      // Domain-only
+      builder.Ignore("_clock");
+      builder.Ignore(a => a.IsActive);
+
+      // Business properties
+      // -----------------------------
+      builder.Property(a => a.Iban)
+         .HasMaxLength(34)            // IBAN max length
+         .IsRequired();
+
+      builder.HasIndex(a => a.Iban)
          .IsUnique();
 
-      b.Property(a => a.Balance)
-         .HasColumnType("decimal(18,2)")
+      builder.Property(a => a.Balance)
+         .HasPrecision(18, 2)         // common default; adjust if needed
          .IsRequired();
 
-      b.Property(a => a.DeactivatedAt)
-         .HasConversion(nulDtOffToIsoStrConv)
+      builder.Property(a => a.DeactivatedAt)
+         .HasConversion(dtConvNul)
          .IsRequired(false);
-
-      // Derived domain state – not persisted
-      b.Ignore(a => a.IsActive);
-
+      
+      // Cross-BC reference (by Id)
       // -----------------------------
-      // Cross-BC references (by Id)
-      // -----------------------------
-      // Reference by Id to Owner (different Bounded Context).
-      // No EF relationship / no database foreign key constraint here.
-      b.Property(a => a.OwnerId)
+      builder.Property(a => a.OwnerId)
          .IsRequired();
 
-      b.HasIndex(a => a.OwnerId);
+      builder.HasIndex(a => a.OwnerId);
 
-      // -----------------------------
-      // Aggregate relationships
-      // -----------------------------
+
       // Account -> Beneficiaries (child entities)
-      b.HasMany(a => a.Beneficiaries)
+      // -----------------------------
+      builder.HasMany<Beneficiary>(a => a.Beneficiaries)
          .WithOne()
-         .HasForeignKey(x => x.AccountId)
-         .OnDelete(DeleteBehavior.Restrict); // no cascade delete
+         .HasForeignKey(b => b.AccountId)
+         .OnDelete(DeleteBehavior.Cascade); // beneficiaries die with account
 
-      // Use backing field to protect aggregate invariants
-      b.Navigation(a => a.Beneficiaries)
+      // Use backing field to protect invariants
+      builder.Navigation(a => a.Beneficiaries)
          .HasField("_beneficiaries")
          .UsePropertyAccessMode(PropertyAccessMode.Field);
+
+      // Optional indexes for admin queries
+      builder.HasIndex(a => a.CreatedAt);
    }
 }
-
-/*
-==========================================================
-Didaktik & Lernziele (Deutsch)
-==========================================================
-
-1) AggregateRoot-Metadaten
--------------------------
-Version wird als ConcurrencyToken gemappt (optimistic concurrency).
-CreatedAt/UpdatedAt werden als DateTimeOffset via ValueConverter
-als UTC-normalisierte ISO-Strings persistiert.
-
-→ Lernziel: Technische Persistenzdetails sauber am Mapping bündeln
-   und Domain-Model frei von EF-Details halten.
-
-2) Cross-BC Reference by Id ≠ Datenbank-Beziehung
--------------------------------------------------
-Owner liegt im Bounded Context "Owners", Account im BC "Core".
-Darum wird OwnerId nur als skalare Referenz gespeichert:
-- keine Navigation zu Owner
-- kein EF Relationship-Mapping
-- kein FK-Constraint in der DB
-
-→ Lernziel: BC-Grenzen reduzieren technische Kopplung.
-   Konsistenz über BC-Grenzen ist eine UseCase-/Policy-Frage
-   (z.B. Owner existiert/ist aktiv prüfen), nicht DB-Magie.
-
-3) Aggregate Relationship: Account -> Beneficiaries
----------------------------------------------------
-Beneficiary ist Child Entity im Account-Aggregat:
-- Beziehung wird in EF als 1:n gemappt
-- DeleteBehavior.Restrict verhindert DB-seitiges Cascade-Delete
-  (Deaktivierung statt Löschen; Child Entities werden explizit
-   über das Aggregat entfernt)
-
-→ Lernziel: Aggregate steuern Lebenszyklus ihrer Child Entities.
-
-4) Backing Field schützt Invarianten
------------------------------------
-Die Collection ist als private Liste implementiert und wird über
-PropertyAccessMode.Field gemappt.
-
-→ Lernziel: EF darf persistieren, aber nicht die Invarianten des
-   Aggregats umgehen (Änderungen nur über Domain-Operationen).
-
-==========================================================
-*/
