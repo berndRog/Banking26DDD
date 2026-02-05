@@ -3,6 +3,8 @@ using BankingApi._2_Modules.Owners._2_Application.Dtos;
 using BankingApi._4_BuildingBlocks;
 namespace BankingApi._2_Modules.Owners._2_Application.UseCases;
 
+
+// UseCases Facade for Owner aggregate
 public class OwnerUseCases(
    OwnerUcCreate createUc,
    OwnerUcCreateProvisioned createProvisionedUc,

@@ -128,7 +128,7 @@ public sealed class Owner : AggregateRoot<Guid> {
       if (lastname.Length is < 2 or > 80)
          return Result<Owner>.Failure(OwnerErrors.InvalidLastname);
 
-      if (!string.IsNullOrWhiteSpace(companyName) && companyName.Length is < 2 or > 200)
+      if (!string.IsNullOrWhiteSpace(companyName) && companyName.Length is < 2 or > 80)
          return Result<Owner>.Failure(OwnerErrors.InvalidCompanyName);
 
       if (string.IsNullOrWhiteSpace(email))
@@ -260,7 +260,7 @@ public sealed class Owner : AggregateRoot<Guid> {
       if (lastname.Length is < 2 or > 80)
          return Result.Failure(OwnerErrors.InvalidLastname);
 
-      if (!string.IsNullOrWhiteSpace(companyName) && companyName.Length is < 2 or > 200)
+      if (!string.IsNullOrWhiteSpace(companyName) && companyName.Length is < 2 or > 80)
          return Result.Failure(OwnerErrors.InvalidCompanyName);
 
       // Validate email in domain (do not rely on caller)
