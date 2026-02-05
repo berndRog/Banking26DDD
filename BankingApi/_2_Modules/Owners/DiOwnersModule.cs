@@ -23,8 +23,10 @@ public static class DiOwnersModule {
       services.AddScoped<OwnerUcCreate>();
       services.AddScoped<OwnerUcCreateProvisioned>();
       services.AddScoped<OwnerUcUpsertProfile>();
+      services.AddScoped<OwnerUcActivate>();
+      services.AddScoped<OwnerUcReject>();
+      services.AddScoped<OwnerUcDeactivate>();
       services.AddScoped<OwnerUcUpdateEmail>();
-      services.AddScoped<OwnerUcRemove>();
       services.AddScoped<IOwnerUseCases, OwnerUseCases>();
 
       // =========================================================

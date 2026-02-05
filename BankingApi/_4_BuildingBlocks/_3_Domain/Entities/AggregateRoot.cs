@@ -17,6 +17,15 @@ public abstract class AggregateRoot<TId> : Entity<TId>
       UpdatedAt = _clock.UtcNow;
    }
    
-   protected void Touch()  => UpdatedAt = _clock.UtcNow;
+   
+   protected void SetCreatedAt(DateTimeOffset createdAt) {
+      if (createdAt == default)
+         throw new ArgumentException("createdAt must be set.", nameof(createdAt));
+      CreatedAt = createdAt;
+      UpdatedAt = createdAt;
+   }
+
+   protected void Touch() => UpdatedAt = _clock.UtcNow;
+   protected void Touch(DateTimeOffset utcNow) => UpdatedAt = utcNow;
    
 }

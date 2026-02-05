@@ -89,7 +89,7 @@ public sealed class OwnersUcCreatePersonIntT : TestBase, IAsyncLifetime {
       _dbContext.ChangeTracker.Clear();
       
       // Assert
-      var actual = await _repository.FindByIdAsync(owner.Id, _ct);
+      var actual = await _repository.FindByIdAsync(owner.Id, noTracking:true,_ct);
       Assert.NotNull(actual);
       Assert.Equal(owner.Id, actual!.Id);
       Assert.Equal(owner.Firstname, actual.Firstname);
@@ -120,7 +120,7 @@ public sealed class OwnersUcCreatePersonIntT : TestBase, IAsyncLifetime {
       _dbContext.ChangeTracker.Clear();
       
       // Assert
-      var actual = await _repository.FindByIdAsync(owner.Id, _ct);
+      var actual = await _repository.FindByIdAsync(owner.Id, noTracking:true,_ct);
       Assert.NotNull(actual);
       Assert.Equal(owner.Id, actual!.Id);
       Assert.Equal(owner.Firstname, actual.Firstname);

@@ -5,8 +5,7 @@ using Microsoft.EntityFrameworkCore.Metadata.Builders;
 namespace BankingApi._2_Modules.Core._4_Infrastructure.Persistence;
 
 public sealed class ConfigTransfer(
-   DateTimeOffsetToIsoStringConverter dtConv,
-   DateTimeOffsetToIsoStringConverterNullable dtConvNul
+   DateTimeOffsetToIsoStringConverter dtConv
 ) : IEntityTypeConfiguration<Transfer> {
    public void Configure(EntityTypeBuilder<Transfer> builder) {
       builder.ToTable("Transfers");

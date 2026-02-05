@@ -5,6 +5,7 @@ public interface IOwnerRepository {
 
    Task<Owner?> FindByIdAsync(
       Guid ownerId, 
+      bool noTracking = false,
       CancellationToken ct = default
    );
 

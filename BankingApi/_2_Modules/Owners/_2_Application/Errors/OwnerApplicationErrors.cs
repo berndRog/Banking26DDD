@@ -20,6 +20,14 @@ public static class OwnerApplicationErrors {
          Title: "Owner: Employee cannot update Owner profiles",
          Message: "The owner profile is blocked against employees access.");
 
+   
+   public static readonly DomainErrors EmployeeRightsRequired =
+      new(
+         ErrorCode.Forbidden,
+         Title: "Employee rights required",
+         Message: "This operation requires employee privileges."
+      );
+   
    public static readonly DomainErrors EmailAlreadyInUse =
       new(ErrorCode.Conflict,
          Title: "Owner: email already used",

@@ -37,9 +37,9 @@ public sealed class BankingDbContext(
 
       modelBuilder.ApplyConfiguration(new ConfigAccount(dtConv, dtConvNul));
       modelBuilder.ApplyConfiguration(new ConfigBeneficiary());
-      
-      
-      
+
+      modelBuilder.ApplyConfiguration(new ConfigTransfer(dtConv));
+      modelBuilder.ApplyConfiguration(new ConfigTransaction(dtConv));
    }
 
    /*

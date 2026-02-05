@@ -64,7 +64,7 @@ public sealed class OwnersRepositoryIntT : TestBase, IAsyncLifetime {
       _dbContext.ChangeTracker.Clear();
       
       // Assert
-      var actual = await _repository.FindByIdAsync(owner.Id, CancellationToken.None);
+      var actual = await _repository.FindByIdAsync(owner.Id, noTracking:true, CancellationToken.None);
       Assert.NotNull(actual);
       Assert.Equal(_seed.Owner1.Id, actual!.Id);
       Assert.Equal(_seed.Owner1.Firstname, actual.Firstname);
@@ -84,7 +84,7 @@ public sealed class OwnersRepositoryIntT : TestBase, IAsyncLifetime {
       var id = _seed.Owner1.Id;
       
       // Act
-      var actual = await _repository.FindByIdAsync(id, CancellationToken.None);
+      var actual = await _repository.FindByIdAsync(id, noTracking:true,CancellationToken.None);
 
       // Assert
       Assert.NotNull(actual);
@@ -105,7 +105,7 @@ public sealed class OwnersRepositoryIntT : TestBase, IAsyncLifetime {
       var nonExistentId = Guid.NewGuid();
 
       // Act
-      var actual = await _repository.FindByIdAsync(nonExistentId, CancellationToken.None);
+      var actual = await _repository.FindByIdAsync(nonExistentId, noTracking:true,CancellationToken.None);
 
       // Assert
       Assert.Null(actual);

@@ -10,7 +10,6 @@ public static class OwnerErrors {
          Title: "Invalid Owner Id",
          Message: "The given Id is invalid.");
 
-
    public static readonly DomainErrors NotPending =
       new(
          ErrorCode.Conflict,
@@ -19,61 +18,45 @@ public static class OwnerErrors {
       );
 
    public static readonly DomainErrors AlreadyDeactivated =
-      new(
-         ErrorCode.Conflict,
+      new(ErrorCode.Conflict,
          Title: "Owner already deactivated",
-         Message: "The owner has already been deactivated."
-      );
+         Message: "The owner has already been deactivated.");
 
    // Validation
    public static readonly DomainErrors FirstnameIsRequired =
-      new(
-         ErrorCode.BadRequest,
+      new(ErrorCode.BadRequest,
          Title: "Owner: First name required",
-         Message: "A first name must be provided."
-      );
+         Message: "A first name must be provided.");
 
    public static readonly DomainErrors InvalidFirstname =
-      new(
-         ErrorCode.BadRequest,
+      new(ErrorCode.BadRequest,
          Title: "Owner: Invalid first name",
-         Message: "The provided first name is too short or too long (2–80 characters)."
-      );
+         Message: "The provided first name is too short or too long (2–80 characters).");
 
    public static readonly DomainErrors LastnameIsRequired =
-      new(
-         ErrorCode.BadRequest,
+      new(ErrorCode.BadRequest,
          Title: "Owner: Last name required",
-         Message: "A last name must be provided."
-      );
+         Message: "A last name must be provided.");
 
    public static readonly DomainErrors InvalidLastname =
-      new(
-         ErrorCode.BadRequest,
+      new(ErrorCode.BadRequest,
          Title: "Owner: Invalid last name",
-         Message: "The provided last name is too short or too long (2–80 characters)."
-      );
+         Message: "The provided last name is too short or too long (2–80 characters).");
    
    public static readonly DomainErrors CompanyNameIsRequired =
-      new(
-         ErrorCode.BadRequest,
+      new(ErrorCode.BadRequest,
          Title: "Owner: Company name required",
-         Message: "A Company name must be provided."
-      );
+         Message: "A Company name must be provided.");
 
    public static readonly DomainErrors InvalidCompanyName =
-      new(
-         ErrorCode.BadRequest,
+      new(ErrorCode.BadRequest,
          Title: "Owner: Invalid company name",
-         Message: "The provided company name is too short or too long (2–80 characters)."
-      );
+         Message: "The provided company name is too short or too long (2–80 characters).");
 
    public static readonly DomainErrors EmailIsRequired =
-      new(
-         ErrorCode.BadRequest,
+      new(ErrorCode.BadRequest,
          Title: "Owner: Email required",
-         Message: "An email address must be provided."
-      );
+         Message: "An email address must be provided.");
    
    public static readonly DomainErrors EmailNotFound =
       new(ErrorCode.NotFound,
@@ -85,31 +68,27 @@ public static class OwnerErrors {
       new(ErrorCode.BadRequest,
          Title: "Owner: Creation Timestamp Required",
          Message: "The creation timestamp (createdAt) must be provided.");
-
-
-   public static readonly DomainErrors NotFound =
-      new(
-         ErrorCode.NotFound,
-         Title: "Owner: Not found",
-         Message: "No owner with the given id exists."
-      );
    
-
+   public static readonly DomainErrors NotFound =
+      new(ErrorCode.NotFound,
+         Title: "Owner: Not found",
+         Message: "No owner with the given id exists.");
    
    // Activation / rejection
-   public static readonly DomainErrors ActivationRequiresEmployee =
-      new(
-         ErrorCode.BadRequest,
-         Title: "Activation requires employee",
-         Message: "An employee must be specified to activate an owner."
-      );
+   public static readonly DomainErrors AuditRequiresEmployee =
+      new(ErrorCode.BadRequest,
+         Title: "Owner: Employee required",
+         Message: "This operation requires a valid employee id for auditing.");
+
+   public static readonly DomainErrors ProfileIncomplete =
+      new(ErrorCode.Conflict,
+         Title: "Owner: Profile incomplete",
+         Message: "The owner profile is incomplete. Complete the required profile data before activation.");
 
    public static readonly DomainErrors RejectionRequiresReason =
-      new(
-         ErrorCode.BadRequest,
-         Title: "Rejection reason required",
-         Message: "A rejection reason code must be provided."
-      );
+      new(ErrorCode.BadRequest,
+         Title: "Owner: Rejection reason required",
+         Message: "A rejection reason code must be provided.");
 
 }
 
