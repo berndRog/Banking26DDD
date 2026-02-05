@@ -12,7 +12,9 @@ public class BankingDbContextFactory : IDesignTimeDbContextFactory<BankingDbCont
          .AddJsonFile("appsettings.json", optional: false)
          .AddJsonFile("appsettings.Development.json", optional: true)
          .Build();
-      var connectionString = configuration.GetConnectionString("BankingDb");
+      var connectionString = configuration.GetConnectionString("BankingApi");
+      
+      Console.WriteLine($"SQLite connection string: {connectionString}");
       
       var optionsBuilder = new DbContextOptionsBuilder<BankingDbContext>();
         
