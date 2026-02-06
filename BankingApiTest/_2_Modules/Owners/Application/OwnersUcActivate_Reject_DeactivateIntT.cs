@@ -2,6 +2,7 @@ using System.Data.Common;
 using BankingApi._2_Modules.Owners._1_Ports.Outbound;
 using BankingApi._2_Modules.Owners._2_Application.Dtos;
 using BankingApi._2_Modules.Owners._2_Application.UseCases;
+using BankingApi._2_Modules.Owners._3_Domain.Aggregates;
 using BankingApi._2_Modules.Owners._4_Infrastructure.Repositories;
 using BankingApi._3_Infrastructure.Database;
 using BankingApi._4_BuildingBlocks._1_Ports.Inbound;
@@ -11,7 +12,7 @@ using Microsoft.EntityFrameworkCore;
 namespace BankingApiTest.Modules.Owners.Infrastructure;
 
 [Collection("Sequential")]
-public sealed class OwnersUcProvision_ProfileIntT : TestBase, IAsyncLifetime {
+public sealed class OwnersUcActivate_Reject_DeactivateIntT : TestBase, IAsyncLifetime {
    private string? _dbPath;
    private DbConnection? _dbConnection;
    private DbContext? _dbContext;
@@ -23,8 +24,9 @@ public sealed class OwnersUcProvision_ProfileIntT : TestBase, IAsyncLifetime {
    
    private TestSeed _seed = null!;
    private IClock _clock = null!;
-   private OwnerUcCreateProvisioned _ucCreateProvisioned = null!;
-   private OwnerUcUpsertProfile _ucUpsertProfile = null!;
+   private Owner _owner = null!;
+   private OwnerUcActivate _ucActivate = null!;
+   private OwnerUcReject _ucReject = null!;
    private CancellationToken _ct = default!;
 
    public async Task InitializeAsync() {
@@ -39,8 +41,7 @@ public sealed class OwnersUcProvision_ProfileIntT : TestBase, IAsyncLifetime {
       _dbPath = dbPath;
       _dbConnection = dbConnection;
       _dbContext = dbContext;
-         
-      var bankingDbContext = _dbContext  as BankingDbContext ?? 
+      var bankingDbContext = _dbContext as BankingDbContext ?? 
          throw new InvalidOperationException("Create: DbContext is not of type BankingDbContext");
 
       _repository = new OwnerRepositoryEf(bankingDbContext);
@@ -48,6 +49,9 @@ public sealed class OwnersUcProvision_ProfileIntT : TestBase, IAsyncLifetime {
 
       _identityGateway = new FakeIdentity(_clock);
       
+      _owner = _seed.Owner5;
+      _repository.Add(_owner);
+      await _unitOfWork.SaveAllChangesAsync("Seeding data", _ct);
    }
 
    public async Task DisposeAsync() {
@@ -60,30 +64,30 @@ public sealed class OwnersUcProvision_ProfileIntT : TestBase, IAsyncLifetime {
    }
    
    [Fact]
-   public async Task CreateProvisionedAsync_returns_success() {
+   public async Task ActivateAsync_returns_success() {
       // Arrange
-      _ucCreateProvisioned = new OwnerUcCreateProvisioned(_identityGateway, _repository,
-         _unitOfWork, _clock, TestLogger.Create<OwnerUcCreateProvisioned>(true));
-      var subject = _identityGateway.Subject;
-      var email = _identityGateway.Username.ToLowerInvariant(); // email is derived from username and normalized to lower case
-      var createdAt = _identityGateway.CreatedAt;
-      var id = "50000000-0000-0000-0000-000000000000";
+      _ucActivate = new OwnerUcActivate(
+         _identityGateway,
+         _repository,
+         _unitOfWork,
+         _clock,
+         TestLogger.Create<OwnerUcActivate>(true)
+      );
       
       // Act
-      var result = await _ucCreateProvisioned.ExecuteAsync(id: id, _ct);   
+      var result = await _ucActivate.ExecuteAsync(_owner.Id, _ct);   
       _dbContext!.ChangeTracker.Clear();
 
       // Assert
       True(result.IsSuccess);
-      var ownerId = result.Value;
-      var actual = await _repository.FindByIdAsync(ownerId, noTracking: true, _ct);
+      var actual = await _repository.FindByIdAsync(_owner.Id, noTracking: true, _ct);
       NotNull(actual);
-      Equal(Guid.Parse(id), actual.Id);
-      Equal(email, actual.Email);
-      Equal(subject, actual.Subject);
-      Equal(createdAt, actual.CreatedAt);
+      Equal(_owner.Id, actual.Id);
+      // Equal(email, actual.Email);
+      // Equal(subject, actual.Subject);
+      // Equal(createdAt, actual.CreatedAt);
    }
-   
+   /*
    [Fact]
    public async Task UpdateProfileAsync_returns_success() {
       // Arrange
@@ -96,7 +100,7 @@ public sealed class OwnersUcProvision_ProfileIntT : TestBase, IAsyncLifetime {
       
       // create provisioned owner first
       var result = await _ucCreateProvisioned.ExecuteAsync(id: id, ct: _ct);   
-      _dbContext?.ChangeTracker.Clear();
+      _dbContext.ChangeTracker.Clear();
       
       // owner profile 
       var owner = _seed.Owner5; 
@@ -120,7 +124,7 @@ public sealed class OwnersUcProvision_ProfileIntT : TestBase, IAsyncLifetime {
          TestLogger.Create<OwnerUcUpsertProfile>(true)
       );
       var resultUpsert = await _ucUpsertProfile.ExecuteAsync(ownerProfileDto, _ct);
-      _dbContext!.ChangeTracker.Clear();
+      _dbContext.ChangeTracker.Clear();
       
       // Assert
       True(resultUpsert.IsSuccess);
@@ -137,4 +141,5 @@ public sealed class OwnersUcProvision_ProfileIntT : TestBase, IAsyncLifetime {
       Equal(owner.CreatedAt, actual.CreatedAt);
 
    }
+   */
 }

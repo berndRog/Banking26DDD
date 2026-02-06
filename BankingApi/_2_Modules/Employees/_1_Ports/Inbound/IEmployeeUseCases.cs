@@ -63,7 +63,6 @@ public interface IEmployeeUseCases {
       AdminRights adminRights,
       DateTimeOffset createdAt,
       string? id = null,
-      Address? address = null,
       CancellationToken ct = default
    );
 

@@ -80,16 +80,16 @@ public static class TestDatabase {
       }
    }
 
-   public static async Task<(string, DbConnection?, DbContext?)> Dispose(
+   public static async Task<(string?, DbConnection?, DbContext?)> Dispose(
       bool isInMemory, 
-      string dbPath,
-      DbConnection dbConnection,
-      DbContext dbContext
+      string? dbPath,
+      DbConnection? dbConnection,
+      DbContext? dbContext
    ) {
 
-      if (!isInMemory) {
+      if (!isInMemory && !string.IsNullOrEmpty(dbPath)) {
          DeleteDatabaseFiles(dbPath);
-         dbPath = string.Empty;
+         dbPath = null;
       }
 
       if (dbContext != null) {

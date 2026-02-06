@@ -6,9 +6,7 @@ using Microsoft.EntityFrameworkCore;
 namespace BankingApi._2_Modules.Core._4_Infrastructure.Repositories;
 
 public sealed class TransferRepository(
-   BankingDbContext _dbContext,
-   IClock _clock,
-   ILogger<TransferRepository> _logger
+   BankingDbContext _dbContext
 ) : ITransferRepository {
    
    public async Task<Transfer?> FindByIdAsync(
@@ -36,8 +34,6 @@ public sealed class TransferRepository(
       Guid accountId,
       CancellationToken ct = default
    ) {
-      _logger.LogDebug("Loading Transfers for Account {Id}", accountId);
-
       return await _dbContext.Transfers
          .Where(t => t.FromAccountId == accountId)
          .OrderByDescending(t => t.BookedAt)

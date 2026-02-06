@@ -5,14 +5,16 @@ using BankingApi._2_Modules.Owners._4_Infrastructure.Repositories;
 using BankingApi._3_Infrastructure.Database;
 using BankingApi._4_BuildingBlocks._1_Ports.Inbound;
 using BankingApi._4_BuildingBlocks._4_Infrastructure.Persistence;
+using Microsoft.EntityFrameworkCore;
 namespace BankingApiTest.Modules.Owners.Infrastructure;
 
 [Collection("Sequential")]
 public sealed class OwnersUcCreateIntT : TestBase, IAsyncLifetime {
-   private string _dbPath = null!;
-   private DbConnection _dbConnection = null!;
-   private BankingDbContext _dbContext = null!;
+   private string? _dbPath;
+   private DbConnection? _dbConnection;
+   private DbContext? _dbContext = null!;
    private Boolean _isInMemory = false;
+   
    private IOwnerRepository _repository = null!;
    private IUnitOfWork _unitOfWork = null!;
    private TestSeed _seed = null!;
@@ -28,21 +30,15 @@ public sealed class OwnersUcCreateIntT : TestBase, IAsyncLifetime {
       // create a real database for testing,
       // as in-memory databases do not support all features (e.g. transactions, relational constraints)
       var (dbPath, dbConnection, dbContext) = await TestDatabase.CreateAsync(
-         useInMemory: _isInMemory,
-         projectName: "BankingApiTest",
-         _ct
-      );
+         useInMemory: _isInMemory, projectName: "BankingApiTest", _ct);
       _dbPath = dbPath;
       _dbConnection = dbConnection;
-      _dbContext = dbContext as BankingDbContext ?? 
+      _dbContext = dbContext;
+      var bankingDbContext = _dbContext   as BankingDbContext ?? 
          throw new InvalidOperationException("Create: DbContext is not of type BankingDbContext");
 
-      _repository = new OwnerRepositoryEf(_dbContext);
-      _unitOfWork = new UnitOfWork(
-         _dbContext,
-         _clock,
-         CreateLogger<UnitOfWork>()
-      );
+      _repository = new OwnerRepositoryEf(bankingDbContext);
+      _unitOfWork = new UnitOfWork(bankingDbContext, _clock, CreateLogger<UnitOfWork>());
 
       _repository.Add(_seed.Owner1);
       _repository.Add(_seed.Owner2);
@@ -62,8 +58,7 @@ public sealed class OwnersUcCreateIntT : TestBase, IAsyncLifetime {
             _isInMemory, _dbPath, _dbConnection, _dbContext);
       _dbPath = dbPath;
       _dbConnection = dbConnection;
-      _dbContext = dbContext as BankingDbContext ?? 
-         throw new InvalidOperationException("Dispose: DbContext is not of type BankingDbContext");
+      _dbContext = dbContext;
 
    }
 
@@ -83,7 +78,7 @@ public sealed class OwnersUcCreateIntT : TestBase, IAsyncLifetime {
          null, null, null, null,
          _ct
       );
-      _dbContext.ChangeTracker.Clear();
+      _dbContext!.ChangeTracker.Clear();
 
       // Assert
       var actual = await _repository.FindByIdAsync(owner.Id, noTracking: true, _ct);
@@ -115,7 +110,7 @@ public sealed class OwnersUcCreateIntT : TestBase, IAsyncLifetime {
          country: address.Country,
          _ct
       );
-      _dbContext.ChangeTracker.Clear();
+      _dbContext!.ChangeTracker.Clear();
 
       // Assert
       var actual = await _repository.FindByIdAsync(owner.Id, noTracking: true, _ct);
@@ -152,7 +147,7 @@ public sealed class OwnersUcCreateIntT : TestBase, IAsyncLifetime {
          country: address.Country,
          _ct
       );
-      _dbContext.ChangeTracker.Clear();
+      _dbContext!.ChangeTracker.Clear();
 
       // Assert
       var actual = await _repository.FindByIdAsync(owner.Id, noTracking: true, _ct);

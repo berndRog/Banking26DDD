@@ -36,7 +36,6 @@ public sealed class EmployeeUcCreate(
       AdminRights adminRights,
       DateTimeOffset createdAt = default,
       string? id = null,
-      Address? address = null,
       CancellationToken ct = default
    ) {
       
@@ -70,8 +69,7 @@ public sealed class EmployeeUcCreate(
          personnelNumber: personnelNumber,
          adminRights: adminRights,
          createdAt: createdAt,
-         id: id,
-         address: address
+         id: id
       );
       if (result.IsFailure)
          return Result<Guid>.Failure(result.Error);

@@ -44,6 +44,7 @@
     &lt;TestId&gt;xUnit::8F031B4C-A09C-4100-8434-F2F7C9EA42DE::net10.0::BankingApiTest.Modules.Owners.Domain.Aggregates.OwnerUt&lt;/TestId&gt;
     &lt;TestId&gt;xUnit::8F031B4C-A09C-4100-8434-F2F7C9EA42DE::net10.0::BankingApiTest.Modules.Owners.Infrastructure.OwnersUcProvision_ProfileIntT.CreateProvisionedAsync_delegates_to_createProvisionedUc_and_returns_result&lt;/TestId&gt;
     &lt;TestId&gt;xUnit::8F031B4C-A09C-4100-8434-F2F7C9EA42DE::net10.0::BankingApiTest.Modules.Owners.Infrastructure.OwnersUcProvision_ProfileIntT.UpdateProfileAsync_returns_success&lt;/TestId&gt;
+    &lt;TestId&gt;xUnit::8F031B4C-A09C-4100-8434-F2F7C9EA42DE::net10.0::BankingApiTest.Modules.Owners.Infrastructure.OwnersUcActivate_Reject_DeactivateIntT.ActivateAsync_returns_success&lt;/TestId&gt;
   &lt;/TestAncestor&gt;
 &lt;/SessionState&gt;</s:String>
 	

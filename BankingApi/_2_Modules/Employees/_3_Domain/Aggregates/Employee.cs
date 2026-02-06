@@ -44,8 +44,6 @@ public sealed class Employee : AggregateRoot<Guid> {
    public DateTimeOffset CreatedAt { get; private set; }
    public DateTimeOffset? DeactivatedAt { get; private set; }
    
-   public Address? Address { get; private set; } = null;
-   
    // EF Core constructor
    private Employee(): base(new BankingSystemClock()) { }
 
@@ -59,8 +57,7 @@ public sealed class Employee : AggregateRoot<Guid> {
       string? phone,
       string personnelNumber,
       AdminRights adminRights,
-      DateTimeOffset createdAt,
-      Address? address = null
+      DateTimeOffset createdAt
    ): base(clock) {
       Id = id;
       Firstname = firstname;
@@ -84,8 +81,7 @@ public sealed class Employee : AggregateRoot<Guid> {
       string personnelNumber,
       AdminRights adminRights = AdminRights.None,
       DateTimeOffset createdAt = default,
-      string? id = null,
-      Address? address = null
+      string? id = null
    ) {
       // Normalize input early
       firstname = firstname.Trim();
@@ -141,8 +137,7 @@ public sealed class Employee : AggregateRoot<Guid> {
          phone,
          personnelNumber,
          adminRights,
-         createdAt,
-         address
+         createdAt
       );
       return Result<Employee>.Success(employee);
    }

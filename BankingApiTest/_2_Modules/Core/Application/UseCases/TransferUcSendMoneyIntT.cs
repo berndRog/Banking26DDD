@@ -14,9 +14,9 @@ namespace BankingApiTest.Modules.Owners.Infrastructure;
 
 public sealed class TransferUcSendMoneyIntT : TestBase, IAsyncLifetime {
 
-   private string _dbPath = null!;
-   private DbConnection _dbConnection = null!;
-   private BankingDbContext _dbContext = null!;
+   private string? _dbPath;
+   private DbConnection? _dbConnection;
+   private DbContext? _dbContext;
    private Boolean _isInMemory = false;
    
    private IAccountRepository _accountRepository = null!;
@@ -26,7 +26,6 @@ public sealed class TransferUcSendMoneyIntT : TestBase, IAsyncLifetime {
    private IClock _clock = null!;
    private AccountUcCreate _accountUcCreate = null!;
    private TransfersUcSendMoney _sut = null!;
-   private readonly bool _inMemoryDb = false;
    private CancellationToken _ct = default!;
 
    public async Task InitializeAsync() {
@@ -35,50 +34,23 @@ public sealed class TransferUcSendMoneyIntT : TestBase, IAsyncLifetime {
       _clock = new FakeClock(new DateTime(2025, 01, 01));
       
       var (dbPath, dbConnection, dbContext) = await TestDatabase.CreateAsync(
-         useInMemory: false,
-         projectName: "BankingApiTest",
-         _ct
-      );
+         useInMemory: false, projectName: "BankingApiTest", _ct);
       _dbPath = dbPath;
       _dbConnection = dbConnection;
-      _dbContext = dbContext as BankingDbContext;
+      _dbContext = dbContext;
+      var bankingDbContext = _dbContext as BankingDbContext ?? 
+         throw new InvalidOperationException("TransfersUcSendMoney: DbContext is not of type BankingDbContext");
       
-      _accountRepository = new AccountRepository(_dbContext);
-      _unitOfWork = new UnitOfWork(
-         _dbContext, 
-         _clock,
-         CreateLogger<UnitOfWork>()
-      );
+      _accountRepository = new AccountRepository(bankingDbContext);
+      _transferRepository = new TransferRepository(bankingDbContext);
+      _unitOfWork = new UnitOfWork(bankingDbContext, _clock, CreateLogger<UnitOfWork>());
       
-      _transferRepository = new TransferRepository(
-         _dbContext,
-         _clock,
-         CreateLogger<TransferRepository>()
-      );
-      
-      _accountUcCreate = new AccountUcCreate(
-         new FakeOwnerLookup(_seed),
-         _accountRepository,
-         _unitOfWork,
-         _clock,
-         CreateLogger<AccountUcCreate>()
-      );
-
-      
-      _unitOfWork = new UnitOfWork(
-         _dbContext, 
-         _clock,
-         CreateLogger<UnitOfWork>()
-      );
+      _accountUcCreate = new AccountUcCreate(new FakeOwnerLookup(_seed),
+         _accountRepository, _unitOfWork, _clock, CreateLogger<AccountUcCreate>());
       
       // System under test
-      _sut = new TransfersUcSendMoney(
-         _accountRepository,
-         _transferRepository,
-         _unitOfWork,
-         _clock,
-         CreateLogger<TransfersUcSendMoney>()
-      );
+      _sut = new TransfersUcSendMoney(_accountRepository, _transferRepository,
+         _unitOfWork, _clock, CreateLogger<TransfersUcSendMoney>());
    }
 
    public async Task DisposeAsync() {
@@ -121,7 +93,7 @@ public sealed class TransferUcSendMoneyIntT : TestBase, IAsyncLifetime {
       
       var result = await _sut.ExecuteAsync(sendMoneyCmd,_ct);
       True(result.IsSuccess);
-      _dbContext.ChangeTracker.Clear();
+      _dbContext!.ChangeTracker.Clear();
       
       // Assert
       var actualTransfer = await _transferRepository.FindWithTransactionsByIdAsync(transfer.Id, _ct);

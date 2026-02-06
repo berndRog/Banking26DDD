@@ -23,11 +23,11 @@ public sealed class ConfigEmployee(
       b.Property(x => x.Firstname)
          .HasMaxLength(100).IsRequired();
       b.Property(x => x.Lastname)
-         .HasMaxLength(100)
+         .HasMaxLength(80)
          .IsRequired();
       
       b.Property(x => x.Email)
-         .HasMaxLength(200)
+         .HasMaxLength(80)
          .IsRequired();
       b.HasIndex(x => x.Email).IsUnique();
       
@@ -63,19 +63,5 @@ public sealed class ConfigEmployee(
          .IsRequired(false);
       // Helpful index for "active employees"
       b.HasIndex(x => x.DeactivatedAt);
-      
-      // Owned: Address (OPTIONAL)
-      b.OwnsOne(c => c.Address, a => {
-         // OPTIONAL: keeps columns readable & avoids collisions
-         a.Property(p => p.Street)
-            .HasColumnName("Address_Street").HasMaxLength(100).IsRequired(false);
-         a.Property(p => p.PostalCode)
-            .HasColumnName("Address_PostalCode").HasMaxLength(20).IsRequired(false);
-         a.Property(p => p.City)
-            .HasColumnName("Address_City").HasMaxLength(50).IsRequired(false);
-         a.Property(p => p.City)
-            .HasColumnName("Address_Country").HasMaxLength(30).IsRequired(false);
-      });
-      b.Navigation(x => x.Address).IsRequired(false);
    }
 }

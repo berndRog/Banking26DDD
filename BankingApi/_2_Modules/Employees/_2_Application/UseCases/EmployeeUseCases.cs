@@ -37,7 +37,6 @@ public sealed class EmployeeUseCases(
       AdminRights adminRights,
       DateTimeOffset createdAt,
       string? id = null,
-      Address? address = null,
       CancellationToken ct = default
    ) => createUc.ExecuteAsync(
       firstname: firstname,
@@ -48,7 +47,6 @@ public sealed class EmployeeUseCases(
       adminRights: adminRights,
       createdAt: createdAt,
       id: id,
-      address: address,
       ct: ct
    );
 
