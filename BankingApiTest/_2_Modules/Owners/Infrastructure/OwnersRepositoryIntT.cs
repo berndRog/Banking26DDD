@@ -65,12 +65,12 @@ public sealed class OwnersRepositoryIntT : TestBase, IAsyncLifetime {
       
       // Assert
       var actual = await _repository.FindByIdAsync(owner.Id, noTracking:true, CancellationToken.None);
-      Assert.NotNull(actual);
-      Assert.Equal(_seed.Owner1.Id, actual!.Id);
-      Assert.Equal(_seed.Owner1.Firstname, actual.Firstname);
-      Assert.Equal(_seed.Owner1.Lastname, actual.Lastname);
-      Assert.Equal(_seed.Owner1.Email, actual.Email); 
-      Assert.Equal(_seed.Owner1.Subject, actual.Subject);
+      NotNull(actual);
+      Equal(_seed.Owner1.Id, actual!.Id);
+      Equal(_seed.Owner1.Firstname, actual.Firstname);
+      Equal(_seed.Owner1.Lastname, actual.Lastname);
+      Equal(_seed.Owner1.Email, actual.Email); 
+      Equal(_seed.Owner1.Subject, actual.Subject);
    }
    
    
@@ -87,12 +87,12 @@ public sealed class OwnersRepositoryIntT : TestBase, IAsyncLifetime {
       var actual = await _repository.FindByIdAsync(id, noTracking:true,CancellationToken.None);
 
       // Assert
-      Assert.NotNull(actual);
-      Assert.Equal(id, actual!.Id);
-      Assert.Equal(_seed.Owner1.Firstname, actual.Firstname);
-      Assert.Equal(_seed.Owner1.Lastname, actual.Lastname);
-      Assert.Equal(_seed.Owner1.Email, actual.Email); 
-      Assert.Equal(_seed.Owner1.Subject, actual.Subject);
+      NotNull(actual);
+      Equal(id, actual!.Id);
+      Equal(_seed.Owner1.Firstname, actual.Firstname);
+      Equal(_seed.Owner1.Lastname, actual.Lastname);
+      Equal(_seed.Owner1.Email, actual.Email); 
+      Equal(_seed.Owner1.Subject, actual.Subject);
    }
 
    [Fact]
@@ -108,7 +108,7 @@ public sealed class OwnersRepositoryIntT : TestBase, IAsyncLifetime {
       var actual = await _repository.FindByIdAsync(nonExistentId, noTracking:true,CancellationToken.None);
 
       // Assert
-      Assert.Null(actual);
+      Null(actual);
    }
   
 
@@ -129,7 +129,7 @@ public sealed class OwnersRepositoryIntT : TestBase, IAsyncLifetime {
       );
 
       // Assert
-      Assert.Equal(20, cars.Count); // All cars from seed
+      Equal(20, cars.Count); // All cars from seed
    }
 /*
    [Fact]
@@ -146,8 +146,8 @@ public sealed class OwnersRepositoryIntT : TestBase, IAsyncLifetime {
       );
 
       // Assert
-      Assert.Equal(5, cars.Count); // Car1-Car5
-      Assert.All(cars, car => Assert.Equal(CarCategory.Economy, car.Category));
+      Equal(5, cars.Count); // Car1-Car5
+      All(cars, car => Equal(CarCategory.Economy, car.Category));
    }
 
    [Fact]
@@ -164,8 +164,8 @@ public sealed class OwnersRepositoryIntT : TestBase, IAsyncLifetime {
       var result1 = car1!.SendToMaintenance();
       var result2 = car2!.SendToMaintenance();
 
-      Assert.True(result1.IsSuccess);
-      Assert.True(result2.IsSuccess);
+      True(result1.IsSuccess);
+      True(result2.IsSuccess);
 
       await _unitOfWork.SaveAllChangesAsync();
       _dbContext.ChangeTracker.Clear();
@@ -178,8 +178,8 @@ public sealed class OwnersRepositoryIntT : TestBase, IAsyncLifetime {
       );
 
       // Assert
-      Assert.Equal(2, cars.Count);
-      Assert.All(cars, car => Assert.Equal(CarStatus.Maintenance, car.Status));
+      Equal(2, cars.Count);
+      All(cars, car => Equal(CarStatus.Maintenance, car.Status));
    }
 
    [Fact]
@@ -191,7 +191,7 @@ public sealed class OwnersRepositoryIntT : TestBase, IAsyncLifetime {
 
       var car1 = await _repository.FindByIdAsync(Guid.Parse(_seed.Car1Id), CancellationToken.None);
       var result = car1!.SendToMaintenance();
-      Assert.True(result.IsSuccess);
+      True(result.IsSuccess);
 
       await _unitOfWork.SaveAllChangesAsync();
       _dbContext.ChangeTracker.Clear();
@@ -204,8 +204,8 @@ public sealed class OwnersRepositoryIntT : TestBase, IAsyncLifetime {
       );
 
       // Assert
-      Assert.Single(cars);
-      Assert.Equal(Guid.Parse(_seed.Car1Id), cars[0].Id);
+      Single(cars);
+      Equal(Guid.Parse(_seed.Car1Id), cars[0].Id);
    }
    #endregion
 
@@ -226,7 +226,7 @@ public sealed class OwnersRepositoryIntT : TestBase, IAsyncLifetime {
          createdAt, id.ToString());
       
       // Assert
-      Assert.True(carResult.IsSuccess);
+      True(carResult.IsSuccess);
       var car = carResult.Value;
 
       // Act
@@ -236,14 +236,14 @@ public sealed class OwnersRepositoryIntT : TestBase, IAsyncLifetime {
 
       // Assert
       var actual = await _repository.FindByIdAsync(car.Id, CancellationToken.None);
-      Assert.NotNull(actual);
-      Assert.Equal(id, actual.Id);
-      Assert.Equal(manufacturer, actual.Manufacturer);
-      Assert.Equal(model, actual.Model);
-      Assert.Equal(licensePlate, actual.LicensePlate);
-      Assert.Equal(category, actual.Category);
-      Assert.Equal(createdAt, actual.CreatedAt);
-      Assert.Equal(status, actual.Status);
+      NotNull(actual);
+      Equal(id, actual.Id);
+      Equal(manufacturer, actual.Manufacturer);
+      Equal(model, actual.Model);
+      Equal(licensePlate, actual.LicensePlate);
+      Equal(category, actual.Category);
+      Equal(createdAt, actual.CreatedAt);
+      Equal(status, actual.Status);
    }
 
    [Fact]
@@ -265,9 +265,9 @@ public sealed class OwnersRepositoryIntT : TestBase, IAsyncLifetime {
       var saved2 = await _repository.FindByIdAsync(car2.Id, CancellationToken.None);
       var saved3 = await _repository.FindByIdAsync(car3.Id, CancellationToken.None);
 
-      Assert.NotNull(saved1);
-      Assert.NotNull(saved2);
-      Assert.NotNull(saved3);
+      NotNull(saved1);
+      NotNull(saved2);
+      NotNull(saved3);
    }
 */
 }

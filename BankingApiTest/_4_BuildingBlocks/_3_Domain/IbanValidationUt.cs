@@ -9,7 +9,7 @@ public class IbanValidationUt {
    //    var iban =IbanValidation.GenerateByFixingCheckDigits(givenIban);
    //    var result = IbanValidation.IsValid(iban);
    //    // Assert
-   //    Assert.True(result.IsSuccess);
+   //    True(result.IsSuccess);
    // }
    //
    [Fact]
@@ -18,7 +18,7 @@ public class IbanValidationUt {
       // Act
       var result = IbanValidation.IsValid(iban);
       // Assert
-      Assert.True(result.IsSuccess);
+      True(result.IsSuccess);
    }
    
    [Fact]
@@ -27,7 +27,7 @@ public class IbanValidationUt {
       // Act
       var result = IbanValidation.IsValid(givenIban);
       // Assert
-      Assert.True(result.IsFailure);
+      True(result.IsFailure);
    }
    
    
@@ -36,7 +36,7 @@ public class IbanValidationUt {
       // Act
       var result = IbanValidation.IsValid(null);
       // Assert
-      Assert.True(result.IsFailure);
+      True(result.IsFailure);
    }
    
 }

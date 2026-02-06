@@ -57,22 +57,22 @@ public sealed class OwnerUt {
       );
 
       // Assert
-      Assert.True(result.IsSuccess);
+      True(result.IsSuccess);
 
       var owner = result.Value!;
       IsType<Owner>(owner);
-      Assert.Equal(Guid.Parse(_id), owner.Id);
-      Assert.Equal(_firstname, owner.Firstname);
-      Assert.Equal(_lastname, owner.Lastname);
-      Assert.Equal(_email, owner.Email);
-      Assert.Equal(_subject, owner.Subject);
+      Equal(Guid.Parse(_id), owner.Id);
+      Equal(_firstname, owner.Firstname);
+      Equal(_lastname, owner.Lastname);
+      Equal(_email, owner.Email);
+      Equal(_subject, owner.Subject);
 
       Null(owner.CompanyName);
-      Assert.Equal($"{_firstname} {_lastname}", owner.DisplayName);
+      Equal($"{_firstname} {_lastname}", owner.DisplayName);
 
-      Assert.Equal(OwnerStatus.Pending, owner.Status);
-      Assert.False(owner.IsActive);
-      Assert.True(owner.IsProfileComplete);
+      Equal(OwnerStatus.Pending, owner.Status);
+      False(owner.IsActive);
+      True(owner.IsProfileComplete);
    }
 
    [Fact]
@@ -89,17 +89,17 @@ public sealed class OwnerUt {
       );
 
       // Assert
-      Assert.True(result.IsSuccess);
+      True(result.IsSuccess);
 
       var owner = result.Value!;
       IsType<Owner>(owner);
-      Assert.NotEqual(Guid.Empty, owner.Id);
-      Assert.Equal(_firstname, owner.Firstname);
-      Assert.Equal(_lastname, owner.Lastname);
-      Assert.Equal(_email, owner.Email);
-      Assert.Equal(_subject, owner.Subject);
+      NotEqual(Guid.Empty, owner.Id);
+      Equal(_firstname, owner.Firstname);
+      Equal(_lastname, owner.Lastname);
+      Equal(_email, owner.Email);
+      Equal(_subject, owner.Subject);
       Null(owner.CompanyName);
-      Assert.Equal($"{_firstname} {_lastname}", owner.DisplayName);
+      Equal($"{_firstname} {_lastname}", owner.DisplayName);
    }
 
    [Theory]
@@ -118,8 +118,8 @@ public sealed class OwnerUt {
       );
 
       // Assert
-      Assert.True(result.IsFailure);
-      Assert.Equal(OwnerErrors.FirstnameIsRequired, result.Error);
+      True(result.IsFailure);
+      Equal(OwnerErrors.FirstnameIsRequired, result.Error);
    }
 
    [Theory]
@@ -135,8 +135,8 @@ public sealed class OwnerUt {
          id: _id
       );
 
-      Assert.True(result.IsFailure);
-      Assert.Equal(OwnerErrors.InvalidFirstname, result.Error);
+      True(result.IsFailure);
+      Equal(OwnerErrors.InvalidFirstname, result.Error);
    }
 
    [Theory]
@@ -155,8 +155,8 @@ public sealed class OwnerUt {
       );
 
       // Assert
-      Assert.True(result.IsFailure);
-      Assert.Equal(OwnerErrors.LastnameIsRequired, result.Error);
+      True(result.IsFailure);
+      Equal(OwnerErrors.LastnameIsRequired, result.Error);
    }
 
    [Theory]
@@ -172,8 +172,8 @@ public sealed class OwnerUt {
          id: _id
       );
 
-      Assert.True(result.IsFailure);
-      Assert.Equal(OwnerErrors.InvalidLastname, result.Error);
+      True(result.IsFailure);
+      Equal(OwnerErrors.InvalidLastname, result.Error);
    }
 
    [Theory]
@@ -194,7 +194,7 @@ public sealed class OwnerUt {
       );
 
       // Assert
-      Assert.True(result.IsFailure);
+      True(result.IsFailure);
       // depending on your VO implementation this might be EmailIsRequired or CommonErrors.InvalidEmail
       // We assert failure is enough for teaching; refine if you want strict error matching.
    }
@@ -216,8 +216,8 @@ public sealed class OwnerUt {
       );
 
       // Assert
-      Assert.True(result.IsSuccess);
-      Assert.Equal(Guid.Parse(id), result.Value!.Id);
+      True(result.IsSuccess);
+      Equal(Guid.Parse(id), result.Value!.Id);
    }
 
    [Fact]
@@ -237,8 +237,8 @@ public sealed class OwnerUt {
       );
 
       // Assert
-      Assert.True(result.IsFailure);
-      Assert.Equal(OwnerErrors.InvalidId, result.Error);
+      True(result.IsFailure);
+      Equal(OwnerErrors.InvalidId, result.Error);
    }
 
    #endregion
@@ -266,15 +266,15 @@ public sealed class OwnerUt {
       );
 
       // Assert
-      Assert.True(result.IsSuccess);
+      True(result.IsSuccess);
 
       var owner = result.Value!;
-      Assert.Equal(Guid.Parse(_id), owner.Id);
+      Equal(Guid.Parse(_id), owner.Id);
       NotNull(owner.Address);
-      Assert.Equal(_address1.Street, owner.Address!.Street);
-      Assert.Equal(_address1.PostalCode, owner.Address!.PostalCode);
-      Assert.Equal(_address1.City, owner.Address!.City);
-      Assert.Equal(_address1.Country, owner.Address!.Country);
+      Equal(_address1.Street, owner.Address!.Street);
+      Equal(_address1.PostalCode, owner.Address!.PostalCode);
+      Equal(_address1.City, owner.Address!.City);
+      Equal(_address1.Country, owner.Address!.Country);
    }
 
    [Theory]
@@ -296,8 +296,8 @@ public sealed class OwnerUt {
          country: _address1.Country
       );
       // Assert
-      Assert.True(result.IsFailure);
-      Assert.Equivalent(CommonErrors.StreetIsRequired, result.Error);
+      True(result.IsFailure);
+      Equivalent(CommonErrors.StreetIsRequired, result.Error);
    }
 
    [Theory]
@@ -318,8 +318,8 @@ public sealed class OwnerUt {
          country: _address1.Country
       );
 
-      Assert.True(result.IsFailure);
-      Assert.Equivalent(CommonErrors.PostalCodeIsRequired, result.Error);
+      True(result.IsFailure);
+      Equivalent(CommonErrors.PostalCodeIsRequired, result.Error);
    }
 
    [Theory]
@@ -340,8 +340,8 @@ public sealed class OwnerUt {
          country: _address1.Country
       );
 
-      Assert.True(result.IsFailure);
-      Assert.Equivalent(CommonErrors.CityIsRequired, result.Error);
+      True(result.IsFailure);
+      Equivalent(CommonErrors.CityIsRequired, result.Error);
    }
 
    #endregion
@@ -365,14 +365,14 @@ public sealed class OwnerUt {
       );
 
       // Assert
-      Assert.True(result.IsSuccess);
+      True(result.IsSuccess);
       var owner = result.Value!;
-      Assert.NotEqual(Guid.Empty, owner.Id);
-      Assert.Equal(_firstname, owner.Firstname);
-      Assert.Equal(_lastname, owner.Lastname);
-      Assert.Equal(_companyName, owner.CompanyName);
-      Assert.Equal(_email, owner.Email);
-      Assert.Equal(_companyName, owner.DisplayName);
+      NotEqual(Guid.Empty, owner.Id);
+      Equal(_firstname, owner.Firstname);
+      Equal(_lastname, owner.Lastname);
+      Equal(_companyName, owner.CompanyName);
+      Equal(_email, owner.Email);
+      Equal(_companyName, owner.DisplayName);
    }
    
 
@@ -390,7 +390,7 @@ public sealed class OwnerUt {
          id: null
       );
 
-      Assert.True(result.IsFailure);
+      True(result.IsFailure);
       Equivalent(OwnerErrors.FirstnameIsRequired, result.Error);
    }
 
@@ -408,8 +408,8 @@ public sealed class OwnerUt {
          id: null
       );
 
-      Assert.True(result.IsFailure);
-      Assert.Equal(OwnerErrors.LastnameIsRequired, result.Error);
+      True(result.IsFailure);
+      Equal(OwnerErrors.LastnameIsRequired, result.Error);
    }
 
    [Theory]
@@ -425,8 +425,8 @@ public sealed class OwnerUt {
          id: null
       );
        
-      Assert.True(result.IsFailure);
-      Assert.Equal(OwnerErrors.InvalidCompanyName, result.Error);
+      True(result.IsFailure);
+      Equal(OwnerErrors.InvalidCompanyName, result.Error);
    }
 
    
@@ -446,7 +446,7 @@ public sealed class OwnerUt {
          id: null
       );
 
-      Assert.True(result.IsFailure);
+      True(result.IsFailure);
    }
 
    [Fact]
@@ -463,8 +463,8 @@ public sealed class OwnerUt {
          id: id
       );
 
-      Assert.True(result.IsSuccess);
-      Assert.Equal(Guid.Parse(id), result.Value!.Id);
+      True(result.IsSuccess);
+      Equal(Guid.Parse(id), result.Value!.Id);
    }
 
    [Fact]
@@ -481,7 +481,7 @@ public sealed class OwnerUt {
          id: id
       );
 
-      Assert.True(result.IsFailure);
+      True(result.IsFailure);
       Equivalent(OwnerErrors.InvalidId, result.Error);
    }
 
@@ -495,7 +495,7 @@ public sealed class OwnerUt {
    [Fact]
    public void CreateProvisioned_valid_sets_pending_and_profile_incomplete_and_createdAt() {
       // Arrange
-      var identityCreatedAt = _seed.FixedNow;
+      var identityCreatedAt = _seed.UtcNow;
 
       // Act
       var result = Owner.CreateProvisioned(
@@ -507,16 +507,16 @@ public sealed class OwnerUt {
       );
 
       // Assert
-      Assert.True(result.IsSuccess);
+      True(result.IsSuccess);
       var owner = result.Value!;
 
-      Assert.Equal(Guid.Parse(_id), owner.Id);
-      Assert.Equal(_subject, owner.Subject);
-      Assert.Equal(_email, owner.Email);
+      Equal(Guid.Parse(_id), owner.Id);
+      Equal(_subject, owner.Subject);
+      Equal(_email, owner.Email);
 
-      Assert.Equal(OwnerStatus.Pending, owner.Status);
-      Assert.False(owner.IsProfileComplete);
-      Assert.False(owner.IsActive);
+      Equal(OwnerStatus.Pending, owner.Status);
+      False(owner.IsProfileComplete);
+      False(owner.IsActive);
 
       Equal(identityCreatedAt, owner.CreatedAt);
       Equal(identityCreatedAt, owner.UpdatedAt);
@@ -532,8 +532,8 @@ public sealed class OwnerUt {
          id: _id
       );
 
-      Assert.True(result.IsFailure);
-      Assert.Equal(OwnerErrors.CreatedAtIsRequired, result.Error);
+      True(result.IsFailure);
+      Equal(OwnerErrors.CreatedAtIsRequired, result.Error);
    }
 
    #endregion
@@ -568,7 +568,7 @@ public sealed class OwnerUt {
          clock: _clock,
          identitySubject: _subject,
          email: _email,
-         createdAt: _seed.FixedNow,
+         createdAt: _seed.UtcNow,
          id: _id
       ).Value!;
 
@@ -580,7 +580,7 @@ public sealed class OwnerUt {
          address: _address1
       );
 
-      var now = _seed.FixedNow.AddDays(2);
+      var utcNow = _seed.UtcNow.AddDays(2);
 
       // Act
       var result = owner.UpdateProfile(
@@ -592,25 +592,25 @@ public sealed class OwnerUt {
          dto.PostalCode,
          dto.City,
          dto.Country,
-         now
+         utcNow
       );
 
       // Assert
-      Assert.True(result.IsSuccess);
+      True(result.IsSuccess);
 
-      Assert.Equal(_firstname, owner.Firstname);
-      Assert.Equal(_lastname, owner.Lastname);
+      Equal(_firstname, owner.Firstname);
+      Equal(_lastname, owner.Lastname);
       Null(owner.CompanyName);
-      Assert.Equal(_email, owner.Email);
+      Equal(_email, owner.Email);
 
       NotNull(owner.Address);
-      Assert.Equal(_address1.Street, owner.Address!.Street);
-      Assert.Equal(_address1.PostalCode, owner.Address!.PostalCode);
-      Assert.Equal(_address1.City, owner.Address!.City);
-      Assert.Equal(_address1.Country, owner.Address!.Country);
+      Equal(_address1.Street, owner.Address!.Street);
+      Equal(_address1.PostalCode, owner.Address!.PostalCode);
+      Equal(_address1.City, owner.Address!.City);
+      Equal(_address1.Country, owner.Address!.Country);
 
-      Assert.True(owner.IsProfileComplete);
-      Equal(now, owner.UpdatedAt);
+      True(owner.IsProfileComplete);
+      Equal(utcNow, owner.UpdatedAt);
    }
 
    [Fact]
@@ -632,7 +632,7 @@ public sealed class OwnerUt {
 
       NotNull(owner.Address);
 
-      var utcNow = _seed.FixedNow.AddDays(1);
+      var utcNow = _seed.UtcNow.AddDays(1);
 
       // Act: provide no address at all
       var result = owner.UpdateProfile(
@@ -648,15 +648,15 @@ public sealed class OwnerUt {
       );
 
       // Assert
-      Assert.True(result.IsSuccess);
+      True(result.IsSuccess);
       Null(owner.Address);
       Equal(utcNow, owner.UpdatedAt);
    }
 
    [Fact]
    public void UpdateProfile_with_partial_address_missing_street_fails() {
-      var owner = Owner.CreateProvisioned(_clock, _subject, _email, _seed.FixedNow, _id).Value!;
-      var utcNow = _seed.FixedNow.AddDays(1);
+      var owner = Owner.CreateProvisioned(_clock, _subject, _email, _seed.UtcNow, _id).Value!;
+      var utcNow = _seed.UtcNow.AddDays(1);
 
       var result = owner.UpdateProfile(
          firstname: _firstname,
@@ -670,14 +670,14 @@ public sealed class OwnerUt {
          utcNow: utcNow
       );
 
-      Assert.True(result.IsFailure);
-      Assert.Equal(CommonErrors.StreetIsRequired, result.Error);
+      True(result.IsFailure);
+      Equal(CommonErrors.StreetIsRequired, result.Error);
    }
 
    [Fact]
    public void UpdateProfile_with_partial_address_missing_postalCode_fails() {
-      var owner = Owner.CreateProvisioned(_clock, _subject, _email, _seed.FixedNow, _id).Value!;
-      var utcNow = _seed.FixedNow.AddDays(1);
+      var owner = Owner.CreateProvisioned(_clock, _subject, _email, _seed.UtcNow, _id).Value!;
+      var utcNow = _seed.UtcNow.AddDays(1);
 
       var result = owner.UpdateProfile(
          firstname: _firstname,
@@ -691,14 +691,14 @@ public sealed class OwnerUt {
          utcNow: utcNow
       );
 
-      Assert.True(result.IsFailure);
-      Assert.Equal(CommonErrors.PostalCodeIsRequired, result.Error);
+      True(result.IsFailure);
+      Equal(CommonErrors.PostalCodeIsRequired, result.Error);
    }
 
    [Fact]
    public void UpdateProfile_with_partial_address_missing_city_fails() {
-      var owner = Owner.CreateProvisioned(_clock, _subject, _email, _seed.FixedNow, _id).Value!;
-      var utcNow = _seed.FixedNow.AddDays(1);
+      var owner = Owner.CreateProvisioned(_clock, _subject, _email, _seed.UtcNow, _id).Value!;
+      var utcNow = _seed.UtcNow.AddDays(1);
 
       var result = owner.UpdateProfile(
          firstname: _firstname,
@@ -712,13 +712,13 @@ public sealed class OwnerUt {
          utcNow: utcNow
       );
 
-      Assert.True(result.IsFailure);
-      Assert.Equal(CommonErrors.CityIsRequired, result.Error);
+      True(result.IsFailure);
+      Equal(CommonErrors.CityIsRequired, result.Error);
    }
 
    [Fact]
    public void UpdateProfile_now_default_fails() {
-      var owner = Owner.CreateProvisioned(_clock, _subject, _email, _seed.FixedNow, _id).Value!;
+      var owner = Owner.CreateProvisioned(_clock, _subject, _email, _seed.UtcNow, _id).Value!;
 
       var result = owner.UpdateProfile(
          firstname: _firstname,
@@ -732,8 +732,8 @@ public sealed class OwnerUt {
          utcNow: default
       );
 
-      Assert.True(result.IsFailure);
-      Assert.Equal(CommonErrors.TimestampIsRequired, result.Error);
+      True(result.IsFailure);
+      Equal(CommonErrors.TimestampIsRequired, result.Error);
    }
 
    #endregion
@@ -756,26 +756,34 @@ public sealed class OwnerUt {
          id: _id
       ).Value!;
 
-      var now = _seed.FixedNow.AddDays(1);
+      var now = _seed.UtcNow.AddDays(1);
       var newEmail = "new.mail@domain.de";
 
       // Act
       var result = owner.ChangeEmail(newEmail, now);
 
       // Assert
-      Assert.True(result.IsSuccess);
-      Assert.Equal(newEmail, owner.Email);
+      True(result.IsSuccess);
+      Equal(newEmail, owner.Email);
       Equal(now, owner.UpdatedAt);
    }
 
    [Fact]
    public void ChangeEmail_now_default_fails() {
-      var owner = Owner.Create(_clock, _firstname, _lastname, null, _email, _subject, _id).Value!;
+      var owner = Owner.Create(
+         clock: _clock, 
+         firstname: _firstname,
+         lastname: _lastname, 
+         companyName: null, 
+         email: _email, 
+         subject: _subject, 
+         id: _id
+      ).Value!;
 
       var result = owner.ChangeEmail("new.mail@domain.de", utcNow: default);
 
-      Assert.True(result.IsFailure);
-      Assert.Equal(CommonErrors.TimestampIsRequired, result.Error);
+      True(result.IsFailure);
+      Equal(CommonErrors.TimestampIsRequired, result.Error);
    }
 
    #endregion
@@ -787,59 +795,75 @@ public sealed class OwnerUt {
 
    [Fact]
    public void Activate_now_default_fails() {
-      var owner = Owner.Create(_clock, _firstname, _lastname, null, _email, _subject, _id).Value!;
+      var owner = Owner.Create(
+         clock: _clock, 
+         firstname: _firstname,
+         lastname: _lastname, 
+         companyName: null, 
+         email: _email, 
+         subject: _subject, 
+         id: _id
+      ).Value!;
 
       var result = owner.Activate(
          employeeId: Guid.Parse("aaaaaaaa-0000-0000-0000-000000000000"),
          utcNow: default
       );
 
-      Assert.True(result.IsFailure);
-      Assert.Equal(CommonErrors.TimestampIsRequired, result.Error);
+      True(result.IsFailure);
+      Equal(CommonErrors.TimestampIsRequired, result.Error);
    }
 
    [Fact]
    public void Activate_with_empty_employeeId_fails() {
-      var owner = Owner.Create(_clock, _firstname, _lastname, null, _email, _subject, _id).Value!;
-      var utcNow = _seed.FixedNow;
+      var owner = Owner.Create(
+         clock: _clock, 
+         firstname: _firstname,
+         lastname: _lastname, 
+         companyName: null, 
+         email: _email, 
+         subject: _subject, 
+         id: _id
+      ).Value!;
+      var utcNow = _seed.UtcNow;
 
       var result = owner.Activate(Guid.Empty, utcNow);
 
-      Assert.True(result.IsFailure);
-      Assert.Equal(OwnerErrors.AuditRequiresEmployee, result.Error);
-      Assert.Equal(OwnerStatus.Pending, owner.Status);
-      Assert.Null(owner.ActivatedAt);
-      Assert.Null(owner.AuditedByEmployeeId);
+      True(result.IsFailure);
+      Equal(OwnerErrors.AuditRequiresEmployee, result.Error);
+      Equal(OwnerStatus.Pending, owner.Status);
+      Null(owner.ActivatedAt);
+      Null(owner.AuditedByEmployeeId);
    }
 
    [Fact]
    public void Activate_when_profile_incomplete_fails() {
-      var owner = Owner.CreateProvisioned(_clock, _subject, _email, _seed.FixedNow, _id).Value!;
-      Assert.False(owner.IsProfileComplete);
+      var owner = Owner.CreateProvisioned(_clock, _subject, _email, _seed.UtcNow, _id).Value!;
+      False(owner.IsProfileComplete);
 
       var employeeId = Guid.Parse("aaaaaaaa-0000-0000-0000-000000000000");
-      var utcNow = _seed.FixedNow.AddDays(1);
+      var utcNow = _seed.UtcNow.AddDays(1);
 
       var result = owner.Activate(employeeId, utcNow);
 
-      Assert.True(result.IsFailure);
-      Assert.Equal(OwnerErrors.ProfileIncomplete, result.Error);
-      Assert.Equal(OwnerStatus.Pending, owner.Status);
+      True(result.IsFailure);
+      Equal(OwnerErrors.ProfileIncomplete, result.Error);
+      Equal(OwnerStatus.Pending, owner.Status);
    }
 
    [Fact]
    public void Activate_when_pending_and_profile_complete_sets_active_and_audit_fields() {
       var owner = Owner.Create(_clock, _firstname, _lastname, null, _email, _subject, _id).Value!;
       var employeeId = Guid.Parse("aaaaaaaa-0000-0000-0000-000000000000");
-      var utcNow = _seed.FixedNow.AddDays(1);
+      var utcNow = _seed.UtcNow.AddDays(1);
 
       var result = owner.Activate(employeeId, utcNow);
 
-      Assert.True(result.IsSuccess);
-      Assert.Equal(OwnerStatus.Active, owner.Status);
-      Assert.Equal(utcNow, owner.ActivatedAt);
-      Assert.Equal(employeeId, owner.AuditedByEmployeeId);
-      Assert.True(owner.IsActive);
+      True(result.IsSuccess);
+      Equal(OwnerStatus.Active, owner.Status);
+      Equal(utcNow, owner.ActivatedAt);
+      Equal(employeeId, owner.AuditedByEmployeeId);
+      True(owner.IsActive);
       Equal(utcNow, owner.UpdatedAt);
    }
 
@@ -847,15 +871,15 @@ public sealed class OwnerUt {
    public void Activate_when_not_pending_fails() {
       var owner = Owner.Create(_clock, _firstname, _lastname, null, _email, _subject, _id).Value!;
       var employeeId = Guid.Parse("aaaaaaaa-0000-0000-0000-000000000000");
-      var utcNow = _seed.FixedNow.AddDays(1);
+      var utcNow = _seed.UtcNow.AddDays(1);
 
       var first = owner.Activate(employeeId, utcNow);
-      Assert.True(first.IsSuccess);
+      True(first.IsSuccess);
 
       var second = owner.Activate(employeeId, utcNow.AddMinutes(1));
 
-      Assert.True(second.IsFailure);
-      Assert.Equal(OwnerErrors.NotPending, second.Error);
+      True(second.IsFailure);
+      Equal(OwnerErrors.NotPending, second.Error);
    }
 
    [Fact]
@@ -868,49 +892,49 @@ public sealed class OwnerUt {
          utcNow: default
       );
 
-      Assert.True(result.IsFailure);
-      Assert.Equal(CommonErrors.TimestampIsRequired, result.Error);
+      True(result.IsFailure);
+      Equal(CommonErrors.TimestampIsRequired, result.Error);
    }
 
    [Fact]
    public void Reject_with_empty_employeeId_fails() {
       var owner = Owner.Create(_clock, _firstname, _lastname, null, _email, _subject, _id).Value!;
-      var utcNow = _seed.FixedNow;
+      var utcNow = _seed.UtcNow;
 
       var result = owner.Reject(Guid.Empty, "KYC_FAILED", utcNow);
 
-      Assert.True(result.IsFailure);
-      Assert.Equal(OwnerErrors.AuditRequiresEmployee, result.Error);
-      Assert.Equal(OwnerStatus.Pending, owner.Status);
+      True(result.IsFailure);
+      Equal(OwnerErrors.AuditRequiresEmployee, result.Error);
+      Equal(OwnerStatus.Pending, owner.Status);
    }
 
    [Fact]
    public void Reject_with_missing_reason_fails() {
       var owner = Owner.Create(_clock, _firstname, _lastname, null, _email, _subject, _id).Value!;
       var employeeId = Guid.Parse("aaaaaaaa-0000-0000-0000-000000000000");
-      var utcNow = _seed.FixedNow;
+      var utcNow = _seed.UtcNow;
 
       var result = owner.Reject(employeeId, "   ", utcNow);
 
-      Assert.True(result.IsFailure);
-      Assert.Equal(OwnerErrors.RejectionRequiresReason, result.Error);
-      Assert.Equal(OwnerStatus.Pending, owner.Status);
+      True(result.IsFailure);
+      Equal(OwnerErrors.RejectionRequiresReason, result.Error);
+      Equal(OwnerStatus.Pending, owner.Status);
    }
 
    [Fact]
    public void Reject_when_pending_sets_rejected_and_audit_fields() {
       var owner = Owner.Create(_clock, _firstname, _lastname, null, _email, _subject, _id).Value!;
       var employeeId = Guid.Parse("aaaaaaaa-0000-0000-0000-000000000000");
-      var utcNow = _seed.FixedNow.AddDays(1);
+      var utcNow = _seed.UtcNow.AddDays(1);
 
       var result = owner.Reject(employeeId, "KYC_FAILED", utcNow);
 
-      Assert.True(result.IsSuccess);
-      Assert.Equal(OwnerStatus.Rejected, owner.Status);
-      Assert.Equal(utcNow, owner.RejectedAt);
-      Assert.Equal(employeeId, owner.AuditedByEmployeeId);
-      Assert.Equal("KYC_FAILED", owner.RejectionReasonCode);
-      Assert.False(owner.IsActive);
+      True(result.IsSuccess);
+      Equal(OwnerStatus.Rejected, owner.Status);
+      Equal(utcNow, owner.RejectedAt);
+      Equal(employeeId, owner.AuditedByEmployeeId);
+      Equal("KYC_FAILED", owner.RejectionReasonCode);
+      False(owner.IsActive);
       Equal(utcNow, owner.UpdatedAt);
    }
 
@@ -918,15 +942,15 @@ public sealed class OwnerUt {
    public void Reject_when_not_pending_fails() {
       var owner = Owner.Create(_clock, _firstname, _lastname, null, _email, _subject, _id).Value!;
       var employeeId = Guid.Parse("aaaaaaaa-0000-0000-0000-000000000000");
-      var utcNow = _seed.FixedNow.AddDays(1);
+      var utcNow = _seed.UtcNow.AddDays(1);
 
       var act = owner.Activate(employeeId, utcNow);
-      Assert.True(act.IsSuccess);
+      True(act.IsSuccess);
 
       var rej = owner.Reject(employeeId, "KYC_FAILED", utcNow.AddMinutes(1));
 
-      Assert.True(rej.IsFailure);
-      Assert.Equal(OwnerErrors.NotPending, rej.Error);
+      True(rej.IsFailure);
+      Equal(OwnerErrors.NotPending, rej.Error);
    }
 
    [Fact]
@@ -938,37 +962,37 @@ public sealed class OwnerUt {
          utcNow: default
       );
 
-      Assert.True(result.IsFailure);
-      Assert.Equal(CommonErrors.TimestampIsRequired, result.Error);
+      True(result.IsFailure);
+      Equal(CommonErrors.TimestampIsRequired, result.Error);
    }
 
    [Fact]
    public void Deactivate_with_empty_employeeId_fails() {
       var owner = Owner.Create(_clock, _firstname, _lastname, null, _email, _subject, _id).Value!;
-      var utcNow = _seed.FixedNow;
+      var utcNow = _seed.UtcNow;
 
       var result = owner.Deactivate(Guid.Empty, utcNow);
 
-      Assert.True(result.IsFailure);
-      Assert.Equal(OwnerErrors.AuditRequiresEmployee, result.Error);
-      Assert.Null(owner.DeactivatedAt);
-      Assert.Null(owner.DeactivatedByEmployeeId);
-      Assert.NotEqual(OwnerStatus.Deactivated, owner.Status);
+      True(result.IsFailure);
+      Equal(OwnerErrors.AuditRequiresEmployee, result.Error);
+      Null(owner.DeactivatedAt);
+      Null(owner.DeactivatedByEmployeeId);
+      NotEqual(OwnerStatus.Deactivated, owner.Status);
    }
 
    [Fact]
    public void Deactivate_when_not_deactivated_sets_status_and_audit_fields() {
       var owner = Owner.Create(_clock, _firstname, _lastname, null, _email, _subject, _id).Value!;
       var employeeId = Guid.Parse("aaaaaaaa-0000-0000-0000-000000000000");
-      var utcNow = _seed.FixedNow.AddDays(2);
+      var utcNow = _seed.UtcNow.AddDays(2);
 
       var result = owner.Deactivate(employeeId, utcNow);
 
-      Assert.True(result.IsSuccess);
-      Assert.Equal(OwnerStatus.Deactivated, owner.Status);
-      Assert.Equal(utcNow, owner.DeactivatedAt);
-      Assert.Equal(employeeId, owner.DeactivatedByEmployeeId);
-      Assert.False(owner.IsActive);
+      True(result.IsSuccess);
+      Equal(OwnerStatus.Deactivated, owner.Status);
+      Equal(utcNow, owner.DeactivatedAt);
+      Equal(employeeId, owner.DeactivatedByEmployeeId);
+      False(owner.IsActive);
       Equal(utcNow, owner.UpdatedAt);
    }
 
@@ -976,15 +1000,15 @@ public sealed class OwnerUt {
    public void Deactivate_when_already_deactivated_fails() {
       var owner = Owner.Create(_clock, _firstname, _lastname, null, _email, _subject, _id).Value!;
       var employeeId = Guid.Parse("aaaaaaaa-0000-0000-0000-000000000000");
-      var now = _seed.FixedNow.AddDays(2);
+      var now = _seed.UtcNow.AddDays(2);
 
       var first = owner.Deactivate(employeeId, now);
-      Assert.True(first.IsSuccess);
+      True(first.IsSuccess);
 
       var second = owner.Deactivate(employeeId, now.AddMinutes(1));
 
-      Assert.True(second.IsFailure);
-      Assert.Equal(OwnerErrors.AlreadyDeactivated, second.Error);
+      True(second.IsFailure);
+      Equal(OwnerErrors.AlreadyDeactivated, second.Error);
    }
 
    #endregion

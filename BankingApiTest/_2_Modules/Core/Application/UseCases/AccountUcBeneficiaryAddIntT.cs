@@ -81,7 +81,7 @@ public sealed class AccountUcBeneficiaryAddIntT : TestBase, IAsyncLifetime {
       // create account for owner in database
       var accountId = await CreateAccountForOwner(_seed.Owner1, _seed.Account1);
       var account = await _repository.FindByIdAsync(accountId, _ct);
-      Assert.NotNull(account);
+      NotNull(account);
       
       // Act
       // create beneficiary for account in database
@@ -96,12 +96,12 @@ public sealed class AccountUcBeneficiaryAddIntT : TestBase, IAsyncLifetime {
       
       // Assert
       var actualAccount = await _repository.FindWithBeneficiariesByIdAsync(account.Id, _ct);
-      Assert.NotNull(actualAccount);
+      NotNull(actualAccount);
       var actual = actualAccount!.Beneficiaries
          .FirstOrDefault(b => b.Id == beneficiary.Id);
-      Assert.NotNull(actual);
-      Assert.Equal(beneficiary.Name, actual!.Name);
-      Assert.Equal(beneficiary.Iban, actual.Iban); 
+      NotNull(actual);
+      Equal(beneficiary.Name, actual!.Name);
+      Equal(beneficiary.Iban, actual.Iban); 
    }
 
    //--- Helpers ---
@@ -114,7 +114,7 @@ public sealed class AccountUcBeneficiaryAddIntT : TestBase, IAsyncLifetime {
          id: account.Id.ToString(),
          ct: _ct
       );
-      Assert.True(resultAccount.IsSuccess);
+      True(resultAccount.IsSuccess);
       var accountId = resultAccount.Value;
       return accountId;
    }

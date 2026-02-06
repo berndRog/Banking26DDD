@@ -33,17 +33,17 @@ public sealed class AccountUt {
       );
 
       // Assert
-      Assert.True(result.IsSuccess);
-      Assert.NotNull(result.Value);
+      True(result.IsSuccess);
+      NotNull(result.Value);
 
       var actual = result.Value!;
-      Assert.IsType<Account>(actual);
-      Assert.NotEqual(Guid.Empty, actual.Id);
-      Assert.Equal(Guid.Parse(_id), actual.Id);
-      Assert.Equal(_iban, actual.Iban);
+      IsType<Account>(actual);
+      NotEqual(Guid.Empty, actual.Id);
+      Equal(Guid.Parse(_id), actual.Id);
+      Equal(_iban, actual.Iban);
       ;
-      Assert.Equal(_balance, actual.Balance, 24);
-      Assert.Equal(_ownerId, actual.OwnerId);
+      Equal(_balance, actual.Balance, 24);
+      Equal(_ownerId, actual.OwnerId);
    }
 
    [Fact]
@@ -58,12 +58,12 @@ public sealed class AccountUt {
       );
 
       // Assert
-      Assert.True(result.IsSuccess);
-      Assert.NotNull(result.Value);
+      True(result.IsSuccess);
+      NotNull(result.Value);
 
       var actual = result.Value!;
-      Assert.NotEqual(Guid.Empty, actual.Id);
-      Assert.NotEqual(Guid.Parse(_id), actual.Id);
+      NotEqual(Guid.Empty, actual.Id);
+      NotEqual(Guid.Parse(_id), actual.Id);
    }
 
    [Fact]
@@ -77,8 +77,8 @@ public sealed class AccountUt {
          id: "not-a-guid"
       );
       // Assert
-      Assert.True(result.IsFailure);
-      Assert.NotNull(result.Error);
+      True(result.IsFailure);
+      NotNull(result.Error);
    }
 
    [Theory]
@@ -96,8 +96,8 @@ public sealed class AccountUt {
          id: _id
       );
       // Assert
-      Assert.True(result.IsFailure);
-      Assert.NotNull(result.Error);
+      True(result.IsFailure);
+      NotNull(result.Error);
    }
 
    [Fact]
@@ -111,7 +111,7 @@ public sealed class AccountUt {
          id: _id
       );
       // Assert
-      Assert.True(result.IsSuccess);
+      True(result.IsSuccess);
    }
 
    [Theory]
@@ -128,8 +128,8 @@ public sealed class AccountUt {
          id: _id
       );
       // Assert
-      Assert.True(result.IsFailure);
-      Assert.NotNull(result.Error);
+      True(result.IsFailure);
+      NotNull(result.Error);
    }
 
    [Fact]
@@ -151,12 +151,12 @@ public sealed class AccountUt {
          id: _id
       );
 
-      Assert.True(result1.IsSuccess);
-      Assert.True(result2.IsSuccess);
-      Assert.Equal(result1.Value!.Id, result2.Value!.Id);
-      Assert.Equal(result1.Value!.Iban, result2.Value!.Iban);
-      Assert.Equal(result1.Value!.OwnerId, result2.Value!.OwnerId);
-      Assert.Equal(result1.Value!.Balance, result2.Value!.Balance);
+      True(result1.IsSuccess);
+      True(result2.IsSuccess);
+      Equal(result1.Value!.Id, result2.Value!.Id);
+      Equal(result1.Value!.Iban, result2.Value!.Iban);
+      Equal(result1.Value!.OwnerId, result2.Value!.OwnerId);
+      Equal(result1.Value!.Balance, result2.Value!.Balance);
    }
  
    #region --- Beneficiaries ----------------------------------------------------------------
@@ -175,8 +175,8 @@ public sealed class AccountUt {
       
       // Assert
       var actual = account.Beneficiaries.FirstOrDefault(b => b.Id == beneficiary.Id);
-      Assert.NotNull(actual);
-      Assert.Equal(beneficiary, actual);
+      NotNull(actual);
+      Equal(beneficiary, actual);
    }
    [Fact]
    public void RemoveBeneficiaryUt() {
@@ -192,8 +192,8 @@ public sealed class AccountUt {
     
       // Assert
       var actual = account.Beneficiaries.FirstOrDefault(b => b.Id == beneficiary1.Id);
-      Assert.Null(actual);
-      // Assert.Equal(beneficiary, actual);
+      Null(actual);
+      // Equal(beneficiary, actual);
    }
    #endregion
    

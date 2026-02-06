@@ -173,7 +173,7 @@ public sealed class Owner : AggregateRoot<Guid> {
          subject: subjectResult.Value,
          address: address
       );
-
+      
       return Result<Owner>.Success(owner);
    }
 

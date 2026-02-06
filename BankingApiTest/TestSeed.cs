@@ -8,8 +8,8 @@ namespace BankingApiTest;
 
 public sealed class TestSeed {
 
-   public DateTimeOffset FixedNow => DateTimeOffset.Parse("2025-01-01T00:00:00Z");
-   public IClock Clock => new FakeClock(FixedNow);
+   public DateTimeOffset UtcNow => DateTimeOffset.Parse("2025-01-01T00:00:00Z");
+   public IClock Clock => new FakeClock(UtcNow);
    
    #region define test data properties
    public Owner Owner1{ get; private set; }
@@ -110,7 +110,6 @@ public sealed class TestSeed {
       Address1 = Address.Create("Hauptstr. 23", "29556", "Suderburg", "DE").GetValueOrThrow();
       Address2 = Address.Create("Bahnhofstr.10", "10115", "Berlin").GetValueOrThrow();
       Address3 = Address.Create("Schillerstr. 1", "30123", "Hannover", "DE").GetValueOrThrow();
-
       
       // ---------- Owners----------  
       Owner1 = CreateOwner(
@@ -410,10 +409,10 @@ public sealed class TestSeed {
          street: address?.Street,
          postalCode: address?.PostalCode,
          city:  address?.City, 
-         country:  address?.Country 
+         country:  address?.Country
       );
 
-      Assert.True(result.IsSuccess);
+      True(result.IsSuccess);
       return result.Value!;
    }
    
@@ -430,7 +429,7 @@ public sealed class TestSeed {
          balance: balance,
          id: id
       );
-      Assert.True(result.IsSuccess);
+      True(result.IsSuccess);
       return result.Value!;
    }
    
@@ -446,7 +445,7 @@ public sealed class TestSeed {
          iban: iban,
          id: id
       );
-      Assert.True(result.IsSuccess);
+      True(result.IsSuccess);
       return result.Value!;
    }
    
@@ -469,7 +468,7 @@ public sealed class TestSeed {
          idempotencyKey: Guid.NewGuid().ToString(),
          id: id
       );
-      Assert.True(result.IsSuccess);
+      True(result.IsSuccess);
       return result.Value!;
    }
    

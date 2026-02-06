@@ -41,19 +41,19 @@ public sealed class TransferUt {
       );
 
       // Assert
-      Assert.True(result.IsSuccess);
-      Assert.NotNull(result.Value);
+      True(result.IsSuccess);
+      NotNull(result.Value);
 
       var actual = result.Value!;
-      Assert.IsType<Transfer>(actual);
-      Assert.Equal(Guid.Parse(_id), actual.Id);
-      Assert.Equal(_fromAccount.Id, actual.FromAccountId);
-      Assert.Equal(_transfer.Amount, actual.Amount, 24);
-      Assert.Equal(_transfer.Purpose, actual.Purpose);
-      Assert.Equal(_beneficiary.Name, actual.RecipientName);
-      Assert.Equal(_beneficiary.Iban, actual.RecipientIban);
-      Assert.Equal("unique-key", actual.IdempotencyKey);
-      Assert.Equal(TransferStatus.Initiated, actual.Status);
+      IsType<Transfer>(actual);
+      Equal(Guid.Parse(_id), actual.Id);
+      Equal(_fromAccount.Id, actual.FromAccountId);
+      Equal(_transfer.Amount, actual.Amount, 24);
+      Equal(_transfer.Purpose, actual.Purpose);
+      Equal(_beneficiary.Name, actual.RecipientName);
+      Equal(_beneficiary.Iban, actual.RecipientIban);
+      Equal("unique-key", actual.IdempotencyKey);
+      Equal(TransferStatus.Initiated, actual.Status);
    }
 
    [Fact]
@@ -72,20 +72,20 @@ public sealed class TransferUt {
       );
 
       // Assert
-      Assert.True(result.IsSuccess);
-      Assert.NotNull(result.Value);
+      True(result.IsSuccess);
+      NotNull(result.Value);
 
       var actual = result.Value!;
-      Assert.IsType<Transfer>(actual);
-      Assert.NotEqual(Guid.Empty, actual.Id);
-      Assert.NotEqual(Guid.Parse(_id), actual.Id);
-      Assert.Equal(_fromAccount.Id, actual.FromAccountId);
-      Assert.Equal(_transfer.Amount, actual.Amount, 24);
-      Assert.Equal(_transfer.Purpose, actual.Purpose);
-      Assert.Equal(_beneficiary.Name, actual.RecipientName);
-      Assert.Equal(_beneficiary.Iban, actual.RecipientIban);
-      Assert.Equal("unique-key", actual.IdempotencyKey);
-      Assert.Equal(TransferStatus.Initiated, actual.Status);
+      IsType<Transfer>(actual);
+      NotEqual(Guid.Empty, actual.Id);
+      NotEqual(Guid.Parse(_id), actual.Id);
+      Equal(_fromAccount.Id, actual.FromAccountId);
+      Equal(_transfer.Amount, actual.Amount, 24);
+      Equal(_transfer.Purpose, actual.Purpose);
+      Equal(_beneficiary.Name, actual.RecipientName);
+      Equal(_beneficiary.Iban, actual.RecipientIban);
+      Equal("unique-key", actual.IdempotencyKey);
+      Equal(TransferStatus.Initiated, actual.Status);
    }
 
    [Fact]
@@ -104,8 +104,8 @@ public sealed class TransferUt {
       );
 
       // Assert
-      Assert.True(result.IsFailure);
-      Assert.NotNull(result.Error);
+      True(result.IsFailure);
+      NotNull(result.Error);
    }
 
    [Fact]
@@ -135,16 +135,16 @@ public sealed class TransferUt {
       var transfer2 = result2.Value!;
 
       // Assert
-      Assert.True(result1.IsSuccess);
-      Assert.True(result2.IsSuccess);
-      Assert.Equal(transfer1.Id, transfer2.Id);
-      Assert.Equal(transfer1.FromAccountId, transfer2.FromAccountId);
-      Assert.Equal(transfer1.Amount, transfer2.Amount);
-      Assert.Equal(transfer1.Purpose, transfer2.Purpose);
-      Assert.Equal(transfer1.RecipientName, transfer2.RecipientName);
-      Assert.Equal(transfer1.RecipientIban, transfer2.RecipientIban);
-      Assert.Equal(transfer1.IdempotencyKey, transfer2.IdempotencyKey);
-      Assert.Equal(transfer1.Status, transfer2.Status);
+      True(result1.IsSuccess);
+      True(result2.IsSuccess);
+      Equal(transfer1.Id, transfer2.Id);
+      Equal(transfer1.FromAccountId, transfer2.FromAccountId);
+      Equal(transfer1.Amount, transfer2.Amount);
+      Equal(transfer1.Purpose, transfer2.Purpose);
+      Equal(transfer1.RecipientName, transfer2.RecipientName);
+      Equal(transfer1.RecipientIban, transfer2.RecipientIban);
+      Equal(transfer1.IdempotencyKey, transfer2.IdempotencyKey);
+      Equal(transfer1.Status, transfer2.Status);
    }
    /*
          #region --- Transactions ----------------------------------------------------------------
@@ -163,8 +163,8 @@ public sealed class TransferUt {
 
             // Assert
             var actual = account.Beneficiaries.FirstOrDefault(b => b.Id == beneficiary.Id);
-            Assert.NotNull(actual);
-            Assert.Equal(beneficiary, actual);
+            NotNull(actual);
+            Equal(beneficiary, actual);
          }
          [Fact]
          public void RemoveBeneficiaryUt() {
@@ -180,8 +180,8 @@ public sealed class TransferUt {
 
             // Assert
             var actual = account.Beneficiaries.FirstOrDefault(b => b.Id == beneficiary1.Id);
-            Assert.Null(actual);
-            // Assert.Equal(beneficiary, actual);
+            Null(actual);
+            // Equal(beneficiary, actual);
          }
          #endregion
          */

@@ -14,8 +14,11 @@ namespace BankingApiTest.Modules.Owners.Infrastructure;
 
 public sealed class TransferUcSendMoneyIntT : TestBase, IAsyncLifetime {
 
+   private string _dbPath = null!;
    private DbConnection _dbConnection = null!;
    private BankingDbContext _dbContext = null!;
+   private Boolean _isInMemory = false;
+   
    private IAccountRepository _accountRepository = null!;
    private ITransferRepository _transferRepository = null!;
    private IUnitOfWork _unitOfWork = null!;
@@ -23,7 +26,6 @@ public sealed class TransferUcSendMoneyIntT : TestBase, IAsyncLifetime {
    private IClock _clock = null!;
    private AccountUcCreate _accountUcCreate = null!;
    private TransfersUcSendMoney _sut = null!;
-   private string _dbPath = null!;
    private readonly bool _inMemoryDb = false;
    private CancellationToken _ct = default!;
 
@@ -32,13 +34,14 @@ public sealed class TransferUcSendMoneyIntT : TestBase, IAsyncLifetime {
       _seed = new TestSeed();
       _clock = new FakeClock(new DateTime(2025, 01, 01));
       
-      var (dbConnection, dbContext) = await TestDatabase.CreateAsync(
+      var (dbPath, dbConnection, dbContext) = await TestDatabase.CreateAsync(
          useInMemory: false,
          projectName: "BankingApiTest",
          _ct
       );
+      _dbPath = dbPath;
       _dbConnection = dbConnection;
-      _dbContext = dbContext;
+      _dbContext = dbContext as BankingDbContext;
       
       _accountRepository = new AccountRepository(_dbContext);
       _unitOfWork = new UnitOfWork(
@@ -79,16 +82,11 @@ public sealed class TransferUcSendMoneyIntT : TestBase, IAsyncLifetime {
    }
 
    public async Task DisposeAsync() {
-      if (_dbContext != null) {
-         await _dbContext.DisposeAsync();
-         _dbContext = null!;
-      }
-
-      if (_dbConnection != null) {
-         await _dbConnection.CloseAsync();
-         await _dbConnection.DisposeAsync();
-         _dbConnection = null!;
-      }
+      var (dbPath, dbConnection, dbContext) = await TestDatabase.Dispose(
+         _isInMemory, _dbPath, _dbConnection, _dbContext);
+      _dbPath = dbPath;
+      _dbConnection = dbConnection;
+      _dbContext = dbContext as BankingDbContext;
    }
    
    [Fact]
@@ -101,7 +99,7 @@ public sealed class TransferUcSendMoneyIntT : TestBase, IAsyncLifetime {
       // create fromAccount for Owner1 in database
       var accountId = await CreateAccountForOwner(_seed.Owner1, fromAccount);
       var account = await _accountRepository.FindWithBeneficiariesByIdAsync(accountId, _ct);
-      Assert.NotNull(account);
+      NotNull(account);
       // add beneficiary to account
       account!.AddBeneficiary(beneficiary.Name, beneficiary.Iban, beneficiary.Id.ToString());
       await _unitOfWork.SaveAllChangesAsync("AddBeneficiary", _ct);
@@ -122,22 +120,22 @@ public sealed class TransferUcSendMoneyIntT : TestBase, IAsyncLifetime {
       );
       
       var result = await _sut.ExecuteAsync(sendMoneyCmd,_ct);
-      Assert.True(result.IsSuccess);
+      True(result.IsSuccess);
       _dbContext.ChangeTracker.Clear();
       
       // Assert
       var actualTransfer = await _transferRepository.FindWithTransactionsByIdAsync(transfer.Id, _ct);
       _unitOfWork.LogChangeTracker("Load transfer with transactions");
       
-      Assert.NotNull(actualTransfer);
-      Assert.Equal(transfer.FromAccountId, actualTransfer.FromAccountId);
-      Assert.Equal(transfer.Amount, actualTransfer!.Amount);
-      Assert.Equal(transfer.Purpose, actualTransfer.Purpose);
+      NotNull(actualTransfer);
+      Equal(transfer.FromAccountId, actualTransfer.FromAccountId);
+      Equal(transfer.Amount, actualTransfer!.Amount);
+      Equal(transfer.Purpose, actualTransfer.Purpose);
       // var actual = actualAccount!.Beneficiaries
       //    .FirstOrDefault(b => b.Id == beneficiary.Id);
-      // Assert.NotNull(actual);
-      // Assert.Equal(beneficiary.Name, actual!.Name);
-      // Assert.Equal(beneficiary.Iban, actual.Iban); 
+      // NotNull(actual);
+      // Equal(beneficiary.Name, actual!.Name);
+      // Equal(beneficiary.Iban, actual.Iban); 
    }
 
    //--- Helpers ---
@@ -150,7 +148,7 @@ public sealed class TransferUcSendMoneyIntT : TestBase, IAsyncLifetime {
          id: account.Id.ToString(),
          ct: _ct
       );
-      Assert.True(resultAccount.IsSuccess);
+      True(resultAccount.IsSuccess);
       var accountId = resultAccount.Value;
       return accountId;
    }

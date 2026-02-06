@@ -92,10 +92,10 @@ public sealed class AccountUcAddBeneficiaryIntT : TestBase, IAsyncLifetime {
       
       // Assert
       var actual = await _repository.FindByIdAsync(account.Id, _ct);
-      Assert.NotNull(actual);
-      Assert.Equal(account.Id, actual!.Id);
-      Assert.Equal(account.Iban, actual.Iban);
-      Assert.Equal(account.Balance, actual.Balance, 24);
+      NotNull(actual);
+      Equal(account.Id, actual!.Id);
+      Equal(account.Iban, actual.Iban);
+      Equal(account.Balance, actual.Balance, 24);
    }
    
    [Fact]
@@ -112,7 +112,7 @@ public sealed class AccountUcAddBeneficiaryIntT : TestBase, IAsyncLifetime {
          id: account.Id.ToString(),
          ct: _ct
       );
-      Assert.True(result.IsFailure);
+      True(result.IsFailure);
    }
    
    [Fact]
@@ -129,6 +129,6 @@ public sealed class AccountUcAddBeneficiaryIntT : TestBase, IAsyncLifetime {
          id: "1000000-abcd",
          ct: _ct
       );
-      Assert.True(result.IsFailure);
+      True(result.IsFailure);
    }
 }
