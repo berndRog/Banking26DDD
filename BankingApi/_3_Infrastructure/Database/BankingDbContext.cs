@@ -11,7 +11,7 @@ namespace BankingApi._3_Infrastructure.Database;
 public sealed class BankingDbContext(
    DbContextOptions<BankingDbContext> options
 ) : DbContext(options) {
-   public DbSet<Employee> Employess => Set<Employee>();
+   public DbSet<Employee> Employees => Set<Employee>();
    public DbSet<Owner> Owners => Set<Owner>();
    public DbSet<Account> Accounts => Set<Account>();
    public DbSet<Beneficiary> Beneficiaries => Set<Beneficiary>();

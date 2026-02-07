@@ -10,8 +10,8 @@ public class OwnerRepositoryEf(
 
    public async Task<Owner?> FindByIdAsync(
       Guid ownerId, 
-      bool noTracking = true,
-      CancellationToken ct = default
+      bool noTracking,
+      CancellationToken ct
    ) {
       var query = dbContext.Owners as IQueryable<Owner>;
       if (noTracking)
@@ -23,14 +23,26 @@ public class OwnerRepositoryEf(
 
    public Task<Owner?> FindByIdentitySubjectAsync(
       string subject,
-      bool noTracking = true,
-      CancellationToken ct = default
+      bool noTracking,
+      CancellationToken ct
    ) {
       var query = dbContext.Owners as IQueryable<Owner>;
       if (noTracking)
          query = query.AsNoTracking();
       return query
          .FirstOrDefaultAsync(c => c.Subject == subject, ct);
+   }
+   
+   public async Task<Owner?> FindByEmailAsync(
+      string email,
+      bool noTracking,
+      CancellationToken ct
+   ) {
+      var query = dbContext.Owners as IQueryable<Owner>;
+      if (noTracking)
+         query = query.AsNoTracking();
+      return await query
+         .FirstOrDefaultAsync(c => c.Email == email, ct);
    }
    
    public async Task<bool> ExistsActiveAsync(
@@ -43,24 +55,11 @@ public class OwnerRepositoryEf(
          is { IsActive: true };
    }
 
-   public async Task<Owner?> FindByEmailAsync(
-      string email,
-      CancellationToken ct
-   ) {
-      return await dbContext.Owners
-         .AsNoTracking()
-         .FirstOrDefaultAsync(c => c.Email == email, ct);
-   }
-   
    
    public void Add(Owner owner) {
       dbContext.Owners.Add(owner);
    }
    
-   public void Remove(Owner owner) {
-      dbContext.Owners.Remove(owner);
-   }
-
    public Task<bool> HasAccountsAsync(Guid ownerId, CancellationToken ct = default) {
       return dbContext.Accounts
          .AsNoTracking()

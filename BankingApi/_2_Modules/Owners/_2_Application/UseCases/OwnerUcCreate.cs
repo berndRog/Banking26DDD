@@ -1,3 +1,4 @@
+using BankingApi._2_Modules.Employees._3_Domain.Errors;
 using BankingApi._2_Modules.Owners._1_Ports.Outbound;
 using BankingApi._2_Modules.Owners._3_Domain.Aggregates;
 using BankingApi._4_BuildingBlocks;
@@ -25,6 +26,11 @@ public sealed class OwnerUcCreate(
       string? country = null,
       CancellationToken ct = default
    ) {
+      
+      if (await _repository.FindByEmailAsync(email, false, ct) != null) {
+         return Result<Guid>.Failure(EmployeeErrors.EmailMustBeUnique);
+      }
+      
       var result = Owner.Create(
          clock: _clock,
          firstname: firstname, 

@@ -36,7 +36,7 @@ public sealed class EmployeeUcSetAdminRights(
          return fail;
       }
 
-      var employee = await _repository.FindByIdAsync(employeeId, ct);
+      var employee = await _repository.FindByIdAsync(employeeId, false, ct);
       if (employee is null) {
          var fail = Result.Failure(EmployeeErrors.NotFound);
          fail.LogIfFailure(_logger, "EmployeeUcSetAdminRights.NotFound", new { employeeId });
@@ -53,6 +53,7 @@ public sealed class EmployeeUcSetAdminRights(
 
       await _unitOfWork.SaveAllChangesAsync("Employee admin rights updated", ct);
 
+      
       _logger.LogInformation("EmployeeUcSetAdminRights done employeeId={employeeId}", employeeId);
       return Result.Success();
    }

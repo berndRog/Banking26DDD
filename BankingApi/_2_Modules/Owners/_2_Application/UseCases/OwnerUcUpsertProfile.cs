@@ -45,7 +45,7 @@ public class OwnerUcUpsertProfile(
          if (resultDtoEmail.IsFailure)
             return Result<OwnerProfileDto>.Failure(resultDtoEmail.Error);
          // check uniqueness
-         var existingByEmail = await repository.FindByEmailAsync(dto.Email, ct);
+         var existingByEmail = await repository.FindByEmailAsync(dto.Email, false, ct);
          if (existingByEmail is not null && existingByEmail.Id != owner.Id)
             return Result<OwnerProfileDto>.Failure(OwnerApplicationErrors.EmailAlreadyInUse);
          // override previous email

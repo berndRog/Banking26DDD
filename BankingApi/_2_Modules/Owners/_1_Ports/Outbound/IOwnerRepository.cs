@@ -11,13 +11,14 @@ public interface IOwnerRepository {
 
    Task<Owner?> FindByIdentitySubjectAsync(
       string subject,
-      bool noTracking = true,
+      bool noTracking = false,
       CancellationToken ct = default
    );
 
    Task<Owner?> FindByEmailAsync(
       string email,
-      CancellationToken ct
+      bool noTracking = false,
+      CancellationToken ct = default
    );
    
    Task<bool> ExistsActiveAsync(
@@ -26,7 +27,6 @@ public interface IOwnerRepository {
    );
    
    void Add(Owner owner);
-   void Remove(Owner owner);
 
    Task<bool> HasAccountsAsync(Guid ownerId, CancellationToken ct = default);
 }

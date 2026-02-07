@@ -31,20 +31,20 @@ public sealed class EmployeeUseCases(
    public Task<Result<Guid>> CreateAsync(
       string firstname,
       string lastname,
-      string emailString,
+      string email,
       string phoneString,
+      string subject,
       string personnelNumber,
-      AdminRights adminRights,
       DateTimeOffset createdAt,
       string? id = null,
       CancellationToken ct = default
    ) => createUc.ExecuteAsync(
       firstname: firstname,
       lastname: lastname,
-      emailString: emailString,
+      email: email,
       phoneString: phoneString,
+      subject: subject,
       personnelNumber: personnelNumber,
-      adminRights: adminRights,
       createdAt: createdAt,
       id: id,
       ct: ct
@@ -54,15 +54,13 @@ public sealed class EmployeeUseCases(
       Guid employeeId,
       DateTimeOffset deactivatedAt,
       CancellationToken ct = default
-   ) =>
-      deactivateUc.ExecuteAsync(employeeId, deactivatedAt, ct);
+   ) => deactivateUc.ExecuteAsync(employeeId, deactivatedAt, ct);
 
    public Task<Result> SetAdminRightsAsync(
       Guid employeeId,
       AdminRights adminRights,
       CancellationToken ct = default
-   ) =>
-      setRightsUc.ExecuteAsync(employeeId, adminRights, ct);
+   ) => setRightsUc.ExecuteAsync(employeeId, adminRights, ct);
 }
 
 /* =====================================================================

@@ -57,10 +57,10 @@ public interface IEmployeeUseCases {
    Task<Result<Guid>> CreateAsync(
       string firstname,
       string lastname,
-      string emailString,
+      string email,
       string phoneString,
+      string subject,
       string personnelNumber,
-      AdminRights adminRights,
       DateTimeOffset createdAt,
       string? id = null,
       CancellationToken ct = default

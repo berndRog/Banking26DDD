@@ -1,4 +1,5 @@
 using BankingApi._2_Modules.Core._3_Domain.Aggregates;
+using BankingApi._2_Modules.Employees._3_Domain.Aggregates;
 using BankingApi._2_Modules.Owners._3_Domain.Aggregates;
 using BankingApi._4_BuildingBlocks._1_Ports.Inbound;
 using BankingApi._4_BuildingBlocks._3_Domain.ValueObjects;
@@ -12,6 +13,9 @@ public sealed class TestSeed {
    public IClock Clock => new FakeClock(UtcNow);
    
    #region define test data properties
+   public Employee Employee1{ get; }
+   public Employee Employee2{ get; }
+   
    public Owner Owner1{ get; private set; }
    public Owner Owner2{ get; private set; }
    public Owner Owner3{ get; }
@@ -106,6 +110,27 @@ public sealed class TestSeed {
 
    public TestSeed() {
 
+      Employee1 = CreateEmployee(
+         id: "00000000-0001-0000-0000-000000000000",
+         firstname: "Emil",
+         lastname: "Engel",
+         email: "emil.engel@bankingapi.de",
+         phoneString: "+49 5826 123 4010",
+         subject: "00000000-0001-0000-0000-000000000000",
+         personnelNumber: "EMP001"
+      );
+   
+      Employee2 = CreateEmployee(
+         id: "00000000-0002-0000-0000-000000000000",
+         firstname: "Frieda",
+         lastname: "Fischer",
+         email: "frieda.fischer@bankingapi.de",
+         phoneString: "+49 5826 123 4020",
+         subject: "00000000-0002-0000-0000-000000000000",
+         personnelNumber: "EMP002"
+      );
+
+      
       //---------- Addresses ----------
       Address1 = Address.Create("Hauptstr. 23", "29556", "Suderburg", "DE").GetValueOrThrow();
       Address2 = Address.Create("Bahnhofstr.10", "10115", "Berlin").GetValueOrThrow();
@@ -389,6 +414,32 @@ public sealed class TestSeed {
 
 
    // ---------- Helper ----------
+   private Employee CreateEmployee(
+      string id,
+      string firstname,
+      string lastname,
+      string email,
+      string phoneString,
+      string subject,
+      string personnelNumber
+   ) {
+      var result = Employee.Create(
+         clock: Clock,
+         firstname: firstname,
+         lastname: lastname,
+         email: email,
+         phone: phoneString,
+         subject: subject,
+         personnelNumber: personnelNumber, 
+         createdAt: UtcNow,
+         id: id
+      );
+
+      True(result.IsSuccess);
+      return result.Value!;
+   }
+   
+   
    private Owner CreateOwner(
       string id,
       string firstname,

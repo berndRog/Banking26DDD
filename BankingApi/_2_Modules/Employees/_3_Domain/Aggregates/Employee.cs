@@ -41,7 +41,6 @@ public sealed class Employee : AggregateRoot<Guid> {
    public AdminRights AdminRights { get; private set; } = AdminRights.ViewReports;
    public bool IsAdmin => AdminRights != AdminRights.None;
    public bool IsActive { get; private set; }
-   public DateTimeOffset CreatedAt { get; private set; }
    public DateTimeOffset? DeactivatedAt { get; private set; }
    
    // EF Core constructor
@@ -55,8 +54,8 @@ public sealed class Employee : AggregateRoot<Guid> {
       string lastname,
       string email,
       string? phone,
+      string subject,
       string personnelNumber,
-      AdminRights adminRights,
       DateTimeOffset createdAt
    ): base(clock) {
       Id = id;
@@ -64,8 +63,9 @@ public sealed class Employee : AggregateRoot<Guid> {
       Lastname  = lastname;
       Email     = email;
       Phone = phone;
+      Subject = subject;
       PersonnelNumber = personnelNumber;
-      AdminRights = adminRights;
+      AdminRights = AdminRights.ViewReports; // default initial rights
       IsActive = true;
       CreatedAt = createdAt;
    }
@@ -78,8 +78,8 @@ public sealed class Employee : AggregateRoot<Guid> {
       string lastname,
       string email,
       string? phone,
+      string subject,
       string personnelNumber,
-      AdminRights adminRights = AdminRights.None,
       DateTimeOffset createdAt = default,
       string? id = null
    ) {
@@ -106,17 +106,21 @@ public sealed class Employee : AggregateRoot<Guid> {
       if (string.IsNullOrWhiteSpace(email))
          return Result<Employee>.Failure(EmployeeErrors.EmailIsRequired);
       var resultEmail = EmailAddress.Check(email);
-      if(!resultEmail.IsFailure) 
+      if(resultEmail.IsFailure) 
          return Result<Employee>.Failure(EmployeeErrors.InvalidEmail);
 
       // optional phone
       if (!string.IsNullOrWhiteSpace(phone)) {
          var resultPhone = PhoneNumber.Check(phone);
-         if (!resultPhone.IsFailure)
+         if (resultPhone.IsFailure)
             return Result<Employee>.Failure(resultPhone.Error);
          phone = resultPhone.Value!;
       }
 
+      var subjectResult = IdentitySubject.Check(subject);
+      if (subjectResult.IsFailure)
+         return Result<Employee>.Failure(subjectResult.Error);
+      
       // required personnel number
       if (string.IsNullOrWhiteSpace(personnelNumber))
          return Result<Employee>.Failure(EmployeeErrors.PersonnelNumberIsRequired);
@@ -135,8 +139,8 @@ public sealed class Employee : AggregateRoot<Guid> {
          lastname,
          email,
          phone,
+         subject,
          personnelNumber,
-         adminRights,
          createdAt
       );
       return Result<Employee>.Success(employee);

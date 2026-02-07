@@ -40,7 +40,7 @@ public sealed class EmployeeUcDeactivate(
       }
 
       // 2) Load aggregate (tracked)
-      var employee = await _repository.FindByIdAsync(employeeId, ct);
+      var employee = await _repository.FindByIdAsync(employeeId, false, ct);
       if (employee is null) {
          var fail = Result.Failure(EmployeeErrors.NotFound);
          fail.LogIfFailure(_logger, "EmployeeUcDeactivate.NotFound", new { employeeId });

@@ -6,36 +6,67 @@ using Microsoft.EntityFrameworkCore;
 namespace BankingApi._2_Modules.Employees._4_Infrastructure.Repositories;
 
 public sealed class EmployeeRepositoryEf(
-   BankingDbContext _dbContext
+   BankingDbContext dbContext
 ) : IEmployeeRepository {
 
    public async Task<Employee?> FindByIdAsync(
-      Guid id, 
+      Guid ownerId, 
+      bool noTracking,
       CancellationToken ct
-   ) => await _dbContext.Employess
-         .FirstOrDefaultAsync(e => e.Id == id, ct);
+   ) {
+      var query = dbContext.Employees as IQueryable<Employee>;
+      if (noTracking)
+         query = query.AsNoTracking();
+      return await query
+         .AsTracking()
+         .FirstOrDefaultAsync(o => o.Id == ownerId, ct);
+   }
+   
 
+   public Task<Employee?> FindByIdentitySubjectAsync(
+      string subject,
+      bool noTracking,
+      CancellationToken ct
+   ) {
+      var query = dbContext.Employees as IQueryable<Employee>;
+      if (noTracking)
+         query = query.AsNoTracking();
+      return query
+         .FirstOrDefaultAsync(c => c.Subject == subject, ct);
+   }
+   
+   public async Task<Employee?> FindByEmailAsync(
+      string email,
+      bool noTracking,
+      CancellationToken ct
+   ) {
+      var query = dbContext.Employees as IQueryable<Employee>;
+      if (noTracking)
+         query = query.AsNoTracking();
+      return await query
+         .FirstOrDefaultAsync(c => c.Email == email, ct);
+   }
+
+   
    public async Task<Employee?> FindByPersonnelNumberAsync(
       string personnelNumber,
       CancellationToken ct
-   ) => await _dbContext.Employess
+   ) => await dbContext.Employees
       .FirstOrDefaultAsync(e => e.PersonnelNumber == personnelNumber, ct);
 
    public Task<bool> ExistsPersonnelNumberAsync(string personnelNumber, CancellationToken ct) {
       throw new NotImplementedException();
    }
 
-   public Task<bool> ExistsEmailAsync(string email, CancellationToken ct) {
-      throw new NotImplementedException();
-   }
+
 
    public async Task<IReadOnlyList<Employee>> SelectAdminsAsync(CancellationToken ct) =>
-      await _dbContext.Employess
+      await dbContext.Employees
          .AsNoTracking()
          .Where(e => e.AdminRights != AdminRights.None)
          .OrderBy(e => e.Lastname)
          .ToListAsync(ct);
 
    public void Add(Employee employee) =>
-      _dbContext.Employess.Add(employee);
+      dbContext.Employees.Add(employee);
 }

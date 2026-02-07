@@ -34,9 +34,23 @@ public interface IEmployeeRepository {
    /// </summary>
    Task<Employee?> FindByIdAsync(
       Guid id,
-      CancellationToken ct
+      bool noTracking = false,
+      CancellationToken ct = default
    );
 
+   Task<Employee?> FindByIdentitySubjectAsync(
+      string subject,
+      bool noTracking = false,
+      CancellationToken ct = default
+   );
+   
+   Task<Employee?> FindByEmailAsync(
+      string email,
+      bool noTracking = false,
+      CancellationToken ct = default
+   );
+   
+   
    /// <summary>
    /// Loads an employee aggregate by its personnel number.
    ///
@@ -49,38 +63,9 @@ public interface IEmployeeRepository {
    /// </summary>
    Task<Employee?> FindByPersonnelNumberAsync(
       string personnelNumber,
-      CancellationToken ct
+      CancellationToken ct = default
    );
-
-   /// <summary>
-   /// Checks whether an employee with the given personnel number exists.
-   ///
-   /// Business meaning:
-   /// - Used to enforce uniqueness during employee creation
-   ///
-   /// Returns:
-   /// - True if an employee with the given personnel number exists
-   /// - False otherwise
-   /// </summary>
-   Task<bool> ExistsPersonnelNumberAsync(
-      string personnelNumber,
-      CancellationToken ct
-   );
-
-   /// <summary>
-   /// Checks whether an employee with the given email address exists.
-   ///
-   /// Business meaning:
-   /// - Used to enforce uniqueness during employee creation
-   ///
-   /// Returns:
-   /// - True if an employee with the given email exists
-   /// - False otherwise
-   /// </summary>
-   Task<bool> ExistsEmailAsync(
-      string email,
-      CancellationToken ct
-   );
+   
 
    // ------------------------------------------------------------------
    // Queries (0..n)

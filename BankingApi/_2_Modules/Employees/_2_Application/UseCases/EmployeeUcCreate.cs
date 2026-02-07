@@ -30,44 +30,38 @@ public sealed class EmployeeUcCreate(
    public async Task<Result<Guid>> ExecuteAsync(
       string firstname,
       string lastname,
-      string emailString,
+      string email,
       string phoneString,
+      string subject,
       string personnelNumber,
-      AdminRights adminRights,
       DateTimeOffset createdAt = default,
       string? id = null,
       CancellationToken ct = default
    ) {
+      email = email.Trim();
+      personnelNumber = personnelNumber.Trim();
       
       // ---- Use-case guards (cheap validations) ----
       if (string.IsNullOrWhiteSpace(personnelNumber)) 
          return Result<Guid>.Failure(EmployeeErrors.PersonnelNumberIsRequired);
       
-      if (string.IsNullOrWhiteSpace(emailString)) 
-         return Result<Guid>.Failure(EmployeeErrors.EmailIsRequired);
-      
       // ---- Uniqueness checks (I/O) ----
-      if (await _repository.ExistsPersonnelNumberAsync(personnelNumber, ct)) {
-         var fail = Result<Guid>.Failure(EmployeeErrors.PersonnelNumberMustBeUnique);
-         fail.LogIfFailure(_logger, "EmployeeUcCreate.PersonnelNumberMustBeUnique", new { personnelNumber });
-         return fail;
-      }
+      if (await _repository.FindByEmailAsync(email, false, ct) != null) 
+         return Result<Guid>.Failure(EmployeeErrors.EmailMustBeUnique);
 
-      if (await _repository.ExistsEmailAsync(emailString, ct)) {
-         var fail = Result<Guid>.Failure(EmployeeErrors.EmailMustBeUnique);
-         fail.LogIfFailure(_logger, "EmployeeUcCreate.EmailMustBeUnique", new { email = emailString });
-         return fail;
-      }
+      if (await _repository.FindByPersonnelNumberAsync(personnelNumber, ct) != null) 
+         return Result<Guid>.Failure(EmployeeErrors.PersonnelNumberMustBeUnique);
+
 
       // ---- Domain factory (invariants) ----
       var result = Employee.Create(
          _clock,
          firstname: firstname,
          lastname: lastname,
-         email: emailString,
+         email: email,
          phone:phoneString,
+         subject: subject,
          personnelNumber: personnelNumber,
-         adminRights: adminRights,
          createdAt: createdAt,
          id: id
       );

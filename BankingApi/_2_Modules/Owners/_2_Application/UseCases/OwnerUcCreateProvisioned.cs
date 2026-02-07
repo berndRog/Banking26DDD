@@ -50,7 +50,7 @@ public class OwnerUcCreateProvisioned(
       var email = emailResult.Value;
 
       // check uniqueness
-      var existingWithEmail = await repository.FindByEmailAsync(email, ct);
+      var existingWithEmail = await repository.FindByEmailAsync(email, false, ct);
       if (existingWithEmail is not null)
          return Result<Guid>.Failure(OwnerApplicationErrors.EmailAlreadyInUse);
 
