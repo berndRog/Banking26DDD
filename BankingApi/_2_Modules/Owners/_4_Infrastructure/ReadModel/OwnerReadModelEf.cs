@@ -10,13 +10,12 @@ using BankingApi._4_BuildingBlocks._3_Domain;
 using Microsoft.EntityFrameworkCore;
 namespace BankingApi._2_Modules.Owners._4_Infrastructure.ReadModel;
 
-
 public sealed class OwnerReadModelEf(
    BankingDbContext dbContext,
    IIdentityGateway identityGateway
 ) : IOwnerReadModel {
 
-   public async Task<Result<Guid>> FindMeProvisionedIdAsync(CancellationToken ct) {
+   public async Task<Result<Guid>> FindMeProvisionedAsync(CancellationToken ct) {
 
       // subject required
       var subjectResult = IdentitySubject.Check(identityGateway.Subject);
@@ -38,25 +37,24 @@ public sealed class OwnerReadModelEf(
    }
 
    
-   public async Task<Result<OwnerDto>> FindMeAsync(CancellationToken ct) {
+   public async Task<Result<OwnerProfileDto>> FindMeAsync(CancellationToken ct) {
       
       // 1) Subject from Gateway
       var subjectResult = IdentitySubject.Check(identityGateway.Subject);
       if (subjectResult.IsFailure)
-         return Result<OwnerDto>.Failure(subjectResult.Error);
+         return Result<OwnerProfileDto>.Failure(subjectResult.Error);
       var subject = subjectResult.Value;
 
       // 2) load Owner by subject (NO tracking, read-only)
       var ownerDto = await dbContext.Owners
          .AsNoTracking()
-         .Where(c => c.Subject == subject)   // filter by subject
-         .Select(c => c.ToOwnerDto())        // project to OwnerDto (map)
+         .Where(c => c.Subject == subject)    // filter by subject
+         .Select(c => c.ToOwnerProfileDto())  // project to OwnerProfileDto (map)
          .SingleOrDefaultAsync(ct);
       
-      
       if (ownerDto is null)
-         return Result<OwnerDto>.Failure(OwnerApplicationErrors.NotProvisioned);   
-      return Result<OwnerDto>.Success(ownerDto);
+         return Result<OwnerProfileDto>.Failure(OwnerApplicationErrors.NotProvisioned);   
+      return Result<OwnerProfileDto>.Success(ownerDto);
       
    }
    
@@ -85,12 +83,37 @@ public sealed class OwnerReadModelEf(
       Guid Id,
       CancellationToken ct
    ) {
-      var customer = await dbContext.Owners
+      var owner = await dbContext.Owners
          .AsNoTracking()
          .FirstOrDefaultAsync(c => c.Id == Id, ct);
 
-      return customer is null
+      return owner is null
          ? Result<OwnerDto>.Failure(OwnerErrors.NotFound)
-         : Result<OwnerDto>.Success(customer.ToOwnerDto());
+         : Result<OwnerDto>.Success(owner.ToOwnerDto());
+   }
+
+
+   public async Task<Result<OwnerDto>> FindByIdentitySubjectAsync(
+      string subject,
+      CancellationToken ct
+   ) {
+      var owner = await dbContext.Owners 
+         .AsNoTracking()
+         .FirstOrDefaultAsync(c => c.Subject == subject, ct);
+      return owner is null
+         ? Result<OwnerDto>.Failure(OwnerErrors.NotFound)
+         : Result<OwnerDto>.Success(owner.ToOwnerDto());
+   }
+   
+   public async Task<Result<OwnerDto>> FindByEmailAsync(
+      string email,
+      CancellationToken ct
+   ) {
+      var owner = await dbContext.Owners
+         .AsNoTracking()
+         .FirstOrDefaultAsync(c => c.Email == email, ct);
+      return owner is null
+         ? Result<OwnerDto>.Failure(OwnerErrors.NotFound)
+         : Result<OwnerDto>.Success(owner.ToOwnerDto());
    }
 }

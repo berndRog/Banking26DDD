@@ -5,7 +5,7 @@ namespace BankingApi._2_Modules.Owners._2_Application.Mappings;
 public static class OwnerMappings {
 
    public static OwnerDto ToOwnerDto(this Owner owner) => new(
-      OwnerId: owner.Id,
+      Id: owner.Id,
       DisplayName: owner.DisplayName,
       Email: owner.Email,
       Status: (int) owner.Status,

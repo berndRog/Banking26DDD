@@ -1,6 +1,5 @@
 using BankingApi._2_Modules.Employees._3_Domain.Enums;
 using BankingApi._4_BuildingBlocks;
-using BankingApi._4_BuildingBlocks._3_Domain.ValueObjects;
 namespace BankingApi._2_Modules.Employees._1_Ports.Inbound;
 
 /// <summary>
@@ -61,7 +60,7 @@ public interface IEmployeeUseCases {
       string phoneString,
       string subject,
       string personnelNumber,
-      DateTimeOffset createdAt,
+      AdminRights adminRights,
       string? id = null,
       CancellationToken ct = default
    );

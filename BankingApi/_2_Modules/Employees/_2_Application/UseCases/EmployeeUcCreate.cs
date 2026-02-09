@@ -4,7 +4,6 @@ using BankingApi._2_Modules.Employees._3_Domain.Enums;
 using BankingApi._2_Modules.Employees._3_Domain.Errors;
 using BankingApi._4_BuildingBlocks;
 using BankingApi._4_BuildingBlocks._1_Ports.Inbound;
-using BankingApi._4_BuildingBlocks._3_Domain.ValueObjects;
 using BankingApi._4_BuildingBlocks._4_Infrastructure.Persistence;
 namespace BankingApi._2_Modules.Employees._2_Application.UseCases;
 
@@ -34,24 +33,23 @@ public sealed class EmployeeUcCreate(
       string phoneString,
       string subject,
       string personnelNumber,
-      DateTimeOffset createdAt = default,
+      AdminRights adminRights,
       string? id = null,
       CancellationToken ct = default
    ) {
       email = email.Trim();
       personnelNumber = personnelNumber.Trim();
-      
+
       // ---- Use-case guards (cheap validations) ----
-      if (string.IsNullOrWhiteSpace(personnelNumber)) 
+      if (string.IsNullOrWhiteSpace(personnelNumber))
          return Result<Guid>.Failure(EmployeeErrors.PersonnelNumberIsRequired);
-      
+
       // ---- Uniqueness checks (I/O) ----
-      if (await _repository.FindByEmailAsync(email, false, ct) != null) 
+      if (await _repository.FindByEmailAsync(email, false, ct) != null)
          return Result<Guid>.Failure(EmployeeErrors.EmailMustBeUnique);
 
-      if (await _repository.FindByPersonnelNumberAsync(personnelNumber, ct) != null) 
+      if (await _repository.FindByPersonnelNumberAsync(personnelNumber, ct) != null)
          return Result<Guid>.Failure(EmployeeErrors.PersonnelNumberMustBeUnique);
-
 
       // ---- Domain factory (invariants) ----
       var result = Employee.Create(
@@ -59,19 +57,20 @@ public sealed class EmployeeUcCreate(
          firstname: firstname,
          lastname: lastname,
          email: email,
-         phone:phoneString,
+         phone: phoneString,
          subject: subject,
          personnelNumber: personnelNumber,
-         createdAt: createdAt,
+         adminRights: adminRights,
+         isActive: true,
          id: id
       );
       if (result.IsFailure)
          return Result<Guid>.Failure(result.Error);
-      
+
       // Add to repository
       var employee = result.Value!;
       _repository.Add(employee);
-      
+
       // Persist via UnitOfWork
       var savedRows = await _unitOfWork.SaveAllChangesAsync("Employee created", ct);
 

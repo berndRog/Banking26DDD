@@ -1,5 +1,6 @@
 using BankingApi._2_Modules.Core._3_Domain.Aggregates;
 using BankingApi._2_Modules.Employees._3_Domain.Aggregates;
+using BankingApi._2_Modules.Employees._3_Domain.Enums;
 using BankingApi._2_Modules.Owners._3_Domain.Aggregates;
 using BankingApi._4_BuildingBlocks._1_Ports.Inbound;
 using BankingApi._4_BuildingBlocks._3_Domain.ValueObjects;
@@ -117,7 +118,10 @@ public sealed class TestSeed {
          email: "emil.engel@bankingapi.de",
          phoneString: "+49 5826 123 4010",
          subject: "00000000-0001-0000-0000-000000000000",
-         personnelNumber: "EMP001"
+         personnelNumber: "EMP001",
+         adminRights: 
+            AdminRights.ViewOwners | AdminRights.ManageOwners |
+            AdminRights.ViewEmployees | AdminRights.ManageEmployees
       );
    
       Employee2 = CreateEmployee(
@@ -127,7 +131,8 @@ public sealed class TestSeed {
          email: "frieda.fischer@bankingapi.de",
          phoneString: "+49 5826 123 4020",
          subject: "00000000-0002-0000-0000-000000000000",
-         personnelNumber: "EMP002"
+         personnelNumber: "EMP002",
+         adminRights: (AdminRights) 511
       );
 
       
@@ -421,7 +426,8 @@ public sealed class TestSeed {
       string email,
       string phoneString,
       string subject,
-      string personnelNumber
+      string personnelNumber,
+      AdminRights adminRights
    ) {
       var result = Employee.Create(
          clock: Clock,
@@ -431,7 +437,8 @@ public sealed class TestSeed {
          phone: phoneString,
          subject: subject,
          personnelNumber: personnelNumber, 
-         createdAt: UtcNow,
+         adminRights: adminRights,
+         isActive: true,   
          id: id
       );
 

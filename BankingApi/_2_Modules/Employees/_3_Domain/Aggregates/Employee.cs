@@ -1,9 +1,12 @@
 using BankingApi._2_Modules.Employees._3_Domain.Enums;
 using BankingApi._2_Modules.Employees._3_Domain.Errors;
+using BankingApi._2_Modules.Owners._3_Domain.Aggregates;
+using BankingApi._2_Modules.Owners._3_Domain.Errors;
 using BankingApi._4_BuildingBlocks;
 using BankingApi._4_BuildingBlocks._1_Ports.Inbound;
 using BankingApi._4_BuildingBlocks._3_Domain;
 using BankingApi._4_BuildingBlocks._3_Domain.Entities;
+using BankingApi._4_BuildingBlocks._3_Domain.Errors;
 using BankingApi._4_BuildingBlocks._3_Domain.ValueObjects;
 using BankingApi._4_BuildingBlocks._4_Infrastructure;
 namespace BankingApi._2_Modules.Employees._3_Domain.Aggregates;
@@ -56,7 +59,8 @@ public sealed class Employee : AggregateRoot<Guid> {
       string? phone,
       string subject,
       string personnelNumber,
-      DateTimeOffset createdAt
+      AdminRights adminRights,
+      bool isActive
    ): base(clock) {
       Id = id;
       Firstname = firstname;
@@ -65,9 +69,8 @@ public sealed class Employee : AggregateRoot<Guid> {
       Phone = phone;
       Subject = subject;
       PersonnelNumber = personnelNumber;
-      AdminRights = AdminRights.ViewReports; // default initial rights
-      IsActive = true;
-      CreatedAt = createdAt;
+      AdminRights = adminRights;
+      IsActive = isActive;
    }
 
    // ---------- Factory (Result-based) ----------
@@ -80,7 +83,8 @@ public sealed class Employee : AggregateRoot<Guid> {
       string? phone,
       string subject,
       string personnelNumber,
-      DateTimeOffset createdAt = default,
+      AdminRights adminRights,
+      bool isActive = true,
       string? id = null
    ) {
       // Normalize input early
@@ -125,29 +129,135 @@ public sealed class Employee : AggregateRoot<Guid> {
       if (string.IsNullOrWhiteSpace(personnelNumber))
          return Result<Employee>.Failure(EmployeeErrors.PersonnelNumberIsRequired);
 
-      if (createdAt == default)
-         return Result<Employee>.Failure(EmployeeErrors.CreatedAtIsRequired);
-
       var result = EntityId.Resolve(id, EmployeeErrors.InvalidId);
       if (result.IsFailure)
          return Result<Employee>.Failure(result.Error);
 
       var employee = new Employee(
-         clock,
-         result.Value,
-         firstname,
-         lastname,
-         email,
-         phone,
-         subject,
-         personnelNumber,
-         createdAt
+         clock: clock,
+         id: result.Value, 
+         firstname: firstname,
+         lastname: lastname,
+         email: email,
+         phone: phone,
+         subject: subject,
+         personnelNumber: personnelNumber,
+         adminRights: adminRights,
+         isActive: isActive
       );
       return Result<Employee>.Success(employee);
    }
 
    // ---------- Domain operations ----------
+   /// <summary>
+   /// Create an employee on first login (provisioning).
+   /// - Only identity facts are known for sure (subject, email, createdAt).
+   /// - Business profile data is still missing and must be completed by the employee.
+   /// </summary>
+   public static Result<Employee> CreateProvisioned(
+      IClock clock,
+      string identitySubject,
+      string email,
+      DateTimeOffset createdAt,
+      AdminRights adminRights = AdminRights.ViewReports,
+      string? id = null
+   ) {
+      
+      var subjectResult = IdentitySubject.Check(identitySubject);
+      if (subjectResult.IsFailure)
+         return Result<Employee>.Failure(subjectResult.Error);
 
+      var emailResult = EmailAddress.Check(email);
+      if (emailResult.IsFailure)
+         return Result<Employee>.Failure(emailResult.Error);
+      
+      var idResult = EntityId.Resolve(id, EmployeeErrors.InvalidId);
+      if (idResult.IsFailure)
+         return Result<Employee>.Failure(idResult.Error);
+
+      // Provisioned owner starts with empty profile fields
+      var employee = new Employee(
+         clock: clock,
+         id: idResult.Value,
+         firstname: string.Empty,
+         lastname: string.Empty,
+         email: emailResult.Value,
+         phone: null,
+         subject: subjectResult.Value,
+         personnelNumber: string.Empty, 
+         adminRights: adminRights,
+         isActive: true
+      );
+      // Provisioning should reflect identity creation time (not "now")
+      employee.SetCreatedAt(createdAt);
+
+      return Result<Employee>.Success(employee);
+   }
+
+   // --------------------------------------------------------------------------
+   // Domain methods (mutations)
+   // - Important: we accept 'now' from outside to keep tests deterministic and
+   //   to avoid reliance on the internal clock after EF materialization.
+   // --------------------------------------------------------------------------
+   /// <summary>
+   /// Employee completes or updates their profile after provisioning.
+   /// </summary>
+   public Result UpdateProfile(
+      string firstname,
+      string lastname,
+      string email,
+      string? phone,
+      string personnelNumber
+   ) {
+
+      firstname = firstname.Trim();
+      lastname  = lastname.Trim();
+      email = email.Trim();
+      phone = phone?.Trim();
+      personnelNumber = personnelNumber.Trim();
+
+      // Validate required profile fields
+      if (string.IsNullOrWhiteSpace(firstname))
+         return Result.Failure(OwnerErrors.FirstnameIsRequired);
+      if (firstname.Length is < 2 or > 80)
+         return Result.Failure(OwnerErrors.InvalidFirstname);
+
+      if (string.IsNullOrWhiteSpace(lastname))
+         return Result.Failure(OwnerErrors.LastnameIsRequired);
+      if (lastname.Length is < 2 or > 80)
+         return Result.Failure(OwnerErrors.InvalidLastname);
+      
+      // Validate email in domain (do not rely on caller)
+      if (string.IsNullOrWhiteSpace(email))
+         return Result.Failure(OwnerErrors.EmailIsRequired);
+
+      var emailResult = EmailAddress.Check(email);
+      if (emailResult.IsFailure)
+         return Result.Failure(emailResult.Error);
+
+      // optional phone
+      if (!string.IsNullOrWhiteSpace(phone)) {
+         var resultPhone = PhoneNumber.Check(phone);
+         if (resultPhone.IsFailure)
+            return Result.Failure(resultPhone.Error);
+         phone = resultPhone.Value!;
+      }
+      
+      if (string.IsNullOrWhiteSpace(personnelNumber))
+         return Result.Failure(EmployeeErrors.PersonnelNumberIsRequired);
+
+      // Apply changes
+      Firstname = firstname;
+      Lastname  = lastname;
+      Email = emailResult.Value;
+      Phone = phone;
+      PersonnelNumber = personnelNumber;
+      
+      Touch();
+      return Result.Success();
+   }
+
+   
    /// <summary>
    /// Replaces the administrative rights of the employee.
    ///

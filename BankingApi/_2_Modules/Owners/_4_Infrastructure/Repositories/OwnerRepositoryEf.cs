@@ -21,7 +21,7 @@ public class OwnerRepositoryEf(
          .FirstOrDefaultAsync(o => o.Id == ownerId, ct);
    }
 
-   public Task<Owner?> FindByIdentitySubjectAsync(
+   public async Task<Owner?> FindByIdentitySubjectAsync(
       string subject,
       bool noTracking,
       CancellationToken ct
@@ -29,7 +29,7 @@ public class OwnerRepositoryEf(
       var query = dbContext.Owners as IQueryable<Owner>;
       if (noTracking)
          query = query.AsNoTracking();
-      return query
+      return await query
          .FirstOrDefaultAsync(c => c.Subject == subject, ct);
    }
    

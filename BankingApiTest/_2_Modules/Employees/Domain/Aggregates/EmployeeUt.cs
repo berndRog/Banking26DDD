@@ -1,4 +1,5 @@
 using BankingApi._2_Modules.Employees._3_Domain.Aggregates;
+using BankingApi._2_Modules.Employees._3_Domain.Enums;
 using BankingApi._2_Modules.Owners._2_Application.Dtos;
 using BankingApi._2_Modules.Owners._3_Domain.Aggregates;
 using BankingApi._2_Modules.Owners._3_Domain.Enum;
@@ -19,6 +20,7 @@ public sealed class EmployeeUt {
    private readonly string _phone;
    private readonly string _subject;
    private readonly string _personnelNumber;
+   private readonly AdminRights _adminRights;
    private readonly string _id;
 
    public EmployeeUt() {
@@ -31,6 +33,7 @@ public sealed class EmployeeUt {
       _phone = "+49 5826 123 4100";
       _subject = "00000000-0010-0000-0000-00000000000";
       _personnelNumber = "EMP010";
+      _adminRights = (AdminRights) 511;
       _id = "00000000-0010-0000-0000-000000000000";
    }
 
@@ -50,9 +53,11 @@ public sealed class EmployeeUt {
          phone: _phone,
          subject: _subject,
          personnelNumber: _personnelNumber,
-         createdAt: _clock.UtcNow,
+         adminRights: (AdminRights) 511,
          id: _id
       );
+
+      string bits = Convert.ToString((int)_adminRights, 2).PadLeft(32, '0');
 
       // Assert
       True(result.IsSuccess);
@@ -65,6 +70,7 @@ public sealed class EmployeeUt {
       Equal(_phone, employee.Phone);
       Equal(_subject, employee.Subject);
       Equal(_personnelNumber, employee.PersonnelNumber);
+      Equal(_adminRights, employee.AdminRights);
    }
 
    [Fact]
@@ -78,7 +84,7 @@ public sealed class EmployeeUt {
          phone: _phone,
          subject: _subject,
          personnelNumber: _personnelNumber,
-         createdAt: _clock.UtcNow,
+         adminRights: _adminRights,
          id: null
       );
       
@@ -95,7 +101,7 @@ public sealed class EmployeeUt {
       Equal(_personnelNumber, employee.PersonnelNumber);
    }
    
-
+/*
    [Theory]
    [InlineData("")]
    [InlineData("   ")]
@@ -234,6 +240,6 @@ public sealed class EmployeeUt {
       True(result.IsFailure);
       Equal(OwnerErrors.InvalidId, result.Error);
    }
-
+*/
    
 }

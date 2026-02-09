@@ -1,7 +1,7 @@
 using BankingApi._2_Modules.Employees._1_Ports.Inbound;
+using BankingApi._2_Modules.Employees._2_Application.Dtos;
 using BankingApi._2_Modules.Employees._3_Domain.Enums;
 using BankingApi._4_BuildingBlocks;
-using BankingApi._4_BuildingBlocks._3_Domain.ValueObjects;
 namespace BankingApi._2_Modules.Employees._2_Application.UseCases;
 
 /// <summary>
@@ -25,6 +25,8 @@ namespace BankingApi._2_Modules.Employees._2_Application.UseCases;
 /// </summary>
 public sealed class EmployeeUseCases(
    EmployeeUcCreate createUc,
+   EmployeeUcCreateProvisioned createProvisionedUc,
+   EmployeeUcUpsertProfile upsertProfileUc,
    EmployeeUcDeactivate deactivateUc,
    EmployeeUcSetAdminRights setRightsUc
 ) : IEmployeeUseCases {
@@ -35,7 +37,7 @@ public sealed class EmployeeUseCases(
       string phoneString,
       string subject,
       string personnelNumber,
-      DateTimeOffset createdAt,
+      AdminRights adminRights,
       string? id = null,
       CancellationToken ct = default
    ) => createUc.ExecuteAsync(
@@ -45,11 +47,22 @@ public sealed class EmployeeUseCases(
       phoneString: phoneString,
       subject: subject,
       personnelNumber: personnelNumber,
-      createdAt: createdAt,
+      adminRights: adminRights,
       id: id,
       ct: ct
    );
 
+   public Task<Result<Guid>> CreateProvisionedAsync(
+      string? id, 
+      CancellationToken ct
+   ) => createProvisionedUc.ExecuteAsync(id, ct);
+
+   public Task<Result<EmployeeProfileDto>> UpsertProfileAsync(
+      EmployeeProfileDto dto, 
+      CancellationToken ct
+   ) => upsertProfileUc.ExecuteAsync(dto, ct);
+
+   
    public Task<Result> DeactivateAsync(
       Guid employeeId,
       DateTimeOffset deactivatedAt,

@@ -10,9 +10,11 @@ public static class DiInfrastructureModule {
       IConfiguration configuration
    ) {
       
+      var connectionString = configuration.GetConnectionString("BankingApiDb");
+      Console.WriteLine("---> Using SQLite connection string: " + connectionString);
+      
       services.AddDbContext<BankingDbContext>(options =>
-         options.UseSqlite(
-            configuration.GetConnectionString("BankingDb"))
+         options.UseSqlite(connectionString)
       );
 
       // Unit of Work

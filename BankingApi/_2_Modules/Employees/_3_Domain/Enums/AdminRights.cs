@@ -10,19 +10,22 @@ public enum AdminRights {
 
    // Customers / Owners (KYC approval etc.)
    ViewOwners   = 1 << 1,
-   ManageOwners = 1 << 2, // activate/reject/deactivate owners
+   // activate/reject/deactivate owners
+   ManageOwners = 1 << 2, 
 
    // Accounts
-   ViewAccounts   = 1 << 3,
-   ManageAccounts = 1 << 4, // open/close/freeze (if you have it)
+   ViewAccounts   = 1 << 3,     //    8
+   // activate/deactivate accounts
+   ManageAccounts = 1 << 4,     //   16
 
    // Transfers
-   ViewTransfers   = 1 << 5,
-   ManageTransfers = 1 << 6, // manual review / cancel (if applicable)
-
+   ViewTransfers   = 1 << 5,    //   32
+   // manual review / cancel (if applicable)
+   ManageTransfers = 1 << 6,    //   64
+   
    // Employees
-   ViewEmployees   = 1 << 7,
-   ManageEmployees = 1 << 8
+   ViewEmployees   = 1 << 7,    //  128 
+   ManageEmployees = 1 << 8     //  256  all 511
 }
 
 /*

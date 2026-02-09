@@ -1,10 +1,12 @@
+using BankingApi._2_Modules.Employees._3_Domain.Enums;
 using BankingApi._3_Infrastructure.Security;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 namespace BankingApi._3_Infrastructure;
 
-public static class DiJwtAuthentication {
-   public static IServiceCollection AddJwtAuthentication(
+public static class DiAuthNAuthZ {
+   
+   public static IServiceCollection AddAuthNAuthZ(
       this IServiceCollection services,
       IConfiguration config
    ) {
@@ -22,7 +24,7 @@ public static class DiJwtAuthentication {
       Console.WriteLine($"JWT Bearer RequireHttpsMetadata: {auth.RequireHttpsMetadata}");
       Console.WriteLine($"JWT Bearer ClockSkewSeconds: {auth.ClockSkewSeconds}");
 
-      // JWT Bearer
+      //--- AuthN JWT Bearer --------------------------------------------------------------------
       services
          .AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
          .AddJwtBearer(opt => {
@@ -56,6 +58,33 @@ public static class DiJwtAuthentication {
                }
             };
          });
+      
+      
+      //--- AuthZ -------------------------------------------------------------------------------
+      services.AddAuthorization(options => {
+         // Role-based coarse authorization (framework-friendly)
+         options.AddPolicy("OwnersOnly", p => p.RequireRole("Owner"));
+         options.AddPolicy("EmployeesOnly", p => p.RequireRole("Employee"));
+
+         // Optional: if you want to allow employees to call owner self endpoints for support,
+         // you can introduce combined policies later.
+         // options.AddPolicy("OwnerOrEmployee", p => p.RequireRole("Owner", "Employee"));
+         
+         
+         // services.AddAuthorization(options => {
+         //    options.AddPolicy("CanViewCustomers", policy =>
+         //       policy.RequireAssertion(ctx =>
+         //          ctx.User.IsInRole("Employee") &&
+         //          ctx.User.HasAdminRight((int)AdminRights.ViewCustomers)));
+         //
+         //    options.AddPolicy("CanEditCustomers", policy =>
+         //       policy.RequireAssertion(ctx =>
+         //          ctx.User.IsInRole("Employee") &&
+         //          ctx.User.HasAdminRight((int)AdminRights.EditCustomers)));
+         // });
+         
+      });
+
 
       return services;
    }

@@ -39,10 +39,10 @@ public class Program {
       builder.Services.AddInfrastructureModule(builder.Configuration);
 
 
-      // AuthN (Bearer)
-      builder.Services.AddJwtAuthentication(builder.Configuration);
-      // AuthZ
-      builder.Services.AddAuthorization();
+      // AuthN (Bearer) + AuthZ
+      builder.Services.AddAuthNAuthZ(builder.Configuration);
+     
+      
       
       builder.Services.AddEndpointsApiExplorer();
       builder.Services.AddSwaggerGen();

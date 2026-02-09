@@ -1,21 +1,21 @@
+using BankingApi._2_Modules.Employees._1_Ports.Outbound;
+using BankingApi._2_Modules.Employees._2_Application.Errors;
+using BankingApi._2_Modules.Employees._3_Domain.Aggregates;
 using BankingApi._2_Modules.Employees._3_Domain.Enums;
-using BankingApi._2_Modules.Owners._1_Ports.Outbound;
-using BankingApi._2_Modules.Owners._2_Application.Errors;
-using BankingApi._2_Modules.Owners._3_Domain.Aggregates;
 using BankingApi._4_BuildingBlocks;
 using BankingApi._4_BuildingBlocks._1_Ports.Inbound;
 using BankingApi._4_BuildingBlocks._1_Ports.Outbound;
 using BankingApi._4_BuildingBlocks._3_Domain;
 using BankingApi._4_BuildingBlocks._3_Domain.Errors;
 using BankingApi._4_BuildingBlocks._4_Infrastructure.Persistence;
-namespace BankingApi._2_Modules.Owners._2_Application.UseCases;
+namespace BankingApi._2_Modules.Employees._2_Application.UseCases;
 
-public class OwnerUcCreateProvisioned(
+public class EmployeeUcCreateProvisioned(
    IIdentityGateway identityGateway,
-   IOwnerRepository repository,
+   IEmployeeRepository repository,
    IUnitOfWork unitOfWork,
    IClock clock,
-   ILogger<OwnerUcCreateProvisioned> logger
+   ILogger<EmployeeUcCreateProvisioned> logger
 ) {
    public async Task<Result<Guid>> ExecuteAsync(
       string? id,
@@ -42,7 +42,8 @@ public class OwnerUcCreateProvisioned(
          adminRights = (AdminRights)identityGateway.AdminRights; // admin_rights
       }
       catch (InvalidOperationException ex) {
-         logger.LogWarning(ex, "Provisioning failed: required identity claim missing (sub={sub})", subject);
+         logger.LogWarning(ex, 
+            "Provisioning failed: required identity claim missing (sub={sub})", subject);
          return Result<Guid>.Failure(CommonErrors.IdentityClaimsMissing);
       }
 
@@ -55,25 +56,26 @@ public class OwnerUcCreateProvisioned(
       // check uniqueness
       var existingWithEmail = await repository.FindByEmailAsync(email, false, ct);
       if (existingWithEmail is not null)
-         return Result<Guid>.Failure(OwnerApplicationErrors.EmailAlreadyInUse);
+         return Result<Guid>.Failure(EmployeeApplicationErrors.EmailAlreadyInUse);
 
       // 4) create aggregate
-      var resultOwner = Owner.CreateProvisioned(clock, subject, email, createdAt, id);
-      if (resultOwner.IsFailure)
-         return Result<Guid>.Failure(resultOwner.Error);
+      var resultEmployee = 
+         Employee.CreateProvisioned(clock, subject, email, createdAt, adminRights, id);
+      if (resultEmployee.IsFailure)
+         return Result<Guid>.Failure(resultEmployee.Error);
 
       // 5) add to repository
-      var owner = resultOwner.Value;
-      repository.Add(owner);
+      var employee = resultEmployee.Value;
+      repository.Add(employee);
 
       // 6) persist with unit of work
-      var savedRows = await unitOfWork.SaveAllChangesAsync("Owner provisioned on first login", ct);
+      var savedRows = await unitOfWork.SaveAllChangesAsync("Employee provisioned on first login", ct);
 
       logger.LogInformation(
-         "Owner provisioned subject={sub} customerId={id} savedRows={rows}",
-         subject, owner.Id, savedRows
+         "Employee provisioned subject={sub} Id={id} savedRows={rows}",
+         subject, employee.Id, savedRows
       );
-      return Result<Guid>.Success(owner.Id);
+      return Result<Guid>.Success(employee.Id);
    }
 }
    
