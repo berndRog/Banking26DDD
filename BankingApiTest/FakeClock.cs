@@ -9,4 +9,8 @@ public sealed class FakeClock : IClock {
          UtcNow = utcNow.Value;
       }
    }
+
+   public FakeClock(DateTime utcNow) {
+      UtcNow = new DateTimeOffset(utcNow, TimeSpan.Zero);
+   }
 }

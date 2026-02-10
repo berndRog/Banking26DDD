@@ -117,11 +117,11 @@ public sealed class TestSeed {
          lastname: "Engel",
          email: "emil.engel@bankingapi.de",
          phoneString: "+49 5826 123 4010",
-         subject: "00000000-0001-0000-0000-000000000000",
-         personnelNumber: "EMP001",
+         subject: "003946D9-9B67-4691-A91B-DB4A98929F5D",
+         personnelNumber: "Emp001",
          adminRights: 
-            AdminRights.ViewOwners | AdminRights.ManageOwners |
-            AdminRights.ViewEmployees | AdminRights.ManageEmployees
+            AdminRights.ViewOwners   | AdminRights.ManageOwners   | 
+            AdminRights.ViewAccounts | AdminRights.ManageAccounts
       );
    
       Employee2 = CreateEmployee(
@@ -130,8 +130,8 @@ public sealed class TestSeed {
          lastname: "Fischer",
          email: "frieda.fischer@bankingapi.de",
          phoneString: "+49 5826 123 4020",
-         subject: "00000000-0002-0000-0000-000000000000",
-         personnelNumber: "EMP002",
+         subject: "009A7C8E-3F2B-4C5D-9E6F-7A8B9C0D1E2F",
+         personnelNumber: "Emp002",
          adminRights: (AdminRights) 511
       );
 
@@ -148,7 +148,7 @@ public sealed class TestSeed {
          lastname: "Mustermann",
          companyName: null,
          email: "erika.mustermann@t-online.de",
-         subject: "10000000-0000-0000-0000-000000000000",
+         subject: "A21990AD-D9DF-486A-8757-4A649E26A54E",
          address: Address1);
          
           
@@ -158,7 +158,7 @@ public sealed class TestSeed {
          lastname: "Mustermann", 
          companyName: null,
          email: "max.mustermann@gmail.com",
-         "20000000-0000-0000-0000-000000000000",
+         subject: "B6910640-161E-4228-9729-D6B142C2DFAD",
          null
       );
       
@@ -168,8 +168,8 @@ public sealed class TestSeed {
          lastname:"Arndt",
          companyName: null,
          email: "a.arndt@t-online.com",
-         "30000000-0000-0000-0000-000000000000",
-         null
+         subject: "CB794E61-BA7A-4D2A-977F-766B42BB79A9",
+         address: Address2
       );
       
       Owner4 = CreateOwner(
@@ -178,7 +178,7 @@ public sealed class TestSeed {
          lastname: "Bauer",
          companyName: null,
          email: "b.bauer@gmail.com",
-         "40000000-0000-0000-0000-000000000000",
+         subject: "DC1924AB-43C5-4C64-872D-6CA05F66756B",
          null
       );
 
@@ -188,8 +188,8 @@ public sealed class TestSeed {
          lastname: "Conrad",
          companyName: "Conrad Consulting GmbH",
          email: "c.conrad@gmx.de",
-         "50000000-0000-0000-0000-000000000000",
-         Address3
+         subject: "EDF650FB-A381-4E3F-A44B-81FFA7610B72",
+         null
       );
       
       Owner6 = CreateOwner(
@@ -198,8 +198,8 @@ public sealed class TestSeed {
          lastname: "Deppe",
          companyName: null,
          "d.deppe@icloud.com",
-         "60000000-0000-0000-0000-000000000000",
-         null
+         subject: "F5674F67-72A3-4449-AF1F-803DCFADDB7F",
+         address: null
       );
       
       // ---------- Accounts ----------

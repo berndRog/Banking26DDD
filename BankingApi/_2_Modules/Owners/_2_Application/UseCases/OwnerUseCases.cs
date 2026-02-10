@@ -30,7 +30,7 @@ public class OwnerUseCases(
    ) => createUc.ExecuteAsync(firstname, lastname, companyName, email, subject, id, 
       street, postalCode, city, country, ct);
 
-   public Task<Result<Guid>> CreateProvisionedAsync(
+   public Task<Result<OwnerProvisionDto>> CreateProvisionedAsync(
       string? id, 
       CancellationToken ct
    ) => createProvisionedUc.ExecuteAsync(id, ct);

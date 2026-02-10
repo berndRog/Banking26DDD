@@ -26,7 +26,7 @@ public sealed class OwnersController(
    [ProducesResponseType<Guid>(StatusCodes.Status200OK)]
    [ProducesResponseType<ProblemDetails>(StatusCodes.Status400BadRequest, "application/problem+json")]
    [ProducesResponseType<ProblemDetails>(StatusCodes.Status401Unauthorized, "application/problem+json")]
-   public async Task<ActionResult<Guid>> PostCreateProvisioned(CancellationToken ct) {
+   public async Task<ActionResult<OwnerProvisionDto>> PostCreateProvisioned(CancellationToken ct) {
       
       _logger.LogWarning("IsAuthenticated={auth}, Claims=[{claims}]",
          User.Identity?.IsAuthenticated,
@@ -35,7 +35,7 @@ public sealed class OwnersController(
       
       var result = await ucCreateProvisioned.ExecuteAsync(null, ct);
       
-      return this.ToActionResult<Guid>(
+      return this.ToActionResult<OwnerProvisionDto>(
          result,
          _logger,
          context: $"POST {UrlStart}/owners/me/provisioned",

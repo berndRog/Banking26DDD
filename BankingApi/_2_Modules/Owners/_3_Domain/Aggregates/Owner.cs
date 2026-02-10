@@ -174,6 +174,9 @@ public sealed class Owner : AggregateRoot<Guid> {
          address: address
       );
       
+      var employeeId = Guid.Parse("00000000-0000-0000-0002-000000000001"); 
+      owner.Activate(employeeId, clock.UtcNow);
+      
       return Result<Owner>.Success(owner);
    }
 
@@ -323,7 +326,7 @@ public sealed class Owner : AggregateRoot<Guid> {
       RejectedAt = null;
       RejectionReasonCode = null;
 
-      Touch(utcNow);
+      Touch();
       return Result.Success();
    }
 
@@ -351,7 +354,7 @@ public sealed class Owner : AggregateRoot<Guid> {
       AuditedByEmployeeId = employeeId;
       RejectionReasonCode = reasonCode.Trim();
 
-      Touch(utcNow);
+      Touch();
       return Result.Success();
    }
 
@@ -375,7 +378,7 @@ public sealed class Owner : AggregateRoot<Guid> {
       DeactivatedAt = utcNow;
       DeactivatedByEmployeeId = employeeId;
 
-      Touch(utcNow);
+      Touch();
       return Result.Success();
    }
 

@@ -41,6 +41,7 @@ public sealed class OwnerUcActivate(
       // 4) Domain change (audit + status transition)
       var utcNow = clock.UtcNow;
       var employeeId = ParseEmployeeId(identityGateway.Subject);
+      
       var result = owner.Activate(employeeId, utcNow);
       if (result.IsFailure)
          return Result.Failure(result.Error);

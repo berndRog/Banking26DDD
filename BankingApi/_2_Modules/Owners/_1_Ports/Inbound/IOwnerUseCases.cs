@@ -17,7 +17,7 @@ public interface IOwnerUseCases {
       CancellationToken ct = default
    );
 
-   Task<Result<Guid>> CreateProvisionedAsync(
+   Task<Result<OwnerProvisionDto>> CreateProvisionedAsync(
       string?  id, 
       CancellationToken ct = default
    );
