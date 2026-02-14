@@ -1,4 +1,6 @@
+using BankingApi._2_Modules.Employees._2_Application.Dtos;
 using BankingApi._2_Modules.Employees._3_Domain.Enums;
+using BankingApi._2_Modules.Owners._2_Application.Dtos;
 using BankingApi._4_BuildingBlocks;
 namespace BankingApi._2_Modules.Employees._1_Ports.Inbound;
 
@@ -62,6 +64,16 @@ public interface IEmployeeUseCases {
       string personnelNumber,
       AdminRights adminRights,
       string? id = null,
+      CancellationToken ct = default
+   );
+   
+   Task<Result<EmployeeProvisionDto>> CreateProvisionedAsync(
+      string?  id, 
+      CancellationToken ct = default
+   );
+   
+   Task<Result<EmployeeDto>> UpdateProfileAsync(
+      EmployeeDto dto, 
       CancellationToken ct = default
    );
 

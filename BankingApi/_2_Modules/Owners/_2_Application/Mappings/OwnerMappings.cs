@@ -6,21 +6,21 @@ public static class OwnerMappings {
 
    public static OwnerDto ToOwnerDto(this Owner owner) => new(
       Id: owner.Id,
-      DisplayName: owner.DisplayName,
-      Email: owner.Email,
-      Status: (int) owner.Status,
-      ProfileComplete: owner.IsProfileComplete,
-      CreatedAt: owner.CreatedAt
-   );
-   
-   public static OwnerProfileDto ToOwnerProfileDto(this Owner owner) => new(
       Firstname: owner.Firstname,
       Lastname: owner.Lastname,
       CompanyName: owner.CompanyName,
       Email: owner.Email,
+      Status: (int) owner.Status,
+      CreatedAt: owner.CreatedAt,
+      DeactivatedAt: owner.DeactivatedAt,
       Street: owner.Address?.Street,
       PostalCode: owner.Address?.PostalCode,
       City: owner.Address?.City,
       Country: owner.Address?.Country
+   );
+   
+   public static OwnerProvisionDto ToOwnerProvisionDto(this Owner owner) => new(
+      Id: owner.Id,
+      ShowProfile: true
    );
 }

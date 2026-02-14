@@ -19,10 +19,10 @@ namespace BankingApi._2_Modules.Employees._2_Application.UseCases;
 /// - Validation of the bitmask (allowed bits) should live in the domain.
 /// </summary>
 public sealed class EmployeeUcSetAdminRights(
-   IEmployeeRepository _repository,
-   IUnitOfWork _unitOfWork,
-   IClock _clock,
-   ILogger<EmployeeUcSetAdminRights> _logger
+   IEmployeeRepository repository,
+   IUnitOfWork unitOfWork,
+   IClock clock,
+   ILogger<EmployeeUcSetAdminRights> logger
 ) {
 
    public async Task<Result> ExecuteAsync(
@@ -30,31 +30,26 @@ public sealed class EmployeeUcSetAdminRights(
       AdminRights adminRights,
       CancellationToken ct
    ) {
-      if (employeeId == Guid.Empty) {
-         var fail = Result.Failure(EmployeeErrors.InvalidId);
-         fail.LogIfFailure(_logger, "EmployeeUcSetAdminRights.InvalidId", new { employeeId });
-         return fail;
-      }
+      if (employeeId == Guid.Empty) 
+         return Result.Failure(EmployeeErrors.InvalidId)
+            .LogIfFailure(logger, "EmployeeUcSetAdminRights.InvalidId", new { employeeId });
 
-      var employee = await _repository.FindByIdAsync(employeeId, false, ct);
-      if (employee is null) {
-         var fail = Result.Failure(EmployeeErrors.NotFound);
-         fail.LogIfFailure(_logger, "EmployeeUcSetAdminRights.NotFound", new { employeeId });
-         return fail;
-      }
+      var employee = await repository.FindByIdAsync(employeeId, false, ct);
+      if (employee is null) 
+         return Result.Failure(EmployeeErrors.NotFound)
+            .LogIfFailure(logger, "EmployeeUcSetAdminRights.NotFound", new { employeeId });
 
-      var result = employee.SetAdminRights(adminRights);
-
-      if (result.IsFailure) {
-         result.LogIfFailure(_logger, "EmployeeUcSetAdminRights.DomainRejected",
+      var result = employee.SetAdminRights(
+         adminRights: adminRights, 
+         updatedAt: clock.UtcNow
+      );
+      if (result.IsFailure) 
+         return result.LogIfFailure(logger, "EmployeeUcSetAdminRights.DomainRejected",
             new { employeeId, adminRights });
-         return result;
-      }
 
-      await _unitOfWork.SaveAllChangesAsync("Employee admin rights updated", ct);
-
+      await unitOfWork.SaveAllChangesAsync("Employee admin rights updated", ct);
       
-      _logger.LogInformation("EmployeeUcSetAdminRights done employeeId={employeeId}", employeeId);
+      logger.LogInformation("EmployeeUcSetAdminRights done employeeId={employeeId}", employeeId);
       return Result.Success();
    }
 }

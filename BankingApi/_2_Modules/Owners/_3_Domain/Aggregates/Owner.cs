@@ -29,8 +29,7 @@ public sealed class Owner : AggregateRoot<Guid> {
 
    // Subject identifier from the identity provider (OIDC / OAuth)
    public string Subject { get; private set; } = default!;
-
-
+   
    // Status (business lifecycle)
    // --------------------------------------------------------------------------
    public OwnerStatus Status { get; private set; } = OwnerStatus.Pending;
@@ -242,9 +241,9 @@ public sealed class Owner : AggregateRoot<Guid> {
       string? postalCode,
       string? city,
       string? country,
-      DateTimeOffset utcNow
+      DateTimeOffset updatedAt
    ) {
-      if (utcNow == default)
+      if (updatedAt == default)
          return Result.Failure(CommonErrors.TimestampIsRequired);
 
       firstname = firstname.Trim();
@@ -296,7 +295,10 @@ public sealed class Owner : AggregateRoot<Guid> {
       Email = emailResult.Value;
       Address = address;
 
-      Touch(utcNow);
+      //SELF-SERVICE: if profile is complete, we auto-activate the owner without employee involvement.
+      // auto-activate on profile completion (no employee involved)
+      Activate(Guid.Empty, updatedAt); 
+      Touch(updatedAt);
       return Result.Success();
    }
 
@@ -306,27 +308,28 @@ public sealed class Owner : AggregateRoot<Guid> {
    /// </summary>
    public Result Activate(
       Guid employeeId, 
-      DateTimeOffset utcNow
+      DateTimeOffset updatedAt
    ) {
+      if (updatedAt == default)
+         return Result.Failure(CommonErrors.TimestampIsRequired);
+      
       // fail early if preconditions for activation are not met
       // (employee, timestamp, status, profile)
       if (employeeId == Guid.Empty)
          return Result.Failure(OwnerErrors.AuditRequiresEmployee);
-      if (utcNow == default)
-         return Result.Failure(CommonErrors.TimestampIsRequired);
       if (Status != OwnerStatus.Pending)
          return Result.Failure(OwnerErrors.NotPending);
       if (!IsProfileComplete)
          return Result.Failure(OwnerErrors.ProfileIncomplete);
-
+   
       Status = OwnerStatus.Active;
-      ActivatedAt = utcNow;
-
+      ActivatedAt = updatedAt;
+   
       AuditedByEmployeeId = employeeId;
       RejectedAt = null;
       RejectionReasonCode = null;
-
-      Touch();
+   
+      Touch(updatedAt);
       return Result.Success();
    }
 
@@ -336,25 +339,26 @@ public sealed class Owner : AggregateRoot<Guid> {
    public Result Reject(
       Guid employeeId, 
       string reasonCode, 
-      DateTimeOffset utcNow
+      DateTimeOffset updatedAt
    ) {
+      if (updatedAt == default)
+         return Result.Failure(CommonErrors.TimestampIsRequired); 
+      
       // fail early if preconditions for rejection are not met
       // (employee, timestamp, status, reason code)
       if (employeeId == Guid.Empty)
          return Result.Failure(OwnerErrors.AuditRequiresEmployee);
       if (string.IsNullOrWhiteSpace(reasonCode))
          return Result.Failure(OwnerErrors.RejectionRequiresReason);
-      if (utcNow == default)
-         return Result.Failure(CommonErrors.TimestampIsRequired);
       if (Status != OwnerStatus.Pending)
          return Result.Failure(OwnerErrors.NotPending);
       
       Status = OwnerStatus.Rejected;
-      RejectedAt = utcNow;
+      RejectedAt = updatedAt;
       AuditedByEmployeeId = employeeId;
       RejectionReasonCode = reasonCode.Trim();
-
-      Touch();
+   
+      Touch(updatedAt);
       return Result.Success();
    }
 
@@ -363,22 +367,23 @@ public sealed class Owner : AggregateRoot<Guid> {
    /// </summary>
    public Result Deactivate(
       Guid employeeId, 
-      DateTimeOffset utcNow
+      DateTimeOffset updatedAt
    ) {
+      if (updatedAt == default)
+         return Result.Failure(CommonErrors.TimestampIsRequired);
+      
       // fail early if preconditions for deactivation are not met
       // (employee, timestamp, status)
       if (employeeId == Guid.Empty)
          return Result.Failure(OwnerErrors.AuditRequiresEmployee);
-      if (utcNow == default)
-         return Result.Failure(CommonErrors.TimestampIsRequired);
       if (Status == OwnerStatus.Deactivated)
          return Result.Failure(OwnerErrors.AlreadyDeactivated);
 
       Status = OwnerStatus.Deactivated;
-      DeactivatedAt = utcNow;
+      DeactivatedAt = updatedAt;
       DeactivatedByEmployeeId = employeeId;
 
-      Touch();
+      Touch(updatedAt);
       return Result.Success();
    }
 
@@ -387,23 +392,23 @@ public sealed class Owner : AggregateRoot<Guid> {
    /// </summary>
    public Result ChangeEmail(
       string email, 
-      DateTimeOffset utcNow
+      DateTimeOffset updatedAt
    ) {
+      if (updatedAt == default)
+         return Result.Failure(CommonErrors.TimestampIsRequired);
+      
       // Normalize email early
       email = email.Trim();
-      
       // fail early if preconditions for email change are not met
       if (string.IsNullOrWhiteSpace(email))
          return Result.Failure(OwnerErrors.EmailIsRequired);
-      if (utcNow == default)
-         return Result.Failure(CommonErrors.TimestampIsRequired);
       
       var resultEmail = EmailAddress.Check(email);
       if (resultEmail.IsFailure)
          return Result.Failure(resultEmail.Error);
 
       Email = resultEmail.Value;
-      Touch(utcNow);
+      Touch(updatedAt);
       return Result.Success();
    }
 }

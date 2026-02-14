@@ -22,7 +22,7 @@ public static class DiOwnersModule {
       // WriteModels = Use Cases
       services.AddScoped<OwnerUcCreate>();
       services.AddScoped<OwnerUcCreateProvisioned>();
-      services.AddScoped<OwnerUcUpsertProfile>();
+      services.AddScoped<OwnerUcUpdateProfile>();
       services.AddScoped<OwnerUcActivate>();
       services.AddScoped<OwnerUcReject>();
       services.AddScoped<OwnerUcDeactivate>();

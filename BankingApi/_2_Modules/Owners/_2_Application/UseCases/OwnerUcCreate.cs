@@ -46,7 +46,9 @@ public sealed class OwnerUcCreate(
       );
       
       if (result.IsFailure) 
-         return Result<Guid>.Failure(result.Error);
+         return Result<Guid>.Failure(result.Error)
+            .LogIfFailure(_logger, "OwnerUcCreate.DomainRejected",
+               new { firstname, lastname, companyName, email, subject, id, street, postalCode, city, country });
       
       // Add owner to repository (tracked by EF)
       var owner = result.Value!;

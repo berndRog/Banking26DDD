@@ -6,7 +6,7 @@ public interface IEmployeeReadModel {
    
    Task<Result<Guid>> FindMeProvisionedAsync(CancellationToken ct);
    
-   Task<Result<EmployeeProfileDto>> FindMeAsync(CancellationToken ct);
+   Task<Result<EmployeeDto>> FindMeAsync(CancellationToken ct);
    
    Task<Result<EmployeeDto>> FindByIdAsync(
       Guid Id, 

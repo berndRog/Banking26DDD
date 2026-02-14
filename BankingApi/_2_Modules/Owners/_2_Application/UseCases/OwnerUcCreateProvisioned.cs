@@ -2,6 +2,7 @@ using BankingApi._2_Modules.Employees._3_Domain.Enums;
 using BankingApi._2_Modules.Owners._1_Ports.Outbound;
 using BankingApi._2_Modules.Owners._2_Application.Dtos;
 using BankingApi._2_Modules.Owners._2_Application.Errors;
+using BankingApi._2_Modules.Owners._2_Application.Mappings;
 using BankingApi._2_Modules.Owners._3_Domain.Aggregates;
 using BankingApi._4_BuildingBlocks;
 using BankingApi._4_BuildingBlocks._1_Ports.Inbound;
@@ -31,24 +32,15 @@ public class OwnerUcCreateProvisioned(
 
       // 2) idempotent lookup
       var existing = await repository.FindByIdentitySubjectAsync(subject, false, ct);
-      existing = await repository.FindByIdentitySubjectAsync(subject, false, ct);
-      if (existing is not null) {
-         return Result<OwnerProvisionDto>.Success(
-            new OwnerProvisionDto(
-               Id: existing.Id,
-               IsProvioned: false
-            )
-         );
-      }
+      if (existing is not null) 
+         return Result<OwnerProvisionDto>.Success(existing.ToOwnerProvisionDto());
       
       // 3) required identity data (translate missing-claim exceptions)
       string username;
       DateTimeOffset createdAt;
-      AdminRights adminRights;
       try {
          username = identityGateway.Username;   // preferred_username
          createdAt = identityGateway.CreatedAt; // created_at
-         adminRights = (AdminRights)identityGateway.AdminRights; // admin_rights
       }
       catch (InvalidOperationException ex) {
          logger.LogWarning(ex, "Provisioning failed: required identity claim missing (sub={sub})", subject);
@@ -69,7 +61,9 @@ public class OwnerUcCreateProvisioned(
       // 4) create aggregate
       var resultOwner = Owner.CreateProvisioned(clock, subject, email, createdAt, id);
       if (resultOwner.IsFailure)
-         return Result<OwnerProvisionDto>.Failure(resultOwner.Error);
+         return Result<OwnerProvisionDto>.Failure(resultOwner.Error)
+            .LogIfFailure(logger, "OwnerUcCreateProvisioned.DomainRejected", 
+               new { subject, email, createdAt, id });
 
       // 5) add to repository
       var owner = resultOwner.Value;
@@ -83,11 +77,6 @@ public class OwnerUcCreateProvisioned(
          subject, owner.Id, savedRows
       );
       
-      return Result<OwnerProvisionDto>.Success(
-         new OwnerProvisionDto(
-            Id: owner.Id,
-            IsProvioned: true
-         )
-      );
+      return Result<OwnerProvisionDto>.Success(owner.ToOwnerProvisionDto());
    }
 }

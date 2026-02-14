@@ -6,19 +6,19 @@ public enum AdminRights {
    None = 0,
 
    // Reports / Audit
-   ViewReports = 1 << 0,
+   ViewReports = 1 << 0,    // 0000001
 
    // Customers / Owners (KYC approval etc.)
    ViewOwners   = 1 << 1,
    // activate/reject/deactivate owners
    ManageOwners = 1 << 2, 
 
-   // Accounts
-   ViewAccounts   = 1 << 3,     //    8
+   // Accounts & Beneficiaries
+   ViewAccounts   =  1 << 3,     //    8
    // activate/deactivate accounts
    ManageAccounts = 1 << 4,     //   16
 
-   // Transfers
+   // Transfers & Transactions
    ViewTransfers   = 1 << 5,    //   32
    // manual review / cancel (if applicable)
    ManageTransfers = 1 << 6,    //   64

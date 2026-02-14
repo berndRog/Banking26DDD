@@ -26,7 +26,7 @@ namespace BankingApi._2_Modules.Employees._2_Application.UseCases;
 public sealed class EmployeeUseCases(
    EmployeeUcCreate createUc,
    EmployeeUcCreateProvisioned createProvisionedUc,
-   EmployeeUcUpsertProfile upsertProfileUc,
+   EmployeeUcUpdateProfile updateProfileUc,
    EmployeeUcDeactivate deactivateUc,
    EmployeeUcSetAdminRights setRightsUc
 ) : IEmployeeUseCases {
@@ -52,15 +52,15 @@ public sealed class EmployeeUseCases(
       ct: ct
    );
 
-   public Task<Result<Guid>> CreateProvisionedAsync(
+   public Task<Result<EmployeeProvisionDto>> CreateProvisionedAsync(
       string? id, 
       CancellationToken ct
    ) => createProvisionedUc.ExecuteAsync(id, ct);
 
-   public Task<Result<EmployeeProfileDto>> UpsertProfileAsync(
-      EmployeeProfileDto dto, 
+   public Task<Result<EmployeeDto>> UpdateProfileAsync(
+      EmployeeDto dto, 
       CancellationToken ct
-   ) => upsertProfileUc.ExecuteAsync(dto, ct);
+   ) => updateProfileUc.ExecuteAsync(dto, ct);
 
    
    public Task<Result> DeactivateAsync(

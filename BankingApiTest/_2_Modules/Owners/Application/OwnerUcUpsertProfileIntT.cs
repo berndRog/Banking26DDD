@@ -27,7 +27,7 @@ public sealed class OwnerUcUpsertProfileIt : TestBase, IAsyncLifetime {
    
    private IIdentityGateway _identityGateway = null!;
    private OwnerUcCreateProvisioned _ownerUcCreateProvisioned = null!;
-   private OwnerUcUpsertProfile _sut = null!;
+   private OwnerUcUpdateProfile _sut = null!;
    
    private Guid _ownerId;
    private string _id = default!;
@@ -75,12 +75,12 @@ public sealed class OwnerUcUpsertProfileIt : TestBase, IAsyncLifetime {
          _clock, CreateLogger<OwnerUcCreateProvisioned>());
       
       // system under test
-      _sut = new OwnerUcUpsertProfile(
+      _sut = new OwnerUcUpdateProfile(
          _identityGateway,
          _repository,
          _unitOfWork,
          _clock,
-         CreateLogger<OwnerUcUpsertProfile>()
+         CreateLogger<OwnerUcUpdateProfile>()
       );
    }
 
@@ -101,17 +101,21 @@ public sealed class OwnerUcUpsertProfileIt : TestBase, IAsyncLifetime {
       True(resultProvisioned.IsSuccess);
       var ownerId = resultProvisioned.Value.Id;
 
-      // new profile data    
+      // new profile data  
+      var id = _seed.Owner5.Id;
       var firstname = _seed.Owner5.Firstname;
       var lastname = _seed.Owner5.Lastname;
       var companyName = _seed.Owner5.CompanyName;
       var email = "neue.mail@mail.local";
+      var status = (int) _seed.Owner5.Status;
+      var createdAt = _seed.Owner5.CreatedAt;
+      var deactivatedAt = _seed.Owner5.DeactivatedAt;
       var street = _seed.Owner5.Address?.Street;
       var postalCode = _seed.Owner5.Address?.PostalCode;
       var city = _seed.Owner5.Address?.City;
       var country = _seed.Owner5.Address?.Country;
-      var dto = new OwnerProfileDto(firstname, lastname, companyName, email,
-         street, postalCode, city, country);
+      var dto = new OwnerDto(id, firstname, lastname, companyName, email,
+         status, createdAt, deactivatedAt, street, postalCode, city, country);
 
       // Act
       var resultProfile = await _sut.ExecuteAsync(dto, CancellationToken.None);

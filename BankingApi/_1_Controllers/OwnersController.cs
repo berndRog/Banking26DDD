@@ -11,17 +11,23 @@ namespace BankingApi._1_Controllers;
 public sealed class OwnersController(
    IOwnerReadModel _readModel,
    OwnerUcCreateProvisioned ucCreateProvisioned,
-   OwnerUcUpsertProfile _ucUpdateProfile,
+   OwnerUcUpdateProfile _ucUpdateProfile,
    ILogger<OwnersController> _logger
 ) : ControllerBase {
 
    private readonly string UrlStart = "bankingapi/v1";
-   
+
+   // Route constants
+   private const string ProvisionedRoute = "owners/me/provisioned";
+   private const string ProfileRoute     = "owners/me/profile";
+   private const string OwnerByIdRoute   = "owners/{id:guid}";
+   private const string OwnerByEmailRoute = "owners/email/{email}";
+
    // ------------------------------------------------------------------
    // SELF-SERVICE (logged-in user)
    // ------------------------------------------------------------------
    [Authorize(Policy = "OwnersOnly")]
-   [HttpPost("owners/me/provisioned")]
+   [HttpPost(ProvisionedRoute)]
    [EndpointSummary("Provision owner on first login (idempotent)")]
    [ProducesResponseType<Guid>(StatusCodes.Status200OK)]
    [ProducesResponseType<ProblemDetails>(StatusCodes.Status400BadRequest, "application/problem+json")]
@@ -35,49 +41,49 @@ public sealed class OwnersController(
       
       var result = await ucCreateProvisioned.ExecuteAsync(null, ct);
       
-      return this.ToActionResult<OwnerProvisionDto>(
+      return this.ToActionResult(
          result,
          _logger,
-         context: $"POST {UrlStart}/owners/me/provisioned",
+         context: $"POST {UrlStart}/{ProvisionedRoute}",
          args: new { }
       );
    }
 
    [Authorize(Policy = "OwnersOnly")]
-   [HttpGet("owners/me/profile")]
+   [HttpGet(ProfileRoute)]
    [EndpointSummary("Get my customer profile (requires provisioning)")]
-   [ProducesResponseType<OwnerProfileDto>(StatusCodes.Status200OK)]
+   [ProducesResponseType<OwnerDto>(StatusCodes.Status200OK)]
    [ProducesResponseType<ProblemDetails>(StatusCodes.Status404NotFound, "application/problem+json")]
    [ProducesResponseType<ProblemDetails>(StatusCodes.Status401Unauthorized, "application/problem+json")]
-   public async Task<ActionResult<OwnerProfileDto>> GetMyProfile(CancellationToken ct) {
+   public async Task<ActionResult<OwnerDto>> GetMyProfile(CancellationToken ct) {
       var result = await _readModel.FindMeAsync(ct);
     
-      return this.ToActionResult<OwnerProfileDto>(
+      return this.ToActionResult<OwnerDto>(
          result,
          _logger,
-         context: $"GET {UrlStart}/owners/me/profile",
+         context: $"GET {UrlStart}/{ProfileRoute}",
          args: null
       );
    }
 
    [Authorize(Policy = "OwnersOnly")]
-   [HttpPut("owners/me/profile")]
+   [HttpPut(ProfileRoute)]
    [Authorize]
    [EndpointSummary("Update my customer profile (requires provisioning)")]
-   [ProducesResponseType<OwnerProfileDto>(StatusCodes.Status200OK)]
+   [ProducesResponseType<OwnerDto>(StatusCodes.Status200OK)]
    [ProducesResponseType<ProblemDetails>(StatusCodes.Status400BadRequest, "application/problem+json")]
    [ProducesResponseType<ProblemDetails>(StatusCodes.Status404NotFound, "application/problem+json")]
    [ProducesResponseType<ProblemDetails>(StatusCodes.Status401Unauthorized, "application/problem+json")]
-   public async Task<ActionResult<OwnerProfileDto>> PutUpdateProfile(
-      [FromBody] OwnerProfileDto dto,
+   public async Task<ActionResult<OwnerDto>> PutUpdateProfile(
+      [FromBody] OwnerDto dto,
       CancellationToken ct
    ) {
       var result = await _ucUpdateProfile.ExecuteAsync(dto, ct);
       
-      return this.ToActionResult<OwnerProfileDto>(
+      return this.ToActionResult<OwnerDto>(
          result,
          _logger,
-         context: $"PUT {UrlStart}/owners/me/profile",
+         context: $"PUT {UrlStart}/{ProfileRoute}",
          args: dto
       );
    }
@@ -93,7 +99,7 @@ public sealed class OwnersController(
    // danach auf Policy hochziehen.
    // ------------------------------------------------------------------
 
-   [HttpGet("owners/{id:guid}", Name = "GetCustomerById")]
+   [HttpGet(OwnerByIdRoute, Name = "GetCustomerById")]
    [Authorize] // später ggf. Policy="EmployeesOnly"
    [EndpointSummary("Get a customer by ReservationId")]
    [ProducesResponseType<OwnerDto>(StatusCodes.Status200OK)]
@@ -107,12 +113,12 @@ public sealed class OwnersController(
       return this.ToActionResult<OwnerDto>(
          result,
          _logger,
-         context: $"GET {UrlStart}/owners/{id}",
+         context: $"GET {UrlStart}/{OwnerByIdRoute.Replace("{id:guid}", id.ToString())}",
          args: new { id }
       );
    }
 
-   [HttpGet("customers/email/{email}")]
+   [HttpGet(OwnerByEmailRoute)]
    [Authorize] // später ggf. Policy="EmployeesOnly"
    [EndpointSummary("Get a customer by email")]
    [ProducesResponseType<OwnerDto>(StatusCodes.Status200OK)]
@@ -125,7 +131,7 @@ public sealed class OwnersController(
       return this.ToActionResult<OwnerDto>(
          result,
          _logger,
-         context: $"GET {UrlStart}/owners/email/{email}",
+         context: $"GET {UrlStart}/{OwnerByEmailRoute.Replace("{email}", email)}",
          args: new { email }
       );
    }

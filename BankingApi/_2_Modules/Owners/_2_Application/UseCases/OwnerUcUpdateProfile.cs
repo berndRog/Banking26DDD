@@ -9,32 +9,32 @@ using BankingApi._4_BuildingBlocks._3_Domain;
 using BankingApi._4_BuildingBlocks._4_Infrastructure.Persistence;
 namespace BankingApi._2_Modules.Owners._2_Application.UseCases;
 
-public class OwnerUcUpsertProfile(
+public class OwnerUcUpdateProfile(
    IIdentityGateway identityGateway,
    IOwnerRepository repository,
    IUnitOfWork unitOfWork,
    IClock clock,
-   ILogger<OwnerUcUpsertProfile> logger
+   ILogger<OwnerUcUpdateProfile> logger
 ) {
    
-   public async Task<Result<OwnerProfileDto>> ExecuteAsync(
-      OwnerProfileDto dto,
+   public async Task<Result<OwnerDto>> ExecuteAsync(
+      OwnerDto dto,
       CancellationToken ct
    ) {
       // subject from gateway
       var subjectResult = IdentitySubject.Check(identityGateway.Subject);
       if (subjectResult.IsFailure)
-         return Result<OwnerProfileDto>.Failure(subjectResult.Error);
+         return Result<OwnerDto>.Failure(subjectResult.Error);
       var subject = subjectResult.Value;
 
       // must be provisioned
       var owner = await repository.FindByIdentitySubjectAsync(subject, false, ct);
       if (owner is null)
-         return Result<OwnerProfileDto>.Failure(OwnerApplicationErrors.NotProvisioned);
+         return Result<OwnerDto>.Failure(OwnerApplicationErrors.NotProvisioned);
 
       // optional: forbid employees/admins
       if (identityGateway.AdminRights != 0)
-         return Result<OwnerProfileDto>.Failure(
+         return Result<OwnerDto>.Failure(
             OwnerApplicationErrors.EmployeesCannotUpdateCustomerProfile);
 
       // override email address (if changed) 
@@ -43,29 +43,30 @@ public class OwnerUcUpsertProfile(
          // create new email value object from dto.Email
          var resultDtoEmail = EmailAddress.Check(dto.Email);
          if (resultDtoEmail.IsFailure)
-            return Result<OwnerProfileDto>.Failure(resultDtoEmail.Error);
+            return Result<OwnerDto>.Failure(resultDtoEmail.Error);
          // check uniqueness
          var existingByEmail = await repository.FindByEmailAsync(dto.Email, false, ct);
          if (existingByEmail is not null && existingByEmail.Id != owner.Id)
-            return Result<OwnerProfileDto>.Failure(OwnerApplicationErrors.EmailAlreadyInUse);
+            return Result<OwnerDto>.Failure(OwnerApplicationErrors.EmailAlreadyInUse);
          // override previous email
          email = dto.Email;
       }
 
       // domain update (now includes country)
       var updateResult = owner.UpdateProfile(
-         dto.Firstname,
-         dto.Lastname,
-         dto.CompanyName,
-         email,
-         dto.Street,
-         dto.PostalCode,
-         dto.City,
-         dto.Country,
-         clock.UtcNow
+         firstname: dto.Firstname,
+         lastname: dto.Lastname,
+         companyName: dto.CompanyName,
+         email: email,
+         street: dto.Street,
+         postalCode: dto.PostalCode,
+         city: dto.City,
+         country: dto.Country,
+         updatedAt: clock.UtcNow
       );
       if (updateResult.IsFailure)
-         return Result<OwnerProfileDto>.Failure(updateResult.Error);
+         return Result<OwnerDto>.Failure(updateResult.Error)
+            .LogIfFailure(logger, "OwnerUcUpdateProfile.DomainRejected", new { dto, subject });
 
       // persist changes with unit of work
       var savedRows = await unitOfWork.SaveAllChangesAsync("Owner profile updated", ct);
@@ -75,6 +76,6 @@ public class OwnerUcUpsertProfile(
          subject, owner.Id, savedRows
       );
       
-      return Result<OwnerProfileDto>.Success(owner.ToOwnerProfileDto());
+      return Result<OwnerDto>.Success(owner.ToOwnerDto());
    }
 }

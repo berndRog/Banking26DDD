@@ -10,18 +10,15 @@ public static class EmployeeMappings {
       Lastname: employee.Lastname,
       Email: employee.Email,
       Phone: employee?.Phone,
-      PersonnelNumber: employee.PersonnelNumber,
+      PersonnelNumber: employee!.PersonnelNumber,
       IsActive: employee.IsActive,
       AdminRights: (int) employee.AdminRights,  
       CreatedAt: employee.CreatedAt,
       DeactivatedAt: employee.DeactivatedAt
    );
    
-   public static EmployeeProfileDto ToEmployeeProfileDto(this Employee employee) => new(
-      Firstname: employee.Firstname,
-      Lastname: employee.Lastname,
-      Email: employee.Email,
-      Phone: employee.Phone,
-      PersonnelNumber: employee.PersonnelNumber
+   public static EmployeeProvisionDto ToEmployeeProvisionDto(this Employee employee) => new(
+      Id: employee.Id,
+      ShowProfile: true
    );
 }

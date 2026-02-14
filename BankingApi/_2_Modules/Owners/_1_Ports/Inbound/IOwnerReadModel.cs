@@ -6,10 +6,8 @@ public interface IOwnerReadModel {
    
    Task<Result<Guid>> FindMeProvisionedAsync(CancellationToken ct);
    
-   Task<Result<OwnerProfileDto>> FindMeAsync(CancellationToken ct);
-   
-   Task<Result<int>> FindMyStatusAsync(CancellationToken ct);
-   
+   Task<Result<OwnerDto>> FindMeAsync(CancellationToken ct);
+
    Task<Result<OwnerDto>> FindByIdAsync(
       Guid Id, 
       CancellationToken ct = default

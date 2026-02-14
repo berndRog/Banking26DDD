@@ -8,7 +8,7 @@ namespace BankingApi._2_Modules.Owners._2_Application.UseCases;
 public class OwnerUseCases(
    OwnerUcCreate createUc,
    OwnerUcCreateProvisioned createProvisionedUc,
-   OwnerUcUpsertProfile upsertProfileUc,
+   OwnerUcUpdateProfile updateProfileUc,
    OwnerUcActivate activateUc,
    OwnerUcReject rejectUc,
    OwnerUcDeactivate deactivateUc,
@@ -35,10 +35,10 @@ public class OwnerUseCases(
       CancellationToken ct
    ) => createProvisionedUc.ExecuteAsync(id, ct);
 
-   public Task<Result<OwnerProfileDto>> UpsertProfileAsync(
-      OwnerProfileDto dto, 
+   public Task<Result<OwnerDto>> UpdateProfileAsync(
+      OwnerDto dto, 
       CancellationToken ct
-   ) => upsertProfileUc.ExecuteAsync(dto, ct);
+   ) => updateProfileUc.ExecuteAsync(dto, ct);
    
    public Task<Result> ActivateAsync(
       Guid ownerId, 

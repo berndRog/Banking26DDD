@@ -1,13 +1,10 @@
 using BankingApi._2_Modules.Employees._3_Domain.Enums;
 using BankingApi._2_Modules.Employees._3_Domain.Errors;
-using BankingApi._2_Modules.Owners._3_Domain.Aggregates;
 using BankingApi._2_Modules.Owners._3_Domain.Errors;
 using BankingApi._4_BuildingBlocks;
 using BankingApi._4_BuildingBlocks._1_Ports.Inbound;
 using BankingApi._4_BuildingBlocks._3_Domain;
 using BankingApi._4_BuildingBlocks._3_Domain.Entities;
-using BankingApi._4_BuildingBlocks._3_Domain.Errors;
-using BankingApi._4_BuildingBlocks._3_Domain.ValueObjects;
 using BankingApi._4_BuildingBlocks._4_Infrastructure;
 namespace BankingApi._2_Modules.Employees._3_Domain.Aggregates;
 
@@ -38,13 +35,20 @@ public sealed class Employee : AggregateRoot<Guid> {
    public string  Email     { get; private set; } = default!;
    public string? Phone { get; private set; } = null;
   
-   public string  Subject { get; private set; } = default!; // OidvOAuthServer
+   public string  Subject { get; private set; } = default!; // IdentityAccessServer
    
    public string PersonnelNumber { get; private set; } = string.Empty;
    public AdminRights AdminRights { get; private set; } = AdminRights.ViewReports;
    public bool IsAdmin => AdminRights != AdminRights.None;
    public bool IsActive { get; private set; }
    public DateTimeOffset? DeactivatedAt { get; private set; }
+
+   private const AdminRights AllowedRights =
+      AdminRights.ViewReports |
+      AdminRights.ViewOwners | AdminRights.ManageOwners |
+      AdminRights.ViewAccounts | AdminRights.ManageAccounts |
+      AdminRights.ViewTransfers | AdminRights.ManageTransfers |
+      AdminRights.ViewEmployees | AdminRights.ManageEmployees; 
    
    // EF Core constructor
    private Employee(): base(new BankingSystemClock()) { }
@@ -188,6 +192,7 @@ public sealed class Employee : AggregateRoot<Guid> {
          adminRights: adminRights,
          isActive: true
       );
+      
       // Provisioning should reflect identity creation time (not "now")
       employee.SetCreatedAt(createdAt);
 
@@ -207,7 +212,8 @@ public sealed class Employee : AggregateRoot<Guid> {
       string lastname,
       string email,
       string? phone,
-      string personnelNumber
+      string personnelNumber,
+      DateTimeOffset updatedAt
    ) {
 
       firstname = firstname.Trim();
@@ -218,18 +224,19 @@ public sealed class Employee : AggregateRoot<Guid> {
 
       // Validate required profile fields
       if (string.IsNullOrWhiteSpace(firstname))
-         return Result.Failure(OwnerErrors.FirstnameIsRequired);
+         return Result.Failure(EmployeeErrors.FirstnameIsRequired);
+            
       if (firstname.Length is < 2 or > 80)
-         return Result.Failure(OwnerErrors.InvalidFirstname);
+         return Result.Failure(EmployeeErrors.InvalidFirstname);
 
       if (string.IsNullOrWhiteSpace(lastname))
-         return Result.Failure(OwnerErrors.LastnameIsRequired);
+         return Result.Failure(EmployeeErrors.LastnameIsRequired);
       if (lastname.Length is < 2 or > 80)
-         return Result.Failure(OwnerErrors.InvalidLastname);
+         return Result.Failure(EmployeeErrors.InvalidLastname);
       
       // Validate email in domain (do not rely on caller)
       if (string.IsNullOrWhiteSpace(email))
-         return Result.Failure(OwnerErrors.EmailIsRequired);
+         return Result.Failure(EmployeeErrors.EmailIsRequired);
 
       var emailResult = EmailAddress.Check(email);
       if (emailResult.IsFailure)
@@ -253,7 +260,7 @@ public sealed class Employee : AggregateRoot<Guid> {
       Phone = phone;
       PersonnelNumber = personnelNumber;
       
-      Touch();
+      Touch(updatedAt);
       return Result.Success();
    }
 
@@ -269,13 +276,16 @@ public sealed class Employee : AggregateRoot<Guid> {
    /// - Success if the rights are valid and applied
    /// - Failure if the bitmask contains unsupported flags
    /// </summary>
-   public Result SetAdminRights(AdminRights adminRights) {
-
-      // Validate allowed bits
-      if (!Enum.IsDefined(typeof(AdminRights), adminRights))
+   public Result SetAdminRights(
+      AdminRights adminRights, 
+      DateTimeOffset updatedAt
+   ) {
+      if ((adminRights & ~AllowedRights) != 0)
          return Result.Failure(EmployeeErrors.InvalidAdminRightsBitmask);
 
       AdminRights = adminRights;
+      
+      Touch(updatedAt);
       return Result.Success();
    }
 
@@ -289,12 +299,16 @@ public sealed class Employee : AggregateRoot<Guid> {
    /// - Sets IsActive to false
    /// - Records the deactivation timestamp
    /// </summary>
-   public Result Deactivate(DateTimeOffset deactivatedAt) {
+   public Result Deactivate(
+      DateTimeOffset deactivatedAt
+   ) {
       if (!IsActive)
          return Result.Failure(EmployeeErrors.AlreadyDeactivated);
 
       IsActive = false;
       DeactivatedAt = deactivatedAt;
+      
+      Touch(deactivatedAt);
       return Result.Success();
    }
 }

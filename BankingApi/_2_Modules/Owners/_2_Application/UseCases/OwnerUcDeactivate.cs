@@ -42,7 +42,8 @@ public sealed class OwnerUcDeactivate(
       var employeeId = ParseEmployeeId(identityGateway.Subject);
       var result = owner.Deactivate(employeeId, now);
       if (result.IsFailure)
-         return Result.Failure(result.Error);
+         return Result.Failure(result.Error)
+            .LogIfFailure(logger, "OwnerUcDeactivate.DomainRejected", new { ownerId, employeeId, now });
 
       // 5) Persist
       var savedRows = await unitOfWork.SaveAllChangesAsync("Owner deactivated by employee", ct);

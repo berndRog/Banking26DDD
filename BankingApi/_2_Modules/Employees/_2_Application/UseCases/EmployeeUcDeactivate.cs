@@ -31,14 +31,13 @@ public sealed class EmployeeUcDeactivate(
    ) {
        // 1) Check guards
       if (deactivatedAt == default)
-         return Result.Failure(EmployeeErrors.DeactivatedAtIsRequired);
+         return Result.Failure(EmployeeErrors.DeactivatedAtIsRequired)
+            .LogIfFailure(_logger, "EmployeeUcDeactivate.DeactivatedAtIsRequired", employeeId);
       
-      if (employeeId == Guid.Empty) {
-         var fail = Result.Failure(EmployeeErrors.InvalidId);
-         fail.LogIfFailure(_logger, "EmployeeUcDeactivate.InvalidId", new { employeeId });
-         return fail;
-      }
-
+      if (employeeId == Guid.Empty) 
+         return Result.Failure(EmployeeErrors.InvalidId)
+            .LogIfFailure(_logger, "EmployeeUcDeactivate.InvalidId", employeeId );
+      
       // 2) Load aggregate (tracked)
       var employee = await _repository.FindByIdAsync(employeeId, false, ct);
       if (employee is null) {

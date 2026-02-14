@@ -36,24 +36,24 @@ public sealed class EmployeeReadModelEf(
    }
 
    
-   public async Task<Result<EmployeeProfileDto>> FindMeAsync(CancellationToken ct) {
+   public async Task<Result<EmployeeDto>> FindMeAsync(CancellationToken ct) {
       
       // 1) Subject from Gateway
       var subjectResult = IdentitySubject.Check(identityGateway.Subject);
       if (subjectResult.IsFailure)
-         return Result<EmployeeProfileDto>.Failure(subjectResult.Error);
+         return Result<EmployeeDto>.Failure(subjectResult.Error);
       var subject = subjectResult.Value;
 
       // 2) load Employee by subject (NO tracking, read-only)
       var employeeDto = await dbContext.Employees
          .AsNoTracking()
-         .Where(c => c.Subject == subject)       // filter by subject
-         .Select(c => c.ToEmployeeProfileDto())  // project to EmployeeProfileDto (map)
+         .Where(c => c.Subject == subject)   // filter by subject
+         .Select(c => c.ToEmployeeDto())     // project to EmployeeDto (map)
          .SingleOrDefaultAsync(ct);
       
       if (employeeDto is null)
-         return Result<EmployeeProfileDto>.Failure(EmployeeApplicationErrors.NotProvisioned);   
-      return Result<EmployeeProfileDto>.Success(employeeDto);
+         return Result<EmployeeDto>.Failure(EmployeeApplicationErrors.NotProvisioned);   
+      return Result<EmployeeDto>.Success(employeeDto);
       
    }
    

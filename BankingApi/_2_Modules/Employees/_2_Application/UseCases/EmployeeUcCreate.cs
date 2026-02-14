@@ -65,7 +65,9 @@ public sealed class EmployeeUcCreate(
          id: id
       );
       if (result.IsFailure)
-         return Result<Guid>.Failure(result.Error);
+         return Result<Guid>.Failure(result.Error)
+            .LogIfFailure(_logger, "EmployeeUcCreate.DomainRejected", 
+               new { firstname, lastname, email, phoneString, subject, personnelNumber, adminRights });
 
       // Add to repository
       var employee = result.Value!;

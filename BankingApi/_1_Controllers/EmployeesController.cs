@@ -13,18 +13,23 @@ namespace BankingApi._1_Controllers;
 public sealed class EmployeesController(
    IEmployeeReadModel _readModel,
    EmployeeUcCreateProvisioned _ucCreateProvisioned,
-   EmployeeUcUpsertProfile _ucUpsertProfile,
+   EmployeeUcUpdateProfile ucUpdateProfile,
    ILogger<EmployeesController> _logger
 ) : ControllerBase {
 
-   private readonly string UrlStart = "bankingapi/v1";
+   // Route constants
+   private const string UrlStart = "bankingapi/v1";
+   
+   private const string ProvisionedRoute     = "employees/me/provisioned";
+   private const string ProfileRoute         = "employees/me/profile";
+   private const string EmployeeByIdRoute    = "employees/{id:guid}";
+   private const string EmployeeByEmailRoute = "employees/email/{email}";
 
    // ------------------------------------------------------------------
    // SELF-SERVICE (logged-in employee)
    // ------------------------------------------------------------------
-
    [Authorize(Policy = "EmployeesOnly")]
-   [HttpPost("employees/me/provisioned")]
+   [HttpPost(ProvisionedRoute)]
    [EndpointSummary("Provision employee on first login (idempotent)")]
    [ProducesResponseType<Guid>(StatusCodes.Status200OK)]
    [ProducesResponseType<ProblemDetails>(StatusCodes.Status400BadRequest, "application/problem+json")]
@@ -39,49 +44,49 @@ public sealed class EmployeesController(
       // Mirror Owners: the UC derives Subject etc. via IdentityGateway
       var result = await _ucCreateProvisioned.ExecuteAsync(null, ct);
 
-      return this.ToActionResult<Guid>(
+      return this.ToActionResult(
          result,
          _logger,
-         context: $"POST {UrlStart}/employees/me/provisioned",
+         context: $"POST {UrlStart}/{ProvisionedRoute}",
          args: new { }
       );
    }
 
    [Authorize(Policy = "EmployeesOnly")]
-   [HttpGet("employees/me/profile")]
+   [HttpGet(ProfileRoute)]
    [EndpointSummary("Get my employee profile (requires provisioning)")]
-   [ProducesResponseType<EmployeeProfileDto>(StatusCodes.Status200OK)]
+   [ProducesResponseType<EmployeeDto>(StatusCodes.Status200OK)]
    [ProducesResponseType<ProblemDetails>(StatusCodes.Status404NotFound, "application/problem+json")]
    [ProducesResponseType<ProblemDetails>(StatusCodes.Status401Unauthorized, "application/problem+json")]
-   public async Task<ActionResult<EmployeeProfileDto>> GetMyProfile(CancellationToken ct) {
+   public async Task<ActionResult<EmployeeDto>> GetMyProfile(CancellationToken ct) {
 
       var result = await _readModel.FindMeAsync(ct);
 
-      return this.ToActionResult<EmployeeProfileDto>(
+      return this.ToActionResult(
          result,
          _logger,
-         context: $"GET {UrlStart}/employees/me/profile",
+         context: $"GET {UrlStart}/{ProfileRoute}",
          args: null
       );
    }
 
    [Authorize(Policy = "EmployeesOnly")]
-   [HttpPut("employees/me/profile")]
+   [HttpPut(ProfileRoute)]
    [EndpointSummary("Update my employee profile (requires provisioning)")]
-   [ProducesResponseType<EmployeeProfileDto>(StatusCodes.Status200OK)]
+   [ProducesResponseType<EmployeeProvisionDto>(StatusCodes.Status200OK)]
    [ProducesResponseType<ProblemDetails>(StatusCodes.Status400BadRequest, "application/problem+json")]
    [ProducesResponseType<ProblemDetails>(StatusCodes.Status404NotFound, "application/problem+json")]
    [ProducesResponseType<ProblemDetails>(StatusCodes.Status401Unauthorized, "application/problem+json")]
-   public async Task<ActionResult<EmployeeProfileDto>> PutUpdateProfile(
-      [FromBody] EmployeeProfileDto dto,
+   public async Task<ActionResult<EmployeeDto>> PutUpdateProfile(
+      [FromBody] EmployeeDto dto,
       CancellationToken ct
    ) {
-      var result = await _ucUpsertProfile.ExecuteAsync(dto, ct);
+      var result = await ucUpdateProfile.ExecuteAsync(dto, ct);
 
-      return this.ToActionResult<EmployeeProfileDto>(
+      return this.ToActionResult(
          result,
          _logger,
-         context: $"PUT {UrlStart}/employees/me/profile",
+         context: $"PUT {UrlStart}/{ProfileRoute}",
          args: dto
       );
    }
@@ -97,7 +102,7 @@ public sealed class EmployeesController(
    // and then fine-grained AdminRights in the UC.
    // ------------------------------------------------------------------
 
-   [HttpGet("employees/{id:guid}", Name = "GetEmployeeById")]
+   [HttpGet(EmployeeByIdRoute, Name = "GetEmployeeById")]
    [Authorize] // optionally: Policy="EmployeesOnly"
    [EndpointSummary("Get an employee by id (directory)")]
    [ProducesResponseType<EmployeeDto>(StatusCodes.Status200OK)]
@@ -112,12 +117,12 @@ public sealed class EmployeesController(
       return this.ToActionResult<EmployeeDto>(
          result,
          _logger,
-         context: $"GET {UrlStart}/employees/{id}",
+         context: $"GET {UrlStart}/{EmployeeByIdRoute.Replace("{id:guid}", id.ToString())}",
          args: new { id }
       );
    }
 
-   [HttpGet("employees/email/{email}")]
+   [HttpGet(EmployeeByEmailRoute)]
    [Authorize] // optionally: Policy="EmployeesOnly"
    [EndpointSummary("Get an employee by email (directory)")]
    [ProducesResponseType<EmployeeDto>(StatusCodes.Status200OK)]
@@ -132,7 +137,7 @@ public sealed class EmployeesController(
       return this.ToActionResult<EmployeeDto>(
          result,
          _logger,
-         context: $"GET {UrlStart}/employees/email/{email}",
+         context: $"GET {UrlStart}/{EmployeeByEmailRoute.Replace("{email}", email)}",
          args: new { email }
       );
    }

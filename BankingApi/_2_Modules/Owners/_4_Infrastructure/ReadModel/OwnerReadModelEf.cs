@@ -37,47 +37,26 @@ public sealed class OwnerReadModelEf(
    }
 
    
-   public async Task<Result<OwnerProfileDto>> FindMeAsync(CancellationToken ct) {
+   public async Task<Result<OwnerDto>> FindMeAsync(CancellationToken ct) {
       
       // 1) Subject from Gateway
       var subjectResult = IdentitySubject.Check(identityGateway.Subject);
       if (subjectResult.IsFailure)
-         return Result<OwnerProfileDto>.Failure(subjectResult.Error);
+         return Result<OwnerDto>.Failure(subjectResult.Error);
       var subject = subjectResult.Value;
 
       // 2) load Owner by subject (NO tracking, read-only)
       var ownerDto = await dbContext.Owners
          .AsNoTracking()
          .Where(c => c.Subject == subject)    // filter by subject
-         .Select(c => c.ToOwnerProfileDto())  // project to OwnerProfileDto (map)
+         .Select(c => c.ToOwnerDto())  // project to OwnerProfileDto (map)
          .SingleOrDefaultAsync(ct);
       
       if (ownerDto is null)
-         return Result<OwnerProfileDto>.Failure(OwnerApplicationErrors.NotProvisioned);   
-      return Result<OwnerProfileDto>.Success(ownerDto);
+         return Result<OwnerDto>.Failure(OwnerApplicationErrors.NotProvisioned);   
+      return Result<OwnerDto>.Success(ownerDto);
       
    }
-   
-   public async Task<Result<int>> FindMyStatusAsync(CancellationToken ct) {
-      
-      // 1) Subject aus Gateway
-      var subjectResult = IdentitySubject.Check(identityGateway.Subject);
-      if (subjectResult.IsFailure)
-         return Result<int>.Failure(subjectResult.Error);
-      var subject = subjectResult.Value;
-
-      // 2) Customer laden (NO tracking, read-only)
-      var status = await dbContext.Owners
-         .AsNoTracking()
-         .Where(c => c.Subject == subject)
-         .Select(c => c.Status)
-         .SingleOrDefaultAsync(ct);
-      
-      if (status == default)
-         return Result<int>.Failure(OwnerApplicationErrors.NotProvisioned);   
-      return Result<int>.Success((int) status);
-   }
-
    
    public async Task<Result<OwnerDto>> FindByIdAsync(
       Guid Id,

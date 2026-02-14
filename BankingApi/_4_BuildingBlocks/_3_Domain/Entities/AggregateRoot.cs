@@ -17,7 +17,6 @@ public abstract class AggregateRoot<TId> : Entity<TId>
       UpdatedAt = _clock.UtcNow;
    }
    
-   
    protected void SetCreatedAt(DateTimeOffset createdAt) {
       if (createdAt == default)
          throw new ArgumentException("createdAt must be set.", nameof(createdAt));

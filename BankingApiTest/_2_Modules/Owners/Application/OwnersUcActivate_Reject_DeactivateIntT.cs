@@ -28,7 +28,7 @@ public sealed class OwnersUcActivate_Reject_DeactivateIntT : TestBase, IAsyncLif
    
    private IIdentityGateway _identityGateway = null!;
    private OwnerUcCreateProvisioned _ownerUcCreateProvisioned = null!;
-   private OwnerUcUpsertProfile _ownerUcUpsertProfile = null!;
+   private OwnerUcUpdateProfile _ownerUcUpdateProfile = null!;
    private OwnerUcActivate _ucActivate = null!;
    private OwnerUcReject _ucReject = null!;
    private OwnerUcDeactivate _ucDeactivate = null!;
@@ -79,8 +79,8 @@ public sealed class OwnersUcActivate_Reject_DeactivateIntT : TestBase, IAsyncLif
          _clock, CreateLogger<OwnerUcCreateProvisioned>());
       
       // upsert provisioned
-      _ownerUcUpsertProfile = new OwnerUcUpsertProfile(_identityGateway, _repository,
-         _unitOfWork, _clock, CreateLogger<OwnerUcUpsertProfile>()
+      _ownerUcUpdateProfile = new OwnerUcUpdateProfile(_identityGateway, _repository,
+         _unitOfWork, _clock, CreateLogger<OwnerUcUpdateProfile>()
       );
       
       // simulate a login in Admin
@@ -109,17 +109,21 @@ public sealed class OwnersUcActivate_Reject_DeactivateIntT : TestBase, IAsyncLif
       _ownerId = resultProvisioned.Value.Id;
       
       // upsert profile use case
-      var ownerProfileDto = new OwnerProfileDto(
+      var ownerProfileDto = new OwnerDto(
+         Id: _seed.Owner5.Id,
          Firstname: _seed.Owner5.Firstname,
          Lastname: _seed.Owner5.Lastname,
          CompanyName: _seed.Owner5.CompanyName,
          Email: "c.conrad@mail.local",
+         Status: (int) _seed.Owner5.Status,
+         CreatedAt: _seed.Owner5.CreatedAt,
+         DeactivatedAt: _seed.Owner5.DeactivatedAt,
          Street:  _seed.Owner5.Address?.Street,
          PostalCode: _seed.Owner5.Address?.PostalCode,
          City: _seed.Owner5.Address?.City,
          Country: _seed.Owner5.Address?.Country
       );
-      var resultUpsert = await _ownerUcUpsertProfile.ExecuteAsync(ownerProfileDto, _ct); 
+      var resultUpsert = await _ownerUcUpdateProfile.ExecuteAsync(ownerProfileDto, _ct); 
       True(resultUpsert.IsSuccess);
 
    }

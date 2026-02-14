@@ -22,8 +22,8 @@ public interface IOwnerUseCases {
       CancellationToken ct = default
    );
    
-   Task<Result<OwnerProfileDto>> UpsertProfileAsync(
-      OwnerProfileDto dto, 
+   Task<Result<OwnerDto>> UpdateProfileAsync(
+      OwnerDto dto, 
       CancellationToken ct = default
    );
    
