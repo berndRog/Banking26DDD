@@ -13,7 +13,7 @@ public sealed class ConfigEmployee(
 
    public void Configure(EntityTypeBuilder<Employee> b) {
 
-      b.ToTable("Employee");
+      b.ToTable("Employees");
       
       // Primary Key
       b.HasKey(x => x.Id);

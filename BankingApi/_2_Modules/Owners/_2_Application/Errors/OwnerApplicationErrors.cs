@@ -3,6 +3,7 @@ using BankingApi._4_BuildingBlocks._3_Domain.Errors;
 namespace BankingApi._2_Modules.Owners._2_Application.Errors;
 
 public static class OwnerApplicationErrors {
+   
    public static readonly DomainErrors NotProvisioned =
       new(ErrorCode.NotFound,
          Title: "Owner: Is not provisioned",
@@ -24,7 +25,7 @@ public static class OwnerApplicationErrors {
    public static readonly DomainErrors EmployeeRightsRequired =
       new(
          ErrorCode.Forbidden,
-         Title: "Employee rights required",
+         Title: "Owner: Employee rights required",
          Message: "This operation requires employee privileges."
       );
    
@@ -32,4 +33,12 @@ public static class OwnerApplicationErrors {
       new(ErrorCode.Conflict,
          Title: "Owner: email already used",
          Message: "The owner email is already in use by another owner.");
+   
+   
+   public static readonly DomainErrors FilterIsRequired =
+      new(ErrorCode.Conflict,
+         Title: "Owner: Filter Is Required",
+         Message: "The provided filter must not be null");
+
+
 }

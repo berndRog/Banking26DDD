@@ -6,7 +6,7 @@ using BankingApi._2_Modules.Owners._4_Infrastructure.ReadModel;
 using BankingApi._2_Modules.Owners._4_Infrastructure.Repositories;
 namespace BankingApi._2_Modules.Owners;
 
-public static class DiOwnersModule {
+public static class DiOwnersModules {
    
    public static IServiceCollection AddOwnersModule(
       this IServiceCollection services

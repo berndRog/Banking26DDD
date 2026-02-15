@@ -1,12 +1,13 @@
 using BankingApi._2_Modules.Employees._1_Ports.Inbound;
 using BankingApi._2_Modules.Employees._1_Ports.Outbound;
 using BankingApi._2_Modules.Employees._2_Application.UseCases;
+using BankingApi._2_Modules.Employees._4_Infrastructure.ReadModel;
 using BankingApi._2_Modules.Employees._4_Infrastructure.Repositories;
-namespace CarRentalApi._2_Modules.Employees;
+namespace BankingApi._2_Modules.Employees;
 
-public static class DiAddEmployeesExtensions {
+public static class DiAddEmployeesMdules {
 
-   public static IServiceCollection AddEmployees(
+   public static IServiceCollection AddEmployeesModules(
       this IServiceCollection services
    ) {
 
@@ -17,10 +18,12 @@ public static class DiAddEmployeesExtensions {
       //services.AddScoped<ICustomerReadContract, CustomerReadContractServiceEf>();
 
       // ReadModels (Queries)
-      //services.AddScoped<IEmployeeReadModel, EmployeeReadModelEf>();
+      services.AddScoped<IEmployeeReadModel, EmployeeReadModelEf>();
 
       // WriteModels = Use Cases
       services.AddScoped<EmployeeUcCreate>();
+      services.AddScoped<EmployeeUcCreateProvisioned>();
+      services.AddScoped<EmployeeUcUpdateProfile>();
       services.AddScoped<EmployeeUcDeactivate>();
       services.AddScoped<EmployeeUcSetAdminRights>();
       services.AddScoped<IEmployeeUseCases, EmployeeUseCases>();

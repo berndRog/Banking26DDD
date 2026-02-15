@@ -1,7 +1,9 @@
 using BankingApi._2_Modules.Owners._1_Ports.Inbound;
 using BankingApi._2_Modules.Owners._2_Application.Dtos;
+using BankingApi._2_Modules.Owners._2_Application.ReadModel;
 using BankingApi._2_Modules.Owners._2_Application.UseCases;
 using BankingApi._4_BuildingBlocks;
+using BankingApi._4_BuildingBlocks._4_Infrastructure.ReadModel;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 namespace BankingApi._1_Controllers;
@@ -14,33 +16,32 @@ public sealed class OwnersController(
    OwnerUcUpdateProfile _ucUpdateProfile,
    ILogger<OwnersController> _logger
 ) : ControllerBase {
-
    private readonly string UrlStart = "bankingapi/v1";
 
    // Route constants
    private const string ProvisionedRoute = "owners/me/provisioned";
-   private const string ProfileRoute     = "owners/me/profile";
-   private const string OwnerByIdRoute   = "owners/{id:guid}";
+   private const string ProfileRoute = "owners/me/profile";
+   private const string OwnerByIdRoute = "owners/{id:guid}";
    private const string OwnerByEmailRoute = "owners/email/{email}";
+   private const string OwnersFilterRoute = "owners/filter";
 
    // ------------------------------------------------------------------
    // SELF-SERVICE (logged-in user)
    // ------------------------------------------------------------------
-   [Authorize(Policy = "OwnersOnly")]
+   //[Authorize(Policy = "OwnersOnly")]
    [HttpPost(ProvisionedRoute)]
    [EndpointSummary("Provision owner on first login (idempotent)")]
    [ProducesResponseType<Guid>(StatusCodes.Status200OK)]
    [ProducesResponseType<ProblemDetails>(StatusCodes.Status400BadRequest, "application/problem+json")]
    [ProducesResponseType<ProblemDetails>(StatusCodes.Status401Unauthorized, "application/problem+json")]
    public async Task<ActionResult<OwnerProvisionDto>> PostCreateProvisioned(CancellationToken ct) {
-      
       _logger.LogWarning("IsAuthenticated={auth}, Claims=[{claims}]",
          User.Identity?.IsAuthenticated,
          string.Join(", ", User.Claims.Select(c => $"{c.Type}={c.Value}"))
       );
-      
+
       var result = await ucCreateProvisioned.ExecuteAsync(null, ct);
-      
+
       return this.ToActionResult(
          result,
          _logger,
@@ -49,7 +50,7 @@ public sealed class OwnersController(
       );
    }
 
-   [Authorize(Policy = "OwnersOnly")]
+   //[Authorize(Policy = "OwnersOnly")]
    [HttpGet(ProfileRoute)]
    [EndpointSummary("Get my customer profile (requires provisioning)")]
    [ProducesResponseType<OwnerDto>(StatusCodes.Status200OK)]
@@ -57,7 +58,7 @@ public sealed class OwnersController(
    [ProducesResponseType<ProblemDetails>(StatusCodes.Status401Unauthorized, "application/problem+json")]
    public async Task<ActionResult<OwnerDto>> GetMyProfile(CancellationToken ct) {
       var result = await _readModel.FindMeAsync(ct);
-    
+
       return this.ToActionResult<OwnerDto>(
          result,
          _logger,
@@ -66,7 +67,7 @@ public sealed class OwnersController(
       );
    }
 
-   [Authorize(Policy = "OwnersOnly")]
+   //[Authorize(Policy = "OwnersOnly")]
    [HttpPut(ProfileRoute)]
    [Authorize]
    [EndpointSummary("Update my customer profile (requires provisioning)")]
@@ -79,7 +80,7 @@ public sealed class OwnersController(
       CancellationToken ct
    ) {
       var result = await _ucUpdateProfile.ExecuteAsync(dto, ct);
-      
+
       return this.ToActionResult<OwnerDto>(
          result,
          _logger,
@@ -99,8 +100,9 @@ public sealed class OwnersController(
    // danach auf Policy hochziehen.
    // ------------------------------------------------------------------
 
+   //[Authorize] // später ggf. Policy="EmployeesOnly"
+
    [HttpGet(OwnerByIdRoute, Name = "GetCustomerById")]
-   [Authorize] // später ggf. Policy="EmployeesOnly"
    [EndpointSummary("Get a customer by ReservationId")]
    [ProducesResponseType<OwnerDto>(StatusCodes.Status200OK)]
    [ProducesResponseType<ProblemDetails>(StatusCodes.Status404NotFound, "application/problem+json")]
@@ -109,7 +111,7 @@ public sealed class OwnersController(
       CancellationToken ct
    ) {
       var result = await _readModel.FindByIdAsync(id, ct);
-      
+
       return this.ToActionResult<OwnerDto>(
          result,
          _logger,
@@ -118,8 +120,8 @@ public sealed class OwnersController(
       );
    }
 
+   //[Authorize] // später ggf. Policy="EmployeesOnly"
    [HttpGet(OwnerByEmailRoute)]
-   [Authorize] // später ggf. Policy="EmployeesOnly"
    [EndpointSummary("Get a customer by email")]
    [ProducesResponseType<OwnerDto>(StatusCodes.Status200OK)]
    [ProducesResponseType<ProblemDetails>(StatusCodes.Status404NotFound, "application/problem+json")]
@@ -136,39 +138,85 @@ public sealed class OwnersController(
       );
    }
 
-   // [HttpGet("owners/name")]
-   // [Authorize] // später ggf. Policy="EmployeesOnly"
-   // [EndpointSummary("Get customers by name")]
-   // [ProducesResponseType<IReadOnlyList<OwnerDto>>(StatusCodes.Status200OK)]
-   // public async Task<ActionResult<IReadOnlyList<CustomerDetailDto>>> GetCustomersByName(
-   //    [FromQuery] string firstname,
-   //    [FromQuery] string lastname,
-   //    CancellationToken ct
-   // ) {
-   //    var result = await _readModel.SelectByNameAsync(firstname, lastname, ct);
-   //    return this.ToActionResult<IReadOnlyList<CustomerDetailDto>>(
-   //       result,
-   //       _logger,
-   //       context: "GET /carrentalapi/v1/customers/name",
-   //       args: new { firstname, lastname }
-   //    );
-   // }
+   // ------------------------------------------------------------------
+   // ADMIN/STAFF READ API (customer directory)
+   // ------------------------------------------------------------------
+   [HttpGet(OwnersFilterRoute)]
+   //[Authorize] // later optionally Policy="EmployeesOnly"
+   [EndpointSummary("Filter and page owners")]
+   [ProducesResponseType<PagedResult<OwnerDto>>(StatusCodes.Status200OK)]
+   [ProducesResponseType<ProblemDetails>(StatusCodes.Status400BadRequest, "application/problem+json")]
+   [ProducesResponseType<ProblemDetails>(StatusCodes.Status401Unauthorized, "application/problem+json")]
+   public async Task<ActionResult<PagedResult<OwnerDto>>> GetAllOwners(
+      [FromBody] OwnerSearchFilter? filter,
+      [FromQuery] PageRequest? page,
+      CancellationToken ct
+   ) {
+      var result = await _readModel.FilterAsync(filter, page, ct);
 
-   // // Optional: Filter
-   // [HttpGet("customers")]
-   // [Authorize] // später ggf. Policy="EmployeesOnly"
-   // [EndpointSummary("Filter customers")]
-   // [ProducesResponseType<IReadOnlyList<CustomerListItemDto>>(StatusCodes.Status200OK)]
-   // public async Task<ActionResult<IReadOnlyList<CustomerListItemDto>>> FilterCustomers(
-   //     [FromQuery] CustomerSearchFilter filter,
-   //     CancellationToken ct
-   // ) {
-   //     var result = await _readModel.FilterAsync(filter, ct);
-   //     return this.ToActionResult<IReadOnlyList<CustomerDto>>(
-   //        result,
-   //        _logger,
-   //        context: "GET /customers",
-   //        args: filter
-   //     ); 
-   // }
+      return this.ToActionResult<PagedResult<OwnerDto>>(
+         result,
+         _logger,
+         context: $"GET {UrlStart}/{OwnersFilterRoute}",
+         args: new { filter, page }
+      );
+   }
+   
+   
+   [HttpGet(OwnersFilterRoute)]
+   //[Authorize] // later optionally Policy="EmployeesOnly"
+   [EndpointSummary("Filter and page owners")]
+   [ProducesResponseType<PagedResult<OwnerDto>>(StatusCodes.Status200OK)]
+   [ProducesResponseType<ProblemDetails>(StatusCodes.Status400BadRequest, "application/problem+json")]
+   [ProducesResponseType<ProblemDetails>(StatusCodes.Status401Unauthorized, "application/problem+json")]
+   public async Task<ActionResult<PagedResult<OwnerDto>>> FilterOwners(
+      [FromBody] OwnerSearchFilter? filter,
+      [FromQuery] PageRequest? page,
+      CancellationToken ct
+   ) {
+      var result = await _readModel.FilterAsync(filter, page, ct);
+
+      return this.ToActionResult<PagedResult<OwnerDto>>(
+         result,
+         _logger,
+         context: $"GET {UrlStart}/{OwnersFilterRoute}",
+         args: new { filter, page }
+      );
+   }
 }
+
+// [HttpGet("owners/name")]
+// [Authorize] // später ggf. Policy="EmployeesOnly"
+// [EndpointSummary("Get customers by name")]
+// [ProducesResponseType<IReadOnlyList<OwnerDto>>(StatusCodes.Status200OK)]
+// public async Task<ActionResult<IReadOnlyList<CustomerDetailDto>>> GetCustomersByName(
+//    [FromQuery] string firstname,
+//    [FromQuery] string lastname,
+//    CancellationToken ct
+// ) {
+//    var result = await _readModel.SelectByNameAsync(firstname, lastname, ct);
+//    return this.ToActionResult<IReadOnlyList<CustomerDetailDto>>(
+//       result,
+//       _logger,
+//       context: "GET /carrentalapi/v1/customers/name",
+//       args: new { firstname, lastname }
+//    );
+// }
+
+// // Optional: Filter
+// [HttpGet("customers")]
+// [Authorize] // später ggf. Policy="EmployeesOnly"
+// [EndpointSummary("Filter customers")]
+// [ProducesResponseType<IReadOnlyList<CustomerListItemDto>>(StatusCodes.Status200OK)]
+// public async Task<ActionResult<IReadOnlyList<CustomerListItemDto>>> FilterCustomers(
+//     [FromQuery] CustomerSearchFilter filter,
+//     CancellationToken ct
+// ) {
+//     var result = await _readModel.FilterAsync(filter, ct);
+//     return this.ToActionResult<IReadOnlyList<CustomerDto>>(
+//        result,
+//        _logger,
+//        context: "GET /customers",
+//        args: filter
+//     ); 
+// }
