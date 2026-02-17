@@ -15,7 +15,7 @@ public sealed class OwnersUcCreateIntT : TestBase, IAsyncLifetime {
    private DbContext? _dbContext = null!;
    private Boolean _isInMemory = false;
    
-   private IOwnerRepository _repository = null!;
+   private IOwnersRepository _repository = null!;
    private IUnitOfWork _unitOfWork = null!;
    private TestSeed _seed = null!;
    private IClock _clock = null!;
@@ -37,7 +37,7 @@ public sealed class OwnersUcCreateIntT : TestBase, IAsyncLifetime {
       var bankingDbContext = _dbContext   as BankingDbContext ?? 
          throw new InvalidOperationException("Create: DbContext is not of type BankingDbContext");
 
-      _repository = new OwnerRepositoryEf(bankingDbContext);
+      _repository = new OwnersRepositoryEf(bankingDbContext);
       _unitOfWork = new UnitOfWork(bankingDbContext, _clock, CreateLogger<UnitOfWork>());
 
       _repository.Add(_seed.Owner1);
@@ -72,7 +72,7 @@ public sealed class OwnersUcCreateIntT : TestBase, IAsyncLifetime {
          firstname: owner.Firstname,
          lastname: owner.Lastname,
          companyName: null,
-         email: owner.Email,
+         emailString: owner.Email.Value,
          subject: owner.Subject,
          id: owner.Id.ToString(),
          null, null, null, null,
@@ -81,7 +81,7 @@ public sealed class OwnersUcCreateIntT : TestBase, IAsyncLifetime {
       _dbContext!.ChangeTracker.Clear();
 
       // Assert
-      var actual = await _repository.FindByIdAsync(owner.Id, noTracking: true, _ct);
+      var actual = await _repository.FindByIdAsync(owner.Id, _ct);
       NotNull(actual);
       Equal(owner.Id, actual!.Id);
       Equal(owner.Firstname, actual.Firstname);
@@ -101,7 +101,7 @@ public sealed class OwnersUcCreateIntT : TestBase, IAsyncLifetime {
          firstname: owner.Firstname,
          lastname: owner.Lastname,
          companyName: null,
-         email: owner.Email,
+         emailString: owner.Email.Value,
          subject: owner.Subject,
          id: owner.Id.ToString(),
          street: address.Street,
@@ -113,7 +113,7 @@ public sealed class OwnersUcCreateIntT : TestBase, IAsyncLifetime {
       _dbContext!.ChangeTracker.Clear();
 
       // Assert
-      var actual = await _repository.FindByIdAsync(owner.Id, noTracking: true, _ct);
+      var actual = await _repository.FindByIdAsync(owner.Id,  _ct);
       NotNull(actual);
       Equal(owner.Id, actual!.Id);
       Equal(owner.Firstname, actual.Firstname);
@@ -138,7 +138,7 @@ public sealed class OwnersUcCreateIntT : TestBase, IAsyncLifetime {
          firstname: owner.Firstname,
          lastname: owner.Lastname,
          companyName: owner.CompanyName,
-         email: owner.Email,
+         emailString: owner.Email.Value,
          subject: owner.Subject,
          id: owner.Id.ToString(),
          street: address.Street,
@@ -150,7 +150,7 @@ public sealed class OwnersUcCreateIntT : TestBase, IAsyncLifetime {
       _dbContext!.ChangeTracker.Clear();
 
       // Assert
-      var actual = await _repository.FindByIdAsync(owner.Id, noTracking: true, _ct);
+      var actual = await _repository.FindByIdAsync(owner.Id,  _ct);
       NotNull(actual);
       Equal(owner.Id, actual!.Id);
       Equal(owner.Firstname, actual.Firstname);

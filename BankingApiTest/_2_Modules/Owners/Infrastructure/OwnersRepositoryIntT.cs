@@ -11,7 +11,7 @@ public sealed class OwnersRepositoryIntT : TestBase, IAsyncLifetime {
 
    private SqliteConnection _dbConnection = null!;
    private BankingDbContext _dbContext = null!;
-   private IOwnerRepository _repository = null!;
+   private IOwnersRepository _repository = null!;
    private IUnitOfWork _unitOfWork = null!;
    private IClock _clock = null!;
    private TestSeed _seed = null!;
@@ -31,7 +31,7 @@ public sealed class OwnersRepositoryIntT : TestBase, IAsyncLifetime {
       _dbContext = new BankingDbContext(options);
       await _dbContext.Database.EnsureCreatedAsync();
 
-      _repository = new OwnerRepositoryEf(_dbContext);
+      _repository = new OwnersRepositoryEf(_dbContext);
       _unitOfWork = new UnitOfWork(
          _dbContext, 
          _clock,
@@ -64,7 +64,7 @@ public sealed class OwnersRepositoryIntT : TestBase, IAsyncLifetime {
       _dbContext.ChangeTracker.Clear();
       
       // Assert
-      var actual = await _repository.FindByIdAsync(owner.Id, noTracking:true, CancellationToken.None);
+      var actual = await _repository.FindByIdAsync(owner.Id, CancellationToken.None);
       NotNull(actual);
       Equal(_seed.Owner1.Id, actual!.Id);
       Equal(_seed.Owner1.Firstname, actual.Firstname);
@@ -84,7 +84,7 @@ public sealed class OwnersRepositoryIntT : TestBase, IAsyncLifetime {
       var id = _seed.Owner1.Id;
       
       // Act
-      var actual = await _repository.FindByIdAsync(id, noTracking:true,CancellationToken.None);
+      var actual = await _repository.FindByIdAsync(id, CancellationToken.None);
 
       // Assert
       NotNull(actual);
@@ -105,7 +105,7 @@ public sealed class OwnersRepositoryIntT : TestBase, IAsyncLifetime {
       var nonExistentId = Guid.NewGuid();
 
       // Act
-      var actual = await _repository.FindByIdAsync(nonExistentId, noTracking:true,CancellationToken.None);
+      var actual = await _repository.FindByIdAsync(nonExistentId, CancellationToken.None);
 
       // Assert
       Null(actual);

@@ -23,7 +23,7 @@ public sealed class EmployeesController(
    private const string ProvisionedRoute     = "employees/me/provisioned";
    private const string ProfileRoute         = "employees/me/profile";
    private const string EmployeeByIdRoute    = "employees/{id:guid}";
-   private const string EmployeeByEmailRoute = "employees/email/{email}";
+   private const string EmployeeByEmailRoute = "";
 
    // ------------------------------------------------------------------
    // SELF-SERVICE (logged-in employee)
@@ -122,7 +122,7 @@ public sealed class EmployeesController(
       );
    }
 
-   [HttpGet(EmployeeByEmailRoute)]
+   [HttpGet("employees/email/{email}")]
    [Authorize] // optionally: Policy="EmployeesOnly"
    [EndpointSummary("Get an employee by email (directory)")]
    [ProducesResponseType<EmployeeDto>(StatusCodes.Status200OK)]
@@ -132,12 +132,15 @@ public sealed class EmployeesController(
       [FromRoute] string email,
       CancellationToken ct
    ) {
+      
+      
+      
       var result = await _readModel.FindByEmailAsync(email, ct);
 
       return this.ToActionResult<EmployeeDto>(
          result,
          _logger,
-         context: $"GET {UrlStart}/{EmployeeByEmailRoute.Replace("{email}", email)}",
+         context: $"GET {UrlStart}/employees/email/{email}",
          args: new { email }
       );
    }

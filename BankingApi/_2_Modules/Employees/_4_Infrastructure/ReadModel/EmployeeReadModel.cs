@@ -2,10 +2,13 @@ using BankingApi._2_Modules.Employees._1_Ports.Inbound;
 using BankingApi._2_Modules.Employees._2_Application.Dtos;
 using BankingApi._2_Modules.Employees._2_Application.Errors;
 using BankingApi._2_Modules.Employees._2_Application.Mappings;
+using BankingApi._2_Modules.Employees._3_Domain.Errors;
+using BankingApi._2_Modules.Owners._2_Application.Mappings;
 using BankingApi._3_Infrastructure.Database;
 using BankingApi._4_BuildingBlocks;
 using BankingApi._4_BuildingBlocks._1_Ports.Outbound;
 using BankingApi._4_BuildingBlocks._3_Domain;
+using BankingApi._4_BuildingBlocks._3_Domain.ValueObjects;
 using Microsoft.EntityFrameworkCore;
 namespace BankingApi._2_Modules.Employees._4_Infrastructure.ReadModel;
 
@@ -57,41 +60,64 @@ public sealed class EmployeeReadModelEf(
       
    }
    
+   
    public async Task<Result<EmployeeDto>> FindByIdAsync(
       Guid Id,
       CancellationToken ct
    ) {
-      var employee = await dbContext.Employees
+      var employeeDto = await dbContext.Employees
          .AsNoTracking()
-         .FirstOrDefaultAsync(c => c.Id == Id, ct);
+         .Where(c => c.Id == Id)  // filter by Id
+         .Select(c => c.ToEmployeeDto())  // project to OwnerDto (map)
+         .SingleOrDefaultAsync(ct);
 
-      return employee is null
-         ? Result<EmployeeDto>.Failure(EmployeeApplicationErrors.NotFound)
-         : Result<EmployeeDto>.Success(employee.ToEmployeeDto());
+      return employeeDto is null
+         ? Result<EmployeeDto>.Failure(EmployeeErrors.NotFound)
+         : Result<EmployeeDto>.Success(employeeDto);
    }
-
 
    public async Task<Result<EmployeeDto>> FindByIdentitySubjectAsync(
       string subject,
       CancellationToken ct
    ) {
-      var employee = await dbContext.Employees 
+      var employeeDto = await dbContext.Employees
          .AsNoTracking()
-         .FirstOrDefaultAsync(c => c.Subject == subject, ct);
-      return employee is null
+         .Where(c => c.Subject == subject) // filter by subject
+         .Select(c => c.ToEmployeeDto())  // projection 
+         .SingleOrDefaultAsync( ct);
+      
+      return employeeDto is null
          ? Result<EmployeeDto>.Failure(EmployeeApplicationErrors.NotFound)
-         : Result<EmployeeDto>.Success(employee.ToEmployeeDto());
+         : Result<EmployeeDto>.Success(employeeDto);
    }
-   
+
    public async Task<Result<EmployeeDto>> FindByEmailAsync(
-      string email,
+      string emailString,
       CancellationToken ct
    ) {
-      var owner = await dbContext.Employees
+      var resultEmail = Email.Create(emailString);
+      if (resultEmail.IsFailure)
+         return Result<EmployeeDto>.Failure(resultEmail.Error);
+      var email = resultEmail.Value;
+      
+      var employeeDto = await dbContext.Employees
          .AsNoTracking()
-         .FirstOrDefaultAsync(c => c.Email == email, ct);
-      return owner is null
+         .Where(c => c.Email == email)   // filter by email
+         .Select(c => c.ToEmployeeDto()) // projection
+         .SingleOrDefaultAsync( ct);
+      
+      return employeeDto is null
          ? Result<EmployeeDto>.Failure(EmployeeApplicationErrors.NotFound)
-         : Result<EmployeeDto>.Success(owner.ToEmployeeDto());
+         : Result<EmployeeDto>.Success(employeeDto);
+   }
+   
+   public async Task<Result<IEnumerable<EmployeeDto>>> SelectAllAsync(
+      CancellationToken ct
+   ) {
+      var ownerDtos = await dbContext.Employees
+         .AsNoTracking()
+         .Select(c => c.ToEmployeeDto()) // project to OwnerDto (map)
+         .ToListAsync(ct);
+      return Result<IEnumerable<EmployeeDto>>.Success(ownerDtos);
    }
 }

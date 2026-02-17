@@ -3,11 +3,12 @@ using BankingApi._2_Modules.Owners._1_Ports.Outbound;
 using BankingApi._2_Modules.Owners._3_Domain.Aggregates;
 using BankingApi._4_BuildingBlocks;
 using BankingApi._4_BuildingBlocks._1_Ports.Inbound;
+using BankingApi._4_BuildingBlocks._3_Domain.ValueObjects;
 using BankingApi._4_BuildingBlocks._4_Infrastructure.Persistence;
 namespace BankingApi._2_Modules.Owners._2_Application.UseCases;
 
 public sealed class OwnerUcCreate(
-   IOwnerRepository _repository,
+   IOwnersRepository _repository,
    IUnitOfWork _unitOfWork,
    IClock _clock,
    ILogger<OwnerUcCreate> _logger
@@ -17,7 +18,7 @@ public sealed class OwnerUcCreate(
       string firstname,
       string lastname,
       string? companyName,
-      string email,
+      string emailString,
       string subject = "system",
       string? id = null,
       string? street = null,
@@ -26,8 +27,13 @@ public sealed class OwnerUcCreate(
       string? country = null,
       CancellationToken ct = default
    ) {
+
+      var resultEmail = Email.Create(emailString);
+      if (resultEmail.IsFailure)
+         return Result<Guid>.Failure(resultEmail.Error);
+      var email = resultEmail.Value;
       
-      if (await _repository.FindByEmailAsync(email, false, ct) != null) {
+      if (await _repository.FindByEmailAsync(email, ct) != null) {
          return Result<Guid>.Failure(EmployeeErrors.EmailMustBeUnique);
       }
       
@@ -48,7 +54,8 @@ public sealed class OwnerUcCreate(
       if (result.IsFailure) 
          return Result<Guid>.Failure(result.Error)
             .LogIfFailure(_logger, "OwnerUcCreate.DomainRejected",
-               new { firstname, lastname, companyName, email, subject, id, street, postalCode, city, country });
+               new { firstname, lastname, companyName, email, subject, id, 
+                  street, postalCode, city, country });
       
       // Add owner to repository (tracked by EF)
       var owner = result.Value!;

@@ -1,5 +1,6 @@
 using BankingApi._2_Modules.Owners._3_Domain.Aggregates;
 using BankingApi._3_Infrastructure.Database;
+using BankingApi._3_Infrastructure.Database.ValueObjects;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 namespace BankingApi._2_Modules.Owners._4_Infrastructure.Persistence;
@@ -40,14 +41,26 @@ public sealed class ConfigOwner(
       builder.Ignore(o => o.IsProfileComplete);
 
       // Profile data
-      builder.Property(o => o.Firstname).HasMaxLength(80).IsRequired();
-      builder.Property(o => o.Lastname).HasMaxLength(80).IsRequired();
-      builder.Property(o => o.CompanyName).HasMaxLength(80).IsRequired(false);
+      builder.Property(o => o.Firstname)
+         .HasMaxLength(80)
+         .IsRequired();
+      builder.Property(o => o.Lastname)
+         .HasMaxLength(80)
+         .IsRequired();
+      builder.Property(o => o.CompanyName)
+         .HasMaxLength(80)
+         .IsRequired(false);
 
-      builder.Property(o => o.Email).HasMaxLength(256).IsRequired();
-      builder.HasIndex(o => o.Email).IsUnique();
+      // Email-VO als Property mapped via Extension
+      builder.Property(x => x.Email)
+         .HasEmailConversion()
+         .IsRequired();
+      // optional: unique index
+      builder.HasIndex(x => x.Email).IsUnique();
 
-      builder.Property(o => o.Subject).HasMaxLength(200).IsRequired();
+      builder.Property(o => o.Subject)
+         .HasMaxLength(200)
+         .IsRequired();
       builder.HasIndex(o => o.Subject).IsUnique();
 
       // Status

@@ -1,4 +1,5 @@
 using BankingApi._2_Modules.Core._3_Domain.Aggregates;
+using BankingApi._2_Modules.Core._3_Domain.ValueObjects;
 using BankingApi._2_Modules.Employees._3_Domain.Aggregates;
 using BankingApi._2_Modules.Employees._3_Domain.Enums;
 using BankingApi._2_Modules.Owners._3_Domain.Aggregates;
@@ -115,7 +116,7 @@ public sealed class TestSeed {
          id: "00000000-0001-0000-0000-000000000000",
          firstname: "Emil",
          lastname: "Engel",
-         email: "emil.engel@bankingapi.de",
+         emailString: "emil.engel@bankingapi.de",
          phoneString: "+49 5826 123 4010",
          subject: "003946D9-9B67-4691-A91B-DB4A98929F5D",
          personnelNumber: "Emp001",
@@ -128,7 +129,7 @@ public sealed class TestSeed {
          id: "00000000-0002-0000-0000-000000000000",
          firstname: "Frieda",
          lastname: "Fischer",
-         email: "frieda.fischer@bankingapi.de",
+         emailString: "frieda.fischer@bankingapi.de",
          phoneString: "+49 5826 123 4020",
          subject: "009A7C8E-3F2B-4C5D-9E6F-7A8B9C0D1E2F",
          personnelNumber: "Emp002",
@@ -147,7 +148,7 @@ public sealed class TestSeed {
          firstname: "Erika",
          lastname: "Mustermann",
          companyName: null,
-         email: "erika.mustermann@t-online.de",
+         emailString: "erika.mustermann@t-online.de",
          subject: "A21990AD-D9DF-486A-8757-4A649E26A54E",
          address: Address1);
          
@@ -157,7 +158,7 @@ public sealed class TestSeed {
          firstname: "Max", 
          lastname: "Mustermann", 
          companyName: null,
-         email: "max.mustermann@gmail.com",
+         emailString: "max.mustermann@gmail.com",
          subject: "B6910640-161E-4228-9729-D6B142C2DFAD",
          null
       );
@@ -167,7 +168,7 @@ public sealed class TestSeed {
          firstname: "Arno",
          lastname:"Arndt",
          companyName: null,
-         email: "a.arndt@t-online.com",
+         emailString: "a.arndt@t-online.com",
          subject: "CB794E61-BA7A-4D2A-977F-766B42BB79A9",
          address: Address2
       );
@@ -177,7 +178,7 @@ public sealed class TestSeed {
          firstname: "Benno",
          lastname: "Bauer",
          companyName: null,
-         email: "b.bauer@gmail.com",
+         emailString: "b.bauer@gmail.com",
          subject: "DC1924AB-43C5-4C64-872D-6CA05F66756B",
          null
       );
@@ -187,7 +188,7 @@ public sealed class TestSeed {
          firstname: "Christine",
          lastname: "Conrad",
          companyName: "Conrad Consulting GmbH",
-         email: "c.conrad@gmx.de",
+         emailString: "c.conrad@gmx.de",
          subject: "EDF650FB-A381-4E3F-A44B-81FFA7610B72",
          null
       );
@@ -197,7 +198,7 @@ public sealed class TestSeed {
          firstname: "Dana",
          lastname: "Deppe",
          companyName: null,
-         "d.deppe@icloud.com",
+         emailString: "d.deppe@icloud.com",
          subject: "F5674F67-72A3-4449-AF1F-803DCFADDB7F",
          address: null
       );
@@ -206,55 +207,55 @@ public sealed class TestSeed {
       Account1 = CreateAccount(
          id: "01000000-0000-0000-0000-000000000000",
          ownerId: Guid.Empty,         // Owner1.Id,
-         iban: "DE10 1000 0000 0000 0000 42",
+         ibanString: "DE10 1000 0000 0000 0000 42",
          balance: 2100.0m
       );
       Account2 = CreateAccount(
          id: "02000000-0000-0000-0000-000000000000",
          ownerId: Guid.Empty,         // Owner1.Id,
-         iban: "DE10 2000 0000 0000 0000 04",
+         ibanString: "DE10 2000 0000 0000 0000 04",
          balance: 2000.0m
       );
       
       Account3 = CreateAccount(
          id: "03000000-0000-0000-0000-000000000000",
          ownerId: Guid.Empty,         // Owner2.Id,
-         iban: "DE20 1000 0000 0000 0000 56",
+         ibanString: "DE20 1000 0000 0000 0000 56",
          balance: 3000.0m
       );
       
       Account4 = CreateAccount(
          id: "04000000-0000-0000-0000-000000000000",
          ownerId: Guid.Empty,         // Owner3.Id,
-         iban: "DE30 1000 0000 0000 0000 70",
+         ibanString: "DE30 1000 0000 0000 0000 70",
          balance: 2500.0m
       );
       
       Account5 = CreateAccount(
          id: "05000000-0000-0000-0000-000000000000",
          ownerId: Guid.Empty,         // Owner4.Id,
-         iban: "DE40 1000 0000 0000 0000 84",
+         ibanString: "DE40 1000 0000 0000 0000 84",
          balance: 1900.0m
       );
       
       Account6 = CreateAccount(
          id: "06000000-0000-0000-0000-000000000000",
          ownerId: Guid.Empty,         // Owner5.Id,
-         iban: "DE50 1000 0000 0000 0000 01",
+         ibanString: "DE50 1000 0000 0000 0000 01",
          balance: 3500.0m
       );
       
       Account7 = CreateAccount(
          id: "07000000-0000-0000-0000-000000000000",
          ownerId: Guid.Empty,         // Owner5.Id,
-         iban: "DE50 2000 0000 0000 0000 60",
+         ibanString: "DE50 2000 0000 0000 0000 60",
          balance: 3100.0m
       );
       
       Account8 = CreateAccount(
          id: "08000000-0000-0000-0000-000000000000",
          ownerId: Guid.Empty,         // Owner6.Id,
-         iban: "DE60 1000 0000 0000 0000 15",
+         ibanString: "DE60 1000 0000 0000 0000 15",
          balance: 4300.0m
       );
   
@@ -264,74 +265,74 @@ public sealed class TestSeed {
          "00100000-0000-0000-0000-000000000000",
          Guid.Empty,                // Account1.Id,
          name: Owner5.DisplayName,
-         iban: Account6.Iban
+         ibanString: Account6.Iban.Value
       );
       Beneficiary2 = CreateBeneficiary(
          id: "00200000-0000-0000-0000-000000000000",
          accountId: Guid.Empty,    // Account1.Id,
          name: Owner5.DisplayName,
-         iban: Account7.Iban
+         ibanString: Account7.Iban.Value
       );
       Beneficiary3 = CreateBeneficiary(
          id: "00300000-0000-0000-0000-000000000000",
          accountId: Guid.Empty,    // Account2.Id,
          name: Owner3.DisplayName,
-         iban: Account4.Iban
+         ibanString: Account4.Iban.Value
       );
       Beneficiary4 = CreateBeneficiary(
          id: "00400000-0000-0000-0000-000000000000",
          accountId: Guid.Empty,
          name: Owner4.DisplayName,
-         iban: Account5.Iban
+         ibanString: Account5.Iban.Value
       );
 
       Beneficiary5 = CreateBeneficiary(
          id: "00500000-0000-0000-0000-000000000000",
          accountId: Guid.Empty,
          name: Owner3.DisplayName,
-         iban: Account4.Iban
+         ibanString: Account4.Iban.Value
       );
       
       Beneficiary6 = CreateBeneficiary(
          id: "00600000-0000-0000-0000-000000000000",
          accountId: Guid.Empty,
          name: Owner4.DisplayName,
-         iban: Account5.Iban
+         ibanString: Account5.Iban.Value
       );
       
       Beneficiary7 = CreateBeneficiary(
          id: "00700000-0000-0000-0000-000000000000",
          accountId: Guid.Empty,
          name: Owner6.DisplayName,
-         iban: Account8.Iban
+         ibanString: Account8.Iban.Value
       );
       
       Beneficiary8 = CreateBeneficiary(
          id: "00800000-0000-0000-0000-000000000000",
          accountId: Guid.Empty,
          name: Owner2.DisplayName,
-         iban: Account3.Iban
+         ibanString: Account3.Iban.Value
       );
       
       Beneficiary9 = CreateBeneficiary(
          id: "00900000-0000-0000-0000-000000000000",
          accountId: Guid.Empty,
          name: Owner6.DisplayName,
-         iban: Account8.Iban
+         ibanString: Account8.Iban.Value
       );
       
       Beneficiary10 = CreateBeneficiary(
          id: "01000000-0000-0000-0000-000000000000",
          accountId: Guid.Empty,
          name: Owner1.DisplayName,
-         iban: Account1.Iban
+         ibanString: Account1.Iban.Value
       );
       
       Beneficiary11 = CreateBeneficiary(
          id: "01100000-0000-0000-0000-000000000000",
          accountId: Guid.Empty,
          name: Owner1.DisplayName,
-         iban: Account2.Iban
+         ibanString: Account2.Iban.Value
       );
       
       
@@ -423,18 +424,28 @@ public sealed class TestSeed {
       string id,
       string firstname,
       string lastname,
-      string email,
+      string emailString,
       string phoneString,
       string subject,
       string personnelNumber,
       AdminRights adminRights
    ) {
+      var resultEmail = Email.Create(emailString);
+      if (resultEmail.IsFailure)
+         throw new Exception($"Invalid email in test seed: {emailString}");
+      var email = resultEmail.Value;
+ 
+      var resultPhone = Phone.Create(phoneString);
+      if (resultPhone.IsFailure)    
+         throw new Exception($"Invalid phone number in test seed: {phoneString}");
+      var phone = resultPhone.Value;
+      
       var result = Employee.Create(
          clock: Clock,
          firstname: firstname,
          lastname: lastname,
          email: email,
-         phone: phoneString,
+         phone: phone,
          subject: subject,
          personnelNumber: personnelNumber, 
          adminRights: adminRights,
@@ -452,10 +463,15 @@ public sealed class TestSeed {
       string firstname,
       string lastname,
       string? companyName,
-      string email,
+      string emailString,
       string subject,
       Address? address
    ) {
+      var resultEmail = Email.Create(emailString);
+      if (resultEmail.IsFailure)
+         throw new Exception($"Invalid email in test seed: {emailString}");
+      var email = resultEmail.Value;
+      
       var result = Owner.Create(
          clock: Clock,
          firstname: firstname,
@@ -477,9 +493,14 @@ public sealed class TestSeed {
    private Account CreateAccount(
       Guid ownerId,
       string id,
-      string iban,
+      string ibanString,
       decimal balance
    ) {
+      var resultIban = Iban.Create(ibanString);
+      if (resultIban.IsFailure)   
+         throw new Exception($"Invalid IBAN in test seed: {ibanString}");
+      var iban = resultIban.Value;
+      
       var result = Account.Create(
          clock: Clock,
          ownerId: ownerId,
@@ -495,8 +516,13 @@ public sealed class TestSeed {
       string id,
       Guid accountId,
       string name,
-      string iban
+      string ibanString
    ) {
+      var resultIban = Iban.Create(ibanString);
+      if (resultIban.IsFailure)   
+         throw new Exception($"Invalid IBAN in test seed: {ibanString}");
+      var iban = resultIban.Value;
+      
       var result = Beneficiary.Create(
          accountId: accountId,
          name: name,

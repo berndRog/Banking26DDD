@@ -1,48 +1,36 @@
 using BankingApi._2_Modules.Owners._1_Ports.Outbound;
 using BankingApi._2_Modules.Owners._3_Domain.Aggregates;
 using BankingApi._3_Infrastructure.Database;
+using BankingApi._4_BuildingBlocks._3_Domain.ValueObjects;
 using Microsoft.EntityFrameworkCore;
 namespace BankingApi._2_Modules.Owners._4_Infrastructure.Repositories;
 
-public class OwnerRepositoryEf(
+public class OwnersRepositoryEf(
    BankingDbContext dbContext
-) : IOwnerRepository {
+) : IOwnersRepository {
 
    public async Task<Owner?> FindByIdAsync(
       Guid ownerId, 
-      bool noTracking,
       CancellationToken ct
    ) {
-      var query = dbContext.Owners as IQueryable<Owner>;
-      if (noTracking)
-         query = query.AsNoTracking();
-      return await query
-         .AsTracking()
+      return await dbContext.Owners
          .FirstOrDefaultAsync(o => o.Id == ownerId, ct);
    }
 
    public async Task<Owner?> FindByIdentitySubjectAsync(
       string subject,
-      bool noTracking,
       CancellationToken ct
    ) {
-      var query = dbContext.Owners as IQueryable<Owner>;
-      if (noTracking)
-         query = query.AsNoTracking();
-      return await query
+      return await dbContext.Owners
          .FirstOrDefaultAsync(c => c.Subject == subject, ct);
    }
    
    public async Task<Owner?> FindByEmailAsync(
-      string email,
-      bool noTracking,
+      Email email,
       CancellationToken ct
    ) {
-      var query = dbContext.Owners as IQueryable<Owner>;
-      if (noTracking)
-         query = query.AsNoTracking();
-      return await query
-         .FirstOrDefaultAsync(c => c.Email == email, ct);
+      return await dbContext.Owners
+         .SingleOrDefaultAsync(c => c.Email == email, ct);
    }
    
    public async Task<bool> ExistsActiveAsync(

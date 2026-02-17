@@ -8,7 +8,7 @@ using BankingApi._4_BuildingBlocks.Utils;
 namespace BankingApi._2_Modules.Owners._2_Application.UseCases;
 
 public sealed class OwnerUcUpdateEmail(
-   IOwnerRepository repository,
+   IOwnersRepository repository,
    IUnitOfWork unitOfWork,
    IClock clock,
    ILogger<OwnerUcUpdateEmail> logger
@@ -19,7 +19,7 @@ public sealed class OwnerUcUpdateEmail(
       string newEmail,
       CancellationToken ct = default
    ) {
-      var owner = await repository.FindByIdAsync(ownerId, noTracking:false, ct);
+      var owner = await repository.FindByIdAsync(ownerId, ct);
       if (owner is null) {
          logger.LogWarning("UpdateEmail email failed: owner not found ({Id})", ownerId.To8());
          return Result.Failure(OwnerErrors.NotFound);

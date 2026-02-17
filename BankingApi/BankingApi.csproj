@@ -40,7 +40,6 @@
 
   <ItemGroup>
     <Folder Include="_3_Infrastructure\Repositories\" />
-    <Folder Include="_2_Modules\Core\_4_Infrastructure\ReadModel\" />
   </ItemGroup>
 
 </Project>

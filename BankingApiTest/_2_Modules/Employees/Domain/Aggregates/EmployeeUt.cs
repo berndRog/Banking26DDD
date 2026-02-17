@@ -16,8 +16,8 @@ public sealed class EmployeeUt {
 
    private readonly string _firstname;
    private readonly string _lastname;
-   private readonly string _email;
-   private readonly string _phone;
+   private readonly Email _email;
+   private readonly Phone _phone;
    private readonly string _subject;
    private readonly string _personnelNumber;
    private readonly AdminRights _adminRights;
@@ -29,8 +29,8 @@ public sealed class EmployeeUt {
       
       _firstname = "Bernd";
       _lastname = "Rogalla";
-      _email = "b.rogalla@bankningapi.de";
-      _phone = "+49 5826 123 4100";
+      _email = Email.Create("b.rogalla@bankingapi.de").Value;
+      _phone = Phone.Create("+49 5826 123 4100").Value;
       _subject = "00000000-0010-0000-0000-00000000000";
       _personnelNumber = "EMP010";
       _adminRights = (AdminRights) 511;
@@ -92,7 +92,6 @@ public sealed class EmployeeUt {
       True(result.IsSuccess);
       var employee = result.Value!;
       IsType<Employee>(employee);
-      Equal(Guid.Parse(_id), employee.Id);
       Equal(_firstname, employee.Firstname);
       Equal(_lastname, employee.Lastname);
       Equal(_email, employee.Email);

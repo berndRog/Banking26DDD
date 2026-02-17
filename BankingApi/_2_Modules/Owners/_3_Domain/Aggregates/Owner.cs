@@ -25,7 +25,7 @@ public sealed class Owner : AggregateRoot<Guid> {
    public string DisplayName => CompanyName ?? $"{Firstname} {Lastname}";
 
    // Email used for communication (not authentication)
-   public string Email { get; private set; } = string.Empty;
+   public Email Email { get; private set; } = default!;
 
    // Subject identifier from the identity provider (OIDC / OAuth)
    public string Subject { get; private set; } = default!;
@@ -49,7 +49,7 @@ public sealed class Owner : AggregateRoot<Guid> {
    public bool IsProfileComplete =>
       !string.IsNullOrWhiteSpace(Firstname) &&
       !string.IsNullOrWhiteSpace(Lastname) &&
-      !string.IsNullOrWhiteSpace(Email);
+      Email is not null && !string.IsNullOrWhiteSpace(Email.Value);
 
    public bool IsActive =>
       Status == OwnerStatus.Active &&
@@ -75,7 +75,7 @@ public sealed class Owner : AggregateRoot<Guid> {
       string firstname,
       string lastname,
       string? companyName,
-      string email,
+      Email email,
       string subject,
       Address? address
    ) : base(clock) {
@@ -101,7 +101,7 @@ public sealed class Owner : AggregateRoot<Guid> {
       string firstname,
       string lastname,
       string? companyName,
-      string email,
+      Email email,
       string subject,
       string? id = null,
       // Flat address fields (UI-friendly)
@@ -113,7 +113,6 @@ public sealed class Owner : AggregateRoot<Guid> {
       // Normalize inputs early
       firstname = firstname.Trim();
       lastname  = lastname.Trim();
-      email     = email.Trim();
       companyName = companyName?.Trim();
 
       // Validate basic fields
@@ -129,23 +128,16 @@ public sealed class Owner : AggregateRoot<Guid> {
 
       if (!string.IsNullOrWhiteSpace(companyName) && companyName.Length is < 2 or > 80)
          return Result<Owner>.Failure(OwnerErrors.InvalidCompanyName);
-
-      if (string.IsNullOrWhiteSpace(email))
-         return Result<Owner>.Failure(OwnerErrors.EmailIsRequired);
-
-      var emailResult = EmailAddress.Check(email);
-      if (emailResult.IsFailure)
-         return Result<Owner>.Failure(emailResult.Error);
-
-      var subjectResult = IdentitySubject.Check(subject);
-      if (subjectResult.IsFailure)
-         return Result<Owner>.Failure(subjectResult.Error);
+      
+      var resultSubject = IdentitySubject.Check(subject);
+      if (resultSubject.IsFailure)
+         return Result<Owner>.Failure(resultSubject.Error);
 
       // Resolve (or generate) aggregate id
-      var idResult = EntityId.Resolve(id, OwnerErrors.InvalidId);
-      if (idResult.IsFailure)
-         return Result<Owner>.Failure(idResult.Error);
-      var ownerId = idResult.Value;
+      var resultId = EntityId.Resolve(id, OwnerErrors.InvalidId);
+      if (resultId.IsFailure)
+         return Result<Owner>.Failure(resultId.Error);
+      var ownerId = resultId.Value;
 
       // Optional address: either none or valid address value object
       Address? address = null;
@@ -168,8 +160,8 @@ public sealed class Owner : AggregateRoot<Guid> {
          firstname: firstname,
          lastname: lastname,
          companyName: companyName,
-         email: emailResult.Value,
-         subject: subjectResult.Value,
+         email: email,
+         subject: resultSubject.Value,
          address: address
       );
       
@@ -187,7 +179,7 @@ public sealed class Owner : AggregateRoot<Guid> {
    public static Result<Owner> CreateProvisioned(
       IClock clock,
       string identitySubject,
-      string email,
+      Email email,
       DateTimeOffset createdAt,
       string? id = null
    ) {
@@ -197,10 +189,6 @@ public sealed class Owner : AggregateRoot<Guid> {
       var subjectResult = IdentitySubject.Check(identitySubject);
       if (subjectResult.IsFailure)
          return Result<Owner>.Failure(subjectResult.Error);
-
-      var emailResult = EmailAddress.Check(email);
-      if (emailResult.IsFailure)
-         return Result<Owner>.Failure(emailResult.Error);
 
       var idResult = EntityId.Resolve(id, OwnerErrors.InvalidId);
       if (idResult.IsFailure)
@@ -213,7 +201,7 @@ public sealed class Owner : AggregateRoot<Guid> {
          firstname: string.Empty,
          lastname: string.Empty,
          companyName: null,
-         email: emailResult.Value,
+         email: email,
          subject: subjectResult.Value,
          address: null
       );
@@ -236,7 +224,7 @@ public sealed class Owner : AggregateRoot<Guid> {
       string firstname,
       string lastname,
       string? companyName,
-      string email,
+      Email email,
       string? street,
       string? postalCode,
       string? city,
@@ -249,7 +237,6 @@ public sealed class Owner : AggregateRoot<Guid> {
       firstname = firstname.Trim();
       lastname  = lastname.Trim();
       companyName = companyName?.Trim();
-      email = email.Trim();
 
       // Validate required profile fields
       if (string.IsNullOrWhiteSpace(firstname))
@@ -264,15 +251,7 @@ public sealed class Owner : AggregateRoot<Guid> {
 
       if (!string.IsNullOrWhiteSpace(companyName) && companyName.Length is < 2 or > 80)
          return Result.Failure(OwnerErrors.InvalidCompanyName);
-
-      // Validate email in domain (do not rely on caller)
-      if (string.IsNullOrWhiteSpace(email))
-         return Result.Failure(OwnerErrors.EmailIsRequired);
-
-      var emailResult = EmailAddress.Check(email);
-      if (emailResult.IsFailure)
-         return Result.Failure(emailResult.Error);
-
+      
       // Address: either null or fully valid
       var anyAddress =
          !string.IsNullOrWhiteSpace(street) ||
@@ -292,7 +271,7 @@ public sealed class Owner : AggregateRoot<Guid> {
       Firstname = firstname;
       Lastname  = lastname;
       CompanyName = companyName;
-      Email = emailResult.Value;
+      Email = email;
       Address = address;
 
       //SELF-SERVICE: if profile is complete, we auto-activate the owner without employee involvement.
@@ -403,7 +382,7 @@ public sealed class Owner : AggregateRoot<Guid> {
       if (string.IsNullOrWhiteSpace(email))
          return Result.Failure(OwnerErrors.EmailIsRequired);
       
-      var resultEmail = EmailAddress.Check(email);
+      var resultEmail = Email.Create(email);
       if (resultEmail.IsFailure)
          return Result.Failure(resultEmail.Error);
 

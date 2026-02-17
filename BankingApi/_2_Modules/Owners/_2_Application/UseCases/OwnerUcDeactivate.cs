@@ -14,7 +14,7 @@ namespace BankingApi._2_Modules.Owners._2_Application.UseCases;
 /// </summary>
 public sealed class OwnerUcDeactivate(
    IIdentityGateway identityGateway,
-   IOwnerRepository repository,
+   IOwnersRepository repository,
    IUnitOfWork unitOfWork,
    IClock clock,
    ILogger<OwnerUcDeactivate> logger
@@ -33,7 +33,7 @@ public sealed class OwnerUcDeactivate(
          return Result.Failure(OwnerErrors.InvalidId);
 
       // 3) Load aggregate
-      var owner = await repository.FindByIdAsync(ownerId, noTracking: false, ct);
+      var owner = await repository.FindByIdAsync(ownerId, ct);
       if (owner is null)
          return Result.Failure(OwnerErrors.NotFound);
 

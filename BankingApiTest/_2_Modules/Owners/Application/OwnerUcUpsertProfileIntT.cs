@@ -22,7 +22,7 @@ public sealed class OwnerUcUpsertProfileIt : TestBase, IAsyncLifetime {
    private TestSeed _seed = null!;
    private IClock _clock = null!;
 
-   private IOwnerRepository _repository = null!;
+   private IOwnersRepository _repository = null!;
    private IUnitOfWork _unitOfWork = null!;
    
    private IIdentityGateway _identityGateway = null!;
@@ -52,17 +52,17 @@ public sealed class OwnerUcUpsertProfileIt : TestBase, IAsyncLifetime {
       var bankingDbContext = _dbContext   as BankingDbContext ?? 
          throw new InvalidOperationException("Create: DbContext is not of type BankingDbContext");
 
-      _repository = new OwnerRepositoryEf(bankingDbContext);
+      _repository = new OwnersRepositoryEf(bankingDbContext);
       _unitOfWork = new UnitOfWork(bankingDbContext, _clock, CreateLogger<UnitOfWork>());
 
-      _repository = new OwnerRepositoryEf(bankingDbContext);
+      _repository = new OwnersRepositoryEf(bankingDbContext);
       _unitOfWork = new UnitOfWork(bankingDbContext, _clock, CreateLogger<UnitOfWork>());
       
       // Test Owner
       _id = _seed.Owner5.Id.ToString();
       _ownerId = _seed.Owner5.Id;
       _subject = _seed.Owner5.Subject;
-      _username = _seed.Owner5.Email;
+      _username = _seed.Owner5.Email.Value;
       _createdAt = _seed.Owner5.CreatedAt;
       _adminRights = 0;
       
@@ -106,7 +106,7 @@ public sealed class OwnerUcUpsertProfileIt : TestBase, IAsyncLifetime {
       var firstname = _seed.Owner5.Firstname;
       var lastname = _seed.Owner5.Lastname;
       var companyName = _seed.Owner5.CompanyName;
-      var email = "neue.mail@mail.local";
+      var emailString = "neue.mail@mail.local";
       var status = (int) _seed.Owner5.Status;
       var createdAt = _seed.Owner5.CreatedAt;
       var deactivatedAt = _seed.Owner5.DeactivatedAt;
@@ -114,7 +114,7 @@ public sealed class OwnerUcUpsertProfileIt : TestBase, IAsyncLifetime {
       var postalCode = _seed.Owner5.Address?.PostalCode;
       var city = _seed.Owner5.Address?.City;
       var country = _seed.Owner5.Address?.Country;
-      var dto = new OwnerDto(id, firstname, lastname, companyName, email,
+      var dto = new OwnerDto(id, firstname, lastname, companyName, emailString,
          status, createdAt, deactivatedAt, street, postalCode, city, country);
 
       // Act
@@ -123,7 +123,7 @@ public sealed class OwnerUcUpsertProfileIt : TestBase, IAsyncLifetime {
       // Assert
       Assert.True(resultProfile.IsSuccess);
       var actualProfile = resultProfile.Value;
-      var actual = await _repository.FindByIdAsync(ownerId, noTracking:false, CancellationToken.None);
+      var actual = await _repository.FindByIdAsync(ownerId, CancellationToken.None);
       _dbContext!.ChangeTracker.Clear();
       _unitOfWork.LogChangeTracker("After profile update");
       _unitOfWork.ClearChangeTracker();
@@ -134,7 +134,7 @@ public sealed class OwnerUcUpsertProfileIt : TestBase, IAsyncLifetime {
       Equal(firstname, actual!.Firstname);
       Equal(lastname, actual.Lastname);
       Equal(companyName, actual.CompanyName);
-      Equal(email, actual.Email);
+      Equal(emailString, actual.Email.Value);
       Equal(_subject, actual.Subject);
       Equal(_createdAt, actual.CreatedAt);
       Equal(street, actual.Address?.Street);

@@ -4,7 +4,7 @@ using BankingApi._4_BuildingBlocks;
 using BankingApi._4_BuildingBlocks._4_Infrastructure.ReadModel;
 namespace BankingApi._2_Modules.Owners._1_Ports.Inbound;
 
-public interface IOwnerReadModel {
+public interface IOwnersReadModel {
    
    Task<Result<Guid>> FindMeProvisionedAsync(
       CancellationToken ct = default
@@ -25,17 +25,17 @@ public interface IOwnerReadModel {
    );
    
    Task<Result<OwnerDto>> FindByEmailAsync(
-      string email, 
+      string emailString, 
       CancellationToken ct = default
    );
 
-   Task<Result<IEnumerable<OwnerDto>>> GetAllAsync(
+   Task<Result<IEnumerable<OwnerDto>>> SelectAllAsync(
       CancellationToken ct
    );
    
-   Task<Result<PagedResult<OwnerDto>>> FilterAsync(
-      OwnerSearchFilter filter,
-      PageRequest page,
-      CancellationToken ct
-   );
+   // Task<Result<PagedResult<OwnerDto>>> FilterAsync(
+   //    OwnerSearchFilter filter,
+   //    PageRequest page,
+   //    CancellationToken ct
+   // );
 }

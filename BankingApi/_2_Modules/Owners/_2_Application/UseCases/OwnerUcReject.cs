@@ -12,7 +12,7 @@ namespace BankingApi._2_Modules.Owners._2_Application.UseCases;
 /// </summary>
 public sealed class OwnerUcReject(
    IIdentityGateway identityGateway,
-   IOwnerRepository repository,
+   IOwnersRepository repository,
    IUnitOfWork unitOfWork,
    IClock clock,
    ILogger<OwnerUcReject> logger
@@ -34,7 +34,7 @@ public sealed class OwnerUcReject(
          return Result.Failure(OwnerErrors.RejectionRequiresReason);
 
       // 3) Load aggregate
-      var owner = await repository.FindByIdAsync(ownerId, noTracking: false, ct);
+      var owner = await repository.FindByIdAsync(ownerId,  ct);
 
       if (owner is null)
          return Result.Failure(OwnerErrors.NotFound);

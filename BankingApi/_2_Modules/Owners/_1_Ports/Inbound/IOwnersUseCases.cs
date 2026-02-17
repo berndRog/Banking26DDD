@@ -2,7 +2,7 @@ using BankingApi._2_Modules.Owners._2_Application.Dtos;
 using BankingApi._4_BuildingBlocks;
 namespace BankingApi._2_Modules.Owners._1_Ports.Inbound;
 
-public interface IOwnerUseCases {
+public interface IOwnersUseCases {
    public Task<Result<Guid>> CreateAsync(
       string firstname,
       string lastname,

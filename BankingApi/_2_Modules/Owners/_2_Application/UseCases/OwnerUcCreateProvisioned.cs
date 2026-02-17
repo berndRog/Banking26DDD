@@ -8,12 +8,13 @@ using BankingApi._4_BuildingBlocks._1_Ports.Inbound;
 using BankingApi._4_BuildingBlocks._1_Ports.Outbound;
 using BankingApi._4_BuildingBlocks._3_Domain;
 using BankingApi._4_BuildingBlocks._3_Domain.Errors;
+using BankingApi._4_BuildingBlocks._3_Domain.ValueObjects;
 using BankingApi._4_BuildingBlocks._4_Infrastructure.Persistence;
 namespace BankingApi._2_Modules.Owners._2_Application.UseCases;
 
 public class OwnerUcCreateProvisioned(
    IIdentityGateway identityGateway,
-   IOwnerRepository repository,
+   IOwnersRepository repository,
    IUnitOfWork unitOfWork,
    IClock clock,
    ILogger<OwnerUcCreateProvisioned> logger
@@ -23,14 +24,13 @@ public class OwnerUcCreateProvisioned(
       CancellationToken ct
    ) {
       // 1) subject required
-      var result = IdentitySubject.Check(identityGateway.Subject);
-      if (result.IsFailure) 
-         return Result<OwnerProvisionDto>.Failure(result.Error);
-      
-      var subject = result.Value;
+      var resultSubject = IdentitySubject.Check(identityGateway.Subject);
+      if (resultSubject.IsFailure) 
+         return Result<OwnerProvisionDto>.Failure(resultSubject.Error);
+      var subject = resultSubject.Value;
 
       // 2) idempotent lookup
-      var existing = await repository.FindByIdentitySubjectAsync(subject, false, ct);
+      var existing = await repository.FindByIdentitySubjectAsync(subject, ct);
       if (existing is not null) 
          return Result<OwnerProvisionDto>.Success(existing.ToOwnerProvisionDto());
       
@@ -47,13 +47,13 @@ public class OwnerUcCreateProvisioned(
       }
 
       // interpret preferred_username as initial email
-      var emailResult = EmailAddress.Check(username);
-      if (emailResult.IsFailure)
-         return Result<OwnerProvisionDto>.Failure(emailResult.Error);
-      var email = emailResult.Value;
+      var resultEmail = Email.Create(username);
+      if (resultEmail.IsFailure)
+         return Result<OwnerProvisionDto>.Failure(resultEmail.Error);
+      var email = resultEmail.Value;
 
       // check uniqueness
-      var existingWithEmail = await repository.FindByEmailAsync(email, false, ct);
+      var existingWithEmail = await repository.FindByEmailAsync(email, ct);
       if (existingWithEmail is not null)
          return Result<OwnerProvisionDto>.Failure(OwnerApplicationErrors.EmailAlreadyInUse);
 

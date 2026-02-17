@@ -1,4 +1,5 @@
 using BankingApi._2_Modules.Accounts._3_Domain.Errors;
+using BankingApi._2_Modules.Core._3_Domain.ValueObjects;
 using BankingApi._4_BuildingBlocks;
 using BankingApi._4_BuildingBlocks._1_Ports.Inbound;
 using BankingApi._4_BuildingBlocks._3_Domain;
@@ -10,7 +11,7 @@ namespace BankingApi._2_Modules.Core._3_Domain.Aggregates;
 public sealed class Account: AggregateRoot<Guid> {
 
    // Properties
-   public string Iban { get; private set; } = string.Empty;
+   public Iban Iban { get; private set; } = default!;
    public decimal Balance { get; private set; } = 0m;
 
    public DateTimeOffset? DeactivatedAt { get; private set; } = null;
@@ -30,7 +31,7 @@ public sealed class Account: AggregateRoot<Guid> {
       IClock clock,
       Guid id,
       Guid ownerId,
-      string iban,
+      Iban iban,
       decimal balance
    ): base(clock) {
       Id      = id;
@@ -44,21 +45,13 @@ public sealed class Account: AggregateRoot<Guid> {
    public static Result<Account> Create(
       IClock clock,
       Guid ownerId,
-      string iban,
+      Iban iban,
       decimal balance = 0m,
       string? id = null
    ) {
       // invariants ownerId must be valid (Guid.Empty is valid for new accounts)
       if (string.IsNullOrWhiteSpace(ownerId.ToString()))
          return Result<Account>.Failure(AccountErrors.InvalidOwnerId);
-      
-      if (string.IsNullOrWhiteSpace(iban))
-         return Result<Account>.Failure(AccountErrors.InvalidIban);
-
-      var result = IbanValidation.IsValid(iban);
-      if (result.IsFailure)
-         return Result<Account>.Failure(result.Error);
-      var groupedIban = result.Value;
       
       // balance can be zero or positive
       if (balance < 0m)
@@ -70,7 +63,7 @@ public sealed class Account: AggregateRoot<Guid> {
       var accountId = idResult.Value;
       
       return Result<Account>.Success(
-         new Account(clock, accountId, ownerId, groupedIban, balance ));
+         new Account(clock, accountId, ownerId, iban, balance ));
    }
    
    //--- Domain operations -----------------------------------------------------
@@ -107,18 +100,20 @@ public sealed class Account: AggregateRoot<Guid> {
    // Story 3.1: add a beneficiary to THIS account
    public Result<Beneficiary> AddBeneficiary(
       string name,
-      string iban,
+      Iban iban,
       string? id = null
    ) {
       // check for duplicate IBANs
-      var normalizedIban = iban.Trim().ToUpperInvariant();
-      if (_beneficiaries.Any(b => b.Iban.Equals(normalizedIban)))
+      if (_beneficiaries.Any(b => b.Iban.Equals(iban)))
          return Result<Beneficiary>.Failure(BeneficiaryErrors.IbanAlreadyRegistred);
 
       // create e new beneficiary
       var result = Beneficiary.Create(
          accountId:Id, 
-         name: name, normalizedIban, id);
+         name: name, 
+         iban: iban, 
+         id: id
+      );
       if (result.IsFailure) 
          return Result<Beneficiary>.Failure(result.Error);
       var beneficiary = result.Value;

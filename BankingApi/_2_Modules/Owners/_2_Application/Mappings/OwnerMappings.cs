@@ -9,7 +9,7 @@ public static class OwnerMappings {
       Firstname: owner.Firstname,
       Lastname: owner.Lastname,
       CompanyName: owner.CompanyName,
-      Email: owner.Email,
+      Email: owner.Email.Value,
       Status: (int) owner.Status,
       CreatedAt: owner.CreatedAt,
       DeactivatedAt: owner.DeactivatedAt,
@@ -21,6 +21,6 @@ public static class OwnerMappings {
    
    public static OwnerProvisionDto ToOwnerProvisionDto(this Owner owner) => new(
       Id: owner.Id,
-      ShowProfile: true
+      WasCreated: true
    );
 }

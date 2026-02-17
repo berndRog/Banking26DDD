@@ -14,7 +14,7 @@ public sealed class AccountUcBeneficiaryAddIntT : TestBase, IAsyncLifetime {
 
    private SqliteConnection _dbConnection = null!;
    private BankingDbContext _dbContext = null!;
-   private IAccountRepository _repository = null!;
+   private IAccountsRepository _repository = null!;
    private IUnitOfWork _unitOfWork = null!;
    private TestSeed _seed = null!;
    private IClock _clock = null!;
@@ -38,7 +38,7 @@ public sealed class AccountUcBeneficiaryAddIntT : TestBase, IAsyncLifetime {
       _dbContext = new BankingDbContext(options);
       await _dbContext.Database.EnsureCreatedAsync(_ct);
 
-      _repository = new AccountRepository(_dbContext);
+      _repository = new AccountsRepository(_dbContext);
       _unitOfWork = new UnitOfWork(
          _dbContext, 
          _clock,
@@ -88,7 +88,7 @@ public sealed class AccountUcBeneficiaryAddIntT : TestBase, IAsyncLifetime {
       var result = await _sut.ExecuteAsync(
          accountId: account!.Id,
          name: beneficiary.Name,
-         iban: beneficiary.Iban,
+         ibanString: beneficiary.Iban.Value,
          id: beneficiary.Id.ToString(),
          ct: _ct
       );
@@ -109,7 +109,7 @@ public sealed class AccountUcBeneficiaryAddIntT : TestBase, IAsyncLifetime {
       // create account in database
       var resultAccount = await _accountUcCreate.ExecuteAsync(
          ownerId: owner.Id,
-         iban: account.Iban,
+         ibanString: account.Iban.Value,
          balance: account.Balance,
          id: account.Id.ToString(),
          ct: _ct

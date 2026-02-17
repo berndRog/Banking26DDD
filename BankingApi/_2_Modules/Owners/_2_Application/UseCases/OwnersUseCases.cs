@@ -5,7 +5,7 @@ namespace BankingApi._2_Modules.Owners._2_Application.UseCases;
 
 
 // UseCases Facade for Owner aggregate
-public class OwnerUseCases(
+public class OwnersUseCases(
    OwnerUcCreate createUc,
    OwnerUcCreateProvisioned createProvisionedUc,
    OwnerUcUpdateProfile updateProfileUc,
@@ -13,7 +13,7 @@ public class OwnerUseCases(
    OwnerUcReject rejectUc,
    OwnerUcDeactivate deactivateUc,
    OwnerUcUpdateEmail updateEmailUc
-): IOwnerUseCases {
+): IOwnersUseCases {
 
    public Task<Result<Guid>> CreateAsync(
       string firstname,

@@ -1,23 +1,21 @@
 using BankingApi._2_Modules.Owners._3_Domain.Aggregates;
+using BankingApi._4_BuildingBlocks._3_Domain.ValueObjects;
 namespace BankingApi._2_Modules.Owners._1_Ports.Outbound;
 
-public interface IOwnerRepository {
+public interface IOwnersRepository {
 
    Task<Owner?> FindByIdAsync(
       Guid ownerId, 
-      bool noTracking = false,
       CancellationToken ct = default
    );
 
    Task<Owner?> FindByIdentitySubjectAsync(
       string subject,
-      bool noTracking = false,
       CancellationToken ct = default
    );
 
    Task<Owner?> FindByEmailAsync(
-      string email,
-      bool noTracking = false,
+      Email email,
       CancellationToken ct = default
    );
    

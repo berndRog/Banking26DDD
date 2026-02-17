@@ -2,6 +2,7 @@ using BankingApi._2_Modules.Accounts._2_Application.UseCases;
 using BankingApi._2_Modules.Core._1_Ports.Inbound;
 using BankingApi._2_Modules.Core._1_Ports.Outbound;
 using BankingApi._2_Modules.Core._2_Application.UseCases;
+using BankingApi._2_Modules.Core._4_Infrastructure.ReadModel;
 using BankingApi._2_Modules.Core._4_Infrastructure.Repositories;
 namespace BankingApi._2_Modules.Core;
 
@@ -15,13 +16,13 @@ public static class DiCoreExtensions {
       // Inbound ports (HTTP / UI)
       // =========================================================
       // ReadModels (Queries)     
-      // services.AddScoped<IReservationReadModel, ReservationReadModelEf>();
+      services.AddScoped<IAccountsReadModel, AccountsReadModelEf>();
 
       // WriteModels = Use Cases
       services.AddScoped<AccountUcCreate>();
       services.AddScoped<AccountUcBeneficiaryAdd>();
       services.AddScoped<AccountUcBeneficiaryRemove>();
-      services.AddScoped<IAccountUseCases, AccountUseCases>();      
+      services.AddScoped<IAccountsUseCases, AccountsUseCases>();      
       
       // Policies
       // services.AddScoped<IReservationConflictPolicy, ReservationConflictPolicyEf>();
@@ -30,7 +31,7 @@ public static class DiCoreExtensions {
       // Outbound ports
       // =========================================================
       // Repositories
-      services.AddScoped<IAccountRepository, AccountRepository>();
+      services.AddScoped<IAccountsRepository, AccountsRepository>();
       //services.AddScoped<IRentalRepository, RentalRepositoryEf>();
 
       

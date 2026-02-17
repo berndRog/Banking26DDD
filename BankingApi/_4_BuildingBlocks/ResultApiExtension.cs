@@ -1,57 +1,56 @@
 using BankingApi._4_BuildingBlocks._3_Domain.Enums;
 using Microsoft.AspNetCore.Mvc;
+
 namespace BankingApi._4_BuildingBlocks;
 
 public static class ResultApiExtensions {
 
-   public static ActionResult ToActionResult(
-      this ControllerBase controller,
-      Result result,
-      ILogger logger,
-      string context,
-      object? args = null
-   ) {
-      // Success -> NoContent 204 (typisch für Commands ohne Body)
-      if (result.IsSuccess)
-         return controller.NoContent();
-
-      // Failure -> log and map DomainErrors to HTTP StatusCodes
-      result.LogIfFailure(logger, context, args);
-
-      var error = result.Error;
-      var problemDetails = new ProblemDetails {
-         Title = error.Title,
-         Detail = error.Message,
-         Status = error.Code.ToHttpStatusCode()
-      };
-
-      return error.Code switch {
-         ErrorCode.BadRequest =>
-            controller.BadRequest(problemDetails),
-
-         ErrorCode.Unauthorized =>
-            controller.Unauthorized(problemDetails),
-
-         ErrorCode.Forbidden =>
-            controller.StatusCode(StatusCodes.Status403Forbidden, problemDetails),
-
-         ErrorCode.NotFound =>
-            controller.NotFound(problemDetails),
-
-         ErrorCode.Conflict =>
-            controller.Conflict(problemDetails),
-
-         ErrorCode.UnsupportedMediaType =>
-            controller.StatusCode(StatusCodes.Status415UnsupportedMediaType, problemDetails),
-
-         ErrorCode.UnprocessableEntity =>
-            controller.UnprocessableEntity(problemDetails),
-
-         _ =>
-            controller.BadRequest(problemDetails)
-      };
-   }
-
+   /// <summary>
+   /// Converts a domain <see cref="Result{T}"/> into an ASP.NET Core <see cref="ActionResult"/>.
+   ///
+   /// PURPOSE
+   /// -------
+   /// This overload is used for queries or commands that return a value.
+   /// The returned value becomes the HTTP response body.
+   ///
+   /// BEHAVIOR
+   /// --------
+   /// Success
+   ///     → HTTP 200 OK
+   ///     → Response body contains the value (T)
+   ///
+   /// Failure
+   ///     → DomainError is translated into an HTTP status code
+   ///     → Returned as RFC7807 ProblemDetails
+   ///     → Failure is logged
+   ///
+   /// COMMAND vs QUERY SEMANTICS
+   /// --------------------------
+   /// Result        -> command without response body -> 204 NoContent
+   /// Result<T>     -> query or read model           -> 200 OK + body
+   ///
+   /// This keeps controller actions trivial:
+   ///     return this.ToActionResult(result, logger, "GetOwner");
+   ///
+   /// IMPORTANT
+   /// ---------
+   /// The controller does not interpret the domain state.
+   /// The UseCase already decided success or failure.
+   /// This method only translates the outcome into HTTP.
+   ///
+   /// EXAMPLES
+   /// --------
+   /// GetOwnerById        -> 200 OK + OwnerDto
+   /// AccountNotFound     -> 404 NotFound
+   /// InvalidFilter       -> 400 BadRequest
+   /// </summary>
+   /// <typeparam name="T">Type of the response body</typeparam>
+   /// <param name="controller">Calling controller (extension target)</param>
+   /// <param name="result">Domain/application result</param>
+   /// <param name="logger">Logger for structured error logging</param>
+   /// <param name="context">Logical operation name (use case)</param>
+   /// <param name="args">Optional structured log arguments</param>
+   /// <returns>HTTP response representing the domain outcome</returns>
    public static ActionResult ToActionResult<T>(
       this ControllerBase controller,
       Result<T> result,
@@ -59,12 +58,16 @@ public static class ResultApiExtensions {
       string context,
       object? args = null
    ) {
+      // Success -> HTTP 200 OK with response body
       if (result.IsSuccess)
          return controller.Ok(result.Value);
 
+      // Failure -> log and translate DomainErrors into HTTP status codes
       result.LogIfFailure(logger, context, args);
 
       var error = result.Error;
+
+      // RFC 7807 ProblemDetails response
       var problemDetails = new ProblemDetails {
          Title = error.Title,
          Detail = error.Message,
@@ -98,7 +101,162 @@ public static class ResultApiExtensions {
       };
    }
 
-   public static ActionResult CreatedAt<T>(
+   /// <summary>
+   /// Converts a domain <see cref="Result"/> into an ASP.NET Core <see cref="ActionResult"/>.
+   ///
+   /// PURPOSE
+   /// -------
+   /// This method forms the boundary between the application/domain layer and HTTP.
+   /// The domain returns semantic results (success/failure + DomainError),
+   /// while the controller must return protocol-specific responses (status codes + body).
+   ///
+   /// BEHAVIOR
+   /// --------
+   /// Success (Result without value)
+   ///     → HTTP 204 NoContent
+   ///     Typical for commands:
+   ///         CreateOwner
+   ///         ActivateAccount
+   ///         SendMoney
+   ///
+   /// Failure
+   ///     → DomainError is translated into an HTTP status code
+   ///     → Returned as RFC7807 ProblemDetails
+   ///     → Failure is logged (important for diagnostics & observability)
+   ///
+   /// DESIGN RATIONALE
+   /// ----------------
+   /// - The domain must not know HTTP
+   /// - Controllers must not implement business rules
+   /// - All error handling must be consistent across the entire API
+   ///
+   /// This method therefore acts as a protocol adapter.
+   ///
+   /// IMPORTANT:
+   ///     Domain errors are NOT exceptions.
+   ///     They represent expected business outcomes.
+   ///
+   /// EXAMPLES
+   /// --------
+   /// EmailAlreadyExists      -> 409 Conflict
+   /// OwnerNotFound           -> 404 NotFound
+   /// InvalidStateTransition  -> 422 UnprocessableEntity
+   /// ValidationError         -> 400 BadRequest
+   ///
+   /// </summary>
+   /// <param name="controller">The calling ASP.NET controller (extension target)</param>
+   /// <param name="result">Domain/application result object</param>
+   /// <param name="logger">Logger used to record failures</param>
+   /// <param name="context">Logical operation name (use case) for structured logging</param>
+   /// <param name="args">Optional structured log arguments</param>
+   /// <returns>HTTP response representing the domain outcome</returns>
+   public static ActionResult ToActionResult(
+      this ControllerBase controller,
+      Result result,
+      ILogger logger,
+      string context,
+      object? args = null
+   ) {
+      // Success -> HTTP 204 NoContent (typical for commands without response body)
+      if (result.IsSuccess)
+         return controller.NoContent();
+
+      // Failure -> log and translate DomainErrors into HTTP status codes
+      result.LogIfFailure(logger, context, args);
+
+      var error = result.Error;
+
+      // RFC 7807 ProblemDetails response
+      var problemDetails = new ProblemDetails {
+         Title = error.Title,
+         Detail = error.Message,
+         Status = error.Code.ToHttpStatusCode()
+      };
+
+      return error.Code switch {
+         ErrorCode.BadRequest =>
+            controller.BadRequest(problemDetails),
+
+         ErrorCode.Unauthorized =>
+            controller.Unauthorized(problemDetails),
+
+         ErrorCode.Forbidden =>
+            controller.StatusCode(StatusCodes.Status403Forbidden, problemDetails),
+
+         ErrorCode.NotFound =>
+            controller.NotFound(problemDetails),
+
+         ErrorCode.Conflict =>
+            controller.Conflict(problemDetails),
+
+         ErrorCode.UnsupportedMediaType =>
+            controller.StatusCode(StatusCodes.Status415UnsupportedMediaType, problemDetails),
+
+         ErrorCode.UnprocessableEntity =>
+            controller.UnprocessableEntity(problemDetails),
+
+         _ =>
+            controller.BadRequest(problemDetails)
+      };
+   }
+
+   
+    /// <summary>
+   /// Converts a successful creation Result into HTTP 201 Created.
+   ///
+   /// This method represents the REST "Create Resource" response semantics.
+   ///
+   /// DOMAIN VIEW
+   /// -----------
+   /// The UseCase returns:
+   ///     Result<T>
+   ///
+   /// Success  -> A new domain object was created
+   /// Failure  -> A business rule prevented creation (NOT an exception)
+   ///
+   /// HTTP VIEW
+   /// ---------
+   /// On success the API MUST return:
+   ///     201 Created
+   ///     Location header pointing to the new resource
+   ///     Response body containing the created DTO
+   ///
+   /// This is different from:
+   ///     200 OK  -> used for queries
+   ///     204 NoContent -> used for commands without response body
+   ///
+   /// WHY routeName + routeValues?
+   /// ----------------------------
+   /// The controller does NOT build URLs manually.
+   /// Instead ASP.NET generates the correct URL based on routing configuration.
+   ///
+   /// Example:
+   ///     routeName: "GetOwnerById"
+   ///     routeValues: new { id = ownerId }
+   ///
+   /// Produces:
+   ///     Location: /owners/{id}
+   ///
+   /// ARCHITECTURAL ROLE
+   /// ------------------
+   /// This method is part of the HTTP adapter.
+   /// It translates the application result into protocol semantics.
+   ///
+   /// The domain does not know HTTP.
+   /// The controller does not know business rules.
+   ///
+   /// This is the boundary between Application Layer and Transport Layer.
+   /// </summary>
+   /// <typeparam name="T">Type of the created resource DTO</typeparam>
+   /// <param name="controller">Calling ASP.NET controller</param>
+   /// <param name="routeName">Name of the GET route used to retrieve the created resource</param>
+   /// <param name="routeValues">Route parameters (typically the new resource id)</param>
+   /// <param name="result">Result returned by the UseCase</param>
+   /// <param name="logger">Logger for structured failure logging</param>
+   /// <param name="context">Logical UseCase name for logging</param>
+   /// <param name="args">Optional structured logging data</param>
+   /// <returns>HTTP response representing the domain outcome</returns>
+   public static ActionResult ToCreatedAt<T>(
       this ControllerBase controller,
       string routeName,
       object? routeValues,
@@ -107,12 +265,20 @@ public static class ResultApiExtensions {
       string context,
       object? args = null
    ) {
+      // Domain failure -> map to HTTP error response (400–422)
       if (result.IsFailure)
          return controller.ToActionResult(result, logger, context, args);
 
+      // Domain success -> HTTP 201 + Location header + body
       return controller.CreatedAtRoute(routeName, routeValues, result.Value);
    }
+    
 
+   /// <summary>
+   /// Converts a domain error code into an appropriate HTTP status code.
+   /// </summary>
+   /// <param name="errorCode"></param>
+   /// <returns></returns>
    public static int ToHttpStatusCode(this ErrorCode errorCode) =>
       errorCode switch {
          ErrorCode.BadRequest => StatusCodes.Status400BadRequest,
@@ -125,3 +291,104 @@ public static class ResultApiExtensions {
          _ => StatusCodes.Status400BadRequest
       };
 }
+
+/*
+================================================================================
+DIDAKTIK & LERNZIELE
+================================================================================
+
+Dieses File implementiert die Übersetzungsschicht zwischen:
+
+    DOMAIN (UseCases liefern Result<T>)
+                ↓
+    APPLICATION / API BOUNDARY
+                ↓
+    HTTP / REST Welt
+
+Ziel ist die strikte Trennung:
+
+    Domain kennt KEIN HTTP
+    Controller kennt KEINE Businesslogik
+
+Der Controller wird dadurch zu einem reinen Adapter.
+
+----------------------------------------------------------------------
+WAS STUDIERENDE HIER LERNEN SOLLEN
+----------------------------------------------------------------------
+
+1) Fehler gehören zur Fachlogik – nicht zur Technik
+---------------------------------------------------
+In klassischen CRUD-Anwendungen werden Fehler oft als Exceptions behandelt.
+In einem DDD-System sind viele Fehler aber erwartbares Verhalten:
+
+    Konto nicht gefunden
+    Email bereits vergeben
+    Überweisung nicht erlaubt
+    Statusübergang ungültig
+
+Diese sind KEINE technischen Fehler → sondern Domänenentscheidungen.
+
+Darum:
+    Domain -> Result / DomainError
+    Nicht -> Exception
+
+----------------------------------------------------------------------
+2) Entkopplung von Domain und Transportprotokoll
+------------------------------------------------
+Die Domain darf NICHT wissen:
+
+    HTTP
+    REST
+    Statuscodes
+    Controller
+    JSON
+    ASP.NET
+
+Die API darf NICHT wissen:
+
+    Validierungsregeln im Detail
+    Aggregatzustände
+    Geschäftslogik
+
+Dieses File ist der "Anti-Corruption Layer" zwischen beiden Welten.
+
+----------------------------------------------------------------------
+3) Konsistentes API-Verhalten (Uniform Error Handling)
+------------------------------------------------------
+Alle Controller bekommen automatisch:
+
+    gleiche Fehlerstruktur
+    gleiche Statuscodes
+    gleiche Loggingstrategie
+    gleiche ProblemDetails (RFC7807)
+
+Dadurch entstehen:
+
+    wartbare APIs
+    testbare APIs
+    dokumentierbare APIs
+    vorhersehbare Clients
+
+----------------------------------------------------------------------
+4) Architekturprinzipien
+------------------------------------------------------
+Hier werden mehrere zentrale Architekturideen praktisch umgesetzt:
+
+- Clean Architecture → Interface Adapter Layer
+- Hexagonale Architektur → Primary Adapter (HTTP)
+- DDD → Application Service liefert Result
+- SOLID → SRP (Controller nur Mapping)
+- DRY → zentrale Fehlerübersetzung
+- Tell, don't ask → UseCase entscheidet Erfolg/Misserfolg
+
+----------------------------------------------------------------------
+KERNGEDANKE FÜR STUDIERENDE
+------------------------------------------------------
+Controller sind KEINE Businesslogik.
+Controller sind Protokolladapter.
+
+Die Fachlichkeit endet im UseCase.
+HTTP beginnt erst danach.
+
+Dieses File ist genau die Grenze zwischen beiden Welten.
+*/

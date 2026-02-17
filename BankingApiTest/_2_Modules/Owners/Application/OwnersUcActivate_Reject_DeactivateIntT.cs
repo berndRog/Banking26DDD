@@ -23,7 +23,7 @@ public sealed class OwnersUcActivate_Reject_DeactivateIntT : TestBase, IAsyncLif
    private TestSeed _seed = null!;
    private IClock _clock = null!;
 
-   private IOwnerRepository _repository = null!;
+   private IOwnersRepository _repository = null!;
    private IUnitOfWork _unitOfWork = null!;
    
    private IIdentityGateway _identityGateway = null!;
@@ -56,17 +56,17 @@ public sealed class OwnersUcActivate_Reject_DeactivateIntT : TestBase, IAsyncLif
       var bankingDbContext = _dbContext   as BankingDbContext ?? 
          throw new InvalidOperationException("Create: DbContext is not of type BankingDbContext");
 
-      _repository = new OwnerRepositoryEf(bankingDbContext);
+      _repository = new OwnersRepositoryEf(bankingDbContext);
       _unitOfWork = new UnitOfWork(bankingDbContext, _clock, CreateLogger<UnitOfWork>());
 
-      _repository = new OwnerRepositoryEf(bankingDbContext);
+      _repository = new OwnersRepositoryEf(bankingDbContext);
       _unitOfWork = new UnitOfWork(bankingDbContext, _clock, CreateLogger<UnitOfWork>());
       
       // Test Owner
       _id = _seed.Owner5.Id.ToString();
       _ownerId = _seed.Owner5.Id;
       _subject = _seed.Owner5.Subject;
-      _username = _seed.Owner5.Email;
+      _username = _seed.Owner5.Email.Value;
       _createdAt = _seed.Owner5.CreatedAt;
       _adminRights = 0;
       
@@ -85,7 +85,6 @@ public sealed class OwnersUcActivate_Reject_DeactivateIntT : TestBase, IAsyncLif
       
       // simulate a login in Admin
       // Default gateway
-      var subjectAdmin = "";
       var identityGatewayAdmin = new FakeIdentity(clock: _clock, subject: _subject, 
          username: _username, createdAt: _createdAt, adminRights: _adminRights);
 
@@ -146,7 +145,7 @@ public sealed class OwnersUcActivate_Reject_DeactivateIntT : TestBase, IAsyncLif
 
       // Assert
       True(result.IsSuccess);
-      var actual = await _repository.FindByIdAsync(_ownerId, noTracking: true, _ct);
+      var actual = await _repository.FindByIdAsync(_ownerId,  _ct);
       NotNull(actual);
       Equal(_ownerId, actual.Id);
       // Equal(email, actual.Email);

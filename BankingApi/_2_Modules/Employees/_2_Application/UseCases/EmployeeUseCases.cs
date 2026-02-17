@@ -43,7 +43,7 @@ public sealed class EmployeeUseCases(
    ) => createUc.ExecuteAsync(
       firstname: firstname,
       lastname: lastname,
-      email: email,
+      emailString: email,
       phoneString: phoneString,
       subject: subject,
       personnelNumber: personnelNumber,

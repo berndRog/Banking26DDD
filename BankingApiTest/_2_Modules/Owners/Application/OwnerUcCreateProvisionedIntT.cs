@@ -21,7 +21,7 @@ public sealed class OwnerUcCreateProvisinedIntT : TestBase, IAsyncLifetime {
    private TestSeed _seed = null!;
    private IClock _clock = null!;
 
-   private IOwnerRepository _repository = null!;
+   private IOwnersRepository _repository = null!;
    private IUnitOfWork _unitOfWork = null!;
    
    private IIdentityGateway _identityGateway = null!;
@@ -51,10 +51,10 @@ public sealed class OwnerUcCreateProvisinedIntT : TestBase, IAsyncLifetime {
       var bankingDbContext = _dbContext   as BankingDbContext ?? 
          throw new InvalidOperationException("Create: DbContext is not of type BankingDbContext");
 
-      _repository = new OwnerRepositoryEf(bankingDbContext);
+      _repository = new OwnersRepositoryEf(bankingDbContext);
       _unitOfWork = new UnitOfWork(bankingDbContext, _clock, CreateLogger<UnitOfWork>());
 
-      _repository = new OwnerRepositoryEf(bankingDbContext);
+      _repository = new OwnersRepositoryEf(bankingDbContext);
       _unitOfWork = new UnitOfWork(bankingDbContext, _clock, CreateLogger<UnitOfWork>());
       
       // Seed cars from TestSeed
@@ -66,7 +66,7 @@ public sealed class OwnerUcCreateProvisinedIntT : TestBase, IAsyncLifetime {
       _id = _seed.Owner5.Id.ToString();
       _ownerId = _seed.Owner5.Id;
       _subject = _seed.Owner5.Subject;
-      _username = _seed.Owner5.Email;
+      _username = _seed.Owner5.Email.Value;
       _createdAt = _seed.Owner5.CreatedAt;
       _adminRights = 0;
       
@@ -99,11 +99,11 @@ public sealed class OwnerUcCreateProvisinedIntT : TestBase, IAsyncLifetime {
       var ownerId = result.Value.Id;
       NotEqual(Guid.Empty, ownerId);
 
-      var actual = await _repository.FindByIdAsync(ownerId, noTracking:false, CancellationToken.None);
+      var actual = await _repository.FindByIdAsync(ownerId,  CancellationToken.None);
       NotNull(actual);
       
       Equal(ownerId, actual.Id);
-      Equal(_username, actual.Email);
+      Equal(_username, actual.Email.Value);
       Equal(_subject, actual.Subject);
       Equal(_createdAt, actual.CreatedAt);
       

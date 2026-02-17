@@ -1,6 +1,7 @@
 using BankingApi._2_Modules.Accounts._3_Domain.Errors;
 using BankingApi._2_Modules.Core._1_Ports.Outbound;
 using BankingApi._2_Modules.Core._3_Domain.Aggregates;
+using BankingApi._2_Modules.Core._3_Domain.ValueObjects;
 using BankingApi._2_Modules.Owners._1_Ports.Inbound;
 using BankingApi._2_Modules.Owners._3_Domain.Errors;
 using BankingApi._4_BuildingBlocks;
@@ -11,7 +12,7 @@ namespace BankingApi._2_Modules.Core._2_Application.UseCases;
 
 public sealed class AccountUcCreate(
    IOwnerLookupContract ownerLookup,
-   IAccountRepository accountRepository,
+   IAccountsRepository accountsRepository,
    IUnitOfWork unitOfWork,
    IClock clock,
    ILogger<AccountUcCreate> logger
@@ -19,7 +20,7 @@ public sealed class AccountUcCreate(
    
    public async Task<Result<Guid>> ExecuteAsync(
       Guid ownerId,
-      string iban,
+      string ibanString,
       decimal balance = 0m,
       string? id = null,
       CancellationToken ct = default
@@ -28,13 +29,18 @@ public sealed class AccountUcCreate(
       if (!await ownerLookup.ExistsActiveAsync(ownerId, ct))
          return Result<Guid>.Failure(AccountErrors.OwnerIdNotFoundOrInactive);
       
-      // domain      
+      // domain   
+      var resultIban = Iban.Create(ibanString);
+      if (resultIban.IsFailure)
+         return Result<Guid>.Failure(AccountErrors.InvalidIban);
+      var iban = resultIban.Value;
+      
       var result =  Account.Create(clock, ownerId, iban, balance, id);
       if (result.IsFailure)
          return Result<Guid>.Failure(result.Error);
       
       var account = result.Value!;
-      accountRepository.Add(account);
+      accountsRepository.Add(account);
       
       // unit of work, save changes to database
       var savedRows = 

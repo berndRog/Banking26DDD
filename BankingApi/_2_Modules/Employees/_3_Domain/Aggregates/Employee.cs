@@ -5,6 +5,7 @@ using BankingApi._4_BuildingBlocks;
 using BankingApi._4_BuildingBlocks._1_Ports.Inbound;
 using BankingApi._4_BuildingBlocks._3_Domain;
 using BankingApi._4_BuildingBlocks._3_Domain.Entities;
+using BankingApi._4_BuildingBlocks._3_Domain.ValueObjects;
 using BankingApi._4_BuildingBlocks._4_Infrastructure;
 namespace BankingApi._2_Modules.Employees._3_Domain.Aggregates;
 
@@ -32,8 +33,8 @@ public sealed class Employee : AggregateRoot<Guid> {
    
    public string  Firstname { get; private set; } = string.Empty;
    public string  Lastname  { get; private set; } = string.Empty;
-   public string  Email     { get; private set; } = default!;
-   public string? Phone { get; private set; } = null;
+   public Email   Email     { get; private set; } = default!;
+   public Phone?  Phone { get; private set; } = null;
   
    public string  Subject { get; private set; } = default!; // IdentityAccessServer
    
@@ -59,8 +60,8 @@ public sealed class Employee : AggregateRoot<Guid> {
       Guid id,
       string firstname,
       string lastname,
-      string email,
-      string? phone,
+      Email email,
+      Phone? phone,
       string subject,
       string personnelNumber,
       AdminRights adminRights,
@@ -83,8 +84,8 @@ public sealed class Employee : AggregateRoot<Guid> {
       IClock clock,
       string firstname,
       string lastname,
-      string email,
-      string? phone,
+      Email email,
+      Phone? phone,
       string subject,
       string personnelNumber,
       AdminRights adminRights,
@@ -94,8 +95,6 @@ public sealed class Employee : AggregateRoot<Guid> {
       // Normalize input early
       firstname = firstname.Trim();
       lastname = lastname.Trim();
-      email= email.Trim();
-      phone = phone?.Trim();
       personnelNumber = personnelNumber.Trim();
 
       // required firstname
@@ -110,36 +109,22 @@ public sealed class Employee : AggregateRoot<Guid> {
       if (lastname.Length is < 2 or > 100)
          return Result<Employee>.Failure(EmployeeErrors.InvalidFirstname);
 
-      // required email
-      if (string.IsNullOrWhiteSpace(email))
-         return Result<Employee>.Failure(EmployeeErrors.EmailIsRequired);
-      var resultEmail = EmailAddress.Check(email);
-      if(resultEmail.IsFailure) 
-         return Result<Employee>.Failure(EmployeeErrors.InvalidEmail);
 
-      // optional phone
-      if (!string.IsNullOrWhiteSpace(phone)) {
-         var resultPhone = PhoneNumber.Check(phone);
-         if (resultPhone.IsFailure)
-            return Result<Employee>.Failure(resultPhone.Error);
-         phone = resultPhone.Value!;
-      }
-
-      var subjectResult = IdentitySubject.Check(subject);
-      if (subjectResult.IsFailure)
-         return Result<Employee>.Failure(subjectResult.Error);
+      var resultSubject = IdentitySubject.Check(subject);
+      if (resultSubject.IsFailure)
+         return Result<Employee>.Failure(resultSubject.Error);
       
       // required personnel number
       if (string.IsNullOrWhiteSpace(personnelNumber))
          return Result<Employee>.Failure(EmployeeErrors.PersonnelNumberIsRequired);
 
-      var result = EntityId.Resolve(id, EmployeeErrors.InvalidId);
-      if (result.IsFailure)
-         return Result<Employee>.Failure(result.Error);
+      var resultId = EntityId.Resolve(id, EmployeeErrors.InvalidId);
+      if (resultId.IsFailure)
+         return Result<Employee>.Failure(resultId.Error);
 
       var employee = new Employee(
          clock: clock,
-         id: result.Value, 
+         id: resultId.Value, 
          firstname: firstname,
          lastname: lastname,
          email: email,
@@ -161,33 +146,29 @@ public sealed class Employee : AggregateRoot<Guid> {
    public static Result<Employee> CreateProvisioned(
       IClock clock,
       string identitySubject,
-      string email,
+      Email email,
       DateTimeOffset createdAt,
       AdminRights adminRights = AdminRights.ViewReports,
       string? id = null
    ) {
       
-      var subjectResult = IdentitySubject.Check(identitySubject);
-      if (subjectResult.IsFailure)
-         return Result<Employee>.Failure(subjectResult.Error);
-
-      var emailResult = EmailAddress.Check(email);
-      if (emailResult.IsFailure)
-         return Result<Employee>.Failure(emailResult.Error);
+      var resultSubject = IdentitySubject.Check(identitySubject);
+      if (resultSubject.IsFailure)
+         return Result<Employee>.Failure(resultSubject.Error);
       
-      var idResult = EntityId.Resolve(id, EmployeeErrors.InvalidId);
-      if (idResult.IsFailure)
-         return Result<Employee>.Failure(idResult.Error);
+      var resultId = EntityId.Resolve(id, EmployeeErrors.InvalidId);
+      if (resultId.IsFailure)
+         return Result<Employee>.Failure(resultId.Error);
 
       // Provisioned owner starts with empty profile fields
       var employee = new Employee(
          clock: clock,
-         id: idResult.Value,
+         id: resultId.Value,
          firstname: string.Empty,
          lastname: string.Empty,
-         email: emailResult.Value,
+         email: email,
          phone: null,
-         subject: subjectResult.Value,
+         subject: resultSubject.Value,
          personnelNumber: string.Empty, 
          adminRights: adminRights,
          isActive: true
@@ -210,16 +191,14 @@ public sealed class Employee : AggregateRoot<Guid> {
    public Result UpdateProfile(
       string firstname,
       string lastname,
-      string email,
-      string? phone,
+      Email email,
+      Phone? phone,
       string personnelNumber,
       DateTimeOffset updatedAt
    ) {
 
       firstname = firstname.Trim();
       lastname  = lastname.Trim();
-      email = email.Trim();
-      phone = phone?.Trim();
       personnelNumber = personnelNumber.Trim();
 
       // Validate required profile fields
@@ -234,29 +213,13 @@ public sealed class Employee : AggregateRoot<Guid> {
       if (lastname.Length is < 2 or > 80)
          return Result.Failure(EmployeeErrors.InvalidLastname);
       
-      // Validate email in domain (do not rely on caller)
-      if (string.IsNullOrWhiteSpace(email))
-         return Result.Failure(EmployeeErrors.EmailIsRequired);
-
-      var emailResult = EmailAddress.Check(email);
-      if (emailResult.IsFailure)
-         return Result.Failure(emailResult.Error);
-
-      // optional phone
-      if (!string.IsNullOrWhiteSpace(phone)) {
-         var resultPhone = PhoneNumber.Check(phone);
-         if (resultPhone.IsFailure)
-            return Result.Failure(resultPhone.Error);
-         phone = resultPhone.Value!;
-      }
-      
       if (string.IsNullOrWhiteSpace(personnelNumber))
          return Result.Failure(EmployeeErrors.PersonnelNumberIsRequired);
 
       // Apply changes
       Firstname = firstname;
       Lastname  = lastname;
-      Email = emailResult.Value;
+      Email = email;
       Phone = phone;
       PersonnelNumber = personnelNumber;
       

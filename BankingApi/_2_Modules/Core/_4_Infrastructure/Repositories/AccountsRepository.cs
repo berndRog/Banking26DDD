@@ -1,13 +1,14 @@
 using BankingApi._2_Modules.Core._1_Ports.Outbound;
 using BankingApi._2_Modules.Core._3_Domain.Aggregates;
+using BankingApi._2_Modules.Core._3_Domain.ValueObjects;
 using BankingApi._3_Infrastructure.Database;
 using Microsoft.EntityFrameworkCore;
 
 namespace BankingApi._2_Modules.Core._4_Infrastructure.Repositories;
 
-public sealed class AccountRepository(
+public sealed class AccountsRepository(
    BankingDbContext dbContext
-) : IAccountRepository {
+) : IAccountsRepository {
    
    // Loads a single account by its primary key (Id).
    public async Task<Account?> FindByIdAsync(
@@ -20,7 +21,7 @@ public sealed class AccountRepository(
 
    // Loads a single account by its IBAN (unique business key).
    public async Task<Account?> FindByIbanAsync(
-      string iban,
+      Iban iban,
       CancellationToken ct = default
    ) {
       return await dbContext.Accounts
@@ -43,7 +44,7 @@ public sealed class AccountRepository(
    public void Add(Account account) {
       dbContext.Accounts.Add(account);
    }
-
+   
    // Updates an existing account.
    // If an entity with the same key is already tracked, update the tracked instance
    // to avoid "The instance of entity type ... cannot be tracked..." exceptions.
@@ -61,4 +62,18 @@ public sealed class AccountRepository(
       // Not tracked yet: attach + mark as modified.
       dbContext.Accounts.Update(account);
    }
+   
+   public Task<Account?> FindBeneficiaryByIdAsync(Guid id, CancellationToken ct = default) {
+      throw new NotImplementedException();
+   }
+
+   public void Add(Beneficiary beneficiary) {
+      throw new NotImplementedException();
+   }
+
+   public void Remove(Beneficiary beneficiary) {
+      throw new NotImplementedException();
+   }
+
+   
 }

@@ -1,41 +1,43 @@
 using BankingApi._2_Modules.Core._3_Domain.Aggregates;
+using BankingApi._3_Infrastructure.Persistence.Converters;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 namespace BankingApi._2_Modules.Core._4_Infrastructure.Persistence;
 
 internal sealed class ConfigBeneficiary : IEntityTypeConfiguration<Beneficiary> {
 
-   public void Configure(EntityTypeBuilder<Beneficiary> b) {
+   public void Configure(EntityTypeBuilder<Beneficiary> builder) {
       // -----------------------------
       // Table & key
       // -----------------------------
-      b.ToTable("Beneficiaries");
+      builder.ToTable("Beneficiaries");
 
-      b.HasKey(x => x.Id);
-      b.Property(x => x.Id)
+      builder.HasKey(x => x.Id);
+      builder.Property(x => x.Id)
          .ValueGeneratedNever();
 
       // -----------------------------
       // Domain properties
       // -----------------------------
-      b.Property(x => x.AccountId)
+      builder.Property(x => x.AccountId)
          .IsRequired();
 
-      b.Property(x => x.Name)
+      builder.Property(x => x.Name)
          .HasMaxLength(200)
          .IsRequired();
 
-      b.Property(x => x.Iban)
-         .HasMaxLength(34)
+      builder.Property(a => a.Iban)
+         .HasIbanConversion()
          .IsRequired();
+      builder.HasIndex(a => a.Iban).IsUnique();
 
       // -----------------------------
       // Indexes
       // -----------------------------
-      b.HasIndex(x => x.AccountId);
+      builder.HasIndex(x => x.AccountId);
 
       // Prevent duplicate beneficiaries per account
-      b.HasIndex(x => new { x.AccountId, x.Iban })
+      builder.HasIndex(x => new { x.AccountId, x.Iban })
          .IsUnique();
    }
 }

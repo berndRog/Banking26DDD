@@ -1,4 +1,5 @@
 using BankingApi._2_Modules.Accounts._3_Domain.Errors;
+using BankingApi._2_Modules.Core._3_Domain.ValueObjects;
 using BankingApi._4_BuildingBlocks;
 using BankingApi._4_BuildingBlocks._3_Domain;
 using BankingApi._4_BuildingBlocks._3_Domain.Entities;
@@ -10,7 +11,7 @@ public sealed class Beneficiary: Entity<Guid> {
 
    // Properties
    public string Name    { get; private set; } = string.Empty;
-   public string Iban    { get; private set; } = string.Empty;
+   public Iban Iban      { get; private set; } = default!;
    public Guid AccountId { get; private set; }
    
    // EfCore ctor
@@ -20,7 +21,7 @@ public sealed class Beneficiary: Entity<Guid> {
    private Beneficiary(
       Guid id,
       string name,
-      string iban,
+      Iban iban,
       Guid accountId
    ) {
       Id          = id;
@@ -33,29 +34,21 @@ public sealed class Beneficiary: Entity<Guid> {
    public static Result<Beneficiary> Create(
       Guid accountId,
       string name,
-      string iban,
+      Iban iban,
       string? id = null
    ) {
       // trim early
       name = name.Trim();
-      iban = iban.Trim();
       
       if (string.IsNullOrWhiteSpace(name))
          return Result<Beneficiary>.Failure(BeneficiaryErrors.InvalidName);
-
-      if (string.IsNullOrWhiteSpace(iban)) 
-         return Result<Beneficiary>.Failure(BeneficiaryErrors.InvalidIban);
-      var result = IbanValidation.IsValid(iban);
-      if (result.IsFailure)
-         return Result<Beneficiary>.Failure(result.Error);
-      var groupedIban = result.Value;
       
       var idResult = EntityId.Resolve(id, BeneficiaryErrors.InvalidId);
       if (idResult.IsFailure)
          return Result<Beneficiary>.Failure(idResult.Error);
       var beneficiaryId = idResult.Value;
 
-      var beneficiary = new Beneficiary(beneficiaryId, name, groupedIban, accountId);
+      var beneficiary = new Beneficiary(beneficiaryId, name, iban, accountId);
       
       return Result<Beneficiary>.Success(beneficiary);
    }

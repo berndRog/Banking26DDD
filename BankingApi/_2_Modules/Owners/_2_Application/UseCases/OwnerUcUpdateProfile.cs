@@ -6,12 +6,13 @@ using BankingApi._4_BuildingBlocks;
 using BankingApi._4_BuildingBlocks._1_Ports.Inbound;
 using BankingApi._4_BuildingBlocks._1_Ports.Outbound;
 using BankingApi._4_BuildingBlocks._3_Domain;
+using BankingApi._4_BuildingBlocks._3_Domain.ValueObjects;
 using BankingApi._4_BuildingBlocks._4_Infrastructure.Persistence;
 namespace BankingApi._2_Modules.Owners._2_Application.UseCases;
 
 public class OwnerUcUpdateProfile(
    IIdentityGateway identityGateway,
-   IOwnerRepository repository,
+   IOwnersRepository repository,
    IUnitOfWork unitOfWork,
    IClock clock,
    ILogger<OwnerUcUpdateProfile> logger
@@ -28,7 +29,7 @@ public class OwnerUcUpdateProfile(
       var subject = subjectResult.Value;
 
       // must be provisioned
-      var owner = await repository.FindByIdentitySubjectAsync(subject, false, ct);
+      var owner = await repository.FindByIdentitySubjectAsync(subject, ct);
       if (owner is null)
          return Result<OwnerDto>.Failure(OwnerApplicationErrors.NotProvisioned);
 
@@ -39,17 +40,17 @@ public class OwnerUcUpdateProfile(
 
       // override email address (if changed) 
       var email = owner.Email;
-      if (!string.Equals(email, dto.Email, StringComparison.OrdinalIgnoreCase)) {
+      if (!string.Equals(email.Value, dto.Email, StringComparison.OrdinalIgnoreCase)) {
          // create new email value object from dto.Email
-         var resultDtoEmail = EmailAddress.Check(dto.Email);
+         var resultDtoEmail = Email.Create(dto.Email);
          if (resultDtoEmail.IsFailure)
             return Result<OwnerDto>.Failure(resultDtoEmail.Error);
          // check uniqueness
-         var existingByEmail = await repository.FindByEmailAsync(dto.Email, false, ct);
+         var existingByEmail = await repository.FindByEmailAsync(resultDtoEmail.Value, ct);
          if (existingByEmail is not null && existingByEmail.Id != owner.Id)
             return Result<OwnerDto>.Failure(OwnerApplicationErrors.EmailAlreadyInUse);
          // override previous email
-         email = dto.Email;
+         email = resultDtoEmail.Value;
       }
 
       // domain update (now includes country)

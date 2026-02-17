@@ -9,17 +9,15 @@ using BankingApi._3_Infrastructure.Database;
 using BankingApi._4_BuildingBlocks;
 using BankingApi._4_BuildingBlocks._1_Ports.Outbound;
 using BankingApi._4_BuildingBlocks._3_Domain;
-using BankingApi._4_BuildingBlocks._3_Domain.Enums;
-using BankingApi._4_BuildingBlocks._3_Domain.Errors;
+using BankingApi._4_BuildingBlocks._3_Domain.ValueObjects;
 using BankingApi._4_BuildingBlocks._4_Infrastructure.ReadModel;
-using CarRentalApi._2_Modules.Customers._2_Application.Dtos.ReadModels;
 using Microsoft.EntityFrameworkCore;
 namespace BankingApi._2_Modules.Owners._4_Infrastructure.ReadModel;
 
-public sealed class OwnerReadModelEf(
+public sealed class OwnersReadModelEf(
    BankingDbContext dbContext,
    IIdentityGateway identityGateway
-) : IOwnerReadModel {
+) : IOwnersReadModel {
 
    public async Task<Result<Guid>> FindMeProvisionedAsync(CancellationToken ct) {
 
@@ -68,13 +66,15 @@ public sealed class OwnerReadModelEf(
       Guid Id,
       CancellationToken ct
    ) {
-      var owner = await dbContext.Owners
+      var ownerDto = await dbContext.Owners
          .AsNoTracking()
-         .FirstOrDefaultAsync(c => c.Id == Id, ct);
+         .Where(c => c.Id == Id)  // filter by Id
+         .Select(c => c.ToOwnerDto())  // project to OwnerDto (map)
+         .SingleOrDefaultAsync(ct);
 
-      return owner is null
-         ? Result<OwnerDto>.Failure(OwnerErrors.NotFound)
-         : Result<OwnerDto>.Success(owner.ToOwnerDto());
+      return ownerDto is null
+         ? Result<OwnerDto>.Failure(OwnerApplicationErrors.NotFound)
+         : Result<OwnerDto>.Success(ownerDto);
    }
 
 
@@ -84,32 +84,43 @@ public sealed class OwnerReadModelEf(
    ) {
       var owner = await dbContext.Owners 
          .AsNoTracking()
-         .FirstOrDefaultAsync(c => c.Subject == subject, ct);
+         .Where(c => c.Subject == subject) // filter by subject
+         .Select(c => c.ToOwnerDto())      // projection 
+         .SingleOrDefaultAsync( ct);
+      
       return owner is null
-         ? Result<OwnerDto>.Failure(OwnerErrors.NotFound)
-         : Result<OwnerDto>.Success(owner.ToOwnerDto());
+         ? Result<OwnerDto>.Failure(OwnerApplicationErrors.NotFound)
+         : Result<OwnerDto>.Success(owner);
    }
    
    public async Task<Result<OwnerDto>> FindByEmailAsync(
-      string email,
+      string emailString,
       CancellationToken ct
    ) {
-      var owner = await dbContext.Owners
+      var resultEmail = Email.Create(emailString);
+      if (resultEmail.IsFailure)
+         return Result<OwnerDto>.Failure(resultEmail.Error);
+      var email = resultEmail.Value;
+      
+      var ownerDto = await dbContext.Owners
          .AsNoTracking()
-         .FirstOrDefaultAsync(c => c.Email == email, ct);
-      return owner is null
+         .Where(c => c.Email == email) // filter by email
+         .Select(c => c.ToOwnerDto())  // projection to OwnerDto
+         .SingleOrDefaultAsync( ct);
+      
+      return ownerDto is null
          ? Result<OwnerDto>.Failure(OwnerErrors.NotFound)
-         : Result<OwnerDto>.Success(owner.ToOwnerDto());
+         : Result<OwnerDto>.Success(ownerDto);
    }
-
    
-   public async Task<Result<IEnumerable<OwnerDto>>> GetAllAsync(
+   public async Task<Result<IEnumerable<OwnerDto>>> SelectAllAsync(
       CancellationToken ct
    ) {
-      var owners = await dbContext.Owners
+      var ownerDtos = await dbContext.Owners
          .AsNoTracking()
+         .Select(c => c.ToOwnerDto()) // project to OwnerDto (map)
          .ToListAsync(ct);
-      return Result<IEnumerable<OwnerDto>>.Success(owners.Select(c => c.ToOwnerDto()));
+      return Result<IEnumerable<OwnerDto>>.Success(ownerDtos);
    }
    
    public async Task<Result<PagedResult<OwnerDto>>> FilterAsync(
@@ -132,7 +143,7 @@ public sealed class OwnerReadModelEf(
       if (filter is not null) {
          if (!string.IsNullOrWhiteSpace(filter.Email)) {
             var email = filter.Email.Trim().ToUpperInvariant();
-            query = query.Where(c => c.Email.ToUpperInvariant() == email);
+            query = query.Where(c => c.Email.Value.ToUpperInvariant() == email);
          }
          if (!string.IsNullOrWhiteSpace(filter.Firstname)) {
             var fn = filter.Firstname.Trim().ToUpperInvariant();

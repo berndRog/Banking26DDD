@@ -1,5 +1,6 @@
 using BankingApi._2_Modules.Core._3_Domain.Aggregates;
 using BankingApi._3_Infrastructure.Database;
+using BankingApi._3_Infrastructure.Persistence.Converters;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
@@ -37,12 +38,10 @@ public sealed class ConfigAccount(
       // Business properties
       // -----------------------------
       builder.Property(a => a.Iban)
-         .HasMaxLength(34)            // IBAN max length
+         .HasIbanConversion()
          .IsRequired();
-
-      builder.HasIndex(a => a.Iban)
-         .IsUnique();
-
+      builder.HasIndex(a => a.Iban).IsUnique();
+      
       builder.Property(a => a.Balance)
          .HasPrecision(18, 2)         // common default; adjust if needed
          .IsRequired();
@@ -55,7 +54,6 @@ public sealed class ConfigAccount(
       // -----------------------------
       builder.Property(a => a.OwnerId)
          .IsRequired();
-
       builder.HasIndex(a => a.OwnerId);
 
 

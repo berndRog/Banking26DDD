@@ -27,16 +27,16 @@ public static class DiOwnersModules {
       services.AddScoped<OwnerUcReject>();
       services.AddScoped<OwnerUcDeactivate>();
       services.AddScoped<OwnerUcUpdateEmail>();
-      services.AddScoped<IOwnerUseCases, OwnerUseCases>();
+      services.AddScoped<IOwnersUseCases, OwnersUseCases>();
 
       // =========================================================
       // Outbound ports
       // =========================================================
       // ReadModels
-      services.AddScoped<IOwnerReadModel, OwnerReadModelEf>();
+      services.AddScoped<IOwnersReadModel, OwnersReadModelEf>();
       
       // Repositories
-      services.AddScoped<IOwnerRepository, OwnerRepositoryEf>();
+      services.AddScoped<IOwnersRepository, OwnersRepositoryEf>();
       
       return services;
    }

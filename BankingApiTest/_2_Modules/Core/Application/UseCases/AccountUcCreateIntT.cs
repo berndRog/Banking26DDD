@@ -14,7 +14,7 @@ public sealed class AccountUcAddBeneficiaryIntT : TestBase, IAsyncLifetime {
    private SqliteConnection _dbConnection = null!;
    private BankingDbContext _dbContext = null!;
    private IOwnerLookupContract _ownerLookup = null!;
-   private IAccountRepository _repository = null!;
+   private IAccountsRepository _repository = null!;
    private IUnitOfWork _unitOfWork = null!;
    private TestSeed _seed = null!;
    private IClock _clock = null!;
@@ -40,7 +40,7 @@ public sealed class AccountUcAddBeneficiaryIntT : TestBase, IAsyncLifetime {
 
       
       _ownerLookup = new FakeOwnerLookup(_seed);
-      _repository = new AccountRepository(_dbContext);
+      _repository = new AccountsRepository(_dbContext);
       _unitOfWork = new UnitOfWork(
          _dbContext, 
          _clock,
@@ -83,7 +83,7 @@ public sealed class AccountUcAddBeneficiaryIntT : TestBase, IAsyncLifetime {
       // Act
       var result = await _sut.ExecuteAsync(
          ownerId: owner.Id,
-         iban: account.Iban,
+         ibanString: account.Iban.Value,
          balance: account.Balance,
          id: account.Id.ToString(),
          ct: _ct
@@ -107,7 +107,7 @@ public sealed class AccountUcAddBeneficiaryIntT : TestBase, IAsyncLifetime {
       // Act
       var result = await _sut.ExecuteAsync(
          ownerId: owner.Id,
-         iban: "ABC123456789",
+         ibanString: "ABC123456789",
          balance: account.Balance,
          id: account.Id.ToString(),
          ct: _ct
@@ -124,7 +124,7 @@ public sealed class AccountUcAddBeneficiaryIntT : TestBase, IAsyncLifetime {
       // Act
       var result = await _sut.ExecuteAsync(
          ownerId: owner.Id,
-         iban: account.Iban,
+         ibanString: account.Iban.Value,
          balance: account.Balance,
          id: "1000000-abcd",
          ct: _ct

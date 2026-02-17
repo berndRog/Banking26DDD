@@ -4,6 +4,7 @@ using BankingApi._2_Modules.Employees._3_Domain.Enums;
 using BankingApi._2_Modules.Employees._3_Domain.Errors;
 using BankingApi._4_BuildingBlocks;
 using BankingApi._4_BuildingBlocks._1_Ports.Inbound;
+using BankingApi._4_BuildingBlocks._3_Domain.ValueObjects;
 using BankingApi._4_BuildingBlocks._4_Infrastructure.Persistence;
 namespace BankingApi._2_Modules.Employees._2_Application.UseCases;
 
@@ -29,7 +30,7 @@ public sealed class EmployeeUcCreate(
    public async Task<Result<Guid>> ExecuteAsync(
       string firstname,
       string lastname,
-      string email,
+      string emailString,
       string phoneString,
       string subject,
       string personnelNumber,
@@ -37,15 +38,25 @@ public sealed class EmployeeUcCreate(
       string? id = null,
       CancellationToken ct = default
    ) {
-      email = email.Trim();
+      emailString = emailString.Trim();
       personnelNumber = personnelNumber.Trim();
 
       // ---- Use-case guards (cheap validations) ----
       if (string.IsNullOrWhiteSpace(personnelNumber))
          return Result<Guid>.Failure(EmployeeErrors.PersonnelNumberIsRequired);
 
+      var resultEmail = Email.Create(emailString);
+      if (resultEmail.IsFailure)
+         return Result<Guid>.Failure(resultEmail.Error);
+      var email = resultEmail.Value;
+      
+      var resultPhone = Phone.Create(phoneString);
+      if (resultPhone.IsFailure)
+         return Result<Guid>.Failure(resultPhone.Error);
+      var phone = resultPhone.Value;
+      
       // ---- Uniqueness checks (I/O) ----
-      if (await _repository.FindByEmailAsync(email, false, ct) != null)
+      if (await _repository.FindByEmailAsync(email.Value, false, ct) != null)
          return Result<Guid>.Failure(EmployeeErrors.EmailMustBeUnique);
 
       if (await _repository.FindByPersonnelNumberAsync(personnelNumber, ct) != null)
@@ -57,7 +68,7 @@ public sealed class EmployeeUcCreate(
          firstname: firstname,
          lastname: lastname,
          email: email,
-         phone: phoneString,
+         phone: phone,
          subject: subject,
          personnelNumber: personnelNumber,
          adminRights: adminRights,
@@ -67,7 +78,7 @@ public sealed class EmployeeUcCreate(
       if (result.IsFailure)
          return Result<Guid>.Failure(result.Error)
             .LogIfFailure(_logger, "EmployeeUcCreate.DomainRejected", 
-               new { firstname, lastname, email, phoneString, subject, personnelNumber, adminRights });
+               new { firstname, lastname, email = emailString, phoneString, subject, personnelNumber, adminRights });
 
       // Add to repository
       var employee = result.Value!;

@@ -44,7 +44,7 @@ public sealed class EmployeeRepositoryEf(
       if (noTracking)
          query = query.AsNoTracking();
       return await query
-         .FirstOrDefaultAsync(c => c.Email == email, ct);
+         .FirstOrDefaultAsync(c => c.Email.Value == email, ct);
    }
 
    

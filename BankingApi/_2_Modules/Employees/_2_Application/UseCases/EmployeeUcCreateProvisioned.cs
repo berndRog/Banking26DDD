@@ -9,6 +9,7 @@ using BankingApi._4_BuildingBlocks._1_Ports.Inbound;
 using BankingApi._4_BuildingBlocks._1_Ports.Outbound;
 using BankingApi._4_BuildingBlocks._3_Domain;
 using BankingApi._4_BuildingBlocks._3_Domain.Errors;
+using BankingApi._4_BuildingBlocks._3_Domain.ValueObjects;
 using BankingApi._4_BuildingBlocks._4_Infrastructure.Persistence;
 namespace BankingApi._2_Modules.Employees._2_Application.UseCases;
 
@@ -50,13 +51,13 @@ public class EmployeeUcCreateProvisioned(
       }
 
       // interpret preferred_username as initial email
-      var emailResult = EmailAddress.Check(username);
-      if (emailResult.IsFailure)
-         return Result<EmployeeProvisionDto>.Failure(emailResult.Error);
-      var email = emailResult.Value;
+      var resultEmail = Email.Create(username);
+      if (resultEmail.IsFailure)
+         return Result<EmployeeProvisionDto>.Failure(resultEmail.Error);
+      var email = resultEmail.Value;
 
       // check uniqueness
-      var existingWithEmail = await repository.FindByEmailAsync(email, false, ct);
+      var existingWithEmail = await repository.FindByEmailAsync(email.Value, false, ct);
       if (existingWithEmail is not null)
          return Result<EmployeeProvisionDto>.Failure(EmployeeApplicationErrors.EmailAlreadyInUse);
 

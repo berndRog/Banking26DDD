@@ -1,4 +1,5 @@
 using BankingApi._2_Modules.Core._3_Domain.Aggregates;
+using BankingApi._2_Modules.Core._3_Domain.ValueObjects;
 using BankingApi._4_BuildingBlocks._1_Ports.Inbound;
 namespace BankingApiTest._2_Modules.Core.Domain.Aggregates;
 
@@ -7,7 +8,7 @@ public sealed class AccountUt {
    private readonly IClock _clock;
 
    private readonly Guid _ownerId;
-   private readonly string _iban;
+   private readonly Iban _iban;
    private readonly decimal _balance;
    private readonly string _id;
 
@@ -88,13 +89,8 @@ public sealed class AccountUt {
    [InlineData("XX00 0000 0000 0000 0000 00")] // unknown country
    public void Create_with_invalid_iban_fails(string iban) {
       // Act
-      var result = Account.Create(
-         clock: _clock,
-         ownerId: _ownerId,
-         iban: iban,
-         balance: _balance,
-         id: _id
-      );
+      var result = Iban.Create(iban);
+  
       // Assert
       True(result.IsFailure);
       NotNull(result.Error);

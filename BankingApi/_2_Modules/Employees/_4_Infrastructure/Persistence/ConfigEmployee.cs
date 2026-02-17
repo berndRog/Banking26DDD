@@ -1,5 +1,6 @@
 using BankingApi._2_Modules.Employees._3_Domain.Aggregates;
 using BankingApi._3_Infrastructure.Database;
+using BankingApi._3_Infrastructure.Database.ValueObjects;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 // falls Email/Address/Phone hier liegen
@@ -26,14 +27,17 @@ public sealed class ConfigEmployee(
          .HasMaxLength(80)
          .IsRequired();
       
+      // Email-VO als Property mapped via Extension
       b.Property(x => x.Email)
-         .HasMaxLength(80)
+         .HasEmailConversion()
          .IsRequired();
+      // optional: unique index
       b.HasIndex(x => x.Email).IsUnique();
       
+      // Phone-VO als Property mapped via Extension
       b.Property(x => x.Phone)
-         .HasMaxLength(32)
-         .IsRequired();
+         .HasNullablePhoneConversion() // is optional, so no IsRequired()
+         .IsRequired(false);
       
       b.Property(x => x.Subject)
          .HasMaxLength(200)
