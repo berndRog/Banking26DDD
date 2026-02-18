@@ -3,7 +3,7 @@ using BankingApi._4_BuildingBlocks;
 using BankingApi._4_BuildingBlocks._3_Domain.ValueObjects;
 namespace BankingApi._2_Modules.Employees._1_Ports.Inbound;
 
-public interface IEmployeeReadModel {
+public interface IEmployeesReadModel {
    
    Task<Result<Guid>> FindMeProvisionedAsync(CancellationToken ct);
    

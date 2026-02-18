@@ -18,6 +18,18 @@ public static class AccountApplicationErrors {
          Title: "Account: Not found",
          Message: "No account with the given id exists."
       );
+   
+   public static readonly DomainErrors OwnerAlreadyHasAccount =
+      new(
+         ErrorCode.UnprocessableEntity,
+         Title: "Account: Owner Already Has An Account",
+         Message: "Initial account already exists for this owner."
+      );
+   
+   public static readonly DomainErrors InvalidIbanFormat =
+      new(ErrorCode.UnprocessableEntity,
+         Title: "Account: Invalid Iban Format",
+         Message: "The provided IBAN is not valid");
 
    public static readonly DomainErrors PredicateIsRequired =
       new(ErrorCode.Conflict,

@@ -5,9 +5,9 @@ using BankingApi._3_Infrastructure.Database;
 using Microsoft.EntityFrameworkCore;
 namespace BankingApi._2_Modules.Employees._4_Infrastructure.Repositories;
 
-public sealed class EmployeeRepositoryEf(
+public sealed class EmployeesesRepositoryEf(
    BankingDbContext dbContext
-) : IEmployeeRepository {
+) : IEmployeesRepository {
 
    public async Task<Employee?> FindByIdAsync(
       Guid ownerId, 

@@ -1,9 +1,7 @@
 using BankingApi._2_Modules.Owners._1_Ports.Inbound;
 using BankingApi._2_Modules.Owners._2_Application.Dtos;
-using BankingApi._2_Modules.Owners._2_Application.ReadModel;
 using BankingApi._2_Modules.Owners._2_Application.UseCases;
 using BankingApi._4_BuildingBlocks;
-using BankingApi._4_BuildingBlocks._4_Infrastructure.ReadModel;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 namespace BankingApi._1_Controllers;
@@ -22,9 +20,6 @@ public sealed class OwnersController(
    // Route constants
    
    private const string OwnersFilterRoute = "owners/filter";
-
-   
-   
    
    // ------------------------------------------------------------------
    // SELF-SERVICE (logged-in user)
@@ -36,7 +31,7 @@ public sealed class OwnersController(
    [ProducesResponseType<OwnerProvisionDto>(StatusCodes.Status201Created)]
    [ProducesResponseType<ProblemDetails>(StatusCodes.Status400BadRequest, "application/problem+json")]
    [ProducesResponseType<ProblemDetails>(StatusCodes.Status401Unauthorized, "application/problem+json")]
-   public async Task<ActionResult<OwnerProvisionDto>> PostCreateProvisioned(CancellationToken ct) {
+   public async Task<ActionResult<OwnerProvisionDto>> CreateOwnerProvisionAsync(CancellationToken ct) {
       const string ctx = "OwnerController.PostCreateProvisioned";
 
       var result = await ucCreateProvisioned.ExecuteAsync(null, ct);
@@ -45,8 +40,13 @@ public sealed class OwnersController(
       
       // If provisioning was just created, return 201 Created with profile data
       if (result.Value.WasCreated) {
-         return this.ToCreatedAt(routeName: nameof(GetMyProfile), routeValues: null, 
-            result: result, logger: logger, context: ctx, args: null);
+         return this.ToCreatedAtRoute(
+             routeName: nameof(GetOwnerProfileAsync), 
+             routeValues: new { }, 
+             result: result, 
+             logger: logger, 
+             context: ctx
+          );
       }
       // Already provisioned, return 200 OK with profile data
       return this.ToActionResult(result: result, logger: logger, 
@@ -56,12 +56,12 @@ public sealed class OwnersController(
    }
 
    //[Authorize(Policy = "OwnersOnly")]
-   [HttpGet("owners/me/profile")]
+   [HttpGet("owners/me/profile", Name = nameof(GetOwnerProfileAsync))]
    [EndpointSummary("Get my customer profile (requires provisioning)")]
    [ProducesResponseType<OwnerDto>(StatusCodes.Status200OK)]
    [ProducesResponseType<ProblemDetails>(StatusCodes.Status404NotFound, "application/problem+json")]
    [ProducesResponseType<ProblemDetails>(StatusCodes.Status401Unauthorized, "application/problem+json")]
-   public async Task<ActionResult<OwnerDto>> GetMyProfile(CancellationToken ct) {
+   public async Task<ActionResult<OwnerDto>> GetOwnerProfileAsync(CancellationToken ct) {
       var result = await readModel.FindMeAsync(ct);
 
       return this.ToActionResult(
@@ -80,7 +80,7 @@ public sealed class OwnersController(
    [ProducesResponseType<ProblemDetails>(StatusCodes.Status400BadRequest, "application/problem+json")]
    [ProducesResponseType<ProblemDetails>(StatusCodes.Status404NotFound, "application/problem+json")]
    [ProducesResponseType<ProblemDetails>(StatusCodes.Status401Unauthorized, "application/problem+json")]
-   public async Task<ActionResult<OwnerDto>> PutUpdateProfile(
+   public async Task<ActionResult<OwnerDto>> PutOwnerProfileAsync(
       [FromBody] OwnerDto dto,
       CancellationToken ct
    ) {
@@ -107,14 +107,14 @@ public sealed class OwnersController(
    [EndpointSummary("Get a customer by ReservationId")]
    [ProducesResponseType<OwnerDto>(StatusCodes.Status200OK)]
    [ProducesResponseType<ProblemDetails>(StatusCodes.Status404NotFound, "application/problem+json")]
-   public async Task<ActionResult<OwnerDto>> GetById(
+   public async Task<ActionResult<OwnerDto>> GetOwnerById(
       [FromRoute] Guid id,
       CancellationToken ct
    ) {
       var result = await readModel.FindByIdAsync(id, ct);
 
       return this.ToActionResult(result, logger,
-         context: $"GET {UrlStart}/owners/{id:guid}", args: id);
+         context: $"GET {UrlStart}/owners/{id:D}", args: id);
    }
 
    //[Authorize] // später ggf. Policy="EmployeesOnly"
@@ -122,13 +122,22 @@ public sealed class OwnersController(
    [EndpointSummary("Get a customer by email")]
    [ProducesResponseType<OwnerDto>(StatusCodes.Status200OK)]
    [ProducesResponseType<ProblemDetails>(StatusCodes.Status404NotFound, "application/problem+json")]
-   public async Task<ActionResult<OwnerDto>> GetByEmail(
+   public async Task<ActionResult<OwnerDto>> GetOwnerByEmail(
       [FromRoute] string email,
       CancellationToken ct
    ) {
       var result = await readModel.FindByEmailAsync(email, ct);
       return this.ToActionResult(result, logger,
          context: $"GET {UrlStart}/owners/email/{email}", args: email);
+   }
+   
+   [HttpGet("owners")]
+   public async Task<ActionResult<IEnumerable<OwnerDto>>> GetAllOwnersAsync(
+      CancellationToken ct
+   ) {
+      var result = await readModel.SelectAllAsync(ct);
+      return this.ToActionResult(result, logger,
+         context: $"GET {UrlStart}/owners", args: null);
    }
    
    // [HttpGet(OwnersFilterRoute)]

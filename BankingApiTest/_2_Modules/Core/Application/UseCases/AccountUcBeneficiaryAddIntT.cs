@@ -38,7 +38,7 @@ public sealed class AccountUcBeneficiaryAddIntT : TestBase, IAsyncLifetime {
       _dbContext = new BankingDbContext(options);
       await _dbContext.Database.EnsureCreatedAsync(_ct);
 
-      _repository = new AccountsRepository(_dbContext);
+      _repository = new AccountsRepositoryEf(_dbContext);
       _unitOfWork = new UnitOfWork(
          _dbContext, 
          _clock,

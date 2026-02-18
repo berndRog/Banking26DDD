@@ -256,7 +256,7 @@ public static class ResultApiExtensions {
    /// <param name="context">Logical UseCase name for logging</param>
    /// <param name="args">Optional structured logging data</param>
    /// <returns>HTTP response representing the domain outcome</returns>
-   public static ActionResult ToCreatedAt<T>(
+   public static ActionResult ToCreatedAtRoute<T>(
       this ControllerBase controller,
       string routeName,
       object? routeValues,
@@ -269,8 +269,29 @@ public static class ResultApiExtensions {
       if (result.IsFailure)
          return controller.ToActionResult(result, logger, context, args);
 
-      // Domain success -> HTTP 201 + Location header + body
-      return controller.CreatedAtRoute(routeName, routeValues, result.Value);
+      // NEVER pass null to CreatedAtRoute
+      routeValues ??= new { };
+      
+      // Domain success -> HTTP 201 + Location header
+      try {
+         logger.LogInformation(
+            "Resource created successfully. Returning 201 Created. " +
+            "Route: {RouteName}, RouteValues: {@RouteValues}, Result: {@Result}",
+            routeName, routeValues, result.Value);
+         return controller.CreatedAtRoute(
+            routeName: routeName, 
+            routeValues: routeValues, 
+            value: result.Value
+         );
+      }
+      catch (Exception ex) {
+         logger.LogError(ex, 
+            "Failed to log creation of resource. " +
+            "Route: {RouteName}, RouteValues: {@RouteValues}",
+            routeName, routeValues); 
+         // Fallback: 201 without Location (better than crashing)
+         return controller.StatusCode(StatusCodes.Status201Created, result.Value);
+      }
    }
     
 

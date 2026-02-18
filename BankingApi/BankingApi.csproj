@@ -34,7 +34,6 @@
     <Content Include="..\.dockerignore">
       <Link>.dockerignore</Link>
     </Content>
-    <Content Include="Migrations\.DS_Store" />
     <Content Include="_4_BuildingBlocks\.DS_Store" />
   </ItemGroup>
 

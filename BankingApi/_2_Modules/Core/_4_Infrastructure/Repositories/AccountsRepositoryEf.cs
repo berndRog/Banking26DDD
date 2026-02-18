@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace BankingApi._2_Modules.Core._4_Infrastructure.Repositories;
 
-public sealed class AccountsRepository(
+public sealed class AccountsRepositoryEf(
    BankingDbContext dbContext
 ) : IAccountsRepository {
    
@@ -38,6 +38,14 @@ public sealed class AccountsRepository(
       return await dbContext.Accounts
          .Include(a => a.Beneficiaries)
          .FirstOrDefaultAsync(a => a.Id == id, ct);
+   }
+
+   // Checks if an account exists for the given ownerId.
+   public async Task<bool> ExistsByOwnerIdAsync(
+      Guid ownerId, 
+      CancellationToken ct
+   ) {
+      return await dbContext.Accounts.AnyAsync(a => a.OwnerId == ownerId, ct);
    }
 
    // Adds a new account to the context so it will be inserted on SaveChanges.

@@ -19,6 +19,6 @@ public static class EmployeeMappings {
    
    public static EmployeeProvisionDto ToEmployeeProvisionDto(this Employee employee) => new(
       Id: employee.Id,
-      ShowProfile: true
+      WasCreated: true
    );
 }

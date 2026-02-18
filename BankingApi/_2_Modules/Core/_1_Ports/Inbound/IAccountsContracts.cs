@@ -1,8 +1,16 @@
 using BankingApi._2_Modules.Core._2_Application.Dtos;
+using BankingApi._4_BuildingBlocks;
 using BankingApi.Core.Dto;
 namespace BankingApi._2_Modules.Core._1_Ports.Inbound;
 
-public interface IAccountsContract {
+public interface IAccountsContracts {
+   
+   Task<Result<AccountDto>> OpenInitialAccountAsync(
+      Guid ownerId,
+      string? ibanString,
+      CancellationToken ct
+   ); 
+   
    Task<AccountSnapshotDto?> GetSnapshotAsync(
       Guid accountId,
       CancellationToken ct

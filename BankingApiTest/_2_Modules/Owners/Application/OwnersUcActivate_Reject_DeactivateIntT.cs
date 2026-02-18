@@ -1,8 +1,13 @@
 using System.Data.Common;
+using BankingApi._2_Modules.Core._1_Ports.Inbound;
+using BankingApi._2_Modules.Core._1_Ports.Outbound;
+using BankingApi._2_Modules.Core._4_Infrastructure.Adapters;
+using BankingApi._2_Modules.Core._4_Infrastructure.Repositories;
 using BankingApi._2_Modules.Owners._1_Ports.Outbound;
 using BankingApi._2_Modules.Owners._2_Application.Dtos;
 using BankingApi._2_Modules.Owners._2_Application.UseCases;
 using BankingApi._2_Modules.Owners._3_Domain.Aggregates;
+using BankingApi._2_Modules.Owners._3_Domain.Enum;
 using BankingApi._2_Modules.Owners._4_Infrastructure.Repositories;
 using BankingApi._3_Infrastructure.Database;
 using BankingApi._4_BuildingBlocks._1_Ports.Inbound;
@@ -29,9 +34,13 @@ public sealed class OwnersUcActivate_Reject_DeactivateIntT : TestBase, IAsyncLif
    private IIdentityGateway _identityGateway = null!;
    private OwnerUcCreateProvisioned _ownerUcCreateProvisioned = null!;
    private OwnerUcUpdateProfile _ownerUcUpdateProfile = null!;
+   
+   private IIdentityGateway _identityGatewayAdmin = null!;
    private OwnerUcActivate _ucActivate = null!;
    private OwnerUcReject _ucReject = null!;
    private OwnerUcDeactivate _ucDeactivate = null!;
+   private IAccountsContracts _accountsContracts = null!;
+   private IAccountsRepository _accountsRepository = null!;
    
    private Guid _ownerId;
    private string _id = default!;
@@ -59,8 +68,13 @@ public sealed class OwnersUcActivate_Reject_DeactivateIntT : TestBase, IAsyncLif
       _repository = new OwnersRepositoryEf(bankingDbContext);
       _unitOfWork = new UnitOfWork(bankingDbContext, _clock, CreateLogger<UnitOfWork>());
 
-      _repository = new OwnersRepositoryEf(bankingDbContext);
-      _unitOfWork = new UnitOfWork(bankingDbContext, _clock, CreateLogger<UnitOfWork>());
+      _accountsRepository = new AccountsRepositoryEf(bankingDbContext);
+      _accountsContracts = new AccountsContracts(
+         _accountsRepository, 
+         _unitOfWork, 
+         _clock, 
+         CreateLogger<AccountsContracts>()
+      );
       
       // Test Owner
       _id = _seed.Owner5.Id.ToString();
@@ -68,7 +82,6 @@ public sealed class OwnersUcActivate_Reject_DeactivateIntT : TestBase, IAsyncLif
       _subject = _seed.Owner5.Subject;
       _username = _seed.Owner5.Email.Value;
       _createdAt = _seed.Owner5.CreatedAt;
-      _adminRights = 0;
       
       // Default gateway
       _identityGateway = new FakeIdentity(clock: _clock, subject: _subject, 
@@ -84,21 +97,21 @@ public sealed class OwnersUcActivate_Reject_DeactivateIntT : TestBase, IAsyncLif
       );
       
       // simulate a login in Admin
+      _adminRights = 255;
       // Default gateway
-      var identityGatewayAdmin = new FakeIdentity(clock: _clock, subject: _subject, 
+      _identityGatewayAdmin = new FakeIdentity(clock: _clock, subject: _subject, 
          username: _username, createdAt: _createdAt, adminRights: _adminRights);
-
       
       // activate
-      _ucActivate = new OwnerUcActivate(_identityGateway, _repository,
+      _ucActivate = new OwnerUcActivate(_identityGatewayAdmin, _repository, _accountsContracts,
          _unitOfWork, _clock, TestLogger.Create<OwnerUcActivate>(true));
       
       // reject
-      _ucReject = new OwnerUcReject(_identityGateway, _repository,
+      _ucReject = new OwnerUcReject(_identityGatewayAdmin, _repository,
          _unitOfWork, _clock, TestLogger.Create<OwnerUcReject>(true));
       
       // deactivate use cases
-      _ucDeactivate = new OwnerUcDeactivate(_identityGateway, _repository,
+      _ucDeactivate = new OwnerUcDeactivate(_identityGatewayAdmin, _repository,
          _unitOfWork, _clock, TestLogger.Create<OwnerUcDeactivate>(true));
       
       // provision owner use case
@@ -135,22 +148,25 @@ public sealed class OwnersUcActivate_Reject_DeactivateIntT : TestBase, IAsyncLif
       _dbContext = dbContext;
    }
    #endregion
+
    
    [Fact]
    public async Task ActivateAsync_returns_success() {
       // Arrange
+      var resultCreate = await _ownerUcCreateProvisioned.ExecuteAsync(_id, _ct);
+      True(resultCreate.IsSuccess);
+      
       // Act
-      var result = await _ucActivate.ExecuteAsync(_ownerId, _ct);   
+      var resultActivate = await _ucActivate.ExecuteAsync(_ownerId, _ownerId, null, _ct);   
       _dbContext!.ChangeTracker.Clear();
 
       // Assert
-      True(result.IsSuccess);
+      True(resultActivate.IsSuccess);
       var actual = await _repository.FindByIdAsync(_ownerId,  _ct);
       NotNull(actual);
       Equal(_ownerId, actual.Id);
-      // Equal(email, actual.Email);
-      // Equal(subject, actual.Subject);
-      // Equal(createdAt, actual.CreatedAt);
+      Equal(OwnerStatus.Active, actual.Status);
+      
    }
    /*
    [Fact]

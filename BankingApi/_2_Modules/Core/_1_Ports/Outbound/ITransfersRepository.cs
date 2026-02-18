@@ -1,7 +1,7 @@
 using BankingApi.Modules.Core.Domain.Aggregates;
 namespace BankingApi._2_Modules.Core._1_Ports.Outbound;
 
-public interface ITransferRepository {
+public interface ITransfersRepository {
    
    Task<Transfer?> FindByIdAsync(
       Guid id,

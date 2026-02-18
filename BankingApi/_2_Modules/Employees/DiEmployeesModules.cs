@@ -18,7 +18,7 @@ public static class DiAddEmployeesMdules {
       //services.AddScoped<ICustomerReadContract, CustomerReadContractServiceEf>();
 
       // ReadModels (Queries)
-      services.AddScoped<IEmployeeReadModel, EmployeeReadModelEf>();
+      services.AddScoped<IEmployeesReadModel, EmployeesReadModelEf>();
 
       // WriteModels = Use Cases
       services.AddScoped<EmployeeUcCreate>();
@@ -34,7 +34,7 @@ public static class DiAddEmployeesMdules {
       // Outbound ports
       // =========================================================
       // Repositories
-      services.AddScoped<IEmployeeRepository, EmployeeRepositoryEf>();
+      services.AddScoped<IEmployeesRepository, EmployeesesRepositoryEf>();
 
       return services;
    }

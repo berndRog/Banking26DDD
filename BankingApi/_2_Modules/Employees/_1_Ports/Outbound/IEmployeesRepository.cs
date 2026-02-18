@@ -19,7 +19,7 @@ namespace BankingApi._2_Modules.Employees._1_Ports.Outbound;
 /// - It must NOT return DTOs/projections (that is the job of ReadModels)
 /// - It should return tracked aggregates (for state changes)
 /// </summary>
-public interface IEmployeeRepository {
+public interface IEmployeesRepository {
 
    // ------------------------------------------------------------------
    // Queries (0..1)

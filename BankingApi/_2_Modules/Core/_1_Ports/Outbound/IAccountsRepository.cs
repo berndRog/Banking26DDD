@@ -3,9 +3,25 @@ using BankingApi._2_Modules.Core._3_Domain.ValueObjects;
 namespace BankingApi._2_Modules.Core._1_Ports.Outbound;
 
 public interface IAccountsRepository {
-   Task<Account?> FindByIdAsync(Guid id, CancellationToken ct = default);
-   Task<Account?> FindByIbanAsync(Iban iban, CancellationToken ct = default);
-   Task<Account?> FindWithBeneficiariesByIdAsync(Guid id, CancellationToken ct = default);
+   Task<Account?> FindByIdAsync(
+      Guid id, 
+      CancellationToken ct = default
+   );
+   
+   Task<Account?> FindByIbanAsync(
+      Iban iban, 
+      CancellationToken ct = default
+   );
+   
+   Task<Account?> FindWithBeneficiariesByIdAsync(
+      Guid id, 
+      CancellationToken ct = default
+   );
+   
+   Task<bool> ExistsByOwnerIdAsync(
+      Guid ownerId, 
+      CancellationToken ct = default
+   );
    
    void Add(Account account);
    

@@ -33,19 +33,24 @@ public interface IOwnersUseCases {
       CancellationToken ct = default
    );
    
-   //
    // Employee actions
    Task<Result> ActivateAsync(
       Guid ownerId, 
+      Guid activatedByEmployeeId,
+      string? ibanString,
       CancellationToken ct = default
    );
+   
    Task<Result> RejectAsync(
       Guid ownerId, 
+      Guid rejectedByEmployeeId,
       string reason,
       CancellationToken ct = default
    );
+   
    Task<Result> DeactivateAsync(
       Guid ownerId, 
+      Guid deactivatedByEmployeeId,
       CancellationToken ct = default
    );
    

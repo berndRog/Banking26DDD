@@ -5,9 +5,9 @@ using BankingApi.Modules.Core.Domain.Aggregates;
 using Microsoft.EntityFrameworkCore;
 namespace BankingApi._2_Modules.Core._4_Infrastructure.Repositories;
 
-public sealed class TransferRepository(
+public sealed class TransfersRepository(
    BankingDbContext _dbContext
-) : ITransferRepository {
+) : ITransfersRepository {
    
    public async Task<Transfer?> FindByIdAsync(
       Guid transferId,

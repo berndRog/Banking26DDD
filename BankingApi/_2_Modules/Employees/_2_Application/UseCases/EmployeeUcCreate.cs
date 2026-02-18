@@ -22,7 +22,7 @@ namespace BankingApi._2_Modules.Employees._2_Application.UseCases;
 /// - Does not handle technical exceptions (middleware responsibility)
 /// </summary>
 public sealed class EmployeeUcCreate(
-   IEmployeeRepository _repository,
+   IEmployeesRepository _repository,
    IUnitOfWork _unitOfWork,
    IClock _clock,
    ILogger<EmployeeUcCreate> _logger

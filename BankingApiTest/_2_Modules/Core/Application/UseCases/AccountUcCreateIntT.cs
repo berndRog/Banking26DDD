@@ -40,7 +40,7 @@ public sealed class AccountUcAddBeneficiaryIntT : TestBase, IAsyncLifetime {
 
       
       _ownerLookup = new FakeOwnerLookup(_seed);
-      _repository = new AccountsRepository(_dbContext);
+      _repository = new AccountsRepositoryEf(_dbContext);
       _unitOfWork = new UnitOfWork(
          _dbContext, 
          _clock,

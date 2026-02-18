@@ -8,9 +8,10 @@ using Microsoft.VisualBasic.CompilerServices;
 namespace BankingApi._1_Controllers;
 
 //[ApiVersion("2.0")]
-[Route("banking/v{version:apiVersion}")]
+//[Route("banking/v{version:apiVersion}")]
 
 [ApiController]
+[Route("bankingapi/v1")]
 [Consumes("application/json")] //default
 [Produces("application/json")] //default
 
@@ -23,11 +24,11 @@ public class AccountsController(
    private string UrlStart = "http://localhost:5100/banking/v1";
    
    
-   [HttpGet("accounts/{id:guid}")]
+   [HttpGet("accounts/{id:guid}", Name = nameof(GetAccountByIdAsync))]
    [EndpointSummary("Get an account by id")]
    [ProducesResponseType(StatusCodes.Status200OK)]
    [ProducesResponseType<ProblemDetails>(StatusCodes.Status404NotFound, "application/problem+json")]
-   public async Task<ActionResult<AccountDto?>> GetByIdAsync(
+   public async Task<ActionResult<AccountDto?>> GetAccountByIdAsync(
       //[Description("Unique id of the account to be found")]
       [FromRoute] Guid id,
       CancellationToken ctToken = default
@@ -35,7 +36,7 @@ public class AccountsController(
       var result = await accountsReadModel.FindByIdAsync(id, ctToken);
 
       return this.ToActionResult(result, logger,
-         context: $"GET {UrlStart}/accounts", args: null);
+         context: $"GET {UrlStart}/accounts/{id:D}", args: id);
    }
    
    [HttpGet("accounts/iban/{iban}")]
@@ -43,7 +44,7 @@ public class AccountsController(
    [ProducesResponseType(StatusCodes.Status200OK)]
    [ProducesResponseType<ProblemDetails>(StatusCodes.Status400BadRequest, "application/problem+json")]
    [ProducesResponseType<ProblemDetails>(StatusCodes.Status404NotFound, "application/problem+json")]
-   public async Task<ActionResult<AccountDto?>> GetByIbanAsync(
+   public async Task<ActionResult<AccountDto?>> GetAccountByIbanAsync(
       [Description("Unique iban of the account to be found")]
       [FromRoute] string iban,
       CancellationToken ctToken = default
@@ -58,7 +59,7 @@ public class AccountsController(
    [EndpointSummary("Get all accounts")]
    [ProducesResponseType(StatusCodes.Status200OK)]
    [ProducesDefaultResponseType]
-   public async Task<ActionResult<IEnumerable<AccountDto>>> GetAllAsync(
+   public async Task<ActionResult<IEnumerable<AccountDto>>> GetAllAccountsAsync(
       CancellationToken ctToken = default
    ) {
       var result = await accountsReadModel.SelectAsync(ctToken);
@@ -78,7 +79,7 @@ public class AccountsController(
    ) {
       var result = await accountsReadModel.SelectByOwnerIdAsync(ownerId, ctToken);
       return this.ToActionResult(result: result, logger: logger,
-         context: $"GET {UrlStart}/owners/{ownerId:guid}/accounts", args: ownerId);
+         context: $"GET {UrlStart}/owners/{ownerId:D}/accounts", args: ownerId);
    }
    
    [HttpPost("owners/{ownerId:guid}/accounts")]
@@ -86,7 +87,7 @@ public class AccountsController(
    [ProducesResponseType(StatusCodes.Status201Created)]
    [ProducesResponseType<ProblemDetails>(StatusCodes.Status400BadRequest, "application/problem+json")]
    [ProducesResponseType<ProblemDetails>(StatusCodes.Status404NotFound, "application/problem+json")]
-   public async Task<ActionResult<AccountDto?>> CreateAsync(
+   public async Task<ActionResult<AccountDto?>> CreateAccountAsync(
       [Description("Unique ownerId of the existing owner")]
       [FromRoute] Guid ownerId,
       [Description("AccountDto with the new account's data")]
@@ -101,13 +102,12 @@ public class AccountsController(
          ct: ctToken
       );
       
-      return this.ToCreatedAt<Guid>(
-         routeName: "GetByIdAsync",
-         routeValues: result.IsSuccess ? new { id = result.Value } : null,
+      return this.ToCreatedAtRoute<Guid>(
+         routeName: nameof(GetAccountByIdAsync),
+         routeValues: new { id = result.Value },
          result: result,
          logger: logger,
-         context: $"POST {UrlStart}/owners/{ownerId:guid}/accounts", 
-         args: null
+         context: $"POST {UrlStart}/owners/{ownerId:D}/accounts"
       );
    }
    

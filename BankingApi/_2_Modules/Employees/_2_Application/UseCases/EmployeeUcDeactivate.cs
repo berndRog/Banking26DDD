@@ -18,7 +18,7 @@ namespace BankingApi._2_Modules.Employees._2_Application.UseCases;
 /// - Uses LogIfFailure for NotFound and domain rejection
 /// </summary>
 public sealed class EmployeeUcDeactivate(
-   IEmployeeRepository _repository,
+   IEmployeesRepository _repository,
    IClock _clock,
    IUnitOfWork _unitOfWork,
    ILogger<EmployeeUcDeactivate> _logger

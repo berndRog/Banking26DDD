@@ -12,10 +12,10 @@ using BankingApi._4_BuildingBlocks._3_Domain.ValueObjects;
 using Microsoft.EntityFrameworkCore;
 namespace BankingApi._2_Modules.Employees._4_Infrastructure.ReadModel;
 
-public sealed class EmployeeReadModelEf(
+public sealed class EmployeesReadModelEf(
    BankingDbContext dbContext,
    IIdentityGateway identityGateway
-) : IEmployeeReadModel {
+) : IEmployeesReadModel {
 
    public async Task<Result<Guid>> FindMeProvisionedAsync(CancellationToken ct) {
 

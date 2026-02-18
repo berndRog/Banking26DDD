@@ -1,4 +1,5 @@
 using BankingApi._3_Infrastructure.Database;
+using BankingApi._3_Infrastructure.Persistence.Converters;
 using BankingApi.Modules.Core.Domain.Aggregates;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
@@ -54,11 +55,12 @@ public sealed class ConfigTransfer(
       builder.Property(t => t.RecipientName)
          .HasMaxLength(200)
          .IsRequired();
-
+      
       builder.Property(t => t.RecipientIban)
-         .HasMaxLength(34)
+         .HasIbanConversion()
          .IsRequired();
-
+      builder.HasIndex(a => a.RecipientIban).IsUnique();
+      
       // Idempotency
       builder.Property(t => t.IdempotencyKey)
          .HasMaxLength(80)

@@ -29,8 +29,7 @@ internal sealed class ConfigBeneficiary : IEntityTypeConfiguration<Beneficiary> 
       builder.Property(a => a.Iban)
          .HasIbanConversion()
          .IsRequired();
-      builder.HasIndex(a => a.Iban).IsUnique();
-
+      
       // -----------------------------
       // Indexes
       // -----------------------------

@@ -165,9 +165,6 @@ public sealed class Owner : AggregateRoot<Guid> {
          address: address
       );
       
-      var employeeId = Guid.Parse("00000000-0000-0000-0002-000000000001"); 
-      owner.Activate(employeeId, clock.UtcNow);
-      
       return Result<Owner>.Success(owner);
    }
 
@@ -190,14 +187,14 @@ public sealed class Owner : AggregateRoot<Guid> {
       if (subjectResult.IsFailure)
          return Result<Owner>.Failure(subjectResult.Error);
 
-      var idResult = EntityId.Resolve(id, OwnerErrors.InvalidId);
-      if (idResult.IsFailure)
-         return Result<Owner>.Failure(idResult.Error);
+      var resultId = EntityId.Resolve(id, OwnerErrors.InvalidId);
+      if (resultId.IsFailure)
+         return Result<Owner>.Failure(resultId.Error);
 
       // Provisioned owner starts with empty profile fields
       var owner = new Owner(
          clock: clock,
-         id: idResult.Value,
+         id: resultId.Value,
          firstname: string.Empty,
          lastname: string.Empty,
          companyName: null,
@@ -286,7 +283,7 @@ public sealed class Owner : AggregateRoot<Guid> {
    /// Activation is only possible if the owner is Pending and profile is complete.
    /// </summary>
    public Result Activate(
-      Guid employeeId, 
+      Guid activatedByEmployeeId, 
       DateTimeOffset updatedAt
    ) {
       if (updatedAt == default)
@@ -294,7 +291,7 @@ public sealed class Owner : AggregateRoot<Guid> {
       
       // fail early if preconditions for activation are not met
       // (employee, timestamp, status, profile)
-      if (employeeId == Guid.Empty)
+      if (activatedByEmployeeId == Guid.Empty)
          return Result.Failure(OwnerErrors.AuditRequiresEmployee);
       if (Status != OwnerStatus.Pending)
          return Result.Failure(OwnerErrors.NotPending);
@@ -303,11 +300,12 @@ public sealed class Owner : AggregateRoot<Guid> {
    
       Status = OwnerStatus.Active;
       ActivatedAt = updatedAt;
-   
-      AuditedByEmployeeId = employeeId;
+      AuditedByEmployeeId = activatedByEmployeeId;
+      
       RejectedAt = null;
       RejectionReasonCode = null;
-   
+      
+      // create initial account for the owner (domain event, handled in application layer)
       Touch(updatedAt);
       return Result.Success();
    }
@@ -316,16 +314,16 @@ public sealed class Owner : AggregateRoot<Guid> {
    /// Employee rejects the owner (e.g., KYC failed).
    /// </summary>
    public Result Reject(
-      Guid employeeId, 
+      Guid rejectedByEmployeeId, 
       string reasonCode, 
-      DateTimeOffset updatedAt
+      DateTimeOffset rejectedAt
    ) {
-      if (updatedAt == default)
+      if (rejectedAt == default)
          return Result.Failure(CommonErrors.TimestampIsRequired); 
       
       // fail early if preconditions for rejection are not met
       // (employee, timestamp, status, reason code)
-      if (employeeId == Guid.Empty)
+      if (rejectedByEmployeeId == Guid.Empty)
          return Result.Failure(OwnerErrors.AuditRequiresEmployee);
       if (string.IsNullOrWhiteSpace(reasonCode))
          return Result.Failure(OwnerErrors.RejectionRequiresReason);
@@ -333,11 +331,11 @@ public sealed class Owner : AggregateRoot<Guid> {
          return Result.Failure(OwnerErrors.NotPending);
       
       Status = OwnerStatus.Rejected;
-      RejectedAt = updatedAt;
-      AuditedByEmployeeId = employeeId;
+      RejectedAt = rejectedAt;
+      AuditedByEmployeeId = rejectedByEmployeeId;
       RejectionReasonCode = reasonCode.Trim();
    
-      Touch(updatedAt);
+      Touch(rejectedAt);
       return Result.Success();
    }
 
@@ -345,24 +343,24 @@ public sealed class Owner : AggregateRoot<Guid> {
    /// Employee deactivates the owner (end customer relationship).
    /// </summary>
    public Result Deactivate(
-      Guid employeeId, 
-      DateTimeOffset updatedAt
+      Guid deactivatedByEmployeeId, 
+      DateTimeOffset deactivatedAt
    ) {
-      if (updatedAt == default)
+      if (deactivatedAt == default)
          return Result.Failure(CommonErrors.TimestampIsRequired);
       
       // fail early if preconditions for deactivation are not met
       // (employee, timestamp, status)
-      if (employeeId == Guid.Empty)
+      if (deactivatedByEmployeeId == Guid.Empty)
          return Result.Failure(OwnerErrors.AuditRequiresEmployee);
       if (Status == OwnerStatus.Deactivated)
          return Result.Failure(OwnerErrors.AlreadyDeactivated);
 
       Status = OwnerStatus.Deactivated;
-      DeactivatedAt = updatedAt;
-      DeactivatedByEmployeeId = employeeId;
+      DeactivatedAt = deactivatedAt;
+      DeactivatedByEmployeeId = deactivatedByEmployeeId;
 
-      Touch(updatedAt);
+      Touch(deactivatedAt);
       return Result.Success();
    }
 

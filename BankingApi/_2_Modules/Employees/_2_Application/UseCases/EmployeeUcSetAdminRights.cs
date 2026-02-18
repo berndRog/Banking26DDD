@@ -19,7 +19,7 @@ namespace BankingApi._2_Modules.Employees._2_Application.UseCases;
 /// - Validation of the bitmask (allowed bits) should live in the domain.
 /// </summary>
 public sealed class EmployeeUcSetAdminRights(
-   IEmployeeRepository repository,
+   IEmployeesRepository repository,
    IUnitOfWork unitOfWork,
    IClock clock,
    ILogger<EmployeeUcSetAdminRights> logger

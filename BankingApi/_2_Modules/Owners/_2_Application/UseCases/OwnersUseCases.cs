@@ -41,26 +41,29 @@ public class OwnersUseCases(
    ) => updateProfileUc.ExecuteAsync(dto, ct);
    
    public Task<Result> ActivateAsync(
-      Guid ownerId, 
+      Guid ownerId,
+      Guid activatedByEmployeeId,
+      string? ibanString,
       CancellationToken ct
-   ) => activateUc.ExecuteAsync(ownerId, ct);
+   ) => activateUc.ExecuteAsync(ownerId, activatedByEmployeeId, ibanString, ct);
 
    public Task<Result> RejectAsync(
       Guid ownerId, 
+      Guid rejectedByEmployeeId,
       string reason,
       CancellationToken ct
    ) => rejectUc.ExecuteAsync(ownerId, reason, ct);
    
    public Task<Result> DeactivateAsync(
-      Guid ownerId,  
+      Guid ownerId,
+      Guid deactivatedByEmployeeId,
       CancellationToken ct
    ) => deactivateUc.ExecuteAsync(ownerId, ct);
    
    public Task<Result> UpdateEmailAsync(
       Guid ownerId, 
       string newEmail, 
-      CancellationToken 
-         ct = default
+      CancellationToken ct = default
    ) => updateEmailUc.ExecuteAsync(ownerId, newEmail, ct);
    
 }

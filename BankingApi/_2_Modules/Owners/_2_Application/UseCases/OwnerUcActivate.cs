@@ -1,3 +1,4 @@
+using BankingApi._2_Modules.Core._1_Ports.Inbound;
 using BankingApi._2_Modules.Owners._1_Ports.Outbound;
 using BankingApi._2_Modules.Owners._2_Application.Errors;
 using BankingApi._2_Modules.Owners._3_Domain.Errors;
@@ -15,19 +16,30 @@ namespace BankingApi._2_Modules.Owners._2_Application.UseCases;
 public sealed class OwnerUcActivate(
    IIdentityGateway identityGateway,
    IOwnersRepository repository,
+   IAccountsContracts accountsContracts,
    IUnitOfWork unitOfWork,
    IClock clock,
    ILogger<OwnerUcActivate> logger
 ) {
-
+   /// <summary>
+   /// Converts the identity subject into an employeeId.
+   /// In your final solution this should use a proper Employee lookup / gateway.
+   /// For lecture/testing we accept "sub is Guid" as convention.
+   /// </summary>
    public async Task<Result> ExecuteAsync(
       Guid ownerId,
+      string? ibanString,
       CancellationToken ct
    ) {
+      
       // 1) Authorization: must be an employee/admin with the required rights
-      // set required later
+      var subject = identityGateway.Subject;
+      
+      
       if (identityGateway.AdminRights == 0)
          return Result.Failure(OwnerApplicationErrors.EmployeeRightsRequired);
+      
+      
 
       // 2) Validate input
       if (ownerId == Guid.Empty)
@@ -37,27 +49,25 @@ public sealed class OwnerUcActivate(
       var owner = await repository.FindByIdAsync(ownerId, ct);
       if (owner is null)
          return Result.Failure(OwnerErrors.NotFound);
-
-      // 4) Domain change (audit + status transition)
-      var utcNow = clock.UtcNow;
-      var employeeId = ParseEmployeeId(identityGateway.Subject);
       
-      var result = owner.Activate(employeeId, utcNow);
+      // 4) create first account (Accounts-BC)
+      var resAccount = await accountsContracts.OpenInitialAccountAsync(ownerId, ibanString, ct);
+      if (resAccount.IsFailure)
+         return Result.Failure(resAccount.Error);
+
+      // 5) Domain change (audit + status transition)
+      // Owner can only be activated if currently in "Provisioned" status (not active yet)
+      // Owner is not storing the accountId
+      var utcNow = clock.UtcNow;
+      var result = owner.Activate(activetedByEmployeeId, utcNow);
       if (result.IsFailure)
          return Result.Failure(result.Error);
 
       // 5) Persist
       var savedRows = await unitOfWork.SaveAllChangesAsync("Owner activated by employee", ct);
-      logger.LogInformation("Owner activated ownerId={ownerId} savedRows={rows}", ownerId, savedRows);
-
+      logger.LogInformation("Owner activated ownerId={id} Status {s} savedRows={rows}", 
+         ownerId, owner.Status, savedRows);
+      
       return Result.Success();
    }
-
-   /// <summary>
-   /// Converts the identity subject into an employeeId.
-   /// In your final solution this should use a proper Employee lookup / gateway.
-   /// For lecture/testing we accept "sub is Guid" as convention.
-   /// </summary>
-   private static Guid ParseEmployeeId(string subject) =>
-      Guid.TryParse(subject, out var id) ? id : Guid.Empty;
 }
