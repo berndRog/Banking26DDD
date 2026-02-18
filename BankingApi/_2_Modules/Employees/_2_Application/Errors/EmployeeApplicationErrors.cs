@@ -16,19 +16,20 @@ public static class EmployeeApplicationErrors {
       );
    
    public static readonly DomainErrors OwnerCannotUpdateEmployeeProfile =
-      new(ErrorCode.Conflict,
+      new(ErrorCode.UnprocessableEntity,
          Title: "Employee: Owner cannot update Employee profiles",
          Message: "The employee profile is blocked against owner access.");
    
    public static readonly DomainErrors EmployeeRightsRequired =
       new(
          ErrorCode.Forbidden,
-         Title: "Employee rights required",
-         Message: "This operation requires employee privileges."
+         Title: "Employee: Admin Rights Required",
+         Message: "Employee: This operation requires employee privileges."
       );
    
    public static readonly DomainErrors EmailAlreadyInUse =
       new(ErrorCode.Conflict,
-         Title: "Employee: email already used",
+         Title: "Employee: Email Already Used",
          Message: "The employee email is already in use by another employee");
+   
 }

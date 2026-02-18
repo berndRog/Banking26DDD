@@ -2,6 +2,7 @@ using BankingApi._2_Modules.Accounts._3_Domain.Enums;
 using BankingApi._2_Modules.Core._3_Domain.Aggregates;
 using BankingApi._4_BuildingBlocks._1_Ports.Inbound;
 using BankingApi.Modules.Core.Domain.Aggregates;
+using BankingApiTest.Infrastructure;
 
 namespace BankingApiTest._2_Modules.Core.Domain.Aggregates;
 
@@ -18,10 +19,10 @@ public sealed class TransferUt {
       _seed = new TestSeed();
       _clock = _seed.Clock;
       // Account 1, Beneficary 1, Owner 1
-      _fromAccount = _seed.Account1;
-      _beneficiary = _seed.Beneficiary1;
-      _toAccount = _seed.Account5;
-      _transfer = _seed.Transfer1;
+      _fromAccount = _seed.Account1();
+      _beneficiary = _seed.Beneficiary1();
+      _toAccount = _seed.Account5();
+      _transfer = _seed.Transfer1();
       _id = "22222222-0000-0000-0000-000000000000";
    }
 

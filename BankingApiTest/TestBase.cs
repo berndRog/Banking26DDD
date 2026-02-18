@@ -1,3 +1,4 @@
+using BankingApiTest.Infrastructure;
 using Microsoft.Extensions.Logging;
 namespace BankingApiTest;
 

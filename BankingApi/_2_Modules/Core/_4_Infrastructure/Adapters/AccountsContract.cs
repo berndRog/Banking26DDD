@@ -12,12 +12,12 @@ using BankingApi._4_BuildingBlocks.Utils;
 using BankingApi.Core.Dto;
 namespace BankingApi._2_Modules.Core._4_Infrastructure.Adapters;
 
-public class AccountsContracts(
+public class AccountsContract(
    IAccountsRepository repository,
    IUnitOfWork unitOfWork,
    IClock clock,
-   ILogger<AccountsContracts> logger
-): IAccountsContracts{
+   ILogger<AccountsContract> logger
+): IAccountsContract{
    
    public async Task<Result<AccountDto>> OpenInitialAccountAsync(
       Guid ownerId, 

@@ -1,6 +1,9 @@
 using BankingApi._2_Modules.Core._1_Ports.Inbound;
+using BankingApi._2_Modules.Employees._1_Ports.Inbound;
+using BankingApi._2_Modules.Employees._3_Domain.Enums;
 using BankingApi._2_Modules.Owners._1_Ports.Outbound;
 using BankingApi._2_Modules.Owners._2_Application.Errors;
+using BankingApi._2_Modules.Owners._3_Domain.Enum;
 using BankingApi._2_Modules.Owners._3_Domain.Errors;
 using BankingApi._4_BuildingBlocks;
 using BankingApi._4_BuildingBlocks._1_Ports.Inbound;
@@ -14,9 +17,10 @@ namespace BankingApi._2_Modules.Owners._2_Application.UseCases;
 /// (You can add that orchestration in the Core BC later.)
 /// </summary>
 public sealed class OwnerUcActivate(
-   IIdentityGateway identityGateway,
+
    IOwnersRepository repository,
-   IAccountsContracts accountsContracts,
+   IEmployeesContract employeesContract,
+   IAccountsContract accountsContract,
    IUnitOfWork unitOfWork,
    IClock clock,
    ILogger<OwnerUcActivate> logger
@@ -32,15 +36,13 @@ public sealed class OwnerUcActivate(
       CancellationToken ct
    ) {
       
-      // 1) Authorization: must be an employee/admin with the required rights
-      var subject = identityGateway.Subject;
+      // 1) Authorization: check if caller is an employee with required rights
+      var requiredRights = AdminRights.ManageOwners | AdminRights.ManageAccounts;
+      var resultEmployee = await employeesContract.GetAuthorizedEmployeeAsync(requiredRights, ct);
+      if (resultEmployee.IsFailure)
+         return Result.Failure(resultEmployee.Error);
+      var employeeDto = resultEmployee.Value;
       
-      
-      if (identityGateway.AdminRights == 0)
-         return Result.Failure(OwnerApplicationErrors.EmployeeRightsRequired);
-      
-      
-
       // 2) Validate input
       if (ownerId == Guid.Empty)
          return Result.Failure(OwnerErrors.InvalidId);
@@ -51,15 +53,18 @@ public sealed class OwnerUcActivate(
          return Result.Failure(OwnerErrors.NotFound);
       
       // 4) create first account (Accounts-BC)
-      var resAccount = await accountsContracts.OpenInitialAccountAsync(ownerId, ibanString, ct);
+      var resAccount = await accountsContract.OpenInitialAccountAsync(ownerId, ibanString, ct);
       if (resAccount.IsFailure)
          return Result.Failure(resAccount.Error);
 
       // 5) Domain change (audit + status transition)
       // Owner can only be activated if currently in "Provisioned" status (not active yet)
+      if(owner.Status != OwnerStatus.Pending)
+         return Result.Failure(OwnerApplicationErrors.InvalidStatusTransition);
+      
       // Owner is not storing the accountId
       var utcNow = clock.UtcNow;
-      var result = owner.Activate(activetedByEmployeeId, utcNow);
+      var result = owner.Activate(employeeDto.Id, utcNow);
       if (result.IsFailure)
          return Result.Failure(result.Error);
 

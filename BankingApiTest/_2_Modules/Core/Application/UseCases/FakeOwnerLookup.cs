@@ -1,4 +1,5 @@
 using BankingApi._2_Modules.Owners._1_Ports.Inbound;
+using BankingApiTest.Infrastructure;
 namespace BankingApiTest.Modules.Owners.Infrastructure;
 
 public class FakeOwnerLookup(
@@ -6,8 +7,8 @@ public class FakeOwnerLookup(
 ): IOwnerLookupContract {
 
    private readonly IReadOnlyCollection<Guid> _activeOwners = new List<Guid> {
-      seed.Owner1.Id, seed.Owner2.Id, seed.Owner3.Id,
-      seed.Owner4.Id, seed.Owner5.Id, seed.Owner6.Id
+      seed.Owner1().Id, seed.Owner2().Id, seed.Owner3().Id,
+      seed.Owner4().Id, seed.Owner5().Id, seed.Owner6().Id
    };
    
    public async Task<bool> ExistsActiveAsync(
@@ -17,3 +18,4 @@ public class FakeOwnerLookup(
       return _activeOwners.Contains(ownerId);
    }
 }
+

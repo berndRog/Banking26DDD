@@ -2,7 +2,7 @@ using BankingApi._2_Modules.Owners._2_Application.Dtos;
 using BankingApi._4_BuildingBlocks;
 namespace BankingApi._2_Modules.Owners._1_Ports.Inbound;
 
-public interface IOwnersUseCases {
+public interface IOwnerUseCases {
    public Task<Result<Guid>> CreateAsync(
       string firstname,
       string lastname,
@@ -36,21 +36,18 @@ public interface IOwnersUseCases {
    // Employee actions
    Task<Result> ActivateAsync(
       Guid ownerId, 
-      Guid activatedByEmployeeId,
       string? ibanString,
       CancellationToken ct = default
    );
    
    Task<Result> RejectAsync(
       Guid ownerId, 
-      Guid rejectedByEmployeeId,
       string reason,
       CancellationToken ct = default
    );
    
    Task<Result> DeactivateAsync(
       Guid ownerId, 
-      Guid deactivatedByEmployeeId,
       CancellationToken ct = default
    );
    

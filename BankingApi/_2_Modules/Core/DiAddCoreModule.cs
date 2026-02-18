@@ -17,7 +17,7 @@ public static class DiCoreExtensions {
       // Inbound ports (HTTP / UI)
       // =========================================================
       // Contracts
-      services.AddScoped<IAccountsContracts, AccountsContracts>();
+      services.AddScoped<IAccountsContract, AccountsContract>();
       // ReadModels (Queries)     
       services.AddScoped<IAccountsReadModel, AccountsReadModelEf>();
 

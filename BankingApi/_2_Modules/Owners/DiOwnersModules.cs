@@ -16,8 +16,9 @@ public static class DiOwnersModules {
       // =========================================================
       // Adapters
       services.AddScoped<IOwnerLookupContract, OwnerLookupAdapter>();
-      // ReadModels (Queries)     
-      // services.AddScoped<IReservationReadModel, ReservationReadModelEf>();
+     
+      // ReadModels
+      services.AddScoped<IOwnerReadModel, OwnerReadModelEf>();      
       
       // WriteModels = Use Cases
       services.AddScoped<OwnerUcCreate>();
@@ -27,16 +28,13 @@ public static class DiOwnersModules {
       services.AddScoped<OwnerUcReject>();
       services.AddScoped<OwnerUcDeactivate>();
       services.AddScoped<OwnerUcUpdateEmail>();
-      services.AddScoped<IOwnersUseCases, OwnersUseCases>();
+      services.AddScoped<IOwnerUseCases, OwnerUseCases>();
 
       // =========================================================
       // Outbound ports
       // =========================================================
-      // ReadModels
-      services.AddScoped<IOwnersReadModel, OwnersReadModelEf>();
-      
       // Repositories
-      services.AddScoped<IOwnersRepository, OwnersRepositoryEf>();
+      services.AddScoped<IOwnersRepository, OwnerRepositoryEf>();
       
       return services;
    }

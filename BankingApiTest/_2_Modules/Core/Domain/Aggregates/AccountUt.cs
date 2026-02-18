@@ -1,6 +1,7 @@
 using BankingApi._2_Modules.Core._3_Domain.Aggregates;
 using BankingApi._2_Modules.Core._3_Domain.ValueObjects;
 using BankingApi._4_BuildingBlocks._1_Ports.Inbound;
+using BankingApiTest.Infrastructure;
 namespace BankingApiTest._2_Modules.Core.Domain.Aggregates;
 
 public sealed class AccountUt {
@@ -13,11 +14,15 @@ public sealed class AccountUt {
    private readonly string _id;
 
    public AccountUt() {
+      
       _seed = new TestSeed();
       _clock = _seed.Clock;
-      _ownerId = _seed.Owner1.Id;
-      _iban = _seed.Account1.Iban;
-      _balance = _seed.Account1.Balance;
+      
+      var owner = _seed.Owner1();
+      var account = _seed.Account1();
+      _ownerId = owner.Id;
+      _iban = account.Iban;
+      _balance = account.Balance;
       _id = "11111111-0000-0000-0000-000000000000";
    }
 
@@ -42,7 +47,6 @@ public sealed class AccountUt {
       NotEqual(Guid.Empty, actual.Id);
       Equal(Guid.Parse(_id), actual.Id);
       Equal(_iban, actual.Iban);
-      ;
       Equal(_balance, actual.Balance, 24);
       Equal(_ownerId, actual.OwnerId);
    }
@@ -159,8 +163,8 @@ public sealed class AccountUt {
    [Fact]
    public void AddBeneficiaryUt() {
       // Arrange
-      var account = _seed.Account1;
-      var beneficiary = _seed.Beneficiary1;
+      var account = _seed.Account1();
+      var beneficiary = _seed.Beneficiary1();
       
       // Act
       account.AddBeneficiary(
@@ -177,9 +181,9 @@ public sealed class AccountUt {
    [Fact]
    public void RemoveBeneficiaryUt() {
       // Arrange
-      var account = _seed.Account1;
-      var beneficiary1 = _seed.Beneficiary1;
-      var beneficiary2 = _seed.Beneficiary2;
+      var account = _seed.Account1();
+      var beneficiary1 = _seed.Beneficiary1();
+      var beneficiary2 = _seed.Beneficiary2();
       account.AddBeneficiary(beneficiary1.Name, beneficiary1.Iban, beneficiary1.Id.ToString());
       account.AddBeneficiary(beneficiary2.Name, beneficiary2.Iban, beneficiary2.Id.ToString());
 

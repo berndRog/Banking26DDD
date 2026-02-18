@@ -5,7 +5,7 @@ using BankingApi._4_BuildingBlocks._3_Domain.ValueObjects;
 using Microsoft.EntityFrameworkCore;
 namespace BankingApi._2_Modules.Owners._4_Infrastructure.Repositories;
 
-public class OwnersRepositoryEf(
+public class OwnerRepositoryEf(
    BankingDbContext dbContext
 ) : IOwnersRepository {
 

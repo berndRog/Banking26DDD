@@ -1,0 +1,22 @@
+using BankingApi._4_BuildingBlocks._1_Ports.Outbound;
+namespace BankingApiTest.Infrastructure;
+
+public sealed class FakeIdentityGateway : IIdentityGateway {
+   public string Subject { get; }
+   public string Username { get; }
+   public DateTimeOffset CreatedAt { get; }
+   public int AdminRights { get; }
+
+   public FakeIdentityGateway(
+      string subject,
+      string username,
+      DateTimeOffset createdAt,
+      int? adminRights = null
+   ) {
+      Subject = subject;
+      Username = username;
+      CreatedAt = createdAt;
+      if (adminRights.HasValue)
+         AdminRights = adminRights.Value;
+   }
+}

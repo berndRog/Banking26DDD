@@ -3,7 +3,7 @@ using BankingApi._4_BuildingBlocks;
 using BankingApi.Core.Dto;
 namespace BankingApi._2_Modules.Core._1_Ports.Inbound;
 
-public interface IAccountsContracts {
+public interface IAccountsContract {
    
    Task<Result<AccountDto>> OpenInitialAccountAsync(
       Guid ownerId,

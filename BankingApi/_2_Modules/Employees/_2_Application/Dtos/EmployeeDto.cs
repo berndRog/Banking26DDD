@@ -8,7 +8,5 @@ public sealed record EmployeeDto(
    string? Phone,
    string PersonnelNumber,
    bool IsActive,
-   int AdminRights,
-   DateTimeOffset CreatedAt,
-   DateTimeOffset? DeactivatedAt
+   int AdminRights
 );

@@ -6,6 +6,7 @@ using BankingApi._2_Modules.Owners._3_Domain.Aggregates;
 using BankingApi._3_Infrastructure.Database;
 using BankingApi._4_BuildingBlocks._1_Ports.Inbound;
 using BankingApi._4_BuildingBlocks._4_Infrastructure.Persistence;
+using BankingApiTest.Infrastructure;
 using Microsoft.Data.Sqlite;
 using Microsoft.EntityFrameworkCore;
 namespace BankingApiTest.Modules.Owners.Infrastructure;
@@ -77,9 +78,11 @@ public sealed class AccountUcBeneficiaryAddIntT : TestBase, IAsyncLifetime {
    [Fact]
    public async Task AddBeneficiaryUt() {
       // Arrange
-      var beneficiary = _seed.Beneficiary1;
+      var owner1 = _seed.Owner1();
+      var account1 = _seed.Account1();
+      var beneficiary = _seed.Beneficiary1();
       // create account for owner in database
-      var accountId = await CreateAccountForOwner(_seed.Owner1, _seed.Account1);
+      var accountId = await CreateAccountForOwner(owner1, account1);
       var account = await _repository.FindByIdAsync(accountId, _ct);
       NotNull(account);
       

@@ -3,6 +3,7 @@ using BankingApi._2_Modules.Owners._4_Infrastructure.Repositories;
 using BankingApi._3_Infrastructure.Database;
 using BankingApi._4_BuildingBlocks._1_Ports.Inbound;
 using BankingApi._4_BuildingBlocks._4_Infrastructure.Persistence;
+using BankingApiTest.Infrastructure;
 using Microsoft.Data.Sqlite;
 using Microsoft.EntityFrameworkCore;
 namespace BankingApiTest._2_Modules.Owners.Infrastructure;
@@ -31,7 +32,7 @@ public sealed class OwnersRepositoryIntT : TestBase, IAsyncLifetime {
       _dbContext = new BankingDbContext(options);
       await _dbContext.Database.EnsureCreatedAsync();
 
-      _repository = new OwnersRepositoryEf(_dbContext);
+      _repository = new OwnerRepositoryEf(_dbContext);
       _unitOfWork = new UnitOfWork(
          _dbContext, 
          _clock,
@@ -56,7 +57,7 @@ public sealed class OwnersRepositoryIntT : TestBase, IAsyncLifetime {
    [Fact]
    public async Task Add_returns_owner1() {
       // Arrange
-      var owner = _seed.Owner1;
+      var owner = _seed.Owner1();
       
       // Act
       _repository.Add(owner);
@@ -66,22 +67,24 @@ public sealed class OwnersRepositoryIntT : TestBase, IAsyncLifetime {
       // Assert
       var actual = await _repository.FindByIdAsync(owner.Id, CancellationToken.None);
       NotNull(actual);
-      Equal(_seed.Owner1.Id, actual!.Id);
-      Equal(_seed.Owner1.Firstname, actual.Firstname);
-      Equal(_seed.Owner1.Lastname, actual.Lastname);
-      Equal(_seed.Owner1.Email, actual.Email); 
-      Equal(_seed.Owner1.Subject, actual.Subject);
+      Equal(owner.Id, actual.Id);
+      Equal(owner.Firstname, actual.Firstname);
+      Equal(owner.Lastname, actual.Lastname);
+      Equal(owner.Email, actual.Email); 
+      Equal(owner.Subject, actual.Subject);
    }
    
    
    [Fact]
    public async Task FindByIdAsync_returns_owner1() {
       // Arrange
-      _dbContext.Owners.AddRange(_seed.Owners);
+      var owners = _seed.Owners;
+      _dbContext.Owners.AddRange(owners);
       await _unitOfWork.SaveAllChangesAsync();
       _dbContext.ChangeTracker.Clear();
       
-      var id = _seed.Owner1.Id;
+      var owner = owners[0];  // Owner1
+      var id = owner.Id;
       
       // Act
       var actual = await _repository.FindByIdAsync(id, CancellationToken.None);
@@ -89,10 +92,11 @@ public sealed class OwnersRepositoryIntT : TestBase, IAsyncLifetime {
       // Assert
       NotNull(actual);
       Equal(id, actual!.Id);
-      Equal(_seed.Owner1.Firstname, actual.Firstname);
-      Equal(_seed.Owner1.Lastname, actual.Lastname);
-      Equal(_seed.Owner1.Email, actual.Email); 
-      Equal(_seed.Owner1.Subject, actual.Subject);
+      Equal(owner.Id, actual.Id);
+      Equal(owner.Firstname, actual.Firstname);
+      Equal(owner.Lastname, actual.Lastname);
+      Equal(owner.Email, actual.Email);
+      Equal(owner.Subject, actual.Subject);
    }
 
    [Fact]

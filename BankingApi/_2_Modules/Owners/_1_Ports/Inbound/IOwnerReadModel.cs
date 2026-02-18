@@ -4,7 +4,7 @@ using BankingApi._4_BuildingBlocks;
 using BankingApi._4_BuildingBlocks._4_Infrastructure.ReadModel;
 namespace BankingApi._2_Modules.Owners._1_Ports.Inbound;
 
-public interface IOwnersReadModel {
+public interface IOwnerReadModel {
    
    Task<Result<Guid>> FindMeProvisionedAsync(
       CancellationToken ct = default

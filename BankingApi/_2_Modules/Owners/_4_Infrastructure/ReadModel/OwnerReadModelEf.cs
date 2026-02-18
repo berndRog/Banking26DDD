@@ -14,10 +14,10 @@ using BankingApi._4_BuildingBlocks._4_Infrastructure.ReadModel;
 using Microsoft.EntityFrameworkCore;
 namespace BankingApi._2_Modules.Owners._4_Infrastructure.ReadModel;
 
-public sealed class OwnersReadModelEf(
+public sealed class OwnerReadModelEf(
    BankingDbContext dbContext,
    IIdentityGateway identityGateway
-) : IOwnersReadModel {
+) : IOwnerReadModel {
 
    public async Task<Result<Guid>> FindMeProvisionedAsync(CancellationToken ct) {
 
@@ -68,7 +68,7 @@ public sealed class OwnersReadModelEf(
    ) {
       var ownerDto = await dbContext.Owners
          .AsNoTracking()
-         .Where(c => c.Id == Id)  // filter by Id
+         .Where(c => c.Id == Id)       // filter by Id
          .Select(c => c.ToOwnerDto())  // project to OwnerDto (map)
          .SingleOrDefaultAsync(ct);
 

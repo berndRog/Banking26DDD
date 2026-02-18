@@ -9,7 +9,7 @@ namespace BankingApi._1_Controllers;
 [ApiController]
 [Route("bankingapi/v1")]
 public sealed class OwnersController(
-   IOwnersReadModel readModel,
+   IOwnerReadModel readModel,
    OwnerUcCreateProvisioned ucCreateProvisioned,
    OwnerUcUpdateProfile ucUpdateProfile,
    ILogger<OwnersController> logger

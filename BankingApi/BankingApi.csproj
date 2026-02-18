@@ -37,8 +37,4 @@
     <Content Include="_4_BuildingBlocks\.DS_Store" />
   </ItemGroup>
 
-  <ItemGroup>
-    <Folder Include="_3_Infrastructure\Repositories\" />
-  </ItemGroup>
-
 </Project>

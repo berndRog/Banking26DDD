@@ -1,6 +1,7 @@
 using BankingApi._2_Modules.Employees._1_Ports.Inbound;
 using BankingApi._2_Modules.Employees._1_Ports.Outbound;
 using BankingApi._2_Modules.Employees._2_Application.UseCases;
+using BankingApi._2_Modules.Employees._4_Infrastructure.Adapters;
 using BankingApi._2_Modules.Employees._4_Infrastructure.ReadModel;
 using BankingApi._2_Modules.Employees._4_Infrastructure.Repositories;
 namespace BankingApi._2_Modules.Employees;
@@ -15,7 +16,7 @@ public static class DiAddEmployeesMdules {
       // Inbound ports (HTTP / UI)
       // =========================================================
       // Contracts      
-      //services.AddScoped<ICustomerReadContract, CustomerReadContractServiceEf>();
+      services.AddScoped<IEmployeesContract, EmployeesContractEf>();
 
       // ReadModels (Queries)
       services.AddScoped<IEmployeesReadModel, EmployeesReadModelEf>();

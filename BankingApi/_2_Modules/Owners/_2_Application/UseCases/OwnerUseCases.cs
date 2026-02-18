@@ -5,7 +5,7 @@ namespace BankingApi._2_Modules.Owners._2_Application.UseCases;
 
 
 // UseCases Facade for Owner aggregate
-public class OwnersUseCases(
+public class OwnerUseCases(
    OwnerUcCreate createUc,
    OwnerUcCreateProvisioned createProvisionedUc,
    OwnerUcUpdateProfile updateProfileUc,
@@ -13,7 +13,7 @@ public class OwnersUseCases(
    OwnerUcReject rejectUc,
    OwnerUcDeactivate deactivateUc,
    OwnerUcUpdateEmail updateEmailUc
-): IOwnersUseCases {
+): IOwnerUseCases {
 
    public Task<Result<Guid>> CreateAsync(
       string firstname,
@@ -42,21 +42,18 @@ public class OwnersUseCases(
    
    public Task<Result> ActivateAsync(
       Guid ownerId,
-      Guid activatedByEmployeeId,
       string? ibanString,
       CancellationToken ct
-   ) => activateUc.ExecuteAsync(ownerId, activatedByEmployeeId, ibanString, ct);
+   ) => activateUc.ExecuteAsync(ownerId, ibanString, ct);
 
    public Task<Result> RejectAsync(
       Guid ownerId, 
-      Guid rejectedByEmployeeId,
       string reason,
       CancellationToken ct
    ) => rejectUc.ExecuteAsync(ownerId, reason, ct);
    
    public Task<Result> DeactivateAsync(
       Guid ownerId,
-      Guid deactivatedByEmployeeId,
       CancellationToken ct
    ) => deactivateUc.ExecuteAsync(ownerId, ct);
    

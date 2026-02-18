@@ -31,7 +31,7 @@ public static class OwnerApplicationErrors {
    
    public static readonly DomainErrors EmailAlreadyInUse =
       new(ErrorCode.Conflict,
-         Title: "Owner: email already used",
+         Title: "Owner: Email Already Used",
          Message: "The owner email is already in use by another owner.");
    
    
@@ -40,5 +40,11 @@ public static class OwnerApplicationErrors {
          Title: "Owner: Filter Is Required",
          Message: "The provided filter must not be null");
 
-
+   public static readonly DomainErrors InvalidStatusTransition =
+      new(
+         ErrorCode.UnprocessableEntity,
+         Title: "Owner: Invalid Status Transitions",
+         Message: "This operation is not possible, due to an invalid status transition."
+      );
+   
 }

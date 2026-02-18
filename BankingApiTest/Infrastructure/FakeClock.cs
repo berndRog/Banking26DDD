@@ -1,5 +1,5 @@
 using BankingApi._4_BuildingBlocks._1_Ports.Inbound;
-namespace BankingApiTest;
+namespace BankingApiTest.Infrastructure;
 
 public sealed class FakeClock : IClock {
    public DateTimeOffset UtcNow { get; } = DateTimeOffset.UtcNow;

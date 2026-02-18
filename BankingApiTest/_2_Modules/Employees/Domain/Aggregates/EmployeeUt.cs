@@ -7,6 +7,7 @@ using BankingApi._2_Modules.Owners._3_Domain.Errors;
 using BankingApi._4_BuildingBlocks._1_Ports.Inbound;
 using BankingApi._4_BuildingBlocks._3_Domain.Errors;
 using BankingApi._4_BuildingBlocks._3_Domain.ValueObjects;
+using BankingApiTest.Infrastructure;
 namespace BankingApiTest.Modules.Owners.Domain.Aggregates;
 
 public sealed class EmployeeUt {
