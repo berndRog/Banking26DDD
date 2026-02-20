@@ -6,24 +6,48 @@ using BankingApi._4_BuildingBlocks._3_Domain.Errors;
 namespace BankingApi._2_Modules.Core._3_Domain.ValueObjects;
 
 /// <summary>
-/// IBAN Value Object (DE/AT/CH).
-/// - Normalizes input (removes spaces/separators, uppercases)
-/// - Validates structure and MOD-97 checksum
-/// - Enforces country set and length for D/A/CH
+/// IBAN value object (DE/AT/CH).
+///
+/// Canonical persisted form:
+/// - no spaces/separators
+/// - uppercase
+///
+/// Design rule:
+/// - Create(...)        = user input (strict normalization + validation)
+/// - FromPersisted(...) = database value (cheap invariant check)
+///
+/// Validation:
+/// - allowed countries + exact length (D/A/CH)
+/// - characters A-Z / 0-9 only
+/// - MOD-97 checksum must pass
 /// </summary>
 public sealed record class Iban {
-
-   /// <summary>Normalized IBAN (no spaces, uppercase)</summary>
+   /// <summary>
+   /// Canonical IBAN (uppercase, no separators).
+   /// Example: "de44 5001 0517 5407 3249 31" -> "DE44500105175407324931"
+   /// </summary>
    public string Value { get; }
 
-   /// <summary>Human readable IBAN (groups of 4 chars)</summary>
+   /// <summary>
+   /// Human readable IBAN (groups of 4).
+   /// Example: "DE44500105175407324931" -> "DE44 5001 0517 5407 3249 31"
+   /// </summary>
    public override string ToString() => Format(Value);
 
-   /// <summary>Compact representation for persistence / APIs</summary>
+   /// <summary>
+   /// Compact representation for persistence / APIs.
+   /// </summary>
    public string ToCompactString() => Value;
 
+   /// <summary>
+   /// Private constructor enforces factory usage.
+   /// Iban can never exist in invalid state.
+   /// </summary>
    private Iban(string normalized) => Value = normalized;
 
+   // =========================================================
+   // COUNTRY RULES (DACH)
+   // =========================================================
    private static readonly IReadOnlyDictionary<string, int> AllowedCountries =
       new Dictionary<string, int>(StringComparer.Ordinal) {
          ["DE"] = 22,
@@ -34,9 +58,15 @@ public sealed record class Iban {
    private static DomainErrors InvalidIban(string message) =>
       new(ErrorCode.BadRequest, Title: "Account: Invalid Iban", Message: message);
 
-   public static Result<Iban> Create(string? input)
-   {
-      var normalized = Normalize(input);
+   // =========================================================
+   // 1) FACTORY — USER INPUT (strict)
+   // =========================================================
+   /// <summary>
+   /// Creates an Iban from user input.
+   /// Performs normalization (removes separators, uppercases) and full validation.
+   /// </summary>
+   public static Result<Iban> Create(string? input) {
+      var normalized = NormalizeFromInput(input);
 
       if (!TryValidate(normalized, out var error))
          return Result<Iban>.Failure(InvalidIban(error));
@@ -44,8 +74,86 @@ public sealed record class Iban {
       return Result<Iban>.Success(new Iban(normalized));
    }
 
-   private static bool TryValidate(string normalized, out string error)
-   {
+   // =========================================================
+   // 2) FACTORY — DATABASE (trusted)
+   // =========================================================
+   /// <summary>
+   /// Rehydrates Iban from database value.
+   /// Only cheap invariant checks — no separator stripping etc.
+   /// Throws if DB contains corrupted (non-canonical) data.
+   /// </summary>
+   internal static Iban FromPersisted(string value) {
+      if (!IsCanonical(value))
+         throw new InvalidOperationException($"Invalid Iban in database: '{value}'");
+
+      // Full checksum validation is still cheap enough and gives safety.
+      // If you want "ultra-cheap", remove the MOD-97 call here.
+      if (!TryValidate(value, out var error))
+         throw new InvalidOperationException($"Invalid Iban in database: '{value}'. {error}");
+
+      return new Iban(value);
+   }
+
+   // =========================================================
+   // NORMALIZATION (used only by Create)
+   // =========================================================
+   /// <summary>
+   /// Normalizes user input into canonical form:
+   /// - removes whitespace and common separators (- . _)
+   /// - uppercases letters
+   /// </summary>
+   private static string NormalizeFromInput(string? input) {
+      if (string.IsNullOrWhiteSpace(input))
+         return string.Empty;
+
+      var sb = new StringBuilder(input.Length);
+      foreach (var ch in input) {
+         if (char.IsWhiteSpace(ch) || ch is '-' or '.' or '_')
+            continue;
+
+         sb.Append(char.ToUpperInvariant(ch));
+      }
+
+      return sb.ToString();
+   }
+
+   // =========================================================
+   // INVARIANT CHECK FOR DB VALUES
+   // =========================================================
+   /// <summary>
+   /// Cheap check ensuring DB value already follows canonical rules:
+   /// - non-empty
+   /// - uppercase letters
+   /// - contains only A-Z / 0-9
+   /// - no separators (spaces, '-', '.', '_')
+   /// </summary>
+   private static bool IsCanonical(string value) {
+      if (string.IsNullOrWhiteSpace(value))
+         return false;
+
+      // must already be trimmed (no leading/trailing whitespace)
+      if (value != value.Trim())
+         return false;
+
+      for (int i = 0; i < value.Length; i++) {
+         char c = value[i];
+
+         // reject typical separators explicitly
+         if (char.IsWhiteSpace(c) || c is '-' or '.' or '_')
+            return false;
+
+         // must be uppercase A-Z or digit
+         if (!(char.IsDigit(c) || IsUpperAlpha(c)))
+            return false;
+      }
+
+      return true;
+   }
+
+   // =========================================================
+   // VALIDATION (structure + checksum)
+   // =========================================================
+   private static bool TryValidate(string normalized, out string error) {
       if (normalized.Length == 0)
          return Fail(out error, "IBAN is required.");
 
@@ -62,15 +170,18 @@ public sealed record class Iban {
          return Fail(out error,
             $"IBAN length for '{country}' must be {expectedLen} characters (was {normalized.Length}).");
 
+      // check digits must be numeric
       if (!char.IsDigit(normalized[2]) || !char.IsDigit(normalized[3]))
          return Fail(out error, "IBAN check digits (positions 3-4) must be numeric.");
 
+      // allowed chars
       for (int i = 0; i < normalized.Length; i++) {
          var c = normalized[i];
          if (!(char.IsDigit(c) || IsUpperAlpha(c)))
             return Fail(out error, $"IBAN contains invalid character '{c}'. Only A-Z and 0-9 are allowed.");
       }
 
+      // MOD-97 checksum
       if (!PassesMod97(normalized))
          return Fail(out error, "IBAN checksum (MOD-97) is invalid.");
 
@@ -78,12 +189,17 @@ public sealed record class Iban {
       return true;
    }
 
-   private static bool Fail(out string error, string message)
-   {
+   private static bool Fail(out string error, string message) {
       error = message;
       return false;
    }
 
+   // =========================================================
+   // DISPLAY / FORMATTING
+   // =========================================================
+   /// <summary>
+   /// Formats canonical iban into groups of 4 characters for display.
+   /// </summary>
    private static string Format(string iban) {
       if (string.IsNullOrEmpty(iban))
          return string.Empty;
@@ -98,18 +214,12 @@ public sealed record class Iban {
       return sb.ToString();
    }
 
-   private static string Normalize(string? input) {
-      if (string.IsNullOrWhiteSpace(input)) return string.Empty;
-
-      var sb = new StringBuilder(input.Length);
-      foreach (var ch in input) {
-         if (char.IsWhiteSpace(ch) || ch == '-' || ch == '.' || ch == '_') continue;
-         sb.Append(char.ToUpperInvariant(ch));
-      }
-      return sb.ToString();
-   }
+   // =========================================================
+   // CHECKSUM (MOD-97)
+   // =========================================================
 
    private static bool PassesMod97(string iban) {
+      // Move first four chars to the end
       var rearranged = iban.Substring(4) + iban.Substring(0, 4);
 
       int mod = 0;
@@ -122,13 +232,13 @@ public sealed record class Iban {
          }
 
          if (IsUpperAlpha(c)) {
-            int val = (c - 'A') + 10;
+            int val = (c - 'A') + 10; // A=10 ... Z=35
             mod = (mod * 10 + (val / 10)) % 97;
             mod = (mod * 10 + (val % 10)) % 97;
             continue;
          }
 
-         return false;
+         return false; // should never happen due to earlier validation
       }
 
       return mod == 1;

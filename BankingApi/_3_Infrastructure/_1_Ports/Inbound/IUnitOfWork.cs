@@ -1,5 +1,5 @@
 using BankingApi._3_Infrastructure.Database;
-namespace BankingApi._4_BuildingBlocks._4_Infrastructure.Persistence;
+namespace BankingApi._3_Infrastructure._1_Ports.Inbound;
 
 public interface IUnitOfWork {
    Task<int> SaveAllChangesAsync(

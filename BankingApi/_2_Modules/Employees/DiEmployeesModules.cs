@@ -23,7 +23,7 @@ public static class DiAddEmployeesMdules {
 
       // WriteModels = Use Cases
       services.AddScoped<EmployeeUcCreate>();
-      services.AddScoped<EmployeeUcCreateProvisioned>();
+      services.AddScoped<EmployeeUcCreateProvision>();
       services.AddScoped<EmployeeUcUpdateProfile>();
       services.AddScoped<EmployeeUcDeactivate>();
       services.AddScoped<EmployeeUcSetAdminRights>();

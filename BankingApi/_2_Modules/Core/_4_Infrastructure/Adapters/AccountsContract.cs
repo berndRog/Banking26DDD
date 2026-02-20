@@ -1,3 +1,4 @@
+using BankingApi._2_Modules.Accounts._3_Domain.Enums;
 using BankingApi._2_Modules.Core._1_Ports.Inbound;
 using BankingApi._2_Modules.Core._1_Ports.Outbound;
 using BankingApi._2_Modules.Core._2_Application.Dtos;
@@ -5,9 +6,10 @@ using BankingApi._2_Modules.Core._2_Application.Errors;
 using BankingApi._2_Modules.Core._2_Application.Mappings;
 using BankingApi._2_Modules.Core._3_Domain.Aggregates;
 using BankingApi._2_Modules.Core._3_Domain.ValueObjects;
+using BankingApi._3_Infrastructure._1_Ports.Inbound;
 using BankingApi._4_BuildingBlocks;
 using BankingApi._4_BuildingBlocks._1_Ports.Inbound;
-using BankingApi._4_BuildingBlocks._4_Infrastructure.Persistence;
+using BankingApi._4_BuildingBlocks._3_Domain.ValueObjects;
 using BankingApi._4_BuildingBlocks.Utils;
 using BankingApi.Core.Dto;
 namespace BankingApi._2_Modules.Core._4_Infrastructure.Adapters;
@@ -53,11 +55,12 @@ public class AccountsContract(
       var iban = resultIban.Value;
       
       // Create initial account
+      var balance = Money.Create(0m, Currency.EUR).Value; // initial balance is always 0 EUR
       var resultAccount = Account.Create(
          clock: clock, 
          ownerId: ownerId,
          iban: iban,
-         balance: 0m,
+         balance: balance,
          null
       );
       if(resultAccount.IsFailure)

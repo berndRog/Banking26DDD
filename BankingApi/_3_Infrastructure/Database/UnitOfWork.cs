@@ -1,6 +1,6 @@
+using BankingApi._3_Infrastructure._1_Ports.Inbound;
 using BankingApi._4_BuildingBlocks._1_Ports.Inbound;
 using BankingApi._4_BuildingBlocks._3_Domain.Entities;
-using BankingApi._4_BuildingBlocks._4_Infrastructure.Persistence;
 using Microsoft.Data.Sqlite;
 using Microsoft.EntityFrameworkCore;
 namespace BankingApi._3_Infrastructure.Database;

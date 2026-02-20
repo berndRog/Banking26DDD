@@ -6,8 +6,9 @@ public static class AccountMappings {
 
    public static AccountDto ToAccountDto(this Account account) => new(
       Id: account.Id,
-      Iban: account.Iban.Value,
-      Balance: account.Balance,
+      IbanString: account.Iban.Value,
+      BalanceDecimal: account.Balance.Amount,
+      CurrencyInt: (int)account.Balance.Currency,
       OwnerId: account.OwnerId   
    );
 

@@ -67,7 +67,7 @@ public interface IEmployeeUseCases {
       CancellationToken ct = default
    );
    
-   Task<Result<EmployeeProvisionDto>> CreateProvisionedAsync(
+   Task<Result<EmployeeProvisionDto>> CreateProvisionAsync(
       string?  id, 
       CancellationToken ct = default
    );

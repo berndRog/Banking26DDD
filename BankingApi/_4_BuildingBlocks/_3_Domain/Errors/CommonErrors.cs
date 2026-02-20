@@ -14,17 +14,23 @@ public static class CommonErrors {
    public static readonly DomainErrors InvalidEmail =
       new(
          ErrorCode.BadRequest,
-         Title: "Invalid email address",
+         Title: "Email: Invalid email address",
          Message: "The provided email address is not valid."
       );
 
    public static readonly DomainErrors InvalidPhone =
       new(
          ErrorCode.BadRequest,
-         Title: "Invalid phone number",
+         Title: "Phone: Invalid phone number",
          Message: "The provided phone number is not valid."
       );
 
+   public static readonly DomainErrors InvalidMoneyAmount =
+      new(ErrorCode.BadRequest,
+         Title: "Money: Invalid Amount",
+         Message: "The monetary amount must be greater than or equal to zero and have at most two decimal places.");
+
+   
    // ------------------------------------------------------------------------
    // Address (Value Object)
    // ------------------------------------------------------------------------

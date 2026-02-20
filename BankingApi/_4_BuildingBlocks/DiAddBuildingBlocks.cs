@@ -1,7 +1,7 @@
+using BankingApi._3_Infrastructure.Security;
 using BankingApi._4_BuildingBlocks._1_Ports.Inbound;
 using BankingApi._4_BuildingBlocks._1_Ports.Outbound;
 using BankingApi._4_BuildingBlocks._4_Infrastructure;
-using BankingApi._4_BuildingBlocks._4_Infrastructure.Security;
 namespace BankingApi._4_BuildingBlocks;
 
 public static class DiAddBuildingBlocks {

@@ -2,12 +2,12 @@ using BankingApi._2_Modules.Employees._1_Ports.Outbound;
 using BankingApi._2_Modules.Employees._2_Application.Dtos;
 using BankingApi._2_Modules.Employees._2_Application.Errors;
 using BankingApi._2_Modules.Employees._2_Application.Mappings;
+using BankingApi._3_Infrastructure._1_Ports.Inbound;
 using BankingApi._4_BuildingBlocks;
 using BankingApi._4_BuildingBlocks._1_Ports.Inbound;
 using BankingApi._4_BuildingBlocks._1_Ports.Outbound;
 using BankingApi._4_BuildingBlocks._3_Domain;
 using BankingApi._4_BuildingBlocks._3_Domain.ValueObjects;
-using BankingApi._4_BuildingBlocks._4_Infrastructure.Persistence;
 namespace BankingApi._2_Modules.Employees._2_Application.UseCases;
 
 public class EmployeeUcUpdateProfile(
@@ -28,19 +28,19 @@ public class EmployeeUcUpdateProfile(
       var subject = subjectResult.Value;
 
       // must be provisioned
-      var employee = await repository.FindByIdentitySubjectAsync(subject, false, ct);
+      var employee = await repository.FindByIdentitySubjectAsync(subject, ct);
       if (employee is null)
          return Result<EmployeeDto>.Failure(EmployeeApplicationErrors.NotProvisioned);
       
       // override email address (if changed) 
       var email = employee.Email;
-      if (!string.Equals(email.Value, dto.Email, StringComparison.OrdinalIgnoreCase)) {
+      if (!string.Equals(email.Value, dto.EmailString, StringComparison.OrdinalIgnoreCase)) {
          // create new email value object from dto.Email
-         var resultDtoEmail = Email.Create(dto.Email);
+         var resultDtoEmail = Email.Create(dto.EmailString);
          if (resultDtoEmail.IsFailure)
             return Result<EmployeeDto>.Failure(resultDtoEmail.Error);
          // check uniqueness
-         var existingByEmail = await repository.FindByEmailAsync(dto.Email, false, ct);
+         var existingByEmail = await repository.FindByEmailAsync(resultDtoEmail.Value, ct);
          if (existingByEmail is not null && existingByEmail.Id != employee.Id)
             return Result<EmployeeDto>.Failure(EmployeeApplicationErrors.EmailAlreadyInUse);
          // override previous email
@@ -48,8 +48,8 @@ public class EmployeeUcUpdateProfile(
       }
 
       Phone? phone = null;
-      if(string.IsNullOrWhiteSpace(dto.Phone) == false) {
-         var resultPhone = Phone.Create(dto.Phone);
+      if(string.IsNullOrWhiteSpace(dto.PhoneString) == false) {
+         var resultPhone = Phone.Create(dto.PhoneString);
          if (resultPhone.IsFailure)
             return Result<EmployeeDto>.Failure(resultPhone.Error);
          phone = resultPhone.Value;

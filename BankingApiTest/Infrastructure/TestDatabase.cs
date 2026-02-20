@@ -2,6 +2,7 @@ using System.Data.Common;
 using BankingApi._3_Infrastructure.Database;
 using Microsoft.Data.Sqlite;
 using Microsoft.EntityFrameworkCore;
+
 namespace BankingApiTest.Infrastructure;
 
 /// <summary>
@@ -150,12 +151,8 @@ public static class TestDatabase {
       bool enableSensitiveDataLogging,
       CancellationToken ct
    ) {
-      // Place DB files at a stable location in the repository:
-      // <repoRoot>/tests/_db/<fileName>
-      var repoRoot = FindRepoRoot();
-      var dbDir = Path.Combine(repoRoot, "tests", "_db");
-      Directory.CreateDirectory(dbDir);
-
+      // Place DB files inside the TEST PROJECT so students can see them immediately:
+      var dbDir = FindTestProjectRoot();
       var dbPath = Path.Combine(dbDir, stableFileName);
 
       // For FilePersistent (uniquePerRun=false) we typically recreate the file each time,
@@ -169,7 +166,7 @@ public static class TestDatabase {
 
       await ApplySqlitePragmasAsync(connection, ct);
 
-      // Optional: helpful debug output
+      // Helpful debug output (lets you copy/paste the path into Rider DB tool window)
       Console.WriteLine($"---> Using SQLite test DB ({(uniquePerRun ? "unique" : "persistent")}): {dbPath}");
 
       var options = BuildOptions(connection, enableSensitiveDataLogging);
@@ -224,27 +221,44 @@ public static class TestDatabase {
       }
    }
 
-   private static string FindRepoRoot() {
-      // We want a stable repo root independent of "bin/Debug/...".
-      // Start from AppContext.BaseDirectory and walk up until a *.sln or a marker folder is found.
+   // private static string FindTestProjectRoot() {
+   //    var dir = new DirectoryInfo(AppContext.BaseDirectory);
+   //
+   //    while (dir is not null) {
+   //       // Marker files that exist in YOUR test project root (see screenshot)
+   //       if (File.Exists(Path.Combine(dir.FullName, "BankingApiTest.csproj")) ||
+   //           File.Exists(Path.Combine(dir.FullName, "appsettingsTest.json")))
+   //          return dir.FullName;
+   //
+   //       dir = dir.Parent;
+   //    }
+   //
+   //    throw new InvalidOperationException("Could not locate test project root.");
+   //}
+
+   private static string FindTestProjectRoot()
+   {
+      // We want the test PROJECT directory (where the .csproj lives),
+      // not the runner working directory (bin/Debug/...).
+      //
+      // Usually the executing assembly name equals the test project name:
+      // e.g. BankingApiTest.dll -> BankingApiTest.csproj
+      var projectName =
+         System.Reflection.Assembly.GetExecutingAssembly().GetName().Name
+         ?? throw new InvalidOperationException("Could not determine test project name.");
+   
+      // Start from the test runner base dir (bin/Debug/...) and walk up until we find the csproj.
       var dir = new DirectoryInfo(AppContext.BaseDirectory);
-
-      while (dir is not null) {
-         // Choose one or more markers that exist in your repo:
-         // - solution file (*.sln)
-         // - a "BankingApi" folder
-         // - a "tests" folder
-         var hasSln = dir.GetFiles("*.sln").Length > 0;
-         var hasTests = dir.GetDirectories("tests").Length > 0;
-         var hasBankingApi = dir.GetDirectories("BankingApi").Length > 0;
-
-         if (hasSln || (hasTests && hasBankingApi))
+   
+      while (dir is not null)
+      {
+         if (dir.GetFiles($"{projectName}.csproj").Any())
             return dir.FullName;
-
+   
          dir = dir.Parent;
       }
-
-      throw new InvalidOperationException("Could not find repository root (no *.sln or expected folders found).");
+   
+      throw new InvalidOperationException($"Could not find test project root for '{projectName}'.");
    }
 }
 
@@ -253,7 +267,7 @@ DEUTSCHER DIDAKTIK-BLOCK (für Vorlesung / Lernziele)
 
 Warum dieser Helper?
 - Studierende sollen in Rider (Database Tool Window) die Datenbank während Debug/Tests beobachten können.
-- Dafür braucht man eine echte SQLite-Datei (FilePersistent), weil :memory: keinen "DB-File" erzeugt.
+- Dafür braucht man eine echte SQLite-Datei, die im Testprojekt sichtbar liegt: <TestProjekt>/_db/*.db
 - Gleichzeitig sollen Views (und andere SQL-Objekte) zuverlässig vorhanden sein.
 
 Wichtige Lernpunkte:
@@ -262,14 +276,13 @@ Wichtige Lernpunkte:
    - Migrate() führt Migrationen aus und damit auch SQL in Migrationen (z.B. CREATE VIEW ...).
    -> Für Views und realistische DB-Strukturen: Migrate() verwenden.
 
-2) Stabiler DB-Pfad für Rider
-   - FilePersistent erzeugt die DB unter tests/_db/BankingApiTest.db.
-   - Rider kann dadurch eine feste DataSource behalten.
-   - In Debug-Sessions können Studis nach jedem UseCase/Request per SELECT prüfen, was passiert ist.
+2) Stabiler DB-Pfad im Testprojekt
+   - FilePersistent erzeugt die DB unter <TestProjekt>/_db/BankingApiTest.db.
+   - Studierende sehen die Datei sofort im Projektbaum (und Rider kann sie leicht öffnen).
 
 3) Isolation vs. Nachvollziehbarkeit
-   - FileUnique ist gut für CI/Parallelität, aber schlecht für Lehre (ständig neue Dateinamen).
-   - FilePersistent ist perfekt für Lehre (stabiler Pfad), aber man muss pro Run reinigen (DeleteDatabaseFiles).
+   - FileUnique ist gut für CI/Parallelität, erzeugt aber viele Dateien.
+   - FilePersistent ist perfekt für Lehre: stabiler Pfad, aber pro Run wird die Datei neu erstellt.
 
 4) Debug-Freundliche SQLite Pragmas
    - busy_timeout reduziert "database is locked" beim Step-by-step Debugging.
@@ -278,5 +291,5 @@ Wichtige Lernpunkte:
 Lernziele:
 - Studierende können den Unterschied zwischen Schema-Generierung (EnsureCreated) und Migrationen (Migrate) erklären.
 - Studierende können nachvollziehen, wie UseCases/Controller DB-Zustände verändern (sichtbar im Rider Viewer).
-- Studierende verstehen, warum ein stabiler DB-Pfad didaktisch hilfreich ist und wie man Test-Infrastruktur baut.
+- Studierende verstehen, wie man testbare Infrastruktur baut (DB pro Test, stabiler Pfad, sauberes Dispose).
 */

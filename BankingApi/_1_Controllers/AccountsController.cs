@@ -96,8 +96,8 @@ public class AccountsController(
    ) {
       var result = await accountsUseCases.CreateAsync(
          ownerId: ownerId,
-         iban: accountDto.Iban,
-         balance: accountDto.Balance,
+         iban: accountDto.IbanString,
+         balance: accountDto.BalanceDecimal,
          id: accountDto.Id.ToString(),
          ct: ctToken
       );

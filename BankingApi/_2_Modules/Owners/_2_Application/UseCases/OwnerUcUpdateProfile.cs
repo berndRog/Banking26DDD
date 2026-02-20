@@ -2,12 +2,12 @@ using BankingApi._2_Modules.Owners._1_Ports.Outbound;
 using BankingApi._2_Modules.Owners._2_Application.Dtos;
 using BankingApi._2_Modules.Owners._2_Application.Errors;
 using BankingApi._2_Modules.Owners._2_Application.Mappings;
+using BankingApi._3_Infrastructure._1_Ports.Inbound;
 using BankingApi._4_BuildingBlocks;
 using BankingApi._4_BuildingBlocks._1_Ports.Inbound;
 using BankingApi._4_BuildingBlocks._1_Ports.Outbound;
 using BankingApi._4_BuildingBlocks._3_Domain;
 using BankingApi._4_BuildingBlocks._3_Domain.ValueObjects;
-using BankingApi._4_BuildingBlocks._4_Infrastructure.Persistence;
 namespace BankingApi._2_Modules.Owners._2_Application.UseCases;
 
 public class OwnerUcUpdateProfile(
@@ -40,9 +40,9 @@ public class OwnerUcUpdateProfile(
 
       // override email address (if changed) 
       var email = owner.Email;
-      if (!string.Equals(email.Value, dto.Email, StringComparison.OrdinalIgnoreCase)) {
+      if (!string.Equals(email.Value, dto.EmailString, StringComparison.OrdinalIgnoreCase)) {
          // create new email value object from dto.Email
-         var resultDtoEmail = Email.Create(dto.Email);
+         var resultDtoEmail = Email.Create(dto.EmailString);
          if (resultDtoEmail.IsFailure)
             return Result<OwnerDto>.Failure(resultDtoEmail.Error);
          // check uniqueness

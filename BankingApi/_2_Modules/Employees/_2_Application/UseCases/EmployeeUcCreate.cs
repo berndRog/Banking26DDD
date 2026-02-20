@@ -2,10 +2,10 @@ using BankingApi._2_Modules.Employees._1_Ports.Outbound;
 using BankingApi._2_Modules.Employees._3_Domain.Aggregates;
 using BankingApi._2_Modules.Employees._3_Domain.Enums;
 using BankingApi._2_Modules.Employees._3_Domain.Errors;
+using BankingApi._3_Infrastructure._1_Ports.Inbound;
 using BankingApi._4_BuildingBlocks;
 using BankingApi._4_BuildingBlocks._1_Ports.Inbound;
 using BankingApi._4_BuildingBlocks._3_Domain.ValueObjects;
-using BankingApi._4_BuildingBlocks._4_Infrastructure.Persistence;
 namespace BankingApi._2_Modules.Employees._2_Application.UseCases;
 
 /// <summary>
@@ -31,10 +31,11 @@ public sealed class EmployeeUcCreate(
       string firstname,
       string lastname,
       string emailString,
-      string phoneString,
+      string? phoneString,
       string subject,
       string personnelNumber,
       AdminRights adminRights,
+      bool isActive = true,
       string? id = null,
       CancellationToken ct = default
    ) {
@@ -56,7 +57,7 @@ public sealed class EmployeeUcCreate(
       var phone = resultPhone.Value;
       
       // ---- Uniqueness checks (I/O) ----
-      if (await _repository.FindByEmailAsync(email.Value, false, ct) != null)
+      if (await _repository.FindByEmailAsync(email, ct) != null)
          return Result<Guid>.Failure(EmployeeErrors.EmailMustBeUnique);
 
       if (await _repository.FindByPersonnelNumberAsync(personnelNumber, ct) != null)

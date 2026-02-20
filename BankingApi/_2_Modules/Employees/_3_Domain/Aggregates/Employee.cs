@@ -33,7 +33,8 @@ public sealed class Employee : AggregateRoot<Guid> {
    
    public string  Firstname { get; private set; } = string.Empty;
    public string  Lastname  { get; private set; } = string.Empty;
-   public Email   Email     { get; private set; } = default!;
+   
+   public Email   Email { get; private set; } = default!; 
    public Phone?  Phone { get; private set; } = null;
   
    public string  Subject { get; private set; } = default!; // IdentityAccessServer

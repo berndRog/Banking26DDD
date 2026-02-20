@@ -1,4 +1,5 @@
 using BankingApi._2_Modules.Core._3_Domain.ValueObjects;
+using BankingApi._4_BuildingBlocks._4_Infrastructure;
 using Microsoft.EntityFrameworkCore.ChangeTracking;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
@@ -9,46 +10,29 @@ namespace BankingApi._3_Infrastructure.Database.ValueObjects;
 /// Converts Iban <-> string and enables correct change tracking.
 /// </summary>
 public static class IbanEf {
+   // ---------------------------------------------------------
+   // Converter
+   // ---------------------------------------------------------
    /// <summary>
-   /// Converts IBAN to database string and back (expression-tree compatible).
+   /// Converts IBAN to database string and back.
+   /// IMPORTANT:
+   /// Uses FromPersisted, not Create.
    /// </summary>
    public static readonly ValueConverter<Iban, string> Converter =
       new(
          iban => iban.Value,
-         value => FromDb(value)
+         value => Iban.FromPersisted(value)
       );
 
+   // ---------------------------------------------------------
+   // Comparer (using generic helper)
+   // ---------------------------------------------------------
    /// <summary>
-   /// Ensures EF Core compares value objects by value (not reference).
+   /// Ensures EF Core compares and snapshots by canonical value.
    /// </summary>
    public static readonly ValueComparer<Iban> Comparer =
-      new(
-         (l, r) => EqualsByValue(l, r),
-         v => v.Value.GetHashCode(),
-         v => FromDb(v.Value) // <- snapshot without null-forgiving chain
+      EfValueObjectComparer.Create<Iban, string>(
+         toPersisted: v => v.Value,
+         fromPersisted: v => Iban.FromPersisted(v)
       );
-
-   
-   /// <summary>
-   /// Compares two Ibans by value, handling nulls correctly.
-   /// </summary>
-   /// <param name="l"></param>
-   /// <param name="r"></param>
-   /// <returns></returns>
-   private static bool EqualsByValue(Iban? l, Iban? r) {
-      if (ReferenceEquals(l, r)) return true; // covers both null
-      if (l is null || r is null) return false;
-      return l.Value == r.Value;
-   }
-   /// <summary>
-   /// Recreates IBAN from DB value and enforces invariants.
-   /// Throws if database contains invalid data.
-   /// </summary>
-   private static Iban FromDb(string value) {
-      var res = Iban.Create(value);
-      if (res.IsFailure)
-         throw new InvalidOperationException($"Invalid IBAN in database: '{value}'");
-
-      return res.Value!;
-   }
 }

@@ -8,8 +8,8 @@ public static class EmployeeMappings {
       Id: employee.Id,
       Firstname: employee.Firstname,
       Lastname: employee.Lastname,
-      Email: employee.Email.Value,
-      Phone: employee.Phone?.Value,
+      EmailString: employee.Email.Value,
+      PhoneString: employee.Phone?.Value,
       PersonnelNumber: employee!.PersonnelNumber,
       IsActive: employee.IsActive,
       AdminRights: (int) employee.AdminRights

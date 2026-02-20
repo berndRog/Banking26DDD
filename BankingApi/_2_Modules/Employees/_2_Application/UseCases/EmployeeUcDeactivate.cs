@@ -1,8 +1,8 @@
 using BankingApi._2_Modules.Employees._1_Ports.Outbound;
 using BankingApi._2_Modules.Employees._3_Domain.Errors;
+using BankingApi._3_Infrastructure._1_Ports.Inbound;
 using BankingApi._4_BuildingBlocks;
 using BankingApi._4_BuildingBlocks._1_Ports.Inbound;
-using BankingApi._4_BuildingBlocks._4_Infrastructure.Persistence;
 namespace BankingApi._2_Modules.Employees._2_Application.UseCases;
 
 /// <summary>
@@ -39,7 +39,7 @@ public sealed class EmployeeUcDeactivate(
             .LogIfFailure(_logger, "EmployeeUcDeactivate.InvalidId", employeeId );
       
       // 2) Load aggregate (tracked)
-      var employee = await _repository.FindByIdAsync(employeeId, false, ct);
+      var employee = await _repository.FindByIdAsync(employeeId, ct);
       if (employee is null) {
          var fail = Result.Failure(EmployeeErrors.NotFound);
          fail.LogIfFailure(_logger, "EmployeeUcDeactivate.NotFound", new { employeeId });

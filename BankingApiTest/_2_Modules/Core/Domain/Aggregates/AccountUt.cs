@@ -1,6 +1,8 @@
+using BankingApi._2_Modules.Accounts._3_Domain.Enums;
 using BankingApi._2_Modules.Core._3_Domain.Aggregates;
 using BankingApi._2_Modules.Core._3_Domain.ValueObjects;
 using BankingApi._4_BuildingBlocks._1_Ports.Inbound;
+using BankingApi._4_BuildingBlocks._3_Domain.ValueObjects;
 using BankingApiTest.Infrastructure;
 namespace BankingApiTest._2_Modules.Core.Domain.Aggregates;
 
@@ -10,7 +12,7 @@ public sealed class AccountUt {
 
    private readonly Guid _ownerId;
    private readonly Iban _iban;
-   private readonly decimal _balance;
+   private readonly Money _balance;
    private readonly string _id;
 
    public AccountUt() {
@@ -47,7 +49,7 @@ public sealed class AccountUt {
       NotEqual(Guid.Empty, actual.Id);
       Equal(Guid.Parse(_id), actual.Id);
       Equal(_iban, actual.Iban);
-      Equal(_balance, actual.Balance, 24);
+      Equal(_balance, actual.Balance);
       Equal(_ownerId, actual.OwnerId);
    }
 
@@ -118,8 +120,9 @@ public sealed class AccountUt {
    [InlineData(-0.01)]
    [InlineData(-1)]
    [InlineData(-1000)]
-   public void Create_with_negative_balance_fails(decimal balance) {
+   public void Create_with_negative_balance_fails(decimal b) {
       // Act
+      var balance = Money.Create(b, Currency.EUR).Value;
       var result = Account.Create(
          clock: _clock,
          ownerId: _ownerId,

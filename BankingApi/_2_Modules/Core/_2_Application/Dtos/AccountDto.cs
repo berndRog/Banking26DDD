@@ -3,7 +3,8 @@ namespace BankingApi.Core.Dto;
 
 public record AccountDto(
    Guid Id,
-   string Iban,
-   decimal Balance,
+   string IbanString,
+   decimal BalanceDecimal,
+   int CurrencyInt,
    Guid OwnerId
 ); 

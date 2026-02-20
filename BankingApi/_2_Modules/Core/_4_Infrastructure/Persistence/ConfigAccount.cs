@@ -42,10 +42,21 @@ public sealed class ConfigAccount(
          .IsRequired();
       builder.HasIndex(a => a.Iban).IsUnique();
       
-      builder.Property(a => a.Balance)
-         .HasPrecision(18, 2)         // common default; adjust if needed
-         .IsRequired();
 
+      // EF Core mapping (Owned Type) example for Account.Balance (Money)
+      builder.OwnsOne(a => a.Balance, b =>
+      {
+         b.Property(p => p.Amount)
+            .HasColumnName("Balance")
+            .HasColumnType("decimal(18,2)")
+            .IsRequired();
+
+         b.Property(p => p.Currency)
+            .HasColumnName("Currency")
+            .HasConversion<int>() // enum -> int
+            .IsRequired();
+      });
+      
       builder.Property(a => a.DeactivatedAt)
          .HasConversion(dtConvNul)
          .IsRequired(false);

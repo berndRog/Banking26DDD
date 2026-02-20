@@ -1,7 +1,7 @@
 using BankingApi._2_Modules.Accounts._3_Domain.Errors;
 using BankingApi._2_Modules.Core._1_Ports.Outbound;
+using BankingApi._3_Infrastructure._1_Ports.Inbound;
 using BankingApi._4_BuildingBlocks;
-using BankingApi._4_BuildingBlocks._4_Infrastructure.Persistence;
 using BankingApi._4_BuildingBlocks.Utils;
 namespace BankingApi._2_Modules.Core._2_Application.UseCases;
 

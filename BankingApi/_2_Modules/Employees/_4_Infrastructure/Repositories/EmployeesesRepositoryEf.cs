@@ -2,6 +2,7 @@ using BankingApi._2_Modules.Employees._1_Ports.Outbound;
 using BankingApi._2_Modules.Employees._3_Domain.Aggregates;
 using BankingApi._2_Modules.Employees._3_Domain.Enums;
 using BankingApi._3_Infrastructure.Database;
+using BankingApi._4_BuildingBlocks._3_Domain.ValueObjects;
 using Microsoft.EntityFrameworkCore;
 namespace BankingApi._2_Modules.Employees._4_Infrastructure.Repositories;
 
@@ -11,58 +12,30 @@ public sealed class EmployeesesRepositoryEf(
 
    public async Task<Employee?> FindByIdAsync(
       Guid ownerId, 
-      bool noTracking,
       CancellationToken ct
-   ) {
-      var query = dbContext.Employees as IQueryable<Employee>;
-      if (noTracking)
-         query = query.AsNoTracking();
-      return await query
-         .AsTracking()
+   ) => await dbContext.Employees
          .FirstOrDefaultAsync(o => o.Id == ownerId, ct);
-   }
-   
 
-   public Task<Employee?> FindByIdentitySubjectAsync(
+   public async Task<Employee?> FindByIdentitySubjectAsync(
       string subject,
-      bool noTracking,
       CancellationToken ct
-   ) {
-      var query = dbContext.Employees as IQueryable<Employee>;
-      if (noTracking)
-         query = query.AsNoTracking();
-      return query
+   ) => await dbContext.Employees
          .FirstOrDefaultAsync(c => c.Subject == subject, ct);
-   }
    
    public async Task<Employee?> FindByEmailAsync(
-      string email,
-      bool noTracking,
+      Email email,
       CancellationToken ct
-   ) {
-      var query = dbContext.Employees as IQueryable<Employee>;
-      if (noTracking)
-         query = query.AsNoTracking();
-      return await query
-         .FirstOrDefaultAsync(c => c.Email.Value == email, ct);
-   }
-
+   ) => await dbContext.Employees
+         .FirstOrDefaultAsync(c => c.Email == email, ct);
    
    public async Task<Employee?> FindByPersonnelNumberAsync(
       string personnelNumber,
       CancellationToken ct
    ) => await dbContext.Employees
       .FirstOrDefaultAsync(e => e.PersonnelNumber == personnelNumber, ct);
-
-   public Task<bool> ExistsPersonnelNumberAsync(string personnelNumber, CancellationToken ct) {
-      throw new NotImplementedException();
-   }
-
-
-
+   
    public async Task<IReadOnlyList<Employee>> SelectAdminsAsync(CancellationToken ct) =>
       await dbContext.Employees
-         .AsNoTracking()
          .Where(e => e.AdminRights != AdminRights.None)
          .OrderBy(e => e.Lastname)
          .ToListAsync(ct);

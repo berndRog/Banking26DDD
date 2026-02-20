@@ -2,9 +2,9 @@ using BankingApi._2_Modules.Core._1_Ports.Outbound;
 using BankingApi._2_Modules.Core._2_Application.UseCases;
 using BankingApi._2_Modules.Core._4_Infrastructure.Repositories;
 using BankingApi._2_Modules.Owners._1_Ports.Inbound;
+using BankingApi._3_Infrastructure._1_Ports.Inbound;
 using BankingApi._3_Infrastructure.Database;
 using BankingApi._4_BuildingBlocks._1_Ports.Inbound;
-using BankingApi._4_BuildingBlocks._4_Infrastructure.Persistence;
 using BankingApiTest.Infrastructure;
 using Microsoft.Data.Sqlite;
 using Microsoft.EntityFrameworkCore;
@@ -85,7 +85,8 @@ public sealed class AccountUcAddBeneficiaryIntT : TestBase, IAsyncLifetime {
       var result = await _sut.ExecuteAsync(
          ownerId: owner.Id,
          ibanString: account.Iban.Value,
-         balance: account.Balance,
+         balanceDecimal: account.Balance.Amount,
+         currency: (int)account.Balance.Currency,
          id: account.Id.ToString(),
          ct: _ct
       );
@@ -96,7 +97,7 @@ public sealed class AccountUcAddBeneficiaryIntT : TestBase, IAsyncLifetime {
       NotNull(actual);
       Equal(account.Id, actual!.Id);
       Equal(account.Iban, actual.Iban);
-      Equal(account.Balance, actual.Balance, 24);
+      Equal(account.Balance, actual.Balance);
    }
    
    [Fact]
@@ -109,7 +110,8 @@ public sealed class AccountUcAddBeneficiaryIntT : TestBase, IAsyncLifetime {
       var result = await _sut.ExecuteAsync(
          ownerId: owner.Id,
          ibanString: "ABC123456789",
-         balance: account.Balance,
+         balanceDecimal: account.Balance.Amount,
+         currency: (int)account.Balance.Currency,
          id: account.Id.ToString(),
          ct: _ct
       );
@@ -126,7 +128,8 @@ public sealed class AccountUcAddBeneficiaryIntT : TestBase, IAsyncLifetime {
       var result = await _sut.ExecuteAsync(
          ownerId: owner.Id,
          ibanString: account.Iban.Value,
-         balance: account.Balance,
+         balanceDecimal: account.Balance.Amount,
+         currency: (int)account.Balance.Currency,
          id: "1000000-abcd",
          ct: _ct
       );

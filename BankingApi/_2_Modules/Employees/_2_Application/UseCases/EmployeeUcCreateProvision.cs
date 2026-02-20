@@ -4,21 +4,21 @@ using BankingApi._2_Modules.Employees._2_Application.Errors;
 using BankingApi._2_Modules.Employees._2_Application.Mappings;
 using BankingApi._2_Modules.Employees._3_Domain.Aggregates;
 using BankingApi._2_Modules.Employees._3_Domain.Enums;
+using BankingApi._3_Infrastructure._1_Ports.Inbound;
 using BankingApi._4_BuildingBlocks;
 using BankingApi._4_BuildingBlocks._1_Ports.Inbound;
 using BankingApi._4_BuildingBlocks._1_Ports.Outbound;
 using BankingApi._4_BuildingBlocks._3_Domain;
 using BankingApi._4_BuildingBlocks._3_Domain.Errors;
 using BankingApi._4_BuildingBlocks._3_Domain.ValueObjects;
-using BankingApi._4_BuildingBlocks._4_Infrastructure.Persistence;
 namespace BankingApi._2_Modules.Employees._2_Application.UseCases;
 
-public class EmployeeUcCreateProvisioned(
+public class EmployeeUcCreateProvision(
    IIdentityGateway identityGateway,
    IEmployeesRepository repository,
    IUnitOfWork unitOfWork,
    IClock clock,
-   ILogger<EmployeeUcCreateProvisioned> logger
+   ILogger<EmployeeUcCreateProvision> logger
 ) {
    public async Task<Result<EmployeeProvisionDto>> ExecuteAsync(
       string? id,
@@ -31,7 +31,7 @@ public class EmployeeUcCreateProvisioned(
       var subject = result.Value;
 
       // 2) idempotent lookup
-      var existing = await repository.FindByIdentitySubjectAsync(subject, false, ct);
+      var existing = await repository.FindByIdentitySubjectAsync(subject, ct);
       if (existing is not null)
          return Result<EmployeeProvisionDto>.Success(existing.ToEmployeeProvisionDto());
 
@@ -57,7 +57,7 @@ public class EmployeeUcCreateProvisioned(
       var email = resultEmail.Value;
 
       // check uniqueness
-      var existingWithEmail = await repository.FindByEmailAsync(email.Value, false, ct);
+      var existingWithEmail = await repository.FindByEmailAsync(email, ct);
       if (existingWithEmail is not null)
          return Result<EmployeeProvisionDto>.Failure(EmployeeApplicationErrors.EmailAlreadyInUse);
 

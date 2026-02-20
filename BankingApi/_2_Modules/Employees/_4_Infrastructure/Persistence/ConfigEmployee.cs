@@ -12,60 +12,60 @@ public sealed class ConfigEmployee(
    DateTimeOffsetToIsoStringConverterNullable _dtConvNul
 ) : IEntityTypeConfiguration<Employee> {
 
-   public void Configure(EntityTypeBuilder<Employee> b) {
+   public void Configure(EntityTypeBuilder<Employee> builder) {
 
-      b.ToTable("Employees");
+      builder.ToTable("Employees");
       
       // Primary Key
-      b.HasKey(x => x.Id);
-      b.Property(x => x.Id).ValueGeneratedNever();
+      builder.HasKey(x => x.Id);
+      builder.Property(x => x.Id).ValueGeneratedNever();
       
       // Scalar properties
-      b.Property(x => x.Firstname)
+      builder.Property(x => x.Firstname)
          .HasMaxLength(100).IsRequired();
-      b.Property(x => x.Lastname)
+      builder.Property(x => x.Lastname)
          .HasMaxLength(80)
          .IsRequired();
       
       // Email-VO als Property mapped via Extension
-      b.Property(x => x.Email)
+      builder.Property(x => x.Email)
          .HasEmailConversion()
          .IsRequired();
       // optional: unique index
-      b.HasIndex(x => x.Email).IsUnique();
+      builder.HasIndex(x => x.Email).IsUnique();
       
       // Phone-VO als Property mapped via Extension
-      b.Property(x => x.Phone)
+      builder.Property(x => x.Phone)
          .HasNullablePhoneConversion() // is optional, so no IsRequired()
          .IsRequired(false);
       
-      b.Property(x => x.Subject)
+      builder.Property(x => x.Subject)
          .HasMaxLength(200)
          .IsRequired();
-      b.HasIndex(x => x.Subject).IsUnique();
+      builder.HasIndex(x => x.Subject).IsUnique();
       
       // Scalar properties (Employee-specific)
-      b.Property(x => x.PersonnelNumber)
+      builder.Property(x => x.PersonnelNumber)
          .HasMaxLength(32)
          .IsRequired();
-      b.HasIndex(x => x.PersonnelNumber).IsUnique();
+      builder.HasIndex(x => x.PersonnelNumber).IsUnique();
 
       // AdminRights enum -> int (SQLite friendly)
-      b.Property(x => x.AdminRights)
+      builder.Property(x => x.AdminRights)
          .HasConversion<int>()
          .IsRequired();
       // IsAdmin is computed => not persisted
-      b.Ignore(x => x.IsAdmin);
+      builder.Ignore(x => x.IsAdmin);
 
-      b.Property(x => x.IsActive)
+      builder.Property(x => x.IsActive)
          .IsRequired();
-      b.Property(x => x.CreatedAt)
+      builder.Property(x => x.CreatedAt)
          .HasConversion(_dtConv)
          .IsRequired();
-      b.Property(x => x.DeactivatedAt)
+      builder.Property(x => x.DeactivatedAt)
          .HasConversion(_dtConvNul)
          .IsRequired(false);
       // Helpful index for "active employees"
-      b.HasIndex(x => x.DeactivatedAt);
+      builder.HasIndex(x => x.DeactivatedAt);
    }
 }

@@ -1,8 +1,8 @@
 using BankingApi._2_Modules.Owners._1_Ports.Outbound;
 using BankingApi._2_Modules.Owners._4_Infrastructure.Repositories;
+using BankingApi._3_Infrastructure._1_Ports.Inbound;
 using BankingApi._3_Infrastructure.Database;
 using BankingApi._4_BuildingBlocks._1_Ports.Inbound;
-using BankingApi._4_BuildingBlocks._4_Infrastructure.Persistence;
 using BankingApiTest.Infrastructure;
 using Microsoft.Data.Sqlite;
 using Microsoft.EntityFrameworkCore;

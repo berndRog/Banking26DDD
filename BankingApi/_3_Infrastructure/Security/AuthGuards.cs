@@ -1,6 +1,7 @@
+using BankingApi._4_BuildingBlocks;
 using BankingApi._4_BuildingBlocks._1_Ports.Outbound;
 using BankingApi._4_BuildingBlocks._3_Domain.Errors;
-namespace BankingApi._4_BuildingBlocks._2_Application.Security;
+namespace BankingApi._3_Infrastructure.Security;
 
 public static class AuthGuards {
 

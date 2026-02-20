@@ -1,18 +1,18 @@
 using BankingApi._2_Modules.Employees._1_Ports.Inbound;
 using BankingApi._2_Modules.Employees._2_Application.Dtos;
 using BankingApi._2_Modules.Employees._2_Application.UseCases;
-using BankingApi._2_Modules.Owners._2_Application.UseCases;
+using BankingApi._2_Modules.Employees._3_Domain.Enums;
 using BankingApi._4_BuildingBlocks;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-
 namespace BankingApi._1_Controllers;
 
 [ApiController]
 [Route("bankingapi/v1")]
 public sealed class EmployeesController(
    IEmployeesReadModel readModel,
-   EmployeeUcCreateProvisioned ucCreateProvisioned,
+   EmployeeUcCreate ucCreate,
+   EmployeeUcCreateProvision ucCreateProvision,
    EmployeeUcUpdateProfile ucUpdateProfile,
    ILogger<EmployeesController> logger
 ) : ControllerBase {
@@ -20,11 +20,45 @@ public sealed class EmployeesController(
    // Route constants
    private const string UrlStart = "bankingapi/v1";
 
+   [HttpPost("employees", Name = nameof(CreateEmployeeAsync))]
+   [EndpointSummary("Create a new employee")]
+   [ProducesResponseType<EmployeeDto>(StatusCodes.Status201Created)]
+   [ProducesResponseType<ProblemDetails>(StatusCodes.Status400BadRequest, "application/problem+json")]   
+   public async Task<ActionResult<Guid>> CreateEmployeeAsync(
+      [FromQuery] string subject,
+      [FromBody] EmployeeDto dto,
+      CancellationToken ct
+   ) {
+      const string ctx = "EmployeesController.CreateEmployeeAsync";
+
+      var result = await ucCreate.ExecuteAsync(
+         firstname: dto.Firstname,
+         lastname: dto.Lastname,
+         emailString: dto.EmailString,
+         phoneString: dto.PhoneString,
+         personnelNumber: dto.PersonnelNumber,
+         subject: subject, // in real scenario, subject should come from auth token or be generated in use case
+         adminRights:  (AdminRights) dto.AdminRights, 
+         isActive: dto.IsActive,
+         id: dto.Id.ToString(),
+         ct: ct
+      );
+      
+      return this.ToCreatedAtRoute(
+         routeName: nameof(GetEmployeeById), 
+         routeValues: new { dto.Id }, 
+         result: result, 
+         logger: logger, 
+         context: ctx
+      );
+   
+   }
+   
    // ------------------------------------------------------------------
    // SELF-SERVICE (logged-in employee)
    // ------------------------------------------------------------------
    [Authorize(Policy = "EmployeesOnly")]
-   [HttpPost("employees/me/provisioned")]
+   [HttpPost("employees/me/provision")]
    [EndpointSummary("Provision employee on first login (idempotent)")]
    [ProducesResponseType<Guid>(StatusCodes.Status200OK)]
    [ProducesResponseType<ProblemDetails>(StatusCodes.Status400BadRequest, "application/problem+json")]
@@ -33,7 +67,7 @@ public sealed class EmployeesController(
       
       const string ctx = "EmployeesController.PostCreateProvisioned";
 
-      var result = await ucCreateProvisioned.ExecuteAsync(null, ct);
+      var result = await ucCreateProvision.ExecuteAsync(null, ct);
       if(result.IsFailure)
          return this.ToActionResult(result: result, logger: logger, context: ctx);
       
@@ -54,9 +88,9 @@ public sealed class EmployeesController(
       
    }
 
-   //[Authorize(Policy = "EmployeesOnly")]
+   [Authorize(Policy = "EmployeesOnly")]
    [HttpGet("employees/me/profile", Name = nameof(GetEmployeeProfileAsync))]
-   [EndpointSummary("Get my employee profile (requires provisioning)")]
+   [EndpointSummary("Get employees profile (requires provision)")]
    [ProducesResponseType<EmployeeDto>(StatusCodes.Status200OK)]
    [ProducesResponseType<ProblemDetails>(StatusCodes.Status404NotFound, "application/problem+json")]
    [ProducesResponseType<ProblemDetails>(StatusCodes.Status401Unauthorized, "application/problem+json")]
@@ -72,8 +106,8 @@ public sealed class EmployeesController(
       );
    }
 
- //  [Authorize(Policy = "EmployeesOnly")]
-   [HttpPut("employees/me/profile")]
+   [Authorize(Policy = "EmployeesOnly")]
+   [HttpPut("employees/me/profile", Name = nameof(PutEmployeeProfileAsync))]
    [EndpointSummary("Update my employee profile (requires provisioning)")]
    [ProducesResponseType<EmployeeProvisionDto>(StatusCodes.Status200OK)]
    [ProducesResponseType<ProblemDetails>(StatusCodes.Status400BadRequest, "application/problem+json")]

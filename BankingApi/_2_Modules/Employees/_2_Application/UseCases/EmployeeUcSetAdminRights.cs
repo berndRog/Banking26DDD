@@ -1,9 +1,9 @@
 using BankingApi._2_Modules.Employees._1_Ports.Outbound;
 using BankingApi._2_Modules.Employees._3_Domain.Enums;
 using BankingApi._2_Modules.Employees._3_Domain.Errors;
+using BankingApi._3_Infrastructure._1_Ports.Inbound;
 using BankingApi._4_BuildingBlocks;
 using BankingApi._4_BuildingBlocks._1_Ports.Inbound;
-using BankingApi._4_BuildingBlocks._4_Infrastructure.Persistence;
 namespace BankingApi._2_Modules.Employees._2_Application.UseCases;
 
 /// <summary>
@@ -34,7 +34,7 @@ public sealed class EmployeeUcSetAdminRights(
          return Result.Failure(EmployeeErrors.InvalidId)
             .LogIfFailure(logger, "EmployeeUcSetAdminRights.InvalidId", new { employeeId });
 
-      var employee = await repository.FindByIdAsync(employeeId, false, ct);
+      var employee = await repository.FindByIdAsync(employeeId, ct);
       if (employee is null) 
          return Result.Failure(EmployeeErrors.NotFound)
             .LogIfFailure(logger, "EmployeeUcSetAdminRights.NotFound", new { employeeId });

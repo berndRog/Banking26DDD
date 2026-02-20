@@ -10,6 +10,7 @@ namespace BankingApi._1_Controllers;
 [Route("bankingapi/v1")]
 public sealed class OwnersController(
    IOwnerReadModel readModel,
+   OwnerUcCreate ucCreate,
    OwnerUcCreateProvisioned ucCreateProvisioned,
    OwnerUcUpdateProfile ucUpdateProfile,
    ILogger<OwnersController> logger
@@ -18,14 +19,50 @@ public sealed class OwnersController(
    private readonly string UrlStart = "bankingapi/v1";
 
    // Route constants
-   
    private const string OwnersFilterRoute = "owners/filter";
    
+   [HttpPost("owners", Name = nameof(CreateOwnerAsync))]
+   [EndpointSummary("Create a new customer with IBAN (not for production use)")]
+   [ProducesResponseType<OwnerDto>(StatusCodes.Status201Created)]
+   [ProducesResponseType<ProblemDetails>(StatusCodes.Status400BadRequest, "application/problem+json")]   
+   public async Task<ActionResult<Guid>> CreateOwnerAsync(
+      [FromQuery] string subject,
+      [FromQuery] string iban,
+      [FromBody] OwnerDto dto,
+      CancellationToken ct
+   ) {
+      const string ctx = "OwnerController.CreateOwnerAsync";
+
+      var result = await ucCreate.ExecuteAsync(
+         firstname: dto.Firstname,
+         lastname: dto.Lastname,
+         companyName: dto.CompanyName,
+         emailString: dto.EmailString,
+         subject: subject, // in real scenario, subject should come from auth token or be generated in use case
+         id: dto.Id.ToString(),
+         ibanString: iban, 
+         street: dto.Street,
+         postalCode: dto.PostalCode,
+         city: dto.City,
+         country: dto.Country,
+         ct: ct
+      );
+      
+      return this.ToCreatedAtRoute(
+         routeName: nameof(GetOwnerById), 
+         routeValues: new { dto.Id }, 
+         result: result, 
+         logger: logger, 
+         context: ctx
+      );
+   
+   }
+
    // ------------------------------------------------------------------
    // SELF-SERVICE (logged-in user)
    // ------------------------------------------------------------------
-   //[Authorize(Policy = "OwnersOnly")]
-   [HttpPost("owners/me/provisioned")]
+   [Authorize(Policy = "OwnersOnly")]
+   [HttpPost("owners/me/provision")]
    [EndpointSummary("Provision owner on first login (idempotent)")]
    [ProducesResponseType<OwnerProvisionDto>(StatusCodes.Status200OK)]
    [ProducesResponseType<OwnerProvisionDto>(StatusCodes.Status201Created)]
@@ -55,13 +92,14 @@ public sealed class OwnersController(
       
    }
 
-   //[Authorize(Policy = "OwnersOnly")]
+   [Authorize(Policy = "OwnersOnly")]
    [HttpGet("owners/me/profile", Name = nameof(GetOwnerProfileAsync))]
-   [EndpointSummary("Get my customer profile (requires provisioning)")]
+   [EndpointSummary("Get owners profile (requires provision)")]
    [ProducesResponseType<OwnerDto>(StatusCodes.Status200OK)]
    [ProducesResponseType<ProblemDetails>(StatusCodes.Status404NotFound, "application/problem+json")]
    [ProducesResponseType<ProblemDetails>(StatusCodes.Status401Unauthorized, "application/problem+json")]
-   public async Task<ActionResult<OwnerDto>> GetOwnerProfileAsync(CancellationToken ct) {
+   public async Task<ActionResult<OwnerDto>> GetOwnerProfileAsync(CancellationToken ct) {    
+      
       var result = await readModel.FindMeAsync(ct);
 
       return this.ToActionResult(
@@ -72,9 +110,8 @@ public sealed class OwnersController(
       );
    }
 
-   //[Authorize(Policy = "OwnersOnly")]
-   [HttpPut("owners/me/profile")]
-   [Authorize]
+   [Authorize(Policy = "OwnersOnly")]
+   [HttpPut("owners/me/profile", Name = nameof(PutOwnerProfileAsync))]
    [EndpointSummary("Update my customer profile (requires provisioning)")]
    [ProducesResponseType<OwnerDto>(StatusCodes.Status200OK)]
    [ProducesResponseType<ProblemDetails>(StatusCodes.Status400BadRequest, "application/problem+json")]
@@ -82,7 +119,7 @@ public sealed class OwnersController(
    [ProducesResponseType<ProblemDetails>(StatusCodes.Status401Unauthorized, "application/problem+json")]
    public async Task<ActionResult<OwnerDto>> PutOwnerProfileAsync(
       [FromBody] OwnerDto dto,
-      CancellationToken ct
+         CancellationToken ct
    ) {
       var result = await ucUpdateProfile.ExecuteAsync(dto, ct);
 
@@ -100,16 +137,14 @@ public sealed class OwnersController(
    // Ich setze hier MINIMAL [Authorize] (Token nötig) und du kannst
    // danach auf Policy hochziehen.
    // ------------------------------------------------------------------
-
-   //[Authorize] // später ggf. Policy="EmployeesOnly"
-
-   [HttpGet("owners/{id:guid}")]
+   [Authorize] 
+   [HttpGet("owners/{id:guid}", Name = nameof(GetOwnerById))]
    [EndpointSummary("Get a customer by ReservationId")]
    [ProducesResponseType<OwnerDto>(StatusCodes.Status200OK)]
    [ProducesResponseType<ProblemDetails>(StatusCodes.Status404NotFound, "application/problem+json")]
    public async Task<ActionResult<OwnerDto>> GetOwnerById(
       [FromRoute] Guid id,
-      CancellationToken ct
+      CancellationToken ct  // Cancel when request is aborted (e.g. client disconnects
    ) {
       var result = await readModel.FindByIdAsync(id, ct);
 
@@ -117,8 +152,8 @@ public sealed class OwnersController(
          context: $"GET {UrlStart}/owners/{id:D}", args: id);
    }
 
-   //[Authorize] // später ggf. Policy="EmployeesOnly"
-   [HttpGet("owners/email/{email}")]
+   [Authorize] // später ggf. Policy="EmployeesOnly"
+   [HttpGet("owners/email/{email}", Name = nameof(GetOwnerByEmail))]
    [EndpointSummary("Get a customer by email")]
    [ProducesResponseType<OwnerDto>(StatusCodes.Status200OK)]
    [ProducesResponseType<ProblemDetails>(StatusCodes.Status404NotFound, "application/problem+json")]

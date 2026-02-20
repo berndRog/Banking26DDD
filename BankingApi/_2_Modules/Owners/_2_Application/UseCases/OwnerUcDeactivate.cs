@@ -1,11 +1,11 @@
 using BankingApi._2_Modules.Owners._1_Ports.Outbound;
 using BankingApi._2_Modules.Owners._2_Application.Errors;
 using BankingApi._2_Modules.Owners._3_Domain.Errors;
+using BankingApi._3_Infrastructure._1_Ports.Inbound;
 using BankingApi._4_BuildingBlocks;
 using BankingApi._4_BuildingBlocks._1_Ports.Inbound;
 using BankingApi._4_BuildingBlocks._1_Ports.Outbound;
 using BankingApi._4_BuildingBlocks._3_Domain;
-using BankingApi._4_BuildingBlocks._4_Infrastructure.Persistence;
 
 namespace BankingApi._2_Modules.Owners._2_Application.UseCases;
 

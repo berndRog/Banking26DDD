@@ -1,0 +1,129 @@
+@startuml
+skinparam componentStyle uml2
+left to right direction
+
+package "Inbound (ASP.NET)" {
+  component "OwnersController" as OwnersCtrl
+  component "EmployeesController" as EmpCtrl
+  component "CoreController" as CoreCtrl
+}
+
+package "Domain Core" {
+
+  package "Owners BC" {
+    ' Query Port (DTOs)
+    interface "IOwnerReadModel\n(Query Port)\nreturns DTOs" as IOwnerRM
+
+    ' Command Port (UseCases)
+    interface "IOwnerUseCases\n(Command Port)" as IOwnerUC
+
+    ' Repository Port (Entities/Aggregates)
+    interface "IOwnerRepository\n(Repo Port)\nloads/saves Entities" as IOwnerRepo
+
+    ' BC communication
+    interface "IEmployeesContract\n(BC Contract Port)" as IEmployeesContract
+
+    component "Owners.ReadModel Impl\n(DTO queries)" as OwnersRMImpl
+    component "Owners.UseCases Impl\n(Entities + domain rules)" as OwnersUCImpl
+    component "Owners.RepositoryEf Impl\n(EF Adapter)" as OwnersRepoImpl
+    component "Owners.Contracts.Adapter\n(calls Employees)" as OwnersContractAdapter
+
+    OwnersRMImpl -up-|> IOwnerRM
+    OwnersUCImpl -up-|> IOwnerUC
+    OwnersRepoImpl -up-|> IOwnerRepo
+    OwnersContractAdapter -up-|> IEmployeesContract
+
+    ' Dependencies inside BC
+    OwnersUCImpl ..> IOwnerRepo : uses\n(Entities)
+    OwnersUCImpl ..> IEmployeesContract : calls
+  }
+
+  package "Employees BC" {
+    interface "IEmployeeReadModel\n(Query Port)\nreturns DTOs" as IEmpRM
+    interface "IEmployeeUseCases\n(Command Port)" as IEmpUC
+    interface "IEmployeeRepository\n(Repo Port)\nloads/saves Entities" as IEmpRepo
+    interface "IOwnersContract\n(BC Contract Port)" as IOwnersContract
+
+    component "Employees.ReadModel Impl\n(DTO queries)" as EmpRMImpl
+    component "Employees.UseCases Impl\n(Entities + domain rules)" as EmpUCImpl
+    component "Employees.RepositoryEf Impl\n(EF Adapter)" as EmpRepoImpl
+    component "Employees.Contracts.Adapter\n(calls Owners)" as EmpContractAdapter
+
+    EmpRMImpl -up-|> IEmpRM
+    EmpUCImpl -up-|> IEmpUC
+    EmpRepoImpl -up-|> IEmpRepo
+    EmpContractAdapter -up-|> IOwnersContract
+
+    EmpUCImpl ..> IEmpRepo : uses\n(Entities)
+    EmpUCImpl ..> IOwnersContract : calls
+  }
+
+  package "Core BC" {
+    interface "ICoreReadModel\n(Query Port)\nreturns DTOs" as ICoreRM
+    interface "ICoreUseCases\n(Command Port)" as ICoreUC
+    interface "ICoreRepository\n(Repo Port)\nloads/saves Entities" as ICoreRepo
+
+    component "Core.ReadModel Impl\n(DTO queries)" as CoreRMImpl
+    component "Core.UseCases Impl\n(Entities + domain rules)" as CoreUCImpl
+    component "Core.RepositoryEf Impl\n(EF Adapter)" as CoreRepoImpl
+
+    CoreRMImpl -up-|> ICoreRM
+    CoreUCImpl -up-|> ICoreUC
+    CoreRepoImpl -up-|> ICoreRepo
+
+    CoreUCImpl ..> ICoreRepo : uses\n(Entities)
+  }
+
+  package "_4_BuildingBlocks" {
+    interface "IUnitOfWork" as IUnitOfWork
+    interface "IIdentityGateway" as IIdentityGateway
+    interface "IClock" as IClock
+  }
+
+}
+
+package "_3_Infrastructure (system-wide)" {
+  component "BankingDbContext\n(EF Core)" as Db
+  component "UnitOfWork(EF)\n(Adapter)" as Uow
+  component "IdentityGateway\n(HttpContext)" as Identity
+  component "SystemClock" as Clock
+}
+
+' Controllers: Query -> ReadModel, Command -> UseCases
+OwnersCtrl --> IOwnerRM : GET/Query
+OwnersCtrl --> IOwnerUC : POST/PUT/DELETE
+
+EmpCtrl --> IEmpRM : GET/Query
+EmpCtrl --> IEmpUC : POST/PUT/DELETE
+
+CoreCtrl --> ICoreRM : GET/Query
+CoreCtrl --> ICoreUC : POST/PUT/DELETE
+
+' UseCases use cross-cutting ports
+OwnersUCImpl ..> IUnitOfWork
+OwnersUCImpl ..> IIdentityGateway
+OwnersUCImpl ..> IClock
+
+EmpUCImpl ..> IUnitOfWork
+EmpUCImpl ..> IIdentityGateway
+EmpUCImpl ..> IClock
+
+CoreUCImpl ..> IUnitOfWork
+CoreUCImpl ..> IClock
+
+Uow -up-|> IUnitOfWork
+Identity -up-|> IIdentityGateway
+Clock -up-|> IClock
+
+' EF adapters / readmodels use DbContext
+OwnersRepoImpl --> Db
+EmpRepoImpl --> Db
+CoreRepoImpl --> Db
+
+OwnersRMImpl --> Db
+EmpRMImpl --> Db
+CoreRMImpl --> Db
+
+Uow --> Db
+
+@enduml

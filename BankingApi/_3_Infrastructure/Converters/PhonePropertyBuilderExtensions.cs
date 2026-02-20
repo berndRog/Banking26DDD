@@ -19,7 +19,7 @@ public static class PhonePropertyBuilderExtensions {
    public static PropertyBuilder<Phone?> HasNullablePhoneConversion(this PropertyBuilder<Phone?> builder) {
       builder.HasConversion(PhoneEf.NullableConverter);
       builder.Metadata.SetValueComparer(PhoneEf.NullableComparer);
-      builder.HasMaxLength(15);
+      builder.HasMaxLength(32);
       builder.IsUnicode(false);
       return builder;
    }

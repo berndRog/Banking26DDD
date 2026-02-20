@@ -1,6 +1,6 @@
 using System.Security.Claims;
 using BankingApi._4_BuildingBlocks._1_Ports.Outbound;
-namespace BankingApi._4_BuildingBlocks._4_Infrastructure.Security;
+namespace BankingApi._3_Infrastructure.Security;
 
 /// <summary>
 /// Reads identity-related claims of the currently authenticated user

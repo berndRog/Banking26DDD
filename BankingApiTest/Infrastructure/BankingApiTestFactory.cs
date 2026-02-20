@@ -3,6 +3,7 @@ using BankingApi;
 using BankingApi._3_Infrastructure.Database;
 using BankingApi._4_BuildingBlocks._1_Ports.Inbound;
 using BankingApi._4_BuildingBlocks._1_Ports.Outbound;
+using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.EntityFrameworkCore;
@@ -14,7 +15,7 @@ namespace BankingApiTest.Infrastructure;
 /// Integration-test host for BankingApi.
 /// Uses the real Program.cs DI setup and only replaces selected infrastructure services (e.g., the database).
 /// </summary>
-public sealed class BankingApiFactory : WebApplicationFactory<Program>, IAsyncLifetime {
+public sealed class BankingApiFactory : WebApplicationFactory<Program> {
    private readonly TestDatabase.DbMode _dbMode;
    private readonly string _databaseName;
    private readonly bool _applyMigrations;
@@ -24,8 +25,8 @@ public sealed class BankingApiFactory : WebApplicationFactory<Program>, IAsyncLi
    private string _dbPath = string.Empty;
    private DbConnection? _dbConnection;
    
-   public string TestSubject { get; set; } = "emp-sub-123";
-   public string TestUsername { get; set; } = "employee@test.local";
+   public string TestSubject { get; set; } = "test-subject";
+   public string TestUsername { get; set; } = "test@user.local";
    public DateTimeOffset TestCreatedAt { get; set; } = DateTimeOffset.Parse("2025-01-01T00:00:00+01:00");
    public int TestAdminRights { get; set; } = 0;
 
@@ -59,7 +60,7 @@ public sealed class BankingApiFactory : WebApplicationFactory<Program>, IAsyncLi
       await dbContext.DisposeAsync();
    }
 
-   public async Task DisposeAsync() {
+   public override async System.Threading.Tasks.ValueTask DisposeAsync() {
       await TestDatabase.DisposeAsync(
          mode: _dbMode,
          dbPath: _dbPath,
@@ -95,6 +96,24 @@ public sealed class BankingApiFactory : WebApplicationFactory<Program>, IAsyncLi
          services.RemoveAll(typeof(IIdentityGateway));
          services.AddScoped<IIdentityGateway>(_ =>
             new FakeIdentityGateway(TestSubject, TestUsername, TestCreatedAt, TestAdminRights));
+
+          
+         // ---- Fake auth for tests ----
+         // Register test auth scheme (do NOT try to register "Bearer")
+         services.AddAuthentication()
+            .AddScheme<AuthenticationSchemeOptions, TestAuthHandler>(
+               TestAuthHandler.Scheme, _ => { });
+
+         // Force defaults LAST (this is the important bit for [Authorize])
+         services.PostConfigureAll<AuthenticationOptions>(o =>
+         {
+            o.DefaultScheme = TestAuthHandler.Scheme;
+            o.DefaultAuthenticateScheme = TestAuthHandler.Scheme;
+            o.DefaultChallengeScheme = TestAuthHandler.Scheme;
+         });
+
+         // Important: ensures authorization sees an authenticated user
+         services.AddAuthorization();
 
          
       });

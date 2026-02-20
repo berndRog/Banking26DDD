@@ -14,9 +14,10 @@ public class AccountsUseCases(
       Guid ownerId,
       string iban,
       decimal balance = 0m,
+      int currency = 1, // default to EUR
       string? id = null,
       CancellationToken ct = default
-   ) => accountUcCreate.ExecuteAsync(ownerId, iban, balance, id, ct);
+   ) => accountUcCreate.ExecuteAsync(ownerId, iban, balance, currency, id, ct);
    
    public Task<Result<Beneficiary>> AddBeneficiaryAsync(
       Guid accountId,

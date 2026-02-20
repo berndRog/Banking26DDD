@@ -25,7 +25,11 @@ public sealed class Owner : AggregateRoot<Guid> {
    public string DisplayName => CompanyName ?? $"{Firstname} {Lastname}";
 
    // Email used for communication (not authentication)
-   public Email Email { get; private set; } = default!;
+   private string _email = default!;         // for EF Core mapping (backing field)
+   public Email Email {
+      get => Email.Create(_email).Value;     // domain VO
+      private set => _email = value.Value;   // keep scalar normalized
+   }
 
    // Subject identifier from the identity provider (OIDC / OAuth)
    public string Subject { get; private set; } = default!;
@@ -49,6 +53,7 @@ public sealed class Owner : AggregateRoot<Guid> {
    public bool IsProfileComplete =>
       !string.IsNullOrWhiteSpace(Firstname) &&
       !string.IsNullOrWhiteSpace(Lastname) &&
+      !string.IsNullOrWhiteSpace(Subject) &&
       Email is not null && !string.IsNullOrWhiteSpace(Email.Value);
 
    public bool IsActive =>
@@ -86,8 +91,6 @@ public sealed class Owner : AggregateRoot<Guid> {
       Email = email;
       Subject = subject;
       Address = address;
-
-      Status = OwnerStatus.Pending;
    }
 
    // --------------------------------------------------------------------------
@@ -138,7 +141,7 @@ public sealed class Owner : AggregateRoot<Guid> {
       if (resultId.IsFailure)
          return Result<Owner>.Failure(resultId.Error);
       var ownerId = resultId.Value;
-
+      
       // Optional address: either none or valid address value object
       Address? address = null;
       var anyAddressFieldProvided =
@@ -164,6 +167,10 @@ public sealed class Owner : AggregateRoot<Guid> {
          subject: resultSubject.Value,
          address: address
       );
+      
+      // auto-activate on creation (no employee involved)
+      var employeeId = Guid.Parse("00000000-0000-0000-0000-123456789000"); // system employee for self-service actions
+      owner.Activate(employeeId, owner.CreatedAt); 
       
       return Result<Owner>.Success(owner);
    }
@@ -284,9 +291,9 @@ public sealed class Owner : AggregateRoot<Guid> {
    /// </summary>
    public Result Activate(
       Guid activatedByEmployeeId, 
-      DateTimeOffset updatedAt
+      DateTimeOffset activatedAt
    ) {
-      if (updatedAt == default)
+      if (activatedAt == default)
          return Result.Failure(CommonErrors.TimestampIsRequired);
       
       // fail early if preconditions for activation are not met
@@ -299,14 +306,14 @@ public sealed class Owner : AggregateRoot<Guid> {
          return Result.Failure(OwnerErrors.ProfileIncomplete);
    
       Status = OwnerStatus.Active;
-      ActivatedAt = updatedAt;
+      ActivatedAt = activatedAt;
       AuditedByEmployeeId = activatedByEmployeeId;
       
       RejectedAt = null;
       RejectionReasonCode = null;
       
       // create initial account for the owner (domain event, handled in application layer)
-      Touch(updatedAt);
+      Touch(activatedAt);
       return Result.Success();
    }
 

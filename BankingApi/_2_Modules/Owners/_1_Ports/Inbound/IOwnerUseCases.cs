@@ -10,6 +10,7 @@ public interface IOwnerUseCases {
       string email,
       string subject = "system",
       string? id = null,
+      string? ibanString = null,
       string? street = null,
       string? postalCode = null,
       string? city = null,

@@ -1,4 +1,5 @@
 using BankingApi._2_Modules.Employees._3_Domain.Aggregates;
+using BankingApi._4_BuildingBlocks._3_Domain.ValueObjects;
 namespace BankingApi._2_Modules.Employees._1_Ports.Outbound;
 
 /// <summary>
@@ -34,22 +35,18 @@ public interface IEmployeesRepository {
    /// </summary>
    Task<Employee?> FindByIdAsync(
       Guid id,
-      bool noTracking = false,
       CancellationToken ct = default
    );
 
    Task<Employee?> FindByIdentitySubjectAsync(
       string subject,
-      bool noTracking = false,
       CancellationToken ct = default
    );
    
    Task<Employee?> FindByEmailAsync(
-      string email,
-      bool noTracking = false,
+      Email email,
       CancellationToken ct = default
    );
-   
    
    /// <summary>
    /// Loads an employee aggregate by its personnel number.

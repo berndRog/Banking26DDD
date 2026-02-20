@@ -1,3 +1,4 @@
+using BankingApi._2_Modules.Accounts._3_Domain.Enums;
 using BankingApi._2_Modules.Core._3_Domain.Aggregates;
 using BankingApi._2_Modules.Core._3_Domain.ValueObjects;
 using BankingApi._2_Modules.Employees._3_Domain.Aggregates;
@@ -111,7 +112,7 @@ public sealed class TestSeed {
    );
 
    public IReadOnlyList<Owner> Owners => [
-      Owner1(), Owner2(), Owner3(), Owner5(), Owner5(), Owner6()
+      Owner1(), Owner2(), Owner3(), Owner4(), Owner5(), Owner6()
    ];
    #endregion
 
@@ -120,56 +121,56 @@ public sealed class TestSeed {
       id: "01000000-0000-0000-0000-000000000000",
       ownerId: Guid.Empty, // Owner1.Id,
       ibanString: "DE10 1000 0000 0000 0000 42",
-      balance: 2100.0m
+      balanceDecimal: 2100.0m
    );
 
    public Account Account2() => CreateAccount(
       id: "02000000-0000-0000-0000-000000000000",
       ownerId: Guid.Empty, // Owner1.Id,
       ibanString: "DE10 2000 0000 0000 0000 04",
-      balance: 2000.0m
+      balanceDecimal: 2000.0m
    );
 
    public Account Account3() => CreateAccount(
       id: "03000000-0000-0000-0000-000000000000",
       ownerId: Guid.Empty, // Owner2.Id,
       ibanString: "DE20 1000 0000 0000 0000 56",
-      balance: 3000.0m
+      balanceDecimal: 3000.0m
    );
 
    public Account Account4() => CreateAccount(
       id: "04000000-0000-0000-0000-000000000000",
       ownerId: Guid.Empty, // Owner3.Id,
       ibanString: "DE30 1000 0000 0000 0000 70",
-      balance: 2500.0m
+      balanceDecimal: 2500.0m
    );
 
    public Account Account5() => CreateAccount(
       id: "05000000-0000-0000-0000-000000000000",
       ownerId: Guid.Empty, // Owner4.Id,
       ibanString: "DE40 1000 0000 0000 0000 84",
-      balance: 1900.0m
+      balanceDecimal: 1900.0m
    );
 
    public Account Account6() => CreateAccount(
       id: "06000000-0000-0000-0000-000000000000",
       ownerId: Guid.Empty, // Owner5.Id,
       ibanString: "DE50 1000 0000 0000 0000 01",
-      balance: 3500.0m
+      balanceDecimal: 3500.0m
    );
 
    public Account Account7() => CreateAccount(
       id: "07000000-0000-0000-0000-000000000000",
       ownerId: Guid.Empty, // Owner5.Id,
       ibanString: "DE50 2000 0000 0000 0000 60",
-      balance: 3100.0m
+      balanceDecimal: 3100.0m
    );
 
    public Account Account8() => CreateAccount(
       id: "08000000-0000-0000-0000-000000000000",
       ownerId: Guid.Empty, // Owner6.Id,
       ibanString: "DE60 1000 0000 0000 0000 15",
-      balance: 4300.0m
+      balanceDecimal: 4300.0m
    );
 
    public IReadOnlyList<Account> Accounts => new List<Account>() {
@@ -457,13 +458,18 @@ public sealed class TestSeed {
       Guid ownerId,
       string id,
       string ibanString,
-      decimal balance
+      decimal balanceDecimal
    ) {
       var resultIban = Iban.Create(ibanString);
       if (resultIban.IsFailure)
          throw new Exception($"Invalid IBAN in test seed: {ibanString}");
       var iban = resultIban.Value;
 
+      var resultBalance = Money.Create(balanceDecimal, Currency.EUR);
+      if (resultBalance.IsFailure)
+         throw new Exception($"Invalid balance in test seed: {balanceDecimal}");
+      var balance = resultBalance.Value;
+      
       var result = Account.Create(
          clock: Clock,
          ownerId: ownerId,

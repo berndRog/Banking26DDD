@@ -56,7 +56,7 @@ public sealed class ConfigOwner(
          .HasEmailConversion()
          .IsRequired();
       // optional: unique index
-      builder.HasIndex(x => x.Email).IsUnique();
+      builder.HasIndex(x => x.Email).IsUnique();;
 
       builder.Property(o => o.Subject)
          .HasMaxLength(200)

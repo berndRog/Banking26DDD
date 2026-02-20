@@ -65,24 +65,7 @@ public static class DiAuthNAuthZ {
          // Role-based coarse authorization (framework-friendly)
          options.AddPolicy("OwnersOnly", p => p.RequireRole("Owner"));
          options.AddPolicy("EmployeesOnly", p => p.RequireRole("Employee"));
-
-         // Optional: if you want to allow employees to call owner self endpoints for support,
-         // you can introduce combined policies later.
-         // options.AddPolicy("OwnerOrEmployee", p => p.RequireRole("Owner", "Employee"));
-         
-         
-         // services.AddAuthorization(options => {
-         //    options.AddPolicy("CanViewCustomers", policy =>
-         //       policy.RequireAssertion(ctx =>
-         //          ctx.User.IsInRole("Employee") &&
-         //          ctx.User.HasAdminRight((int)AdminRights.ViewCustomers)));
-         //
-         //    options.AddPolicy("CanEditCustomers", policy =>
-         //       policy.RequireAssertion(ctx =>
-         //          ctx.User.IsInRole("Employee") &&
-         //          ctx.User.HasAdminRight((int)AdminRights.EditCustomers)));
-         // });
-         
+         options.AddPolicy("OwnerOrEmployee", p => p.RequireRole("Owner", "Employee"));
       });
 
 
