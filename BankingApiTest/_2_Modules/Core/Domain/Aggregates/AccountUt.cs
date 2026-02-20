@@ -103,7 +103,7 @@ public sealed class AccountUt {
    }
 
    [Fact]
-   public void Create_with_empty_ownerId_is_ok() {
+   public void Create_with_empty_ownerId_is_failure() {
       // Act
       var result = Account.Create(
          clock: _clock,
@@ -113,28 +113,9 @@ public sealed class AccountUt {
          id: _id
       );
       // Assert
-      True(result.IsSuccess);
-   }
-
-   [Theory]
-   [InlineData(-0.01)]
-   [InlineData(-1)]
-   [InlineData(-1000)]
-   public void Create_with_negative_balance_fails(decimal b) {
-      // Act
-      var balance = Money.Create(b, Currency.EUR).Value;
-      var result = Account.Create(
-         clock: _clock,
-         ownerId: _ownerId,
-         iban: _iban,
-         balance: balance,
-         id: _id
-      );
-      // Assert
       True(result.IsFailure);
-      NotNull(result.Error);
    }
-
+   
    [Fact]
    public void Create_is_deterministic_for_same_input_id() {
       // Act

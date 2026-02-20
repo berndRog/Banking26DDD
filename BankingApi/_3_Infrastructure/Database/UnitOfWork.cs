@@ -24,40 +24,6 @@ public sealed class UnitOfWork(
       return rows;
    }
 
-   public async Task<SaveOutcome> SaveAllChangesSendMoneyAsync(
-      //string idempotencyKey,  // is used in the UseCase only
-      string? text = null,
-      CancellationToken ctToken = default
-   ) {
-      _dbContext.ChangeTracker.DetectChanges();
-      LogBefore(text);
-
-      ApplyAuditInfo();
-
-      try {
-         var rows = await _dbContext.SaveChangesAsync(ctToken);
-         LogAfter(rows);
-         return SaveOutcome.Success(rows);
-      }
-      catch (DbUpdateConcurrencyException ex) {
-         _logger.LogWarning(ex, "Booking save failed due to concurrency conflict.");
-         return SaveOutcome.Concurrency(ex);
-      }
-      catch (DbUpdateException ex) {
-         if (TryGetUniqueViolationInfo(ex, out var info)) {
-            // Hinweis: idempotencyKey wird hier NICHT "verarbeitet".
-            // Er ist nur Kontext; die Entscheidung "ist das Booking-Idempotency?" trifft der UseCase.
-            _logger.LogInformation(ex,
-               "Booking save hit unique constraint. Provider={Provider}, Table={Table}, Columns={Columns}",
-               info.Provider, info.Table, string.Join(",", info.Columns));
-            return SaveOutcome.Unique(info, ex);
-         }
-
-         _logger.LogError(ex, "Booking save failed with DbUpdateException.");
-         return SaveOutcome.DbUpdate(ex);
-      }
-   }
-
    public void ClearChangeTracker() =>
       _dbContext.ChangeTracker.Clear();
 

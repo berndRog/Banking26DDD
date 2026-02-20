@@ -119,56 +119,56 @@ public sealed class TestSeed {
    #region -------------- Test Accounts ------------------------------------------------------
    public Account Account1() => CreateAccount(
       id: "01000000-0000-0000-0000-000000000000",
-      ownerId: Guid.Empty, // Owner1.Id,
+      ownerId: Owner1().Id,
       ibanString: "DE10 1000 0000 0000 0000 42",
       balanceDecimal: 2100.0m
    );
 
    public Account Account2() => CreateAccount(
       id: "02000000-0000-0000-0000-000000000000",
-      ownerId: Guid.Empty, // Owner1.Id,
+      ownerId: Owner1().Id,
       ibanString: "DE10 2000 0000 0000 0000 04",
       balanceDecimal: 2000.0m
    );
 
    public Account Account3() => CreateAccount(
       id: "03000000-0000-0000-0000-000000000000",
-      ownerId: Guid.Empty, // Owner2.Id,
+      ownerId: Owner2().Id,
       ibanString: "DE20 1000 0000 0000 0000 56",
       balanceDecimal: 3000.0m
    );
 
    public Account Account4() => CreateAccount(
       id: "04000000-0000-0000-0000-000000000000",
-      ownerId: Guid.Empty, // Owner3.Id,
+      ownerId: Owner3().Id,
       ibanString: "DE30 1000 0000 0000 0000 70",
       balanceDecimal: 2500.0m
    );
 
    public Account Account5() => CreateAccount(
       id: "05000000-0000-0000-0000-000000000000",
-      ownerId: Guid.Empty, // Owner4.Id,
+      ownerId: Owner4().Id,
       ibanString: "DE40 1000 0000 0000 0000 84",
       balanceDecimal: 1900.0m
    );
 
    public Account Account6() => CreateAccount(
       id: "06000000-0000-0000-0000-000000000000",
-      ownerId: Guid.Empty, // Owner5.Id,
+      ownerId: Owner5().Id,
       ibanString: "DE50 1000 0000 0000 0000 01",
       balanceDecimal: 3500.0m
    );
 
    public Account Account7() => CreateAccount(
       id: "07000000-0000-0000-0000-000000000000",
-      ownerId: Guid.Empty, // Owner5.Id,
+      ownerId: Owner5().Id,
       ibanString: "DE50 2000 0000 0000 0000 60",
       balanceDecimal: 3100.0m
    );
 
    public Account Account8() => CreateAccount(
       id: "08000000-0000-0000-0000-000000000000",
-      ownerId: Guid.Empty, // Owner6.Id,
+      ownerId: Owner6().Id,
       ibanString: "DE60 1000 0000 0000 0000 15",
       balanceDecimal: 4300.0m
    );
@@ -268,7 +268,7 @@ public sealed class TestSeed {
       id: "00010000-0000-0000-0000-000000000000",
       fromAccountId: Account1().Id, // Account1.Id,
       beneficiary: Beneficiary1(), // Account3.Id,
-      amount: 345.0m,
+      amountDecimal: 345.0m,
       purpose: "Erika an Chris1"
    );
 
@@ -276,7 +276,7 @@ public sealed class TestSeed {
       id: "00020000-0000-0000-0000-000000000000",
       fromAccountId: Account1().Id, // Account1.Id,
       beneficiary: Beneficiary2(), // Account2.Id,
-      amount: 231.0m,
+      amountDecimal: 231.0m,
       purpose: "Erika an Chris2"
    );
 
@@ -284,7 +284,7 @@ public sealed class TestSeed {
       id: "00030000-0000-0000-0000-000000000000",
       fromAccountId: Account2().Id, // Account2.Id,
       beneficiary: Beneficiary3(), // Account4.Id,
-      amount: 289.00m,
+      amountDecimal: 289.00m,
       purpose: "Erika an Arne"
    );
 
@@ -292,7 +292,7 @@ public sealed class TestSeed {
       id: "00040000-0000-0000-0000-000000000000",
       fromAccountId: Account2().Id, // Account2.Id,
       beneficiary: Beneficiary4(), // Account4.Id,
-      amount: 289.00m,
+      amountDecimal: 289.00m,
       purpose: "Erika an Benno"
    );
    // public Transfer Transfer5{ get; }
@@ -506,11 +506,16 @@ public sealed class TestSeed {
       string id,
       Guid fromAccountId,
       Beneficiary beneficiary,
-      decimal amount,
+      decimal amountDecimal,
       string purpose
    ) {
       var toAccount = Accounts.First(a => a.Iban == beneficiary.Iban);
 
+      var resultAmount = Money.Create(amountDecimal, Currency.EUR);
+      if (resultAmount.IsFailure)
+         throw new Exception($"Invalid amount in test seed: {amountDecimal}");
+      var amount = resultAmount.Value;
+      
       var result = Transfer.Create(
          clock: Clock,
          fromAccountId: fromAccountId,
@@ -518,7 +523,6 @@ public sealed class TestSeed {
          purpose: purpose,
          recipientName: beneficiary.Name,
          recipientIban: beneficiary.Iban,
-         idempotencyKey: Guid.NewGuid().ToString(),
          id: id
       );
       True(result.IsSuccess);

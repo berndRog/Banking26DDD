@@ -21,10 +21,18 @@ public sealed class ConfigTransaction(
 
       builder.Property(x => x.AccountId)
          .IsRequired();
+      
+      builder.OwnsOne(t => t.Amount, b => {
+         b.Property(p => p.Amount)
+            .HasColumnName("Amount")
+            .HasColumnType("decimal(18,2)")
+            .IsRequired();
 
-      builder.Property(x => x.Amount)
-         .HasPrecision(18, 2)
-         .IsRequired();
+         b.Property(p => p.Currency)
+            .HasColumnName("Currency")
+            .HasConversion<int>()
+            .IsRequired();
+      });
 
       builder.Property(x => x.Purpose)
          .HasMaxLength(200)

@@ -2,6 +2,7 @@ using BankingApi._2_Modules.Core;
 using BankingApi._2_Modules.Employees;
 using BankingApi._2_Modules.Owners;
 using BankingApi._3_Infrastructure;
+using BankingApi._3_Infrastructure._1_Ports.Inbound;
 using BankingApi._3_Infrastructure.Database;
 using BankingApi._4_BuildingBlocks;
 using BankingApi._4_BuildingBlocks._1_Ports.Inbound;
@@ -48,7 +49,7 @@ public class Program {
 
       var app = builder.Build();
 
-      //SeedData(app);
+      SeedData(app);
 
       // Configure the HTTP request pipeline.
       if (app.Environment.IsDevelopment()) {
@@ -71,25 +72,25 @@ public class Program {
 
    private static void SeedData(WebApplication app) {
       // Seed the database in development
-      // if (app.Environment.IsDevelopment()) {
-      //    using var scope = app.Services.CreateScope();
-      //    var services = scope.ServiceProvider;
-      //    var db = services.GetRequiredService<BankingDbContext>();
-      //    var unitOfWork = services.GetRequiredService<IUnitOfWork>();
-      //    var clock = services.GetRequiredService<IClock>();
-      //
-      //    // Ensure database is created
-      //    db.Database.EnsureCreated();
-      //
-      //    // Seed if empty
-      //    if (!db.Employees.Any()) {
-      //       var seed = new Seed(clock);
-      //       db.Employees.AddRange(seed.Employee1, seed.Employee2);
-      //       db.Owners.AddRange(seed.Owners);
-      //       db.Accounts.AddRange(seed.Accounts);
-      //       db.Transfers.AddRange(seed.Transfers);
-      //       unitOfWork.SaveAllChangesAsync("");
-      //    }
-      // }
+      if (app.Environment.IsDevelopment()) {
+         using var scope = app.Services.CreateScope();
+         var services = scope.ServiceProvider;
+         var db = services.GetRequiredService<BankingDbContext>();
+         var unitOfWork = services.GetRequiredService<IUnitOfWork>();
+         var clock = services.GetRequiredService<IClock>();
+      
+         // Ensure database is created
+         db.Database.EnsureCreated();
+      
+         // Seed if empty
+         if (!db.Employees.Any()) {
+            var seed = new Seed(clock);
+            db.Employees.AddRange(seed.Employee1, seed.Employee2);
+            db.Owners.AddRange(seed.Owners);
+            db.Accounts.AddRange(seed.Accounts);
+            db.Transfers.AddRange(seed.Transfers);
+            unitOfWork.SaveAllChangesAsync("");
+         }
+      }
    }
 }

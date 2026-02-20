@@ -37,7 +37,6 @@ public sealed class TransferUt {
          purpose: _transfer.Purpose,
          recipientName: _beneficiary.Name,
          recipientIban: _beneficiary.Iban,
-         idempotencyKey: "unique-key",
          id: _id
       );
 
@@ -49,11 +48,10 @@ public sealed class TransferUt {
       IsType<Transfer>(actual);
       Equal(Guid.Parse(_id), actual.Id);
       Equal(_fromAccount.Id, actual.FromAccountId);
-      Equal(_transfer.Amount, actual.Amount, 24);
+      Equal(_transfer.Amount, actual.Amount);
       Equal(_transfer.Purpose, actual.Purpose);
       Equal(_beneficiary.Name, actual.RecipientName);
       Equal(_beneficiary.Iban, actual.RecipientIban);
-      Equal("unique-key", actual.IdempotencyKey);
       Equal(TransferStatus.Initiated, actual.Status);
    }
 
@@ -68,7 +66,6 @@ public sealed class TransferUt {
          purpose: _transfer.Purpose,
          recipientName: _beneficiary.Name,
          recipientIban: _beneficiary.Iban,
-         idempotencyKey: "unique-key",
          id: null
       );
 
@@ -81,11 +78,10 @@ public sealed class TransferUt {
       NotEqual(Guid.Empty, actual.Id);
       NotEqual(Guid.Parse(_id), actual.Id);
       Equal(_fromAccount.Id, actual.FromAccountId);
-      Equal(_transfer.Amount, actual.Amount, 24);
+      Equal(_transfer.Amount, actual.Amount);
       Equal(_transfer.Purpose, actual.Purpose);
       Equal(_beneficiary.Name, actual.RecipientName);
       Equal(_beneficiary.Iban, actual.RecipientIban);
-      Equal("unique-key", actual.IdempotencyKey);
       Equal(TransferStatus.Initiated, actual.Status);
    }
 
@@ -100,7 +96,6 @@ public sealed class TransferUt {
          purpose: _transfer.Purpose,
          recipientName: _beneficiary.Name,
          recipientIban: _beneficiary.Iban,
-         idempotencyKey: "unique-key",
          id: "is-not-a-guid"
       );
 
@@ -119,7 +114,6 @@ public sealed class TransferUt {
          purpose: _transfer.Purpose,
          recipientName: _beneficiary.Name,
          recipientIban: _beneficiary.Iban,
-         idempotencyKey: "unique-key",
          id: _id
       );
       var result2 = Transfer.Create(
@@ -129,7 +123,6 @@ public sealed class TransferUt {
          purpose: _transfer.Purpose,
          recipientName: _beneficiary.Name,
          recipientIban: _beneficiary.Iban,
-         idempotencyKey: "unique-key",
          id: _id
       );
       var transfer1 = result1.Value!;
@@ -144,7 +137,6 @@ public sealed class TransferUt {
       Equal(transfer1.Purpose, transfer2.Purpose);
       Equal(transfer1.RecipientName, transfer2.RecipientName);
       Equal(transfer1.RecipientIban, transfer2.RecipientIban);
-      Equal(transfer1.IdempotencyKey, transfer2.IdempotencyKey);
       Equal(transfer1.Status, transfer2.Status);
    }
    /*

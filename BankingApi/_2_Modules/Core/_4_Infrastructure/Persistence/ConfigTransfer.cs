@@ -43,10 +43,18 @@ public sealed class ConfigTransfer(
 
       // Business properties
       // -----------------------------
-      builder.Property(t => t.Amount)
-         .HasPrecision(18, 2)
-         .IsRequired();
+      builder.OwnsOne(t => t.Amount, b => {
+         b.Property(p => p.Amount)
+            .HasColumnName("Amount")
+            .HasColumnType("decimal(18,2)")
+            .IsRequired();
 
+         b.Property(p => p.Currency)
+            .HasColumnName("Currency")
+            .HasConversion<int>()
+            .IsRequired();
+      });
+      
       builder.Property(t => t.Purpose)
          .HasMaxLength(200)
          .IsRequired();
@@ -61,14 +69,6 @@ public sealed class ConfigTransfer(
          .IsRequired();
       builder.HasIndex(a => a.RecipientIban).IsUnique();
       
-      // Idempotency
-      builder.Property(t => t.IdempotencyKey)
-         .HasMaxLength(80)
-         .IsRequired();
-
-      builder.HasIndex(t => t.IdempotencyKey)
-         .IsUnique();
-
       // State
       builder.Property(t => t.Status)
          .HasConversion<int>() // or string

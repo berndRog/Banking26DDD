@@ -6,6 +6,8 @@ namespace BankingApiTest._2_Modules.Owners.Application;
 
 public sealed class OwnerUcActivateIntT : IntegrationTestBase {
    
+   TestSeed _seed = new TestSeed();
+   
    // For teaching: keep DB so students can inspect it afterwards.
    protected override bool DeleteDatabaseOnDispose => false;
 
@@ -27,8 +29,12 @@ public sealed class OwnerUcActivateIntT : IntegrationTestBase {
       // Assert
       await Factory.WithScopeAsync(async sp => {
          var db = sp.GetRequiredService<BankingDbContext>();
-         // seed here...
-         await db.SaveChangesAsync();
+         // seed here..
+         var owner = _seed.Owner1();
+         
+         
+         
+         //await db.SaveChangesAsync();
       });
 
       

@@ -352,14 +352,14 @@ public sealed class Seed {
          id: "00010000-0000-0000-0000-000000000000",
          fromAccountId: Account1.Id,       // Account1.Id,
          beneficiary: Beneficiary1,        // Account3.Id,
-         amount: 345.0m,
+         amountDecimal: 345.0m,
          purpose: "Erika an Chris1"
       );
       Transfer2 = CreateTransfer(
          id: "00020000-0000-0000-0000-000000000000",
          fromAccountId: Account1.Id,      // Account1.Id,
          beneficiary: Beneficiary2,       // Account2.Id,
-         amount: 231.0m,
+         amountDecimal: 231.0m,
          purpose: "Erika an Chris2"
 
       );
@@ -367,14 +367,14 @@ public sealed class Seed {
          id: "00030000-0000-0000-0000-000000000000",
          fromAccountId: Account2.Id,      // Account2.Id,
          beneficiary: Beneficiary3,       // Account4.Id,
-         amount: 289.00m,
+         amountDecimal: 289.00m,
          purpose: "Erika an Arne"
       );
       Transfer4 = CreateTransfer(
          id: "00040000-0000-0000-0000-000000000000",
          fromAccountId: Account2.Id,      // Account2.Id,
          beneficiary: Beneficiary4,       // Account4.Id,
-         amount: 289.00m,
+         amountDecimal: 289.00m,
          purpose: "Erika an Benno"
       );
       
@@ -550,10 +550,15 @@ public sealed class Seed {
       string id,
       Guid fromAccountId,
       Beneficiary beneficiary,
-      decimal amount,
+      decimal amountDecimal,
       string purpose
    ) {
       var toAccount = Accounts.First(a => a.Iban == beneficiary.Iban);
+      
+      var resultMoney = Money.Create(amountDecimal, Currency.EUR);
+      if (resultMoney.IsFailure)
+         throw new Exception($"Invalid amount in seed data: {amountDecimal}");
+      var amount = resultMoney.Value;
       
       var result = Transfer.Create(
          clock: _clock,
@@ -562,7 +567,6 @@ public sealed class Seed {
          purpose: purpose,
          recipientName: beneficiary.Name,
          recipientIban: beneficiary.Iban,
-         idempotencyKey: Guid.NewGuid().ToString(),
          id: id
       );
       return result.Value!;
