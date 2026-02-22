@@ -163,18 +163,18 @@ public static class EmployeeErrors {
          Message: "The employee does not have the required administrative rights."
       );
 
-   public static readonly DomainErrors ManageOwnersRightRequired =
+   public static readonly DomainErrors ManageEmployeesRightRequired =
       new(
          ErrorCode.Forbidden,
-         Title: "Manage Owners Right Required",
-         Message: "The employee must have the 'ManageOwners' admin right to perform this action."
+         Title: "Manage Customers Right Required",
+         Message: "The employee must have the 'ManageEmployees' admin right to perform this action."
       );
 
-   public static readonly DomainErrors ViewOwnersRightRequired =
+   public static readonly DomainErrors ViewEmployeesRightRequired =
       new(
          ErrorCode.Forbidden,
-         Title: "View Owners Right Required",
-         Message: "The employee must have the 'ViewOwners' admin right to access customer data."
+         Title: "View Customers Right Required",
+         Message: "The employee must have the 'ViewEmployees' admin right to access customer data."
       );
 
 }

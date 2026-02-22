@@ -1,5 +1,6 @@
 using System.Data.Common;
 using BankingApi;
+using BankingApi._3_Infrastructure._1_Ports.Inbound;
 using BankingApi._3_Infrastructure.Database;
 using BankingApi._4_BuildingBlocks._1_Ports.Inbound;
 using BankingApi._4_BuildingBlocks._1_Ports.Outbound;
@@ -78,18 +79,24 @@ public sealed class BankingApiFactory : WebApplicationFactory<Program> {
          if (_dbConnection is null)
             throw new InvalidOperationException("Factory not initialized. Did you call InitializeAsync()?");
 
-         // Replace production DbContext registration with test registration.
-         services.RemoveAll(typeof(DbContextOptions<BankingDbContext>));
-         services.RemoveAll(typeof(BankingDbContext));
+         // 1) Remove all registrations that might exist from Program.cs
+         services.RemoveAll<DbContextOptions<BankingDbContext>>();
+         services.RemoveAll<BankingDbContext>();
 
-         services.AddDbContext<BankingDbContext>(o => {
-            o.UseSqlite(_dbConnection);
+         // Optional: if you use IDbContextFactory<BankingDbContext> anywhere
+         services.RemoveAll<IDbContextFactory<BankingDbContext>>();
 
-            if (_enableSensitiveDataLogging)
-               o.EnableSensitiveDataLogging();
+         // 2) Re-register BankingDbContext using the test connection
+         services.AddDbContext<BankingDbContext>(options => {
+            options.UseSqlite(_dbConnection);
+            if (_enableSensitiveDataLogging) options.EnableSensitiveDataLogging();
          });
 
-         // Optional: replace more infrastructure for tests here (Clock, MessageBus, etc.)
+         // 3) Replace UnitOfWork
+         services.RemoveAll<IUnitOfWork>();
+         services.AddScoped<IUnitOfWork, UnitOfWork>();
+         
+         // replace more infrastructure for tests here (Clock, IdentityGateway)
          services.RemoveAll(typeof(IClock));
          services.AddSingleton<IClock>(new FakeClock(TestCreatedAt));
          

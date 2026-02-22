@@ -1,10 +1,9 @@
-﻿using System;
-namespace BankingApi.Core.Dto;
+﻿namespace BankingApi.Core.Dto;
 
 public record AccountDto(
    Guid Id,
    string IbanString,
    decimal BalanceDecimal,
    int CurrencyInt,
-   Guid OwnerId
+   Guid CustomerId
 ); 

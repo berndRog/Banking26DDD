@@ -19,7 +19,7 @@ public interface IAccountRepository {
    );
    
    Task<bool> ExistsByOwnerIdAsync(
-      Guid ownerId, 
+      Guid customerId, 
       CancellationToken ct = default
    );
    

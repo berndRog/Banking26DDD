@@ -18,7 +18,7 @@ public sealed class TransferUt {
    public TransferUt() {
       _seed = new TestSeed();
       _clock = _seed.Clock;
-      // Account 1, Beneficary 1, Owner 1
+      // Account 1, Beneficary 1, Customer 1
       _fromAccount = _seed.Account1();
       _beneficiary = _seed.Beneficiary1();
       _toAccount = _seed.Account5();

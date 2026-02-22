@@ -8,8 +8,8 @@ public static class AccountApplicationErrors {
    public static readonly DomainErrors InValidOwnerId =
       new(
          ErrorCode.BadRequest,
-         Title: "Account: Invalid OwnerId",
-         Message: "the given ownerId is invalid."
+         Title: "Account: Invalid CustomerId",
+         Message: "the given customerId is invalid."
       );
    
    public static readonly DomainErrors NotFound =
@@ -22,7 +22,7 @@ public static class AccountApplicationErrors {
    public static readonly DomainErrors OwnerAlreadyHasAccount =
       new(
          ErrorCode.UnprocessableEntity,
-         Title: "Account: Owner Already Has An Account",
+         Title: "Account: Customer Already Has An Account",
          Message: "Initial account already exists for this owner."
       );
    
@@ -38,7 +38,7 @@ public static class AccountApplicationErrors {
 
    public static readonly DomainErrors FilterIsRequired =
       new(ErrorCode.Conflict,
-         Title: "Owner: Filter Is Required",
+         Title: "Customer: Filter Is Required",
          Message: "The provided filter must not be null");
 
 

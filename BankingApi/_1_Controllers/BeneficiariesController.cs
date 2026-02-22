@@ -14,7 +14,7 @@
 // [Produces("application/json")] //default
 //
 // public class BeneficiariesController(
-//    IOwnersRepository ownersRepository,
+//    ICustomerRepository employeesRepository,
 //    IAccountsRepository accountsRepository,
 //    IBeneficiariesRepository beneficiariesRepository,
 //    ITransfersRepository transfersRepository,
@@ -76,7 +76,7 @@
 //       // Find beneficiaries by SQL like %name%
 //       var beneficiaries = await beneficiariesRepository.SelectByNameAsync(name, ctToken);
 //
-//       // if owners are found return them
+//       // if employees are found return them
 //       if (beneficiaries.Any()) return Ok(beneficiaries.Select(beneficiary => beneficiary.ToBeneficiaryDto()));
 //       // else return not found
 //       return NotFound("Beneficiaries with given Name not found");

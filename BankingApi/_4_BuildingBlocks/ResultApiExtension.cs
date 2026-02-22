@@ -40,7 +40,7 @@ public static class ResultApiExtensions {
    ///
    /// EXAMPLES
    /// --------
-   /// GetOwnerById        -> 200 OK + OwnerDto
+   /// GetCustomerById        -> 200 OK + CustomerDto
    /// AccountNotFound     -> 404 NotFound
    /// InvalidFilter       -> 400 BadRequest
    /// </summary>
@@ -231,11 +231,11 @@ public static class ResultApiExtensions {
    /// Instead ASP.NET generates the correct URL based on routing configuration.
    ///
    /// Example:
-   ///     routeName: "GetOwnerById"
-   ///     routeValues: new { id = ownerId }
+   ///     routeName: "GetCustomerById"
+   ///     routeValues: new { id = customerId }
    ///
    /// Produces:
-   ///     Location: /owners/{id}
+   ///     Location: /employees/{id}
    ///
    /// ARCHITECTURAL ROLE
    /// ------------------

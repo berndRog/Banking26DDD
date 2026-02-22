@@ -8,10 +8,10 @@ public enum AdminRights {
    // Reports / Audit
    ViewReports = 1 << 0,    // 0000001
 
-   // Customers / Owners (KYC approval etc.)
-   ViewOwners   = 1 << 1,
-   // activate/reject/deactivate owners
-   ManageOwners = 1 << 2, 
+   // Customers / Customers (KYC approval etc.)
+   ViewCustomers   = 1 << 1,
+   // activate/reject/deactivate employees
+   ManageCustomers = 1 << 2, 
 
    // Accounts & Beneficiaries
    ViewAccounts   =  1 << 3,     //    8
@@ -32,19 +32,19 @@ public enum AdminRights {
  * Beispiel: Rechte kombinieren
  * ----------------------------
  * var rights =
- *    AdminRights.ViewOwners |
- *    AdminRights.ManageOwners |
+ *    AdminRights.ViewEmployees |
+ *    AdminRights.ManageEmployees |
  *    AdminRights.ViewAccounts;
  * AminRights = rights; 
  *    
  * Einzelnes Recht prüfen
  * ----------------------
  * bool hasRight =
- *   (rights & AdminRights.ManageOwners) == AdminRights.ManageOwners;
+ *   (rights & AdminRights.ManageEmployees) == AdminRights.ManageEmployees;
  *  
  * Mehrere Rechte prüfen
  * ----------------------  
- * var required = AdminRights.ViewOwners | AdminRights.ManageOwners;
+ * var required = AdminRights.ViewEmployees | AdminRights.ManageEmployees;
  * bool hasRights = (rights & required) == required;
  */
 

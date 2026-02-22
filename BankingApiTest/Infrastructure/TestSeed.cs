@@ -3,7 +3,6 @@ using BankingApi._2_Modules.Core._3_Domain.Aggregates;
 using BankingApi._2_Modules.Core._3_Domain.ValueObjects;
 using BankingApi._2_Modules.Employees._3_Domain.Aggregates;
 using BankingApi._2_Modules.Employees._3_Domain.Enums;
-using BankingApi._2_Modules.Owners._3_Domain.Aggregates;
 using BankingApi._4_BuildingBlocks._1_Ports.Inbound;
 using BankingApi._4_BuildingBlocks._3_Domain.ValueObjects;
 using BankingApi.Modules.Core.Domain.Aggregates;
@@ -23,7 +22,7 @@ public sealed class TestSeed {
       subject: "003946D9-9B67-4691-A91B-DB4A98929F5D",
       personnelNumber: "Emp001",
       adminRights:
-      AdminRights.ViewOwners | AdminRights.ManageOwners |
+      AdminRights.ViewEmployees | AdminRights.ManageEmployees |
       AdminRights.ViewAccounts | AdminRights.ManageAccounts
    );
 
@@ -54,8 +53,8 @@ public sealed class TestSeed {
       => Address.Create("Schillerstr. 1", "30123", "Hannover", "DE").GetValueOrThrow();
    #endregion
 
-   #region -------------- Test Owners (Enities) ----------------------------------------------
-   public Owner Owner1() => CreateOwner(
+   #region -------------- Test Customers (Enities) ----------------------------------------------
+   public Customer Customer1() => CreateCustomer(
       id: "10000000-0000-0000-0000-000000000000",
       firstname: "Erika",
       lastname: "Mustermann",
@@ -65,7 +64,7 @@ public sealed class TestSeed {
       address: Address1
    );
 
-   public Owner Owner2() => CreateOwner(
+   public Customer Customer2() => CreateCustomer(
       id: "20000000-0000-0000-0000-000000000000",
       firstname: "Max",
       lastname: "Mustermann",
@@ -75,7 +74,7 @@ public sealed class TestSeed {
       null
    );
 
-   public Owner Owner3() => CreateOwner(
+   public Customer Customer3() => CreateCustomer(
       "30000000-0000-0000-0000-000000000000",
       firstname: "Arno",
       lastname: "Arndt",
@@ -85,7 +84,7 @@ public sealed class TestSeed {
       address: Address2
    );
 
-   public Owner Owner4() => CreateOwner(
+   public Customer Customer4() => CreateCustomer(
       id: "40000000-0000-0000-0000-000000000000",
       firstname: "Benno",
       lastname: "Bauer",
@@ -95,7 +94,7 @@ public sealed class TestSeed {
       null
    );
 
-   public Owner Owner5() => CreateOwner(
+   public Customer Customer5() => CreateCustomer(
       id: "50000000-0000-0000-0000-000000000000",
       firstname: "Christine",
       lastname: "Conrad",
@@ -105,7 +104,7 @@ public sealed class TestSeed {
       null
    );
 
-   public Owner Owner6() => CreateOwner(
+   public Customer Customer6() => CreateCustomer(
       id: "60000000-0000-0000-0000-000000000000",
       firstname: "Dana",
       lastname: "Deppe",
@@ -115,64 +114,64 @@ public sealed class TestSeed {
       address: null
    );
 
-   public IReadOnlyList<Owner> Owners => [
-      Owner1(), Owner2(), Owner3(), Owner4(), Owner5(), Owner6()
+   public IReadOnlyList<Customer> Customers => [
+      Customer1(), Customer2(), Customer3(), Customer4(), Customer5(), Customer6()
    ];
    #endregion
 
    #region -------------- Test Accounts ------------------------------------------------------
    public Account Account1() => CreateAccount(
       id: "01000000-0000-0000-0000-000000000000",
-      ownerId: Owner1().Id,
+      customerId: Customer1().Id,
       ibanString: "DE10 1000 0000 0000 0000 42",
       balanceDecimal: 2100.0m
    );
 
    public Account Account2() => CreateAccount(
       id: "02000000-0000-0000-0000-000000000000",
-      ownerId: Owner1().Id,
+      customerId: Customer1().Id,
       ibanString: "DE10 2000 0000 0000 0000 04",
       balanceDecimal: 2000.0m
    );
 
    public Account Account3() => CreateAccount(
       id: "03000000-0000-0000-0000-000000000000",
-      ownerId: Owner2().Id,
+      customerId: Customer2().Id,
       ibanString: "DE20 1000 0000 0000 0000 56",
       balanceDecimal: 3000.0m
    );
 
    public Account Account4() => CreateAccount(
       id: "04000000-0000-0000-0000-000000000000",
-      ownerId: Owner3().Id,
+      customerId: Customer3().Id,
       ibanString: "DE30 1000 0000 0000 0000 70",
       balanceDecimal: 2500.0m
    );
 
    public Account Account5() => CreateAccount(
       id: "05000000-0000-0000-0000-000000000000",
-      ownerId: Owner4().Id,
+      customerId: Customer4().Id,
       ibanString: "DE40 1000 0000 0000 0000 84",
       balanceDecimal: 1900.0m
    );
 
    public Account Account6() => CreateAccount(
       id: "06000000-0000-0000-0000-000000000000",
-      ownerId: Owner5().Id,
+      customerId: Customer5().Id,
       ibanString: "DE50 1000 0000 0000 0000 01",
       balanceDecimal: 3500.0m
    );
 
    public Account Account7() => CreateAccount(
       id: "07000000-0000-0000-0000-000000000000",
-      ownerId: Owner5().Id,
+      customerId: Customer5().Id,
       ibanString: "DE50 2000 0000 0000 0000 60",
       balanceDecimal: 3100.0m
    );
 
    public Account Account8() => CreateAccount(
       id: "08000000-0000-0000-0000-000000000000",
-      ownerId: Owner6().Id,
+      customerId: Customer6().Id,
       ibanString: "DE60 1000 0000 0000 0000 15",
       balanceDecimal: 4300.0m
    );
@@ -187,77 +186,77 @@ public sealed class TestSeed {
    public Beneficiary Beneficiary1() => CreateBeneficiary(
       "00100000-0000-0000-0000-000000000000",
       Guid.Empty, // Account1.Id,
-      name: Owner5().DisplayName,
+      name: Customer5().DisplayName,
       ibanString: Account6().Iban.Value
    );
 
    public Beneficiary Beneficiary2() => CreateBeneficiary(
       id: "00200000-0000-0000-0000-000000000000",
       accountId: Guid.Empty, // Account1.Id,
-      name: Owner5().DisplayName,
+      name: Customer5().DisplayName,
       ibanString: Account7().Iban.Value
    );
 
    public Beneficiary Beneficiary3() => CreateBeneficiary(
       id: "00300000-0000-0000-0000-000000000000",
       accountId: Guid.Empty, // Account2.Id,
-      name: Owner3().DisplayName,
+      name: Customer3().DisplayName,
       ibanString: Account4().Iban.Value
    );
 
    public Beneficiary Beneficiary4() => CreateBeneficiary(
       id: "00400000-0000-0000-0000-000000000000",
       accountId: Guid.Empty,
-      name: Owner4().DisplayName,
+      name: Customer4().DisplayName,
       ibanString: Account5().Iban.Value
    );
 
    public Beneficiary Beneficiary5() => CreateBeneficiary(
       id: "00500000-0000-0000-0000-000000000000",
       accountId: Guid.Empty,
-      name: Owner3().DisplayName,
+      name: Customer3().DisplayName,
       ibanString: Account4().Iban.Value
    );
 
    public Beneficiary Beneficiary6() => CreateBeneficiary(
       id: "00600000-0000-0000-0000-000000000000",
       accountId: Guid.Empty,
-      name: Owner4().DisplayName,
+      name: Customer4().DisplayName,
       ibanString: Account5().Iban.Value
    );
 
    public Beneficiary Beneficiary7() => CreateBeneficiary(
       id: "00700000-0000-0000-0000-000000000000",
       accountId: Guid.Empty,
-      name: Owner6().DisplayName,
+      name: Customer6().DisplayName,
       ibanString: Account8().Iban.Value
    );
 
    public Beneficiary Beneficiary8() => CreateBeneficiary(
       id: "00800000-0000-0000-0000-000000000000",
       accountId: Guid.Empty,
-      name: Owner2().DisplayName,
+      name: Customer2().DisplayName,
       ibanString: Account3().Iban.Value
    );
 
    public Beneficiary Beneficiary9() => CreateBeneficiary(
       id: "00900000-0000-0000-0000-000000000000",
       accountId: Guid.Empty,
-      name: Owner6().DisplayName,
+      name: Customer6().DisplayName,
       ibanString: Account8().Iban.Value
    );
 
    public Beneficiary Beneficiary10() => CreateBeneficiary(
       id: "01000000-0000-0000-0000-000000000000",
       accountId: Guid.Empty,
-      name: Owner1().DisplayName,
+      name: Customer1().DisplayName,
       ibanString: Account1().Iban.Value
    );
 
    public Beneficiary Beneficiary11() => CreateBeneficiary(
       id: "01100000-0000-0000-0000-000000000000",
       accountId: Guid.Empty,
-      name: Owner1().DisplayName,
+      name: Customer1().DisplayName,
       ibanString: Account2().Iban.Value
    );
 
@@ -426,7 +425,7 @@ public sealed class TestSeed {
       return result.Value!;
    }
 
-   private Owner CreateOwner(
+   private Customer CreateCustomer(
       string id,
       string firstname,
       string lastname,
@@ -440,7 +439,7 @@ public sealed class TestSeed {
          throw new Exception($"Invalid email in test seed: {emailString}");
       var email = resultEmail.Value;
 
-      var result = Owner.Create(
+      var result = Customer.Create(
          clock: Clock,
          firstname: firstname,
          lastname: lastname,
@@ -459,7 +458,7 @@ public sealed class TestSeed {
    }
 
    private Account CreateAccount(
-      Guid ownerId,
+      Guid customerId,
       string id,
       string ibanString,
       decimal balanceDecimal
@@ -476,7 +475,7 @@ public sealed class TestSeed {
       
       var result = Account.Create(
          clock: Clock,
-         ownerId: ownerId,
+         customerId: customerId,
          iban: iban,
          balance: balance,
          id: id

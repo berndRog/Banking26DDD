@@ -26,7 +26,7 @@ public static class BeneficiaryApplicationErrors {
    //
    // public static readonly DomainErrors FilterIsRequired =
    //    new(ErrorCode.Conflict,
-   //       Title: "Owner: Filter Is Required",
+   //       Title: "Customer: Filter Is Required",
    //       Message: "The provided filter must not be null");
 
 

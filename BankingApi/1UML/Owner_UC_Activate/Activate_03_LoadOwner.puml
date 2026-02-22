@@ -6,10 +6,10 @@ skinparam maxMessageSize 90
 title Detail 2: Load Owner + Status Guard
 
 participant "OwnerUcActivate" as U
-participant "OwnersRepository" as R
+participant "EmployeesRepository" as R
 participant "Owner Aggregate" as O
 
-U -> R : FindById(ownerId)
+U -> R : FindById(customerId)
 alt not found
   R --> U : null (404)
 else found

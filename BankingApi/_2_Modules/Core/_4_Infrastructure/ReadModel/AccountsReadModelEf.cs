@@ -2,11 +2,8 @@ using BankingApi._2_Modules.Core._1_Ports.Inbound;
 using BankingApi._2_Modules.Core._2_Application.Errors;
 using BankingApi._2_Modules.Core._2_Application.Mappings;
 using BankingApi._2_Modules.Core._3_Domain.ValueObjects;
-using BankingApi._2_Modules.Owners._2_Application.Dtos;
-using BankingApi._2_Modules.Owners._2_Application.Errors;
-using BankingApi._2_Modules.Owners._2_Application.Mappings;
-using BankingApi._2_Modules.Owners._2_Application.ReadModel;
-using BankingApi._2_Modules.Owners._3_Domain.Aggregates;
+using BankingApi._2_Modules.Employees._2_Application.ReadModel;
+using BankingApi._2_Modules.Employees._3_Domain.Aggregates;
 using BankingApi._3_Infrastructure.Database;
 using BankingApi._4_BuildingBlocks;
 using BankingApi._4_BuildingBlocks._1_Ports.Outbound;
@@ -68,15 +65,15 @@ public sealed class AccountsReadModelEf(
    }
    
    public async Task<Result<IEnumerable<AccountDto>>> SelectByOwnerIdAsync(
-      Guid ownerId,
+      Guid customerId,
       CancellationToken ctToken = default
    ) {
-      if(ownerId == Guid.Empty)
+      if(customerId == Guid.Empty)
          return Result<IEnumerable<AccountDto>>.Failure(AccountApplicationErrors.InValidOwnerId);
       
       var accountDtos =  await dbContext.Accounts
          .AsNoTracking()
-         .Where(a => a.OwnerId == ownerId)
+         .Where(a => a.CustomerId == customerId)
          .Select(a => a.ToAccountDto())
          .ToListAsync(ctToken);
       
@@ -158,20 +155,20 @@ public sealed class AccountsReadModelEf(
    }
 
 
-   // public async Task<Result<PagedResult<OwnerDto>>> FilterAsync(
-   //    OwnerSearchFilter filter,
+   // public async Task<Result<PagedResult<CustomerDto>>> FilterAsync(
+   //    CustomerSearchFilter filter,
    //    PageRequest page,
    //    CancellationToken ct
    // ) {
    //    if (filter is null) 
-   //       return Result<PagedResult<OwnerDto>>.Failure(OwnerApplicationErrors.FilterIsRequired);
+   //       return Result<PagedResult<CustomerDto>>.Failure(CustomerApplicationErrors.FilterIsRequired);
    //    
    //    // Normalize page defaults
    //    var pageNumber = page?.PageNumber > 0 ? page.PageNumber : 1;
    //    var pageSize   = page?.PageSize    > 0 ? page.PageSize    : 20;
    //    var skip       = (pageNumber - 1) * pageSize;
    //
-   //    IQueryable<Owner> query = dbContext.Owners
+   //    IQueryable<Customer> query = dbContext.Customers
    //       .AsNoTracking();
    //
    //    // Filters
@@ -199,17 +196,17 @@ public sealed class AccountsReadModelEf(
    //    var items = await query
    //       .Skip(skip)
    //       .Take(pageSize)
-   //       .Select(c => c.ToOwnerDto())
+   //       .Select(c => c.ToCustomerDto())
    //       .ToListAsync(ct);
    //
    //    // Wrap into PagedResult (adjust if your PagedResult has a different constructor/factory)
-   //    var paged = new PagedResult<OwnerDto>(
+   //    var paged = new PagedResult<CustomerDto>(
    //       items,
    //       total,
    //       pageNumber,
    //       pageSize
    //    );
    //
-   //    return Result<PagedResult<OwnerDto>>.Success(paged);
+   //    return Result<PagedResult<CustomerDto>>.Success(paged);
    // }
 }

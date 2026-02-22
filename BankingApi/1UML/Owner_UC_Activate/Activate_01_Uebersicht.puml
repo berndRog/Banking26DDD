@@ -17,13 +17,13 @@ box "BC Core" #FFE
 participant "AccountsContract" as AC
 end box
 
-E -> API : ActivateOwner(ownerId, iban?)
-API -> U : Execute(ownerId, iban?)
+E -> API : ActivateOwner(customerId, iban?)
+API -> U : Execute(customerId, iban?)
 
 U -> EA : RequireEmployee(OwnerActivate)
 EA --> U : EmployeeId / Forbidden
 
-U -> AC : OpenInitialAccount(ownerId, iban?)
+U -> AC : OpenInitialAccount(customerId, iban?)
 AC --> U : OK / Error
 
 U --> API : Success / Failure

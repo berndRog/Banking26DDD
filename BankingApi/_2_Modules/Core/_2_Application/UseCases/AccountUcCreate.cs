@@ -4,7 +4,7 @@ using BankingApi._2_Modules.Core._1_Ports.Outbound;
 using BankingApi._2_Modules.Core._2_Application.Mappings;
 using BankingApi._2_Modules.Core._3_Domain.Aggregates;
 using BankingApi._2_Modules.Core._3_Domain.ValueObjects;
-using BankingApi._2_Modules.Owners._1_Ports.Inbound;
+using BankingApi._2_Modules.Customers._1_Ports.Inbound;
 using BankingApi._3_Infrastructure._1_Ports.Inbound;
 using BankingApi._4_BuildingBlocks;
 using BankingApi._4_BuildingBlocks._1_Ports.Inbound;
@@ -14,7 +14,7 @@ using BankingApi.Core.Dto;
 namespace BankingApi._2_Modules.Core._2_Application.UseCases;
 
 public sealed class AccountUcCreate(
-   IOwnerLookupContract ownerLookup,
+   ICustomerLookupContract customerLookup,
    IAccountRepository accountRepository,
    IUnitOfWork unitOfWork,
    IClock clock,
@@ -22,7 +22,7 @@ public sealed class AccountUcCreate(
 ) {
    
    public async Task<Result<AccountDto>> ExecuteAsync(
-      Guid ownerId,
+      Guid customerId,
       string ibanString,
       decimal balanceDecimal,
       int currency,
@@ -30,7 +30,7 @@ public sealed class AccountUcCreate(
       CancellationToken ct = default
    ) {
       
-      if (!await ownerLookup.ExistsActiveAsync(ownerId, ct))
+      if (!await customerLookup.ExistsActiveAsync(customerId, ct))
          return Result<AccountDto>.Failure(AccountErrors.OwnerIdNotFoundOrInactive);
       
       // invariant: initial balance must be >= 0
@@ -45,7 +45,7 @@ public sealed class AccountUcCreate(
          return Result<AccountDto>.Failure(AccountErrors.InvalidIban);
       var iban = resultIban.Value;
       
-      var result =  Account.Create(clock, ownerId, iban, balance, id);
+      var result =  Account.Create(clock, customerId, iban, balance, id);
       if (result.IsFailure)
          return Result<AccountDto>.Failure(result.Error);
       

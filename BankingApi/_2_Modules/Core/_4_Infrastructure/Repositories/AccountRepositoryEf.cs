@@ -40,12 +40,12 @@ public sealed class AccountRepositoryEf(
          .FirstOrDefaultAsync(a => a.Id == id, ct);
    }
 
-   // Checks if an account exists for the given ownerId.
+   // Checks if an account exists for the given customerId.
    public async Task<bool> ExistsByOwnerIdAsync(
-      Guid ownerId, 
+      Guid customerId, 
       CancellationToken ct
    ) {
-      return await dbContext.Accounts.AnyAsync(a => a.OwnerId == ownerId, ct);
+      return await dbContext.Accounts.AnyAsync(a => a.CustomerId == customerId, ct);
    }
 
    // Adds a new account to the context so it will be inserted on SaveChanges.

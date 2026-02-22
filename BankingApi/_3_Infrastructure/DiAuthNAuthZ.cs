@@ -63,9 +63,9 @@ public static class DiAuthNAuthZ {
       //--- AuthZ -------------------------------------------------------------------------------
       services.AddAuthorization(options => {
          // Role-based coarse authorization (framework-friendly)
-         options.AddPolicy("OwnersOnly", p => p.RequireRole("Owner"));
+         options.AddPolicy("CustomersOnly", p => p.RequireRole("Customer"));
          options.AddPolicy("EmployeesOnly", p => p.RequireRole("Employee"));
-         options.AddPolicy("OwnerOrEmployee", p => p.RequireRole("Owner", "Employee"));
+         options.AddPolicy("CustomersOrEmployees", p => p.RequireRole("Customer", "Employee"));
       });
 
 

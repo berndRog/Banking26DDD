@@ -11,7 +11,7 @@ public sealed class AccountUt {
    private readonly TestSeed _seed;
    private readonly IClock _clock;
 
-   private readonly Guid _ownerId;
+   private readonly Guid _customerId;
    private readonly Iban _iban;
    private readonly Money _balance;
    private readonly string _id;
@@ -21,9 +21,9 @@ public sealed class AccountUt {
       _seed = new TestSeed();
       _clock = _seed.Clock;
       
-      var owner = _seed.Owner1();
+      var owner = _seed.Customer1();
       var account = _seed.Account1();
-      _ownerId = owner.Id;
+      _customerId = owner.Id;
       _iban = account.Iban;
       _balance = account.Balance;
       _id = "11111111-0000-0000-0000-000000000000";
@@ -35,7 +35,7 @@ public sealed class AccountUt {
       // Act
       var result = Account.Create(
          clock: _clock,
-         ownerId: _ownerId,
+         customerId: _customerId,
          iban: _iban,
          balance: _balance,
          id: _id
@@ -51,7 +51,7 @@ public sealed class AccountUt {
       Equal(Guid.Parse(_id), actual.Id);
       Equal(_iban, actual.Iban);
       Equal(_balance, actual.Balance);
-      Equal(_ownerId, actual.OwnerId);
+      Equal(_customerId, actual.CustomerId);
    }
 
    [Fact]
@@ -59,7 +59,7 @@ public sealed class AccountUt {
       // Act
       var result = Account.Create(
          clock: _clock,
-         ownerId: _ownerId,
+         customerId: _customerId,
          iban: _iban,
          balance: _balance,
          id: null
@@ -79,7 +79,7 @@ public sealed class AccountUt {
       // Act
       var result = Account.Create(
          clock: _clock,
-         ownerId: _ownerId,
+         customerId: _customerId,
          iban: _iban,
          balance: _balance,
          id: "not-a-guid"
@@ -104,11 +104,11 @@ public sealed class AccountUt {
    }
 
    [Fact]
-   public void Create_with_empty_ownerId_is_failure() {
+   public void Create_with_empty_customerId_is_failure() {
       // Act
       var result = Account.Create(
          clock: _clock,
-         ownerId: Guid.Empty,
+         customerId: Guid.Empty,
          iban: _iban,
          balance: _balance,
          id: _id
@@ -122,7 +122,7 @@ public sealed class AccountUt {
       // Act
       var result1 = Account.Create(
          clock: _clock,
-         ownerId: _ownerId,
+         customerId: _customerId,
          iban: _iban,
          balance: _balance,
          id: _id
@@ -130,7 +130,7 @@ public sealed class AccountUt {
 
       var result2 = Account.Create(
          clock: _clock,
-         ownerId: _ownerId,
+         customerId: _customerId,
          iban: _iban,
          balance: _balance,
          id: _id
@@ -140,7 +140,7 @@ public sealed class AccountUt {
       True(result2.IsSuccess);
       Equal(result1.Value!.Id, result2.Value!.Id);
       Equal(result1.Value!.Iban, result2.Value!.Iban);
-      Equal(result1.Value!.OwnerId, result2.Value!.OwnerId);
+      Equal(result1.Value!.CustomerId, result2.Value!.CustomerId);
       Equal(result1.Value!.Balance, result2.Value!.Balance);
    }
  

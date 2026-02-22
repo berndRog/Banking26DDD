@@ -12,7 +12,7 @@ namespace BankingApi._2_Modules.Employees._2_Application.UseCases;
 
 public class EmployeeUcUpdateProfile(
    IIdentityGateway identityGateway,
-   IEmployeesRepository repository,
+   IEmployeeRepository repository,
    IUnitOfWork unitOfWork,
    IClock clock,
    ILogger<EmployeeUcUpdateProfile> logger

@@ -3,7 +3,7 @@ using BankingApi._2_Modules.Core._2_Application.Mappings;
 using BankingApi._2_Modules.Core._2_Application.UseCases;
 using BankingApi._2_Modules.Core._3_Domain.Aggregates;
 using BankingApi._2_Modules.Core._4_Infrastructure.Repositories;
-using BankingApi._2_Modules.Owners._3_Domain.Aggregates;
+using BankingApi._2_Modules.Employees._3_Domain.Aggregates;
 using BankingApi._3_Infrastructure._1_Ports.Inbound;
 using BankingApi._3_Infrastructure.Database;
 using BankingApi._4_BuildingBlocks._1_Ports.Inbound;
@@ -11,7 +11,7 @@ using BankingApi.Core.Dto;
 using BankingApiTest.Infrastructure;
 using Microsoft.Data.Sqlite;
 using Microsoft.EntityFrameworkCore;
-namespace BankingApiTest.Modules.Owners.Infrastructure;
+namespace BankingApiTest.Modules.Employees.Infrastructure;
 
 public sealed class AccountUcBeneficiaryAddIntT : TestBase, IAsyncLifetime {
 
@@ -49,7 +49,7 @@ public sealed class AccountUcBeneficiaryAddIntT : TestBase, IAsyncLifetime {
       );
       
       _accountUcCreate = new AccountUcCreate(
-         new FakeOwnerLookup(_seed),
+         new FakeCustomerLookup(_seed),
          _repository,
          _unitOfWork,
          _clock,
@@ -80,7 +80,7 @@ public sealed class AccountUcBeneficiaryAddIntT : TestBase, IAsyncLifetime {
    [Fact]
    public async Task AddBeneficiaryUt() {
       // Arrange
-      var owner1 = _seed.Owner1();
+      var owner1 = _seed.Customer1();
       var account1 = _seed.Account1();
       var beneficiary = _seed.Beneficiary1();
       // create account for owner in database
@@ -108,10 +108,10 @@ public sealed class AccountUcBeneficiaryAddIntT : TestBase, IAsyncLifetime {
    }
 
    //--- Helpers ---
-   private async Task<AccountDto> CreateAccountForOwner(Owner owner, Account account) {
+   private async Task<AccountDto> CreateAccountForOwner(Customer customer, Account account) {
       // create account in database
       var resultAccount = await _accountUcCreate.ExecuteAsync(
-         ownerId: owner.Id,
+         customerId: customer.Id,
          ibanString: account.Iban.Value,
          balanceDecimal: account.Balance.Amount,
          currency: (int)account.Balance.Currency,

@@ -16,8 +16,8 @@ public static class AccountErrors {
 
    public static readonly DomainErrors InvalidOwnerId =
       new(ErrorCode.BadRequest,
-         Title: "Account: Invalid OwnerId",
-         Message: "The given OwnerId is not valid.");
+         Title: "Account: Invalid CustomerId",
+         Message: "The given CustomerId is not valid.");
 
    public static readonly DomainErrors InvalidBalance =
       new(ErrorCode.BadRequest,
@@ -46,7 +46,7 @@ public static class AccountErrors {
 
    public static readonly DomainErrors OwnerIdNotFoundOrInactive =
       new(ErrorCode.BadRequest, 
-         Title: "Account: OwnerId Not Found or InActive",
-         Message: "The given OwnerId not found or the Owner is inactive.");
+         Title: "Account: CustomerId Not Found or InActive",
+         Message: "The given CustomerId not found or the Customer is inactive.");
    
 }

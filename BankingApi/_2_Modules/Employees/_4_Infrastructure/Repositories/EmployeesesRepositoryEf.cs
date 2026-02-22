@@ -8,13 +8,13 @@ namespace BankingApi._2_Modules.Employees._4_Infrastructure.Repositories;
 
 public sealed class EmployeesesRepositoryEf(
    BankingDbContext dbContext
-) : IEmployeesRepository {
+) : IEmployeeRepository {
 
    public async Task<Employee?> FindByIdAsync(
-      Guid ownerId, 
+      Guid customerId, 
       CancellationToken ct
    ) => await dbContext.Employees
-         .FirstOrDefaultAsync(o => o.Id == ownerId, ct);
+         .FirstOrDefaultAsync(o => o.Id == customerId, ct);
 
    public async Task<Employee?> FindByIdentitySubjectAsync(
       string subject,

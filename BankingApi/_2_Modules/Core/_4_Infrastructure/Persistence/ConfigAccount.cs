@@ -59,9 +59,9 @@ public sealed class ConfigAccount(
       
       // Cross-BC reference (by Id)
       // -----------------------------
-      builder.Property(a => a.OwnerId)
+      builder.Property(a => a.CustomerId)
          .IsRequired();
-      builder.HasIndex(a => a.OwnerId);
+      builder.HasIndex(a => a.CustomerId);
 
 
       // Account -> Beneficiaries (child entities)

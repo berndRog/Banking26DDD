@@ -12,13 +12,13 @@ public class AccountsUseCases(
 ) : IAccountsUseCases {
    
    public Task<Result<AccountDto>> CreateAsync(
-      Guid ownerId,
+      Guid customerId,
       string iban,
       decimal balance = 0m,
       int currency = 1, // default to EUR
       string? id = null,
       CancellationToken ct = default
-   ) => accountUcCreate.ExecuteAsync(ownerId, iban, balance, currency, id, ct);
+   ) => accountUcCreate.ExecuteAsync(customerId, iban, balance, currency, id, ct);
    
    public Task<Result<BeneficiaryDto>> AddBeneficiaryAsync(
       Guid accountId,

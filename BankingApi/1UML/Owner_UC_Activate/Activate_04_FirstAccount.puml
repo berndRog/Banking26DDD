@@ -8,7 +8,7 @@ title Detail 3: Open Initial Account (Core)
 participant "OwnerUcActivate (BC Owner)" as U
 participant "AccountsContract (BC Core)" as AC
 
-U -> AC : OpenInitialAccount(ownerId, iban?)
+U -> AC : OpenInitialAccount(customerId, iban?)
 alt invalid iban
   AC --> U : Failure (422)
 else initial account exists

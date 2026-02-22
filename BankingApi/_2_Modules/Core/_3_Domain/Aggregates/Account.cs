@@ -26,8 +26,8 @@ public sealed class Account : AggregateRoot<Guid> {
    public DateTimeOffset? DeactivatedAt { get; private set; } = null;
    public bool IsActive => DeactivatedAt == null;
 
-   // Account -> Owner [0..*] : [1]
-   public Guid OwnerId { get; private set; }
+   // Account -> Customer [0..*] : [1]
+   public Guid CustomerId { get; private set; }
 
    // Empfänger: Account -> Beneficiaries [1] : [0..*]
    private readonly List<Beneficiary> _beneficiaries = new();
@@ -43,12 +43,12 @@ public sealed class Account : AggregateRoot<Guid> {
    private Account(
       IClock clock,
       Guid id,
-      Guid ownerId,
+      Guid customerId,
       Iban iban,
       Money balance
    ) : base(clock) {
       Id = id;
-      OwnerId = ownerId;
+      CustomerId = customerId;
       Iban = iban;
       Balance = balance;
    }
@@ -62,13 +62,13 @@ public sealed class Account : AggregateRoot<Guid> {
    /// </summary>
    public static Result<Account> Create(
       IClock clock,
-      Guid ownerId,
+      Guid customerId,
       Iban iban,
       Money balance,
       string? id = null
    ) {
-      // invariant: ownerId must be valid
-      if (ownerId == Guid.Empty)
+      // invariant: customerId must be valid
+      if (customerId == Guid.Empty)
          return Result<Account>.Failure(AccountErrors.InvalidOwnerId);
       
       var idResult = EntityId.Resolve(id, AccountErrors.InvalidId);
@@ -77,7 +77,7 @@ public sealed class Account : AggregateRoot<Guid> {
       var accountId = idResult.Value;
 
       return Result<Account>.Success(
-         new Account(clock, accountId, ownerId, iban, balance)
+         new Account(clock, accountId, customerId, iban, balance)
       );
    }
 
@@ -213,8 +213,8 @@ public sealed class Account : AggregateRoot<Guid> {
 //    public DateTimeOffset? DeactivatedAt { get; private set; } = null;
 //    public bool IsActive => DeactivatedAt == null;
 //    
-//    // Account -> Owner [0..*] : [1] 
-//    public Guid OwnerId { get; private set; }
+//    // Account -> Customer [0..*] : [1] 
+//    public Guid CustomerId { get; private set; }
 //    // Empfänger: Account -> Beneficiaries [1] : [0..*]
 //    private readonly List<Beneficiary> _beneficiaries = new();
 //    public IReadOnlyCollection<Beneficiary> Beneficiaries => _beneficiaries.AsReadOnly();
@@ -226,12 +226,12 @@ public sealed class Account : AggregateRoot<Guid> {
 //    private Account(
 //       IClock clock,
 //       Guid id,
-//       Guid ownerId,
+//       Guid customerId,
 //       Iban iban,
 //       decimal balance
 //    ): base(clock) {
 //       Id      = id;
-//       OwnerId = ownerId;
+//       CustomerId = customerId;
 //       Iban    = iban;
 //       Balance = balance;
 //    }
@@ -240,13 +240,13 @@ public sealed class Account : AggregateRoot<Guid> {
 //    // static factory method to create a new account for an existing owner
 //    public static Result<Account> Create(
 //       IClock clock,
-//       Guid ownerId,
+//       Guid customerId,
 //       Iban iban,
 //       decimal balance = 0m,
 //       string? id = null
 //    ) {
-//       // invariants ownerId must be valid (Guid.Empty is valid for new accounts)
-//       if (string.IsNullOrWhiteSpace(ownerId.ToString()))
+//       // invariants customerId must be valid (Guid.Empty is valid for new accounts)
+//       if (string.IsNullOrWhiteSpace(customerId.ToString()))
 //          return Result<Account>.Failure(AccountErrors.InvalidOwnerId);
 //       
 //       // balance can be zero or positive
@@ -259,7 +259,7 @@ public sealed class Account : AggregateRoot<Guid> {
 //       var accountId = idResult.Value;
 //       
 //       return Result<Account>.Success(
-//          new Account(clock, accountId, ownerId, iban, balance ));
+//          new Account(clock, accountId, customerId, iban, balance ));
 //    }
 //    
 //    //--- Domain operations -----------------------------------------------------

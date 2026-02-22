@@ -1,6 +1,6 @@
 using BankingApi._2_Modules.Core;
+using BankingApi._2_Modules.Customers;
 using BankingApi._2_Modules.Employees;
-using BankingApi._2_Modules.Owners;
 using BankingApi._3_Infrastructure;
 using BankingApi._3_Infrastructure._1_Ports.Inbound;
 using BankingApi._3_Infrastructure.Database;
@@ -36,7 +36,7 @@ public class Program {
 
       // Modules
       builder.Services.AddCoreModule();
-      builder.Services.AddOwnersModule();
+      builder.Services.AddCustomerModules();
       builder.Services.AddEmployeesModules();
       builder.Services.AddBuildingBlocks();
       builder.Services.AddInfrastructureModule(builder.Configuration);
@@ -49,7 +49,7 @@ public class Program {
 
       var app = builder.Build();
 
-      // SeedData(app);
+      //SeedData(app);
 
       // Configure the HTTP request pipeline.
       if (app.Environment.IsDevelopment()) {
@@ -86,7 +86,7 @@ public class Program {
          if (!db.Employees.Any()) {
             var seed = new Seed(clock);
             db.Employees.AddRange(seed.Employee1, seed.Employee2);
-            db.Owners.AddRange(seed.Owners);
+            db.Customers.AddRange(seed.Employees);
             db.Accounts.AddRange(seed.Accounts);
             db.Transfers.AddRange(seed.Transfers);
             unitOfWork.SaveAllChangesAsync("");

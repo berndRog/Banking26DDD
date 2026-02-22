@@ -6,7 +6,7 @@ namespace BankingApi._2_Modules.Core._1_Ports.Inbound;
 public interface IAccountsContract {
    
    Task<Result<AccountDto>> OpenInitialAccountAsync(
-      Guid ownerId,
+      Guid customerId,
       string? accoutIdString,
       string? ibanString,
       CancellationToken ct

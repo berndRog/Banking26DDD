@@ -10,7 +10,7 @@ namespace BankingApi._1_Controllers;
 [ApiController]
 [Route("bankingapi/v1")]
 public sealed class EmployeesController(
-   IEmployeesReadModel readModel,
+   IEmployeeReadModel readModel,
    EmployeeUcCreate ucCreate,
    EmployeeUcCreateProvision ucCreateProvision,
    EmployeeUcUpdateProfile ucUpdateProfile,
@@ -29,8 +29,8 @@ public sealed class EmployeesController(
       [FromBody] EmployeeDto dto,
       CancellationToken ct
    ) {
-      const string ctx = "EmployeesController.CreateEmployeeAsync";
-
+      const string context = $"{nameof(CustomersController)}.{nameof(CreateEmployeeAsync)}";
+      
       var result = await ucCreate.ExecuteAsync(
          firstname: dto.Firstname,
          lastname: dto.Lastname,
@@ -44,47 +44,36 @@ public sealed class EmployeesController(
          ct: ct
       );
       
-      return this.ToCreatedAtRoute(
-         routeName: nameof(GetEmployeeById), 
-         routeValues: new { dto.Id }, 
-         result: result, 
-         logger: logger, 
-         context: ctx
-      );
-   
+      return this.ToCreatedAtRoute(routeName: nameof(GetEmployeeById), 
+         routeValues: new { dto.Id }, result, logger, context, args: new { dto });
    }
    
    // ------------------------------------------------------------------
    // SELF-SERVICE (logged-in employee)
    // ------------------------------------------------------------------
    [Authorize(Policy = "EmployeesOnly")]
-   [HttpPost("employees/me/provision")]
+   [HttpPost("employees/me/provision", Name = nameof(CreateEmployeeProvisionAsync))]
    [EndpointSummary("Provision employee on first login (idempotent)")]
    [ProducesResponseType<Guid>(StatusCodes.Status200OK)]
    [ProducesResponseType<ProblemDetails>(StatusCodes.Status400BadRequest, "application/problem+json")]
    [ProducesResponseType<ProblemDetails>(StatusCodes.Status401Unauthorized, "application/problem+json")]
-   public async Task<ActionResult<Guid>> CreateEmployeeProvisionAsync(CancellationToken ct) {
+   public async Task<ActionResult<Guid>> CreateEmployeeProvisionAsync(
+      CancellationToken ct
+   ) {
+      const string context = $"{nameof(CustomersController)}.{nameof(CreateEmployeeProvisionAsync)}";
       
-      const string ctx = "EmployeesController.PostCreateProvisioned";
-
       var result = await ucCreateProvision.ExecuteAsync(null, ct);
       if(result.IsFailure)
-         return this.ToActionResult(result: result, logger: logger, context: ctx);
+         return this.ToActionResult(result, logger, context);
       
       // If provisioning was just created, return 201 Created with profile data
       if (result.Value.WasCreated) {
          return this.ToCreatedAtRoute(
-            routeName: nameof(GetEmployeeProfileAsync), 
-            routeValues: new { },
-            result: result, 
-            logger: logger, 
-            context: ctx
-         );
+            routeName: nameof(GetEmployeeProfileAsync),
+            routeValues: new { }, result, logger, context); 
       }
       // Already provisioned, return 200 OK with profile data
-      return this.ToActionResult(result: result, logger: logger, 
-         context: "EmployeesController.CreateEmployeeProvisionAsync", args: null
-      );
+      return this.ToActionResult(result,  logger, context);
       
    }
 
@@ -94,16 +83,14 @@ public sealed class EmployeesController(
    [ProducesResponseType<EmployeeDto>(StatusCodes.Status200OK)]
    [ProducesResponseType<ProblemDetails>(StatusCodes.Status404NotFound, "application/problem+json")]
    [ProducesResponseType<ProblemDetails>(StatusCodes.Status401Unauthorized, "application/problem+json")]
-   public async Task<ActionResult<EmployeeDto>> GetEmployeeProfileAsync(CancellationToken ct) {
-
+   public async Task<ActionResult<EmployeeDto>> GetEmployeeProfileAsync(
+      CancellationToken ct
+   ) {
+      const string context = $"{nameof(CustomersController)}.{nameof(CreateEmployeeProvisionAsync)}";
+      
       var result = await readModel.FindMeAsync(ct);
 
-      return this.ToActionResult(
-         result,
-         logger,
-         context: $"GET {UrlStart}/employees/me/profile",
-         args: null
-      );
+      return this.ToActionResult(result, logger, context);
    }
 
    [Authorize(Policy = "EmployeesOnly")]
@@ -117,26 +104,12 @@ public sealed class EmployeesController(
       [FromBody] EmployeeDto dto,
       CancellationToken ct
    ) {
+      const string context = $"{nameof(CustomersController)}.{nameof(PutEmployeeProfileAsync)}";
+
       var result = await ucUpdateProfile.ExecuteAsync(dto, ct);
 
-      return this.ToActionResult(
-         result,
-         logger,
-         context: $"PUT {UrlStart}/employees/me/profile",
-         args: dto
-      );
+      return this.ToActionResult(result, logger, context, args: new { dto } );
    }
-
-   // ------------------------------------------------------------------
-   // STAFF DIRECTORY (employee directory)
-   // ------------------------------------------------------------------
-   // Controller keeps this minimal. AdminRights checks belong into
-   // ReadModel/UseCase (your stated preference).
-   //
-   // If you later want a coarse gate here too:
-   // - [Authorize(Policy="EmployeesOnly")]
-   // and then fine-grained AdminRights in the UC.
-   // ------------------------------------------------------------------
 
    [HttpGet("employees/{id:guid}", Name = "GetEmployeeById")]
    //[Authorize] // optionally: Policy="EmployeesOnly"
@@ -148,17 +121,14 @@ public sealed class EmployeesController(
       [FromRoute] Guid id,
       CancellationToken ct
    ) {
+      const string context = $"{nameof(CustomersController)}.{nameof(GetEmployeeById)}";
+
       var result = await readModel.FindByIdAsync(id, ct);
 
-      return this.ToActionResult<EmployeeDto>(
-         result,
-         logger,
-         context: $"GET {UrlStart}/employees/{id:D}",
-         args: new { id }
-      );
+      return this.ToActionResult<EmployeeDto>(result, logger, context, args: new { id });
    }
 
-   [HttpGet("employees/email/{email}")]
+   [HttpGet("employees/email/{email}", Name = "GetEmployeeByEmail")]
    [Authorize] // optionally: Policy="EmployeesOnly"
    [EndpointSummary("Get an employee by email (directory)")]
    [ProducesResponseType<EmployeeDto>(StatusCodes.Status200OK)]
@@ -168,14 +138,25 @@ public sealed class EmployeesController(
       [FromRoute] string email,
       CancellationToken ct
    ) {
-      
+      const string context = $"{nameof(CustomersController)}.{nameof(GetEmployeeByEmail)}";
+
       var result = await readModel.FindByEmailAsync(email, ct);
 
-      return this.ToActionResult<EmployeeDto>(
-         result,
-         logger,
-         context: $"GET {UrlStart}/employees/email/{email}",
-         args: new { email }
-      );
+      return this.ToActionResult<EmployeeDto>(result, logger, context, args: new { email });
+   }
+   
+   [Authorize(Policy="EmployeesOnly")]
+   [HttpGet("employees", Name = nameof(GetAllEmployeesAsync))]
+   [EndpointSummary("Get all customers")]
+   [ProducesResponseType<IEnumerable<EmployeeDto>>(StatusCodes.Status200OK)]
+   [ProducesResponseType<ProblemDetails>(StatusCodes.Status401Unauthorized, "application/problem+json")]
+   public async Task<ActionResult<IEnumerable<EmployeeDto>>> GetAllEmployeesAsync(
+      CancellationToken ct
+   ) {
+      const string context = $"{nameof(EmployeesController)}.{nameof(GetAllEmployeesAsync)}";
+      
+      var result = await readModel.SelectAllAsync(ct);
+      
+      return this.ToActionResult(result, logger, context, args: null);
    }
 }

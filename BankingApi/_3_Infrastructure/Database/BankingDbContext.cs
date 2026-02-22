@@ -2,8 +2,6 @@ using BankingApi._2_Modules.Core._3_Domain.Aggregates;
 using BankingApi._2_Modules.Core._4_Infrastructure.Persistence;
 using BankingApi._2_Modules.Employees._3_Domain.Aggregates;
 using BankingApi._2_Modules.Employees._4_Infrastructure.Persistence;
-using BankingApi._2_Modules.Owners._3_Domain.Aggregates;
-using BankingApi._2_Modules.Owners._4_Infrastructure.Persistence;
 using BankingApi.Modules.Core.Domain.Aggregates;
 using Microsoft.EntityFrameworkCore;
 namespace BankingApi._3_Infrastructure.Database;
@@ -12,7 +10,7 @@ public sealed class BankingDbContext(
    DbContextOptions<BankingDbContext> options
 ) : DbContext(options) {
    public DbSet<Employee> Employees => Set<Employee>();
-   public DbSet<Owner> Owners => Set<Owner>();
+   public DbSet<Customer> Customers => Set<Customer>();
    public DbSet<Account> Accounts => Set<Account>();
    public DbSet<Beneficiary> Beneficiaries => Set<Beneficiary>();
    public DbSet<Transfer> Transfers => Set<Transfer>();
@@ -32,7 +30,7 @@ public sealed class BankingDbContext(
       // ------------------------------------------------------------
       // Apply entity mappings (aggregate roots first).
       // ------------------------------------------------------------
-      modelBuilder.ApplyConfiguration(new ConfigOwner(dtConv, dtConvNul));
+      modelBuilder.ApplyConfiguration(new ConfigCustomer(dtConv, dtConvNul));
       modelBuilder.ApplyConfiguration(new ConfigEmployee(dtConv, dtConvNul));
 
       modelBuilder.ApplyConfiguration(new ConfigAccount(dtConv, dtConvNul));
@@ -75,7 +73,7 @@ public sealed class BankingDbContext(
 
    4) Aggregate Root vs Child Entity
    ---------------------------------
-   AggregateRoots (Owner, Account) werden separat konfiguriert.
+   AggregateRoots (Customer, Account) werden separat konfiguriert.
    Child Entities (Beneficiary) können eine eigene EF-Config haben,
    ohne die Aggregate-Grenze fachlich zu verletzen.
 

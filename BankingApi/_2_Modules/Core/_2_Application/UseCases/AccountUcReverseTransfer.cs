@@ -25,7 +25,7 @@
 //       if (original is null)
 //          return Result<Transfer>.Failure(TransferErrors.NotFound);
 //
-//       // 2 Safety check ownership
+//       // 2 Safety check employeeship
 //       if (original.FromAccountId != accountId)
 //          return Result<Transfer>.Failure(DomainErrors.Forbidden);
 //

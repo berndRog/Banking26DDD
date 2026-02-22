@@ -15,7 +15,7 @@ namespace BankingApi._2_Modules.Employees._2_Application.UseCases;
 
 public class EmployeeUcCreateProvision(
    IIdentityGateway identityGateway,
-   IEmployeesRepository repository,
+   IEmployeeRepository repository,
    IUnitOfWork unitOfWork,
    IClock clock,
    ILogger<EmployeeUcCreateProvision> logger

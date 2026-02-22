@@ -11,7 +11,7 @@ title Owner Activation\nEmployee Authorization + Initial Account Opening
 actor "Bank Employee" as User
 
 box "API Layer"
-participant "OwnersController" as API
+participant "EmployeesController" as API
 end box
 
 box "BC Owner"
@@ -31,8 +31,8 @@ participant "Accounts" as Accounts
 end box
 
 == Request ==
-User -> API : POST /owners/{id}/activate(iban)
-API -> UcActivate : Execute(ownerId)
+User -> API : POST /employees/{id}/activate(iban)
+API -> UcActivate : Execute(customerId)
 
 == Authorize Employee ==
 UcActivate -> EmpContract : RequireEmployee(OwnerActivate)
@@ -45,7 +45,7 @@ alt not authorized
     API --> User : Forbidden
 else authorized
     == Load Owner ==
-    UcActivate -> OwnerRepo : FindById(ownerId)
+    UcActivate -> OwnerRepo : FindById(customerId)
     OwnerRepo --> UcActivate : Owner / null
 
     alt owner not found
@@ -53,7 +53,7 @@ else authorized
         API --> User : Not Found
     else owner found
         == Open Initial Account ==
-        UcActivate -> AccContract : OpenInitialAccount(ownerId, iban)
+        UcActivate -> AccContract : OpenInitialAccount(customerId, iban)
         AccContract -> Accounts : Create Account
         Accounts --> AccContract : AccountCreated / Failure
 

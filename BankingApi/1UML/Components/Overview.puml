@@ -3,7 +3,7 @@ skinparam componentStyle uml2
 left to right direction
 
 package "Inbound (ASP.NET)" {
-  component "OwnersController" as OwnersCtrl
+  component "EmployeesController" as OwnersCtrl
   component "EmployeesController" as EmpCtrl
   component "CoreController" as CoreCtrl
 }

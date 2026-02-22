@@ -8,7 +8,7 @@ namespace BankingApiTest.Infrastructure;
 
 public sealed class TestAuthHandler : AuthenticationHandler<AuthenticationSchemeOptions> {
    public const string Scheme = "TestScheme";
-   public const string Header = "X-Test-Roles"; // z.B. "Owner" oder "Employee" oder "Owner,Employee"
+   public const string Header = "X-Test-Roles"; // z.B. "Customer" oder "Employee" oder "Customer,Employee"
 
    public TestAuthHandler(
       IOptionsMonitor<AuthenticationSchemeOptions> options,

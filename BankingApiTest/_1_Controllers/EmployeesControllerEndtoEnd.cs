@@ -1,14 +1,13 @@
 using System.Net;
 using System.Net.Http.Json;
+using BankingApi._2_Modules.Customers._2_Application.Dtos;
 using BankingApi._2_Modules.Employees._2_Application.Dtos;
-using BankingApi._2_Modules.Owners._2_Application.Dtos;
-using BankingApi._2_Modules.Owners._3_Domain.Enum;
 using BankingApi._3_Infrastructure.Database;
 using BankingApi._4_BuildingBlocks._3_Domain.ValueObjects;
 using BankingApiTest.Infrastructure;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
-namespace BankingApiTest._2_Modules.Owners.Application;
+namespace BankingApiTest._2_Modules.Employees.Application;
 
 public sealed class EmployeesControllerEndToEnd : IntegrationTestBase {
    private TestSeed _seed = new TestSeed();
@@ -83,7 +82,7 @@ public sealed class EmployeesControllerEndToEnd : IntegrationTestBase {
       // Arrange
       Factory.TestSubject = "testOwner-123";
       Factory.TestUsername = "test.owner@test.local";
-      Factory.TestAdminRights = 0; // Owner, kein Employe
+      Factory.TestAdminRights = 0; // Customer, kein Employe
       
       // Act
       var request = new HttpRequestMessage(
@@ -98,7 +97,7 @@ public sealed class EmployeesControllerEndToEnd : IntegrationTestBase {
          userMessage: $"Unexpected status {(int)response.StatusCode} {response.StatusCode}\n"
       );
       
-     var ownerProvisionDto = await response.Content.ReadFromJsonAsync<OwnerProvisionDto>(); // helpful for debugging
+     var ownerProvisionDto = await response.Content.ReadFromJsonAsync<CustomerProvisionDto>(); // helpful for debugging
      NotNull(ownerProvisionDto);
      var id = ownerProvisionDto.Id;
      
@@ -122,10 +121,10 @@ public sealed class EmployeesControllerEndToEnd : IntegrationTestBase {
    
    
    [Fact]
-   public async Task GetAndPost_EmployeeProfile_ok() {
+   public async Task GetAndPut_EmployeeProfile_ok() {
       // Arrange
-      Factory.TestSubject = "testOwner-123";
-      Factory.TestUsername = "test.owner@test.local";
+      Factory.TestSubject = "test-employee";
+      Factory.TestUsername = "test.employee@test.local";
       Factory.TestAdminRights = 511; // Employe
       
       // Provisioning (idempotent, should return same owner on repeated calls)
@@ -226,26 +225,25 @@ public sealed class EmployeesControllerEndToEnd : IntegrationTestBase {
    [Fact]
    public async Task Employee_GetById_ok() {
       // Assert
-      var owners = _seed.Owners;
-    //  var owner = owners[0];
-      var owner = owners[1];
+      var employees = _seed.Employees;
+      var employee = employees[1];
       
       // damit TestAuthHandler den
       await Factory.WithScopeAsync(async serviceProvider => {
          var db = serviceProvider.GetRequiredService<BankingDbContext>();
          // seed here...
-         db.Owners.AddRange(owners);
+         db.Employees.AddRange(employees);
          await db.SaveChangesAsync();
       });
 
       // Act
-      var id = owner.Id;
+      var id = employee.Id;
       
       var request = new HttpRequestMessage(
          HttpMethod.Get,
-         $"/bankingapi/v1/owners/{id}"
+         $"/bankingapi/v1/employees/{id}"
       );
-      request.Headers.Add(TestAuthHandler.Header, "Owner");
+      request.Headers.Add(TestAuthHandler.Header, "Customer");
       
       var response = await Client.SendAsync(request);
       
@@ -256,27 +254,26 @@ public sealed class EmployeesControllerEndToEnd : IntegrationTestBase {
       );
       
       // Assert
-      var actualOwnerDto = await response.Content.ReadFromJsonAsync<OwnerDto>();
-      NotNull(actualOwnerDto);
+      var actualEmployeeDto = await response.Content.ReadFromJsonAsync<EmployeeDto>();
+      NotNull(actualEmployeeDto);
       
-      Equals(owner.Id, actualOwnerDto?.Id);
-      Equals(owner.Firstname, actualOwnerDto?.Firstname);
-      Equals(owner.Lastname, actualOwnerDto?.Lastname);
-      Equals(owner.CompanyName, actualOwnerDto?.CompanyName);
-      Equals(owner.Email, actualOwnerDto?.EmailString);
-      Equals((int)owner.Status, actualOwnerDto?.StatusInt);
-      //Equal(Factory.TestSubject, owner.Subject);
-      Equals(owner.Address?.Street, actualOwnerDto?.Street);
-      Equals(owner.Address?.PostalCode, actualOwnerDto?.PostalCode);
-      Equals(owner.Address?.City, actualOwnerDto?.City);
-      Equals(owner.Address?.Country, actualOwnerDto?.Country);
+      var actualEmail = Email.Create(actualEmployeeDto?.EmailString).Value;
+      var actualPhone = Phone.Create(actualEmployeeDto?.PhoneString).Value;
+      
+      Equals(employee.Id, actualEmployeeDto?.Id);
+      Equals(employee.Firstname, actualEmployeeDto?.Firstname);
+      Equals(employee.Lastname, actualEmployeeDto?.Lastname);
+      Equals(employee.Email, actualEmployeeDto?.EmailString);
+      Equals(employee.Phone, actualPhone);
+      Equals(employee.PersonnelNumber, actualEmployeeDto?.PersonnelNumber);
+      Equals(employee.IsActive, actualEmployeeDto?.IsActive);
    }
    
    [Fact]
    public async Task Employee_GetByEmail_ok() {
       // Assert
       var employees = _seed.Employees; // damit TestAuthHandler den
-      var employee1 = employees[0];
+      var employee = employees[0];
       await Factory.WithScopeAsync(async serviceProvider => {
          var dbContext = serviceProvider.GetRequiredService<BankingDbContext>();
          // seed here...
@@ -285,7 +282,7 @@ public sealed class EmployeesControllerEndToEnd : IntegrationTestBase {
       });
 
       // Act
-      var email = employee1.Email.Value;
+      var email = employee.Email.Value;
       
       var request = new HttpRequestMessage(
          HttpMethod.Get,
@@ -309,13 +306,13 @@ public sealed class EmployeesControllerEndToEnd : IntegrationTestBase {
       var actualEmail = Email.Create(actualEmployeeDto?.EmailString).Value;
       var actualPhone = Phone.Create(actualEmployeeDto?.PhoneString).Value;
       
-      Equals(employee1.Id, actualEmployeeDto?.Id);
-      Equals(employee1.Firstname, actualEmployeeDto?.Firstname);
-      Equals(employee1.Lastname, actualEmployeeDto?.Lastname);
-      Equals(employee1.Email, actualEmail);
-      Equals(employee1.Phone, actualPhone);
-      Equals(employee1.PersonnelNumber, actualEmployeeDto?.PersonnelNumber);
-      Equals(employee1.IsActive, actualEmployeeDto?.IsActive);
+      Equals(employee.Id, actualEmployeeDto?.Id);
+      Equals(employee.Firstname, actualEmployeeDto?.Firstname);
+      Equals(employee.Lastname, actualEmployeeDto?.Lastname);
+      Equals(employee.Email, actualEmail);
+      Equals(employee.Phone, actualPhone);
+      Equals(employee.PersonnelNumber, actualEmployeeDto?.PersonnelNumber);
+      Equals(employee.IsActive, actualEmployeeDto?.IsActive);
  
    }
 }

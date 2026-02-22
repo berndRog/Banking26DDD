@@ -17,7 +17,7 @@ public static class EmployeeApplicationErrors {
    
    public static readonly DomainErrors OwnerCannotUpdateEmployeeProfile =
       new(ErrorCode.UnprocessableEntity,
-         Title: "Employee: Owner cannot update Employee profiles",
+         Title: "Employee: Customer cannot update Employee profiles",
          Message: "The employee profile is blocked against owner access.");
    
    public static readonly DomainErrors EmployeeRightsRequired =

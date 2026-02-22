@@ -1,8 +1,7 @@
 using System.Linq.Expressions;
 using BankingApi._2_Modules.Core._3_Domain.Aggregates;
 using BankingApi._2_Modules.Core._3_Domain.ValueObjects;
-using BankingApi._2_Modules.Owners._2_Application.Dtos;
-using BankingApi._2_Modules.Owners._2_Application.ReadModel;
+using BankingApi._2_Modules.Employees._2_Application.ReadModel;
 using BankingApi._4_BuildingBlocks;
 using BankingApi._4_BuildingBlocks._4_Infrastructure.ReadModel;
 using BankingApi.Core.Dto;
@@ -25,7 +24,7 @@ public interface IAccountsReadModel {
    );
 
    Task<Result<IEnumerable<AccountDto>>> SelectByOwnerIdAsync(
-      Guid ownerId,
+      Guid customerId,
       CancellationToken ctToken = default 
    );
    
@@ -49,8 +48,8 @@ public interface IAccountsReadModel {
       CancellationToken ct = default
    );
 
-   // Task<Result<PagedResult<OwnerDto>>> FilterAsync(
-   //    OwnerSearchFilter filter,
+   // Task<Result<PagedResult<CustomerDto>>> FilterAsync(
+   //    CustomerSearchFilter filter,
    //    PageRequest page,
    //    CancellationToken ct
    // );

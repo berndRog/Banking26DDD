@@ -6,7 +6,7 @@ namespace BankingApi._2_Modules.Core._1_Ports.Inbound;
 public interface IAccountsUseCases{
 
    Task<Result<AccountDto>> CreateAsync(
-      Guid ownerId,
+      Guid customerId,
       string iban,
       decimal balance = 0m,
       int currency = 1, // default to EUR

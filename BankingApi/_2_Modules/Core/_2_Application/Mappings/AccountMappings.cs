@@ -9,7 +9,7 @@ public static class AccountMappings {
       IbanString: account.Iban.Value,
       BalanceDecimal: account.Balance.Amount,
       CurrencyInt: (int)account.Balance.Currency,
-      OwnerId: account.OwnerId   
+      CustomerId: account.CustomerId   
    );
 
    public static BeneficiaryDto ToBeneficiaryDto(this Beneficiary beneficiary) => new(

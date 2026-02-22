@@ -4,13 +4,13 @@
 // using BankingApi._2_Modules.Core._2_Application.UseCases;
 // using BankingApi._2_Modules.Core._3_Domain.Aggregates;
 // using BankingApi._2_Modules.Core._4_Infrastructure.Repositories;
-// using BankingApi._2_Modules.Owners._3_Domain.Aggregates;
+// using BankingApi._2_Modules.Customers._3_Domain.Aggregates;
 // using BankingApi._3_Infrastructure.Database;
 // using BankingApi._4_BuildingBlocks._1_Ports.Inbound;
 // using BankingApi._4_BuildingBlocks._4_Infrastructure.Persistence;
 // using Microsoft.Data.Sqlite;
 // using Microsoft.EntityFrameworkCore;
-// namespace BankingApiTest.Modules.Owners.Infrastructure;
+// namespace BankingApiTest.Modules.Customers.Infrastructure;
 //
 // public sealed class TransferUcSendMoneyIntT : TestBase, IAsyncLifetime {
 //
@@ -45,7 +45,7 @@
 //       _transferRepository = new TransferRepository(bankingDbContext);
 //       _unitOfWork = new UnitOfWork(bankingDbContext, _clock, CreateLogger<UnitOfWork>());
 //       
-//       _accountUcCreate = new AccountUcCreate(new FakeOwnerLookup(_seed),
+//       _accountUcCreate = new AccountUcCreate(new FakeCustomerLookup(_seed),
 //          _accountsRepository, _unitOfWork, _clock, CreateLogger<AccountUcCreate>());
 //       
 //       // System under test
@@ -68,8 +68,8 @@
 //       var beneficiary =  _seed.Beneficiary1;
 //       var transfer = _seed.Transfer1;
 //
-//       // create fromAccount for Owner1 in database
-//       var accountId = await CreateAccountForOwner(_seed.Owner1, fromAccount);
+//       // create fromAccount for Customer1 in database
+//       var accountId = await CreateAccountForOwner(_seed.Customer1, fromAccount);
 //       var account = await _accountsRepository.FindWithBeneficiariesByIdAsync(accountId, _ct);
 //       NotNull(account);
 //       // add beneficiary to account
@@ -111,10 +111,10 @@
 //    }
 //
 //    //--- Helpers ---
-//    private async Task<Guid> CreateAccountForOwner(Owner owner, Account account) {
+//    private async Task<Guid> CreateAccountForOwner(Customer owner, Account account) {
 //       // create account in database
 //       var resultAccount = await _accountUcCreate.ExecuteAsync(
-//          ownerId: owner.Id,
+//          customerId: owner.Id,
 //          iban: account.Iban,
 //          balance: account.Balance,
 //          id: account.Id.ToString(),

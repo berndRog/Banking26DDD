@@ -1,20 +1,20 @@
 using BankingApi._2_Modules.Core._1_Ports.Outbound;
 using BankingApi._2_Modules.Core._2_Application.UseCases;
 using BankingApi._2_Modules.Core._4_Infrastructure.Repositories;
-using BankingApi._2_Modules.Owners._1_Ports.Inbound;
+using BankingApi._2_Modules.Customers._1_Ports.Inbound;
 using BankingApi._3_Infrastructure._1_Ports.Inbound;
 using BankingApi._3_Infrastructure.Database;
 using BankingApi._4_BuildingBlocks._1_Ports.Inbound;
 using BankingApiTest.Infrastructure;
 using Microsoft.Data.Sqlite;
 using Microsoft.EntityFrameworkCore;
-namespace BankingApiTest.Modules.Owners.Infrastructure;
+namespace BankingApiTest.Modules.Employees.Infrastructure;
 
 public sealed class AccountUcAddBeneficiaryIntT : TestBase, IAsyncLifetime {
 
    private SqliteConnection _dbConnection = null!;
    private BankingDbContext _dbContext = null!;
-   private IOwnerLookupContract _ownerLookup = null!;
+   private ICustomerLookupContract _customerLookup = null!;
    private IAccountRepository _repository = null!;
    private IUnitOfWork _unitOfWork = null!;
    private TestSeed _seed = null!;
@@ -54,7 +54,7 @@ public sealed class AccountUcAddBeneficiaryIntT : TestBase, IAsyncLifetime {
       
       // System under test
       _sut = new AccountUcCreate(
-         _ownerLookup,
+         _customerLookup,
          _repository,
          _unitOfWork,
          _clock,
@@ -78,12 +78,12 @@ public sealed class AccountUcAddBeneficiaryIntT : TestBase, IAsyncLifetime {
    [Fact]
    public async Task Create_account() {
       // Arrange
-      var owner = _seed.Owner5();
+      var owner = _seed.Customer5();
       var account = _seed.Account6();
       
       // Act
       var result = await _sut.ExecuteAsync(
-         ownerId: owner.Id,
+         customerId: owner.Id,
          ibanString: account.Iban.Value,
          balanceDecimal: account.Balance.Amount,
          currency: (int)account.Balance.Currency,
@@ -103,12 +103,12 @@ public sealed class AccountUcAddBeneficiaryIntT : TestBase, IAsyncLifetime {
    [Fact]
    public async Task Create_account_with_invalid_iban_fails() {
       // Arrange
-      var owner = _seed.Owner5();
+      var owner = _seed.Customer5();
       var account = _seed.Account6();
       
       // Act
       var result = await _sut.ExecuteAsync(
-         ownerId: owner.Id,
+         customerId: owner.Id,
          ibanString: "ABC123456789",
          balanceDecimal: account.Balance.Amount,
          currency: (int)account.Balance.Currency,
@@ -121,12 +121,12 @@ public sealed class AccountUcAddBeneficiaryIntT : TestBase, IAsyncLifetime {
    [Fact]
    public async Task Create_account_with_invalid_id_fails() {
       // Arrange
-      var owner = _seed.Owner5();
+      var owner = _seed.Customer5();
       var account = _seed.Account6();
       
       // Act
       var result = await _sut.ExecuteAsync(
-         ownerId: owner.Id,
+         customerId: owner.Id,
          ibanString: account.Iban.Value,
          balanceDecimal: account.Balance.Amount,
          currency: (int)account.Balance.Currency,

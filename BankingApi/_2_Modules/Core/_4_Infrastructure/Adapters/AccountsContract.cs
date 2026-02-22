@@ -22,14 +22,14 @@ public class AccountsContract(
 ): IAccountsContract{
    
    public async Task<Result<AccountDto>> OpenInitialAccountAsync(
-      Guid ownerId, 
+      Guid customerId, 
       string? accoutIdString = null,
       string? ibanString = null,
       CancellationToken ct = default!
    ) {
       
       // Check if owner already has an account (not required, but good to have for this use case)
-      var exists = await repository.ExistsByOwnerIdAsync(ownerId, ct);
+      var exists = await repository.ExistsByOwnerIdAsync(customerId, ct);
       if (exists)
          return Result<AccountDto>.Failure(AccountApplicationErrors.OwnerAlreadyHasAccount);
       
@@ -60,7 +60,7 @@ public class AccountsContract(
       
       var resultAccount = Account.Create(
          clock: clock, 
-         ownerId: ownerId,
+         customerId: customerId,
          iban: iban,
          balance: balance,
          id: accoutIdString
@@ -75,8 +75,8 @@ public class AccountsContract(
       // Persist
       var savedRows = await unitOfWork.SaveAllChangesAsync("Initial account", ct);
       logger.LogInformation(
-         "Initial account created ownerId={ownId} accountId {accId} savedRows={rows}", 
-         ownerId, account.Id, savedRows);
+         "Initial account created customerId={ownId} accountId {accId} savedRows={rows}", 
+         customerId, account.Id, savedRows);
       
       return Result<AccountDto>.Success(account.ToAccountDto());
    }

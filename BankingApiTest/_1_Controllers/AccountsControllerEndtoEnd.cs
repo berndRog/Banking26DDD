@@ -1,7 +1,8 @@
 using System.Net;
 using System.Net.Http.Json;
-using BankingApi._2_Modules.Owners._2_Application.Dtos;
-using BankingApi._2_Modules.Owners._3_Domain.Enum;
+using BankingApi._2_Modules.Customers._2_Application.Dtos;
+using BankingApi._2_Modules.Customers._3_Domain.Enum;
+using BankingApi._3_Infrastructure._1_Ports.Inbound;
 using BankingApi._3_Infrastructure.Database;
 using BankingApi.Core.Dto;
 using BankingApiTest.Infrastructure;
@@ -15,62 +16,37 @@ public sealed class AccountsControllerEndToEnd : IntegrationTestBase {
    // For teaching: keep DB so students can inspect it afterwards.
    protected override bool DeleteDatabaseOnDispose => false;
 
-   #region Post_Account_Create
+   #region PostAccount_Create
    [Fact]
    public async Task PostAccount_Create_ok() {
       // Arrange
-      var owner1 = _seed.Owner1();
+      var customer1 = _seed.Customer1();
       var account1 = _seed.Account1();
       var account2 = _seed.Account2();
-
-      // Owner with first account will be created with this endpoint
-      var iban1String = account1.Iban.Value;
-
-      var requestOwnerDto = new OwnerDto(
-         Id: owner1.Id,
-         Firstname: owner1.Firstname,
-         Lastname: owner1.Lastname,
-         CompanyName: owner1.CompanyName,
-         EmailString: owner1.Email.Value,
-         StatusInt: (int)OwnerStatus.Active,
-         Street: owner1.Address?.Street,
-         PostalCode: owner1.Address?.PostalCode,
-         City: owner1.Address?.City,
-         Country: owner1.Address?.Country
-      );
+      var customerId = customer1.Id;
+      
+      await Factory.WithScopeAsync(async serviceProvider => {
+         var db = serviceProvider.GetRequiredService<BankingDbContext>();
+         // seed here...
+         db.Customers.Add(customer1);
+         db.Accounts.Add(account1);
+         await db.SaveChangesAsync();
+      });
+      
       // Act
-      var subjectOwner =
-         "12345678-0000-0000-0000-000000000000"; // in real scenario, subject should come from auth token or be generated in use case
-
-      var responsePostOwner = await Client.PostAsJsonAsync(
-         $"/bankingapi/v1/owners?subject={Uri.EscapeDataString(subjectOwner)}&iban={Uri.EscapeDataString(iban1String)}",
-         requestOwnerDto
-      );
-
-      var ownerDto = await responsePostOwner.Content.ReadFromJsonAsync<OwnerDto>(); // helpful for debugging
-      NotNull(ownerDto);
-      var ownerId = ownerDto.Id;
-
-      True(
-         condition: responsePostOwner.StatusCode is HttpStatusCode.Created,
-         userMessage: $"Unexpected status {(int)responsePostOwner.StatusCode} {responsePostOwner.StatusCode}\n{ownerId}"
-      );
-
-      var iban2String = account2.Iban.Value;
       var requestAccountDto = new AccountDto(
          Id: account2.Id,
          IbanString: account2.Iban.Value,
          BalanceDecimal: account2.Balance.Amount,
          CurrencyInt: (int)account2.Balance.Currency, // "EUR",
-         OwnerId: account2.OwnerId
+         CustomerId: account2.CustomerId
       );
-      // Act
-      //  [HttpPost("owners/{ownerId:guid}/accounts")]
+      //  [HttpPost("customers/{customerId:guid}/accounts")]
       var request = new HttpRequestMessage(
          HttpMethod.Post,
-         $"/bankingapi/v1/owners/{ownerId}/accounts"
+         $"/bankingapi/v1/customers/{customerId}/accounts"
       );
-      request.Headers.Add(TestAuthHandler.Header, "Owner");
+      request.Headers.Add(TestAuthHandler.Header, "Customer");
       request.Content = JsonContent.Create(requestAccountDto);
 
       var responsePostAccount = await Client.SendAsync(request);
@@ -81,7 +57,7 @@ public sealed class AccountsControllerEndToEnd : IntegrationTestBase {
       Equal(account2.Iban.Value, account2Dto.IbanString);
       Equal(account2.Balance.Amount, account2Dto.BalanceDecimal);
       Equal((int)account2.Balance.Currency, account2Dto.CurrencyInt);
-      Equal(account2.OwnerId, account2Dto.OwnerId);
+      Equal(account2.CustomerId, account2Dto.CustomerId);
 
       // Assert (HTTP)
       True(
@@ -93,59 +69,271 @@ public sealed class AccountsControllerEndToEnd : IntegrationTestBase {
       // Assert (DB)
       await Factory.WithScopeAsync(async serviceProvider => {
          var dbContext = serviceProvider.GetRequiredService<BankingDbContext>();
-
-         // IMPORTANT: use AsNoTracking to avoid tracking artifacts
-         var owner = await dbContext.Owners
-            .AsNoTracking()
-            .Where(o => o.Id == ownerId)
-            .SingleOrDefaultAsync();
-
-         NotNull(owner);
-
+         
          // Domain-level checks
-
          var accounts = await dbContext.Accounts
             .AsNoTracking()
-            .Where(a => a.OwnerId == ownerId)
+            .Where(a => a.CustomerId == customerId)
             .ToListAsync();
          Equal(2, accounts.Count);
-         
-         var actualAccount1 = accounts[0];
-         // Equal(account1.Id, actualAccount1.Id);
-         Equal(account1.Iban.Value, actualAccount1.Iban.Value);
-         Equal(0.0m, actualAccount1.Balance.Amount);
-         Equal(account1.Balance.Currency, actualAccount1.Balance.Currency);
-         Equal(account1.OwnerId, actualAccount1.OwnerId);
          
          var actualAccount2 = accounts[1];
          Equal(account2.Id, actualAccount2.Id);
          Equal(account2.Iban.Value, actualAccount2.Iban.Value);
          Equal(account2.Balance.Amount, actualAccount2.Balance.Amount);
          Equal(account2.Balance.Currency, actualAccount2.Balance.Currency);
-         Equal(account2.OwnerId, actualAccount2.OwnerId);
+         Equal(account2.CustomerId, actualAccount2.CustomerId);
       });
    }
    #endregion
    
-     #region Post_Beneficiary_Create
+   #region GetAccount_byId
+   [Fact]
+   public async Task GetAccountById() {
+      // Arrange
+      var customer1 = _seed.Customer1();
+      var account1 = _seed.Account1();
+      var account2 = _seed.Account2();
+      var accountId = account2.Id;
+      
+      await Factory.WithScopeAsync(async serviceProvider => {
+         var dbContext = serviceProvider.GetRequiredService<BankingDbContext>();
+         var unitOfWork = serviceProvider.GetRequiredService<IUnitOfWork>();
+         // seed here...
+         dbContext.Customers.Add(customer1);
+         dbContext.Accounts.Add(account1);
+         dbContext.Accounts.Add(account2);
+         await unitOfWork.SaveAllChangesAsync();
+      });
+      
+      // Act
+      var request = new HttpRequestMessage(
+         HttpMethod.Get,
+         $"/bankingapi/v1/accounts/{accountId}"
+      );
+      request.Headers.Add(TestAuthHandler.Header, "Customer");
+
+      var responseGetAccountbyId = await Client.SendAsync(request);
+      var accountDto = await responseGetAccountbyId.Content.ReadFromJsonAsync<AccountDto>(); // helpful for debugging
+      NotNull(accountDto);
+      
+      Equal(account2.Id, accountDto.Id);
+      Equal(account2.Iban.Value, accountDto.IbanString);
+      
+      // Assert (HTTP)
+      True(
+         condition: responseGetAccountbyId.StatusCode is HttpStatusCode.OK,
+         userMessage:
+         $"Unexpected status {(int)responseGetAccountbyId.StatusCode} {responseGetAccountbyId.StatusCode}\n{accountDto.Id}"
+      );
+
+      // Assert (DB)
+      await Factory.WithScopeAsync(async serviceProvider => {
+         var dbContext = serviceProvider.GetRequiredService<BankingDbContext>();
+         
+         // Domain-level checks
+         var actualAccount = await dbContext.Accounts
+            .AsNoTracking()
+            .FirstOrDefaultAsync(a => a.Id == accountId);
+         
+         Equal(account2.Id, actualAccount.Id);
+         Equal(account2.Iban.Value, actualAccount.Iban.Value);
+         Equal(account2.Balance.Amount, actualAccount.Balance.Amount);
+         Equal(account2.Balance.Currency, actualAccount.Balance.Currency);
+         Equal(account2.CustomerId, actualAccount.CustomerId);
+      });
+   }
+   #endregion
+   
+   #region GetAccount_byIban
+   [Fact]
+   public async Task GetAccountByIban() {
+      // Arrange
+      var customer1 = _seed.Customer1();
+      var account1 = _seed.Account1();
+      var account2 = _seed.Account2();
+      
+      await Factory.WithScopeAsync(async serviceProvider => {
+         var dbContext = serviceProvider.GetRequiredService<BankingDbContext>();
+         var unitOfWork = serviceProvider.GetRequiredService<IUnitOfWork>();
+         // seed here...
+         dbContext.Customers.Add(customer1);
+         dbContext.Accounts.Add(account1);
+         dbContext.Accounts.Add(account2);
+         await unitOfWork.SaveAllChangesAsync();
+      });
+      
+      // Act
+      var request = new HttpRequestMessage(
+         HttpMethod.Get,
+         $"/bankingapi/v1/accounts/iban/{account2.Iban}"
+      );
+      request.Headers.Add(TestAuthHandler.Header, "Customer");
+
+      var responseGetAccountbyId = await Client.SendAsync(request);
+      var accountDto = await responseGetAccountbyId.Content.ReadFromJsonAsync<AccountDto>(); // helpful for debugging
+      NotNull(accountDto);
+      
+      Equal(account2.Id, accountDto.Id);
+      Equal(account2.Iban.Value, accountDto.IbanString);
+      
+      // Assert (HTTP)
+      True(
+         condition: responseGetAccountbyId.StatusCode is HttpStatusCode.OK,
+         userMessage:
+         $"Unexpected status {(int)responseGetAccountbyId.StatusCode} {responseGetAccountbyId.StatusCode}\n{accountDto.Id}"
+      );
+
+      // Assert (DB)
+      await Factory.WithScopeAsync(async serviceProvider => {
+         var dbContext = serviceProvider.GetRequiredService<BankingDbContext>();
+         
+         // Domain-level checks
+         var actualAccount = await dbContext.Accounts
+            .AsNoTracking()
+            .FirstOrDefaultAsync(a => a.Iban == account2.Iban);
+         
+         Equal(account2.Id, actualAccount.Id);
+         Equal(account2.Iban.Value, actualAccount.Iban.Value);
+         Equal(account2.Balance.Amount, actualAccount.Balance.Amount);
+         Equal(account2.Balance.Currency, actualAccount.Balance.Currency);
+         Equal(account2.CustomerId, actualAccount.CustomerId);
+      });
+   }
+   #endregion
+   
+   #region GetAllAccounts
+   [Fact]
+   public async Task GetAllAccounts() {
+      // Arrange
+      var accounts = _seed.Accounts;
+      
+      await Factory.WithScopeAsync(async serviceProvider => {
+         var dbContext = serviceProvider.GetRequiredService<BankingDbContext>();
+         var unitOfWork = serviceProvider.GetRequiredService<IUnitOfWork>(); 
+         dbContext.Accounts.AddRange(accounts);
+         await unitOfWork.SaveAllChangesAsync();
+      });
+      
+      // Act
+      var request = new HttpRequestMessage(
+         HttpMethod.Get,
+         $"/bankingapi/v1/accounts"
+      );
+      request.Headers.Add(TestAuthHandler.Header, "Employee");
+
+      var responseAllGetAccounts = await Client.SendAsync(request);
+      // Assert (HTTP)
+      True(
+         condition: responseAllGetAccounts.StatusCode is HttpStatusCode.OK,
+         userMessage:
+         $"Unexpected status {(int)responseAllGetAccounts.StatusCode} {responseAllGetAccounts.StatusCode}\n"
+      );
+      var accountDtos = await responseAllGetAccounts.Content.ReadFromJsonAsync<List<AccountDto>>(); // helpful for debugging
+      NotNull(accountDtos);
+      
+      Equal(accounts.Count, accountDtos.Count);
+      var expectedIds = accounts.Select(a => a.Id).OrderBy(id => id).ToList();
+      var accountIds   = accountDtos.Select(a => a.Id).OrderBy(id => id).ToList();
+      Equal(expectedIds, accountIds);
+
+
+      // Assert (DB)
+      await Factory.WithScopeAsync(async serviceProvider => {
+         var dbContext = serviceProvider.GetRequiredService<BankingDbContext>();
+         
+         // Domain-level checks
+         var actualAccount = await dbContext.Accounts
+            .AsNoTracking()
+            .ToListAsync();
+         
+         var actualIds   = actualAccount.Select(a => a.Id).OrderBy(id => id).ToList();
+         Equal(expectedIds, accountIds);
+
+      });
+   }
+   #endregion
+   
+   
+   #region GetAccounts_ByOwnerId
+   [Fact]
+   public async Task GetAccountsByOwnerId() {
+      // Arrange
+      var Customers = _seed.Customers;
+      var accounts = _seed.Accounts;
+      var customerId = _seed.Customer1().Id;
+      
+      await Factory.WithScopeAsync(async serviceProvider => {
+         var dbContext = serviceProvider.GetRequiredService<BankingDbContext>();
+         var unitOfWork = serviceProvider.GetRequiredService<IUnitOfWork>(); 
+         dbContext.Customers.AddRange(Customers);
+         dbContext.Accounts.AddRange(accounts);
+         await unitOfWork.SaveAllChangesAsync();
+      });
+      
+      // Act
+      var request = new HttpRequestMessage(
+         HttpMethod.Get,
+         $"/bankingapi/v1/customers/{customerId}/accounts"
+      );
+      request.Headers.Add(TestAuthHandler.Header, "Employee");
+
+      var responseAllGetAccounts = await Client.SendAsync(request);
+      // Assert (HTTP)
+      True(
+         condition: responseAllGetAccounts.StatusCode is HttpStatusCode.OK,
+         userMessage:
+         $"Unexpected status {(int)responseAllGetAccounts.StatusCode} {responseAllGetAccounts.StatusCode}\n"
+      );
+      var accountDtos = await responseAllGetAccounts.Content.ReadFromJsonAsync<List<AccountDto>>(); // helpful for debugging
+      NotNull(accountDtos);
+      
+      Equal(2, accountDtos.Count);
+      var expectedIds = accounts
+         .Where(a => a.CustomerId == customerId)
+         .Select(a => a.Id)
+         .OrderBy(id => id).ToList();
+      var accountDtosIds  = accountDtos
+         .Select(a => a.Id)
+         .OrderBy(id => id).ToList();
+      Equal(expectedIds, accountDtosIds);
+      
+      // Assert (DB)
+      await Factory.WithScopeAsync(async serviceProvider => {
+         var dbContext = serviceProvider.GetRequiredService<BankingDbContext>();
+         
+         // Domain-level checks
+         var actualAccountIds = await dbContext.Accounts
+            .AsNoTracking()
+            .Where(a => a.CustomerId == customerId)
+            .Select(a => a.Id)
+            .OrderBy(id => id)
+            .ToListAsync();
+         Equal(expectedIds, actualAccountIds);
+
+      });
+   }
+   #endregion
+   
+   #region Post_Beneficiary_Create
    [Fact]
    public async Task PostBeneAccount_Create_ok() {
       // Arrange
-      var owner1 = _seed.Owner1();
+      var owner1 = _seed.Customer1();
       var account1 = _seed.Account1();
       var account2 = _seed.Account2();
       var beneficiary1 = _seed.Beneficiary1();
 
-      // Owner with first account will be created with this endpoint
+      // Customer with first account will be created with this endpoint
       var iban1String = account1.Iban.Value;
 
-      var requestOwnerDto = new OwnerDto(
+      var requestOwnerDto = new CustomerDto(
          Id: owner1.Id,
          Firstname: owner1.Firstname,
          Lastname: owner1.Lastname,
          CompanyName: owner1.CompanyName,
          EmailString: owner1.Email.Value,
-         StatusInt: (int)OwnerStatus.Active,
+         StatusInt: (int)CustomerStatus.Active,
          Street: owner1.Address?.Street,
          PostalCode: owner1.Address?.PostalCode,
          City: owner1.Address?.City,
@@ -156,17 +344,17 @@ public sealed class AccountsControllerEndToEnd : IntegrationTestBase {
          "12345678-0000-0000-0000-000000000000"; // in real scenario, subject should come from auth token or be generated in use case
 
       var responsePostOwner = await Client.PostAsJsonAsync(
-         $"/bankingapi/v1/owners?subject={Uri.EscapeDataString(subjectOwner)}&iban={Uri.EscapeDataString(iban1String)}",
+         $"/bankingapi/v1/employees?subject={Uri.EscapeDataString(subjectOwner)}&iban={Uri.EscapeDataString(iban1String)}",
          requestOwnerDto
       );
 
-      var ownerDto = await responsePostOwner.Content.ReadFromJsonAsync<OwnerDto>(); // helpful for debugging
+      var ownerDto = await responsePostOwner.Content.ReadFromJsonAsync<CustomerDto>(); // helpful for debugging
       NotNull(ownerDto);
-      var ownerId = ownerDto.Id;
+      var customerId = ownerDto.Id;
 
       True(
          condition: responsePostOwner.StatusCode is HttpStatusCode.Created,
-         userMessage: $"Unexpected status {(int)responsePostOwner.StatusCode} {responsePostOwner.StatusCode}\n{ownerId}"
+         userMessage: $"Unexpected status {(int)responsePostOwner.StatusCode} {responsePostOwner.StatusCode}\n{customerId}"
       );
 
       var iban2String = account2.Iban.Value;
@@ -175,15 +363,15 @@ public sealed class AccountsControllerEndToEnd : IntegrationTestBase {
          IbanString: account2.Iban.Value,
          BalanceDecimal: account2.Balance.Amount,
          CurrencyInt: (int)account2.Balance.Currency, // "EUR",
-         OwnerId: account2.OwnerId
+         CustomerId: account2.CustomerId
       );
       // Act
-      //  [HttpPost("owners/{ownerId:guid}/accounts")]
+      //  [HttpPost("employees/{customerId:guid}/accounts")]
       var request = new HttpRequestMessage(
          HttpMethod.Post,
-         $"/bankingapi/v1/owners/{ownerId}/accounts"
+         $"/bankingapi/v1/employees/{customerId}/accounts"
       );
-      request.Headers.Add(TestAuthHandler.Header, "Owner");
+      request.Headers.Add(TestAuthHandler.Header, "Customer");
       request.Content = JsonContent.Create(requestAccountDto);
 
       var responsePostAccount = await Client.SendAsync(request);
@@ -194,7 +382,7 @@ public sealed class AccountsControllerEndToEnd : IntegrationTestBase {
       Equal(account2.Iban.Value, account2Dto.IbanString);
       Equal(account2.Balance.Amount, account2Dto.BalanceDecimal);
       Equal((int)account2.Balance.Currency, account2Dto.CurrencyInt);
-      Equal(account2.OwnerId, account2Dto.OwnerId);
+      Equal(account2.CustomerId, account2Dto.CustomerId);
 
       // Assert (HTTP)
       True(
@@ -208,9 +396,9 @@ public sealed class AccountsControllerEndToEnd : IntegrationTestBase {
          var dbContext = serviceProvider.GetRequiredService<BankingDbContext>();
 
          // IMPORTANT: use AsNoTracking to avoid tracking artifacts
-         var owner = await dbContext.Owners
+         var owner = await dbContext.Customers
             .AsNoTracking()
-            .Where(o => o.Id == ownerId)
+            .Where(o => o.Id == customerId)
             .SingleOrDefaultAsync();
 
          NotNull(owner);
@@ -219,7 +407,7 @@ public sealed class AccountsControllerEndToEnd : IntegrationTestBase {
 
          var accounts = await dbContext.Accounts
             .AsNoTracking()
-            .Where(a => a.OwnerId == ownerId)
+            .Where(a => a.CustomerId == customerId)
             .ToListAsync();
          Equal(2, accounts.Count);
          
@@ -228,14 +416,14 @@ public sealed class AccountsControllerEndToEnd : IntegrationTestBase {
          Equal(account1.Iban.Value, actualAccount1.Iban.Value);
          Equal(0.0m, actualAccount1.Balance.Amount);
          Equal(account1.Balance.Currency, actualAccount1.Balance.Currency);
-         Equal(account1.OwnerId, actualAccount1.OwnerId);
+         Equal(account1.CustomerId, actualAccount1.CustomerId);
          
          var actualAccount2 = accounts[1];
          Equal(account2.Id, actualAccount2.Id);
          Equal(account2.Iban.Value, actualAccount2.Iban.Value);
          Equal(account2.Balance.Amount, actualAccount2.Balance.Amount);
          Equal(account2.Balance.Currency, actualAccount2.Balance.Currency);
-         Equal(account2.OwnerId, actualAccount2.OwnerId);
+         Equal(account2.CustomerId, actualAccount2.CustomerId);
       });
    }
    #endregion
@@ -244,19 +432,19 @@ public sealed class AccountsControllerEndToEnd : IntegrationTestBase {
    [Fact]
    public async Task GetAllOwners_ok() {
       // Assert
-      var owners = _seed.Owners;
-      var owner1 = owners[0];
+      var customers = _seed.Customers;
+      var customer = customers[0];
       await Factory.WithScopeAsync(async serviceProvider => {
          var dbContext = serviceProvider.GetRequiredService<BankingDbContext>();
          // seed here...
-         dbContext.Owners.AddRange(owners);
+         dbContext.Customers.AddRange(customers);
          await dbContext.SaveChangesAsync();
       });
 
       // Act
       var request = new HttpRequestMessage(
          HttpMethod.Get,
-         $"/bankingapi/v1/owners"
+         $"/bankingapi/v1/c"
       );
       request.Headers.Add(TestAuthHandler.Header, "Employee");
 
@@ -271,9 +459,9 @@ public sealed class AccountsControllerEndToEnd : IntegrationTestBase {
       // Assert
       response.EnsureSuccessStatusCode();
       Equal(HttpStatusCode.OK, response.StatusCode);
-      var actualOwnerDtos = await response.Content.ReadFromJsonAsync<List<OwnerDto>>();
+      var actualOwnerDtos = await response.Content.ReadFromJsonAsync<List<CustomerDto>>();
 
-      Equal(owners.Count, actualOwnerDtos?.Count);
+      Equal(customers.Count, actualOwnerDtos?.Count);
 
       // Equals(owner1.Id, actualOwnerDto?.Id);
       // Equals(owner1.Firstname, actualOwnerDto?.Firstname);

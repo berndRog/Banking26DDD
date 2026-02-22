@@ -1,6 +1,5 @@
 using BankingApi._2_Modules.Employees._3_Domain.Enums;
 using BankingApi._2_Modules.Employees._3_Domain.Errors;
-using BankingApi._2_Modules.Owners._3_Domain.Errors;
 using BankingApi._4_BuildingBlocks;
 using BankingApi._4_BuildingBlocks._1_Ports.Inbound;
 using BankingApi._4_BuildingBlocks._3_Domain;
@@ -47,7 +46,7 @@ public sealed class Employee : AggregateRoot<Guid> {
 
    private const AdminRights AllowedRights =
       AdminRights.ViewReports |
-      AdminRights.ViewOwners | AdminRights.ManageOwners |
+      AdminRights.ViewEmployees | AdminRights.ManageEmployees |
       AdminRights.ViewAccounts | AdminRights.ManageAccounts |
       AdminRights.ViewTransfers | AdminRights.ManageTransfers |
       AdminRights.ViewEmployees | AdminRights.ManageEmployees; 

@@ -1,14 +1,9 @@
 using BankingApi._2_Modules.Employees._3_Domain.Aggregates;
 using BankingApi._2_Modules.Employees._3_Domain.Enums;
-using BankingApi._2_Modules.Owners._2_Application.Dtos;
-using BankingApi._2_Modules.Owners._3_Domain.Aggregates;
-using BankingApi._2_Modules.Owners._3_Domain.Enum;
-using BankingApi._2_Modules.Owners._3_Domain.Errors;
 using BankingApi._4_BuildingBlocks._1_Ports.Inbound;
-using BankingApi._4_BuildingBlocks._3_Domain.Errors;
 using BankingApi._4_BuildingBlocks._3_Domain.ValueObjects;
 using BankingApiTest.Infrastructure;
-namespace BankingApiTest.Modules.Owners.Domain.Aggregates;
+namespace BankingApiTest.Modules.Employees.Domain.Aggregates;
 
 public sealed class EmployeeUt {
 
@@ -107,7 +102,7 @@ public sealed class EmployeeUt {
    [InlineData("   ")]
    public void CreatePerson_invalid_firstname_fails(string firstname) {
       // Act
-      var result = Owner.Create(
+      var result = Customer.Create(
          clock: _clock,
          firstname: firstname,
          lastname: _lastname,
@@ -119,13 +114,13 @@ public sealed class EmployeeUt {
 
       // Assert
       True(result.IsFailure);
-      Equal(OwnerErrors.FirstnameIsRequired, result.Error);
+      Equal(CustomerErrors.FirstnameIsRequired, result.Error);
    }
 
    [Theory]
    [MemberData(nameof(InvalidNameLengths))]
    public void CreatePerson_invalid_firstname_length_fails(string firstname) {
-      var result = Owner.Create(
+      var result = Customer.Create(
          clock: _clock,
          firstname: firstname,
          lastname: _lastname,
@@ -136,7 +131,7 @@ public sealed class EmployeeUt {
       );
 
       True(result.IsFailure);
-      Equal(OwnerErrors.InvalidFirstname, result.Error);
+      Equal(CustomerErrors.InvalidFirstname, result.Error);
    }
 
    [Theory]
@@ -144,7 +139,7 @@ public sealed class EmployeeUt {
    [InlineData("   ")]
    public void CreatePerson_invalid_lastname_fails(string lastname) {
       // Act
-      var result = Owner.Create(
+      var result = Customer.Create(
          clock: _clock,
          firstname: _firstname,
          lastname: lastname,
@@ -156,13 +151,13 @@ public sealed class EmployeeUt {
 
       // Assert
       True(result.IsFailure);
-      Equal(OwnerErrors.LastnameIsRequired, result.Error);
+      Equal(CustomerErrors.LastnameIsRequired, result.Error);
    }
 
    [Theory]
    [MemberData(nameof(InvalidNameLengths))]
    public void CreatePerson_invalid_lastname_length_fails(string lastname) {
-      var result = Owner.Create(
+      var result = Customer.Create(
          clock: _clock,
          firstname: _firstname,
          lastname: lastname,
@@ -173,7 +168,7 @@ public sealed class EmployeeUt {
       );
 
       True(result.IsFailure);
-      Equal(OwnerErrors.InvalidLastname, result.Error);
+      Equal(CustomerErrors.InvalidLastname, result.Error);
    }
 
    [Theory]
@@ -183,7 +178,7 @@ public sealed class EmployeeUt {
    [InlineData("a.b.de")]
    public void CreatePerson_invalid_email_fails(string email) {
       // Act
-      var result = Owner.Create(
+      var result = Customer.Create(
          clock: _clock,
          firstname: _firstname,
          lastname: _lastname,
@@ -205,7 +200,7 @@ public sealed class EmployeeUt {
       var id = "11111111-1111-1111-1111-111111111111";
 
       // Act
-      var result = Owner.Create(
+      var result = Customer.Create(
          clock: _clock,
          firstname: _firstname,
          lastname: _lastname,
@@ -226,7 +221,7 @@ public sealed class EmployeeUt {
       var id = "not-a-guid";
 
       // Act
-      var result = Owner.Create(
+      var result = Customer.Create(
          clock: _clock,
          firstname: _firstname,
          lastname: _lastname,
@@ -238,7 +233,7 @@ public sealed class EmployeeUt {
 
       // Assert
       True(result.IsFailure);
-      Equal(OwnerErrors.InvalidId, result.Error);
+      Equal(CustomerErrors.InvalidId, result.Error);
    }
 */
    
