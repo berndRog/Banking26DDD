@@ -3,7 +3,7 @@ using BankingApi._4_BuildingBlocks;
 namespace BankingApi._2_Modules.Owners._1_Ports.Inbound;
 
 public interface IOwnerUseCases {
-   public Task<Result<Guid>> CreateAsync(
+   public Task<Result<OwnerDto>> CreateAsync(
       string firstname,
       string lastname,
       string? companyName,
@@ -37,6 +37,7 @@ public interface IOwnerUseCases {
    // Employee actions
    Task<Result> ActivateAsync(
       Guid ownerId, 
+      string? accountIdString,
       string? ibanString,
       CancellationToken ct = default
    );

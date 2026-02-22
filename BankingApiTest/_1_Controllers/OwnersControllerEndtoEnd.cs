@@ -14,6 +14,7 @@ public sealed class OwnersControllerEndToEnd : IntegrationTestBase {
    // For teaching: keep DB so students can inspect it afterwards.
    protected override bool DeleteDatabaseOnDispose => false;
 
+   #region Post_Owner_Create
    [Fact]
    public async Task PostOwner_Create_ok() {
       // Arrange
@@ -31,28 +32,87 @@ public sealed class OwnersControllerEndToEnd : IntegrationTestBase {
          Country: "DE"
       );
       // Act
-      
-      var subject = "12345678-0000-0000-0000-000000000000"; // in real scenario, subject should come from auth token or be generated in use case
+
+      var subject =
+         "12345678-0000-0000-0000-000000000000"; // in real scenario, subject should come from auth token or be generated in use case
       var response = await Client.PostAsJsonAsync(
          $"/bankingapi/v1/owners?subject={Uri.EscapeDataString(subject)}&iban={Uri.EscapeDataString(iban)}",
          requestDto
       );
-      
-     var body = await response.Content.ReadAsStringAsync(); // helpful for debugging
-     body = body.Trim().Trim('"'); // remove quotes if response is a plain string (e.g. Id)
-     Guid.TryParse(body, out var id);
-     
-     // Assert (HTTP)
-      True( 
-         id == requestDto.Id, 
-         $"Expected Id {requestDto.Id} in response body, but got {id.ToString()}"
-      );
+
+      var ownerDto = await response.Content.ReadFromJsonAsync<OwnerDto>();
+      NotNull(ownerDto);
+
       True(
          condition: response.StatusCode is HttpStatusCode.Created,
-         userMessage: $"Unexpected status {(int)response.StatusCode} {response.StatusCode}\n{id}"
+         userMessage: $"Unexpected status {(int)response.StatusCode} {response.StatusCode}\n{ownerDto?.Id}"
       );
-      
+
+      // assert
+      // Domain-level checks
+      Equal(requestDto.Firstname, ownerDto?.Firstname);
+      Equal(requestDto.Lastname, ownerDto?.Lastname);
+
       // Assert (DB)
+      await Factory.WithScopeAsync(async serviceProvider => {
+         var dbContext = serviceProvider.GetRequiredService<BankingDbContext>();
+
+         // IMPORTANT: use AsNoTracking to avoid tracking artifacts
+         var owner = await dbContext.Owners
+            .AsNoTracking()
+            .Where(o => o.Id == ownerDto!.Id)
+            .SingleOrDefaultAsync();
+
+         NotNull(owner);
+
+         // Domain-level checks
+         Equal(requestDto.Firstname, owner.Firstname);
+         Equal(requestDto.Lastname, owner.Lastname);
+         Equal(requestDto.EmailString, owner.Email.Value);
+         Equal(requestDto.StatusInt, (int)owner.Status);
+         Equal(subject, owner.Subject);
+         Equal(requestDto.Street, owner.Address?.Street);
+         Equal(requestDto.PostalCode, owner.Address?.PostalCode);
+         Equal(requestDto.City, owner.Address?.City);
+         Equal(requestDto.Country, owner.Address?.Country);
+
+         var accounts = await dbContext.Accounts
+            .AsNoTracking()
+            .Where(a => a.OwnerId == ownerDto!.Id)
+            .ToListAsync();
+         Equal(1, accounts?.Count); // exactly one account should be created
+      });
+   }
+   #endregion
+
+   #region Post_Owner_Provision
+   [Fact]
+   public async Task PostOwner_Provison_ok() {
+      // Arrange
+      Factory.TestSubject = "testOwner-123";
+      Factory.TestUsername = "test.owner@test.local";
+      Factory.TestAdminRights = 0; // Owner, kein Employe
+
+      // Act
+      var request = new HttpRequestMessage(
+         HttpMethod.Post,
+         "/bankingapi/v1/owners/me/provision"
+      );
+      request.Headers.Add(TestAuthHandler.Header, "Owner");
+
+      var response = await Client.SendAsync(request);
+
+      // status code can be 201 Created (if owner was just provisioned) or 200 OK (if owner already exist)
+      True(
+         condition: response.StatusCode is HttpStatusCode.Created || response.StatusCode is HttpStatusCode.OK,
+         userMessage: $"Unexpected status {(int)response.StatusCode} {response.StatusCode}\n"
+      );
+
+      var ownerProvisionDto = await response.Content.ReadFromJsonAsync<OwnerProvisionDto>(); // helpful for debugging
+      NotNull(ownerProvisionDto);
+      var id = ownerProvisionDto.Id;
+
+      // Assert (DB) – didaktisch stark
       await Factory.WithScopeAsync(async serviceProvider => {
          var dbContext = serviceProvider.GetRequiredService<BankingDbContext>();
 
@@ -61,110 +121,58 @@ public sealed class OwnersControllerEndToEnd : IntegrationTestBase {
             .AsNoTracking()
             .Where(o => o.Id == id)
             .SingleOrDefaultAsync();
-         
+
          NotNull(owner);
 
-         // Domain-level checks
-         Equal(requestDto.Firstname, owner.Firstname);
-         Equal(requestDto.Lastname, owner.Lastname);
-         Equal(requestDto.EmailString, owner.Email.Value);
-         Equal(requestDto.StatusInt, (int) owner.Status);
-         Equal(subject, owner.Subject);
-         Equal(requestDto.Street, owner.Address?.Street);
-         Equal(requestDto.PostalCode, owner.Address?.PostalCode);
-         Equal(requestDto.City, owner.Address?.City);
-         Equal(requestDto.Country, owner.Address?.Country);
-         
+         Equal(Factory.TestUsername, owner.Email.Value);
+         Equal(Factory.TestSubject, owner.Subject);
       });
    }
-   
-   [Fact]
-   public async Task PostOwner_Provison_ok() {
-      // Arrange
-      Factory.TestSubject = "testOwner-123";
-      Factory.TestUsername = "test.owner@test.local";
-      Factory.TestAdminRights = 0; // Owner, kein Employe
-      
-      // Act
-      var request = new HttpRequestMessage(
-         HttpMethod.Post,
-         "/bankingapi/v1/owners/me/provision"
-      );
-      request.Headers.Add(TestAuthHandler.Header, "Owner");
-      
-      var response = await Client.SendAsync(request);
-      
-      // status code can be 201 Created (if owner was just provisioned) or 200 OK (if owner already exist)
-      True(
-         condition: response.StatusCode is HttpStatusCode.Created || response.StatusCode is HttpStatusCode.OK,
-         userMessage: $"Unexpected status {(int)response.StatusCode} {response.StatusCode}\n"
-      );
-      
-     var ownerProvisionDto = await response.Content.ReadFromJsonAsync<OwnerProvisionDto>(); // helpful for debugging
-     NotNull(ownerProvisionDto);
-     var id = ownerProvisionDto.Id;
-     
-     // Assert (DB) – didaktisch stark
-     await Factory.WithScopeAsync(async serviceProvider => {
-        var dbContext = serviceProvider.GetRequiredService<BankingDbContext>();
+   #endregion
 
-        // IMPORTANT: use AsNoTracking to avoid tracking artifacts
-        var owner = await dbContext.Owners
-           .AsNoTracking()
-           .Where(o => o.Id == id)
-           .SingleOrDefaultAsync();
-
-        NotNull(owner);
-        
-        Equal(Factory.TestUsername, owner.Email.Value);
-        Equal(Factory.TestSubject, owner.Subject);
-
-     });
-   }
-   
-   
+   #region Get_and_Post_Owner_Profile
    [Fact]
    public async Task GetAndPostOwner_Profile_ok() {
       // Arrange
       Factory.TestSubject = "testOwner-123";
       Factory.TestUsername = "test.owner@test.local";
       Factory.TestAdminRights = 0; // Owner
-      
+
       // Provisioning (idempotent, should return same owner on repeated calls)
       var request = new HttpRequestMessage(
          HttpMethod.Post,
          "/bankingapi/v1/owners/me/provision"
       );
       request.Headers.Add(TestAuthHandler.Header, "Owner");
-      
+
       var responsePostProvision = await Client.SendAsync(request);
       // status code must be 201 Created 
       True(
          condition: responsePostProvision.StatusCode is HttpStatusCode.Created,
          userMessage: $"Unexpected status {(int)responsePostProvision.StatusCode} {responsePostProvision.StatusCode}\n"
       );
-      
-      var ownerProvisionDto = 
-         await responsePostProvision.Content.ReadFromJsonAsync<OwnerProvisionDto>(); 
-      
+
+      var ownerProvisionDto =
+         await responsePostProvision.Content.ReadFromJsonAsync<OwnerProvisionDto>();
+
       // Act Get Profile and Post Profile (update)
       request = new HttpRequestMessage(
          HttpMethod.Get,
          "/bankingapi/v1/owners/me/profile"
       );
       request.Headers.Add(TestAuthHandler.Header, "Owner");
-      
+
       var responseGetProfile = await Client.SendAsync(request);
-      
+
       // status code must be 200 OK
       True(
          condition: responseGetProfile.StatusCode is HttpStatusCode.OK,
          userMessage: $"Unexpected status {(int)responseGetProfile.StatusCode} {responseGetProfile.StatusCode}\n"
       );
-      
+
       var getProfileOwnerDto = await responseGetProfile.Content.ReadFromJsonAsync<OwnerDto>();
       NotNull(getProfileOwnerDto);
-      
+
       // update profile with new data (except Id, Email and Status, which are not updatable in this scenario)
       var id = getProfileOwnerDto.Id;
       var reqPostProfileOwnerDto = getProfileOwnerDto with {
@@ -192,7 +200,7 @@ public sealed class OwnersControllerEndToEnd : IntegrationTestBase {
          condition: responsePutProfile.StatusCode is HttpStatusCode.OK,
          userMessage: $"Unexpected status {(int)responsePutProfile.StatusCode} {responsePutProfile.StatusCode}\n"
       );
-    
+
       var resPostProfileOwnerDto = await responsePutProfile.Content.ReadFromJsonAsync<OwnerDto>();
       NotNull(resPostProfileOwnerDto);
 
@@ -206,7 +214,7 @@ public sealed class OwnersControllerEndToEnd : IntegrationTestBase {
       Equal(reqPostProfileOwnerDto.PostalCode, resPostProfileOwnerDto.PostalCode);
       Equal(reqPostProfileOwnerDto.City, resPostProfileOwnerDto.City);
       Equal(reqPostProfileOwnerDto.Country, resPostProfileOwnerDto.Country);
-      
+
       // Assert (DB) 
       await Factory.WithScopeAsync(async serviceProvider => {
          var dbContext = serviceProvider.GetRequiredService<BankingDbContext>();
@@ -218,26 +226,28 @@ public sealed class OwnersControllerEndToEnd : IntegrationTestBase {
             .SingleOrDefaultAsync();
 
          NotNull(owner);
-         
+
          Equal(reqPostProfileOwnerDto.Id, owner.Id);
          Equal(reqPostProfileOwnerDto.Firstname, owner.Firstname);
          Equal(reqPostProfileOwnerDto.Lastname, owner.Lastname);
          Equal(reqPostProfileOwnerDto.EmailString, owner.Email.Value);
-         Equal(reqPostProfileOwnerDto.StatusInt, (int) owner.Status);
+         Equal(reqPostProfileOwnerDto.StatusInt, (int)owner.Status);
          Equal(reqPostProfileOwnerDto.Street, owner.Address?.Street);
          Equal(reqPostProfileOwnerDto.PostalCode, owner.Address?.PostalCode);
          Equal(reqPostProfileOwnerDto.City, owner.Address?.City);
-         Equal(reqPostProfileOwnerDto.Country, owner.Address?.Country); 
+         Equal(reqPostProfileOwnerDto.Country, owner.Address?.Country);
       });
    }
-   
+   #endregion
+
+   #region Get_Owner_ById_and_Email
    [Fact]
    public async Task GetOwner_ById_ok() {
       // Assert
       var owners = _seed.Owners;
-    //  var owner = owners[0];
+      //  var owner = owners[0];
       var owner = owners[1];
-      
+
       // damit TestAuthHandler den
       await Factory.WithScopeAsync(async serviceProvider => {
          var db = serviceProvider.GetRequiredService<BankingDbContext>();
@@ -248,25 +258,25 @@ public sealed class OwnersControllerEndToEnd : IntegrationTestBase {
 
       // Act
       var id = owner.Id;
-      
+
       var request = new HttpRequestMessage(
          HttpMethod.Get,
          $"/bankingapi/v1/owners/{id}"
       );
       request.Headers.Add(TestAuthHandler.Header, "Owner");
-      
+
       var response = await Client.SendAsync(request);
-      
+
       // status code must be 200 OK
       True(
          condition: response.StatusCode is HttpStatusCode.OK,
          userMessage: $"Unexpected status {(int)response.StatusCode} {response.StatusCode}\n"
       );
-      
+
       // Assert
       var actualOwnerDto = await response.Content.ReadFromJsonAsync<OwnerDto>();
       NotNull(actualOwnerDto);
-      
+
       Equals(owner.Id, actualOwnerDto?.Id);
       Equals(owner.Firstname, actualOwnerDto?.Firstname);
       Equals(owner.Lastname, actualOwnerDto?.Lastname);
@@ -279,7 +289,7 @@ public sealed class OwnersControllerEndToEnd : IntegrationTestBase {
       Equals(owner.Address?.City, actualOwnerDto?.City);
       Equals(owner.Address?.Country, actualOwnerDto?.Country);
    }
-   
+
    [Fact]
    public async Task GetOwner_ByEmail_ok() {
       // Assert
@@ -294,21 +304,21 @@ public sealed class OwnersControllerEndToEnd : IntegrationTestBase {
 
       // Act
       var email = owner1.Email.Value;
-      
+
       var request = new HttpRequestMessage(
          HttpMethod.Get,
          $"/bankingapi/v1/owners/email/{email}"
       );
       request.Headers.Add(TestAuthHandler.Header, "Owner");
-      
+
       var response = await Client.SendAsync(request);
-      
+
       // status code must be 200 OK
       True(
          condition: response.StatusCode is HttpStatusCode.OK,
          userMessage: $"Unexpected status {(int)response.StatusCode} {response.StatusCode}\n"
       );
-      
+
       // Assert
       response.EnsureSuccessStatusCode();
       Equal(HttpStatusCode.OK, response.StatusCode);
@@ -325,4 +335,53 @@ public sealed class OwnersControllerEndToEnd : IntegrationTestBase {
       Equals(owner1.Address?.City, actualOwnerDto?.City);
       Equals(owner1.Address?.Country, actualOwnerDto?.Country);
    }
+   #endregion
+
+   #region Get_All_Owners
+   [Fact]
+   public async Task GetAllOwners_ok() {
+      // Assert
+      var owners = _seed.Owners;
+      var owner1 = owners[0];
+      await Factory.WithScopeAsync(async serviceProvider => {
+         var dbContext = serviceProvider.GetRequiredService<BankingDbContext>();
+         // seed here...
+         dbContext.Owners.AddRange(owners);
+         await dbContext.SaveChangesAsync();
+      });
+
+      // Act
+      var request = new HttpRequestMessage(
+         HttpMethod.Get,
+         $"/bankingapi/v1/owners"
+      );
+      request.Headers.Add(TestAuthHandler.Header, "Employee");
+
+      var response = await Client.SendAsync(request);
+
+      // status code must be 200 OK
+      True(
+         condition: response.StatusCode is HttpStatusCode.OK,
+         userMessage: $"Unexpected status {(int)response.StatusCode} {response.StatusCode}\n"
+      );
+
+      // Assert
+      response.EnsureSuccessStatusCode();
+      Equal(HttpStatusCode.OK, response.StatusCode);
+      var actualOwnerDtos = await response.Content.ReadFromJsonAsync<List<OwnerDto>>();
+
+      Equal(owners.Count, actualOwnerDtos?.Count);
+
+      // Equals(owner1.Id, actualOwnerDto?.Id);
+      // Equals(owner1.Firstname, actualOwnerDto?.Firstname);
+      // Equals(owner1.Lastname, actualOwnerDto?.Lastname);
+      // Equals(owner1.CompanyName, actualOwnerDto?.CompanyName);
+      // Equals(owner1.Email, actualOwnerDto?.EmailString);
+      // Equals((int)owner1.Status, actualOwnerDto?.StatusInt);
+      // Equals(owner1.Address?.Street, actualOwnerDto?.Street);
+      // Equals(owner1.Address?.PostalCode, actualOwnerDto?.PostalCode);
+      // Equals(owner1.Address?.City, actualOwnerDto?.City);
+      // Equals(owner1.Address?.Country, actualOwnerDto?.Country);
+   }
+   #endregion
 }

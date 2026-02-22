@@ -7,6 +7,7 @@ using BankingApi._4_BuildingBlocks._3_Domain;
 using BankingApi._4_BuildingBlocks._3_Domain.Entities;
 using BankingApi._4_BuildingBlocks._3_Domain.ValueObjects;
 using BankingApi._4_BuildingBlocks._4_Infrastructure;
+using BankingApi.Core.Dto;
 
 namespace BankingApi._2_Modules.Core._3_Domain.Aggregates;
 
@@ -104,15 +105,7 @@ public sealed class Account : AggregateRoot<Guid> {
       return Result<Account>.Success(this);
    }
 
-   /// <summary>
-   /// Convenience overload: create Money from decimal + currency.
-   /// Uses Money.Create(...) (Result) => domain stays protected.
-   /// </summary>
-   public Result<Account> Credit(decimal amount, Currency currency) {
-      var res = Money.Create(amount, currency);
-      return res.IsFailure ? Result<Account>.Failure(res.Error) : Credit(res.Value);
-   }
-
+   
    /// <summary>
    /// Debit = withdraw money from THIS account.
    /// Amount must be positive and in the same currency as the balance.
@@ -138,32 +131,22 @@ public sealed class Account : AggregateRoot<Guid> {
       return Result<Account>.Success(this);
    }
 
-   /// <summary>
-   /// Convenience overload: create Money from decimal + currency.
-   /// </summary>
-   public Result<Account> Debit(decimal amount, Currency currency) {
-      var res = Money.Create(amount, currency);
-      return res.IsFailure ? Result<Account>.Failure(res.Error) : Debit(res.Value);
-   }
-
    public bool HasSufficientFunds(Money amount) =>
       amount.Currency == Balance.Currency &&
       amount.Amount > 0m &&
       Balance >= amount;
 
-   public bool HasSufficientFunds(decimal amount, Currency currency) {
-      var res = Money.Create(amount, currency);
-      return res.IsSuccess && HasSufficientFunds(res.Value);
-   }
-
    // -------------------- Beneficiaries -----------------------
-
    // Story 3.1: add a beneficiary to THIS account
    public Result<Beneficiary> AddBeneficiary(
-      string name,
-      Iban iban,
-      string? id = null
+      BeneficiaryDto beneficiaryDto
    ) {
+      // Domain logic
+      var resultIban = Iban.Create(beneficiaryDto.IbanString);
+      if (resultIban.IsFailure) 
+         return Result<Beneficiary>.Failure(BeneficiaryErrors.InvalidIban);
+      var iban = resultIban.Value;
+      
       // check for duplicate IBANs
       if (_beneficiaries.Any(b => b.Iban.Equals(iban)))
          return Result<Beneficiary>.Failure(BeneficiaryErrors.IbanAlreadyRegistred);
@@ -171,9 +154,9 @@ public sealed class Account : AggregateRoot<Guid> {
       // create a new beneficiary
       var result = Beneficiary.Create(
          accountId: Id,
-         name: name,
+         name: beneficiaryDto.Name,
          iban: iban,
-         id: id
+         id: beneficiaryDto.Id.ToString()
       );
       if (result.IsFailure)
          return Result<Beneficiary>.Failure(result.Error);

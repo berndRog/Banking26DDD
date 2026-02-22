@@ -273,25 +273,25 @@ public sealed class EmployeesControllerEndToEnd : IntegrationTestBase {
    }
    
    [Fact]
-   public async Task Owners_GetByEmail_ok() {
+   public async Task Employee_GetByEmail_ok() {
       // Assert
-      var owners = _seed.Owners;
-      var owner1 = owners[0];
+      var employees = _seed.Employees; // damit TestAuthHandler den
+      var employee1 = employees[0];
       await Factory.WithScopeAsync(async serviceProvider => {
          var dbContext = serviceProvider.GetRequiredService<BankingDbContext>();
          // seed here...
-         dbContext.Owners.AddRange(owners);
+         dbContext.Employees.AddRange(employees);
          await dbContext.SaveChangesAsync();
       });
 
       // Act
-      var email = owner1.Email.Value;
+      var email = employee1.Email.Value;
       
       var request = new HttpRequestMessage(
          HttpMethod.Get,
-         $"/bankingapi/v1/owners/email/{email}"
+         $"/bankingapi/v1/employees/email/{email}"
       );
-      request.Headers.Add(TestAuthHandler.Header, "Owner");
+      request.Headers.Add(TestAuthHandler.Header, "Employee");
       
       var response = await Client.SendAsync(request);
       
@@ -304,17 +304,18 @@ public sealed class EmployeesControllerEndToEnd : IntegrationTestBase {
       // Assert
       response.EnsureSuccessStatusCode();
       Equal(HttpStatusCode.OK, response.StatusCode);
-      var actualOwnerDto = await response.Content.ReadFromJsonAsync<OwnerDto>();
+      var actualEmployeeDto = await response.Content.ReadFromJsonAsync<EmployeeDto>();
 
-      Equals(owner1.Id, actualOwnerDto?.Id);
-      Equals(owner1.Firstname, actualOwnerDto?.Firstname);
-      Equals(owner1.Lastname, actualOwnerDto?.Lastname);
-      Equals(owner1.CompanyName, actualOwnerDto?.CompanyName);
-      Equals(owner1.Email, actualOwnerDto?.EmailString);
-      Equals((int)owner1.Status, actualOwnerDto?.StatusInt);
-      Equals(owner1.Address?.Street, actualOwnerDto?.Street);
-      Equals(owner1.Address?.PostalCode, actualOwnerDto?.PostalCode);
-      Equals(owner1.Address?.City, actualOwnerDto?.City);
-      Equals(owner1.Address?.Country, actualOwnerDto?.Country);
+      var actualEmail = Email.Create(actualEmployeeDto?.EmailString).Value;
+      var actualPhone = Phone.Create(actualEmployeeDto?.PhoneString).Value;
+      
+      Equals(employee1.Id, actualEmployeeDto?.Id);
+      Equals(employee1.Firstname, actualEmployeeDto?.Firstname);
+      Equals(employee1.Lastname, actualEmployeeDto?.Lastname);
+      Equals(employee1.Email, actualEmail);
+      Equals(employee1.Phone, actualPhone);
+      Equals(employee1.PersonnelNumber, actualEmployeeDto?.PersonnelNumber);
+      Equals(employee1.IsActive, actualEmployeeDto?.IsActive);
+ 
    }
 }

@@ -15,7 +15,7 @@ using BankingApi.Core.Dto;
 namespace BankingApi._2_Modules.Core._4_Infrastructure.Adapters;
 
 public class AccountsContract(
-   IAccountsRepository repository,
+   IAccountRepository repository,
    IUnitOfWork unitOfWork,
    IClock clock,
    ILogger<AccountsContract> logger
@@ -23,6 +23,7 @@ public class AccountsContract(
    
    public async Task<Result<AccountDto>> OpenInitialAccountAsync(
       Guid ownerId, 
+      string? accoutIdString = null,
       string? ibanString = null,
       CancellationToken ct = default!
    ) {
@@ -56,12 +57,13 @@ public class AccountsContract(
       
       // Create initial account
       var balance = Money.Create(0m, Currency.EUR).Value; // initial balance is always 0 EUR
+      
       var resultAccount = Account.Create(
          clock: clock, 
          ownerId: ownerId,
          iban: iban,
          balance: balance,
-         null
+         id: accoutIdString
       );
       if(resultAccount.IsFailure)
          return Result<AccountDto>.Failure(resultAccount.Error);

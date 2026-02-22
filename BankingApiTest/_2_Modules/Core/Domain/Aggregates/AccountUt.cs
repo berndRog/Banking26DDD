@@ -1,4 +1,5 @@
 using BankingApi._2_Modules.Accounts._3_Domain.Enums;
+using BankingApi._2_Modules.Core._2_Application.Mappings;
 using BankingApi._2_Modules.Core._3_Domain.Aggregates;
 using BankingApi._2_Modules.Core._3_Domain.ValueObjects;
 using BankingApi._4_BuildingBlocks._1_Ports.Inbound;
@@ -152,9 +153,7 @@ public sealed class AccountUt {
       
       // Act
       account.AddBeneficiary(
-         name: beneficiary.Name, 
-         iban: beneficiary.Iban, 
-         id: beneficiary.Id.ToString()
+         beneficiaryDto: beneficiary.ToBeneficiaryDto()
       );
       
       // Assert
@@ -168,8 +167,8 @@ public sealed class AccountUt {
       var account = _seed.Account1();
       var beneficiary1 = _seed.Beneficiary1();
       var beneficiary2 = _seed.Beneficiary2();
-      account.AddBeneficiary(beneficiary1.Name, beneficiary1.Iban, beneficiary1.Id.ToString());
-      account.AddBeneficiary(beneficiary2.Name, beneficiary2.Iban, beneficiary2.Id.ToString());
+      account.AddBeneficiary(beneficiary1.ToBeneficiaryDto());
+      account.AddBeneficiary(beneficiary2.ToBeneficiaryDto());
 
       // Act
       account.RemoveBeneficiary(beneficiary1.Id);

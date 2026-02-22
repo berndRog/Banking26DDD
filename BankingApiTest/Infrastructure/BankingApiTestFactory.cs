@@ -16,7 +16,7 @@ namespace BankingApiTest.Infrastructure;
 /// Uses the real Program.cs DI setup and only replaces selected infrastructure services (e.g., the database).
 /// </summary>
 public sealed class BankingApiFactory : WebApplicationFactory<Program> {
-   private readonly TestDatabase.DbMode _dbMode;
+   private readonly DbMode _dbMode;
    private readonly string _databaseName;
    private readonly bool _applyMigrations;
    private readonly bool _enableSensitiveDataLogging;
@@ -32,7 +32,7 @@ public sealed class BankingApiFactory : WebApplicationFactory<Program> {
 
    
    public BankingApiFactory(
-      TestDatabase.DbMode dbMode,
+      DbMode dbMode,
       string databaseName = "BankingApiTest",
       bool applyMigrations = true,
       bool enableSensitiveDataLogging = true,

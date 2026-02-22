@@ -6,7 +6,7 @@ public abstract class Entity<TId> : IEquatable<Entity<TId>>
    // id == primary key
    public TId Id { get; protected set; } = default!;
 
-   // override equality based on ReservationId
+   // override equality based on Id
    public override bool Equals(object? obj) {
       
       if (obj is not Entity<TId> other)

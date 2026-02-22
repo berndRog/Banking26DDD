@@ -2,6 +2,7 @@ using BankingApi._2_Modules.Core._1_Ports.Inbound;
 using BankingApi._2_Modules.Core._2_Application.UseCases;
 using BankingApi._2_Modules.Core._3_Domain.Aggregates;
 using BankingApi._4_BuildingBlocks;
+using BankingApi.Core.Dto;
 namespace BankingApi._2_Modules.Accounts._2_Application.UseCases;
 
 public class AccountsUseCases(
@@ -10,7 +11,7 @@ public class AccountsUseCases(
    AccountUcBeneficiaryRemove accountUcBeneficiaryRemove
 ) : IAccountsUseCases {
    
-   public Task<Result<Guid>> CreateAsync(
+   public Task<Result<AccountDto>> CreateAsync(
       Guid ownerId,
       string iban,
       decimal balance = 0m,
@@ -19,13 +20,11 @@ public class AccountsUseCases(
       CancellationToken ct = default
    ) => accountUcCreate.ExecuteAsync(ownerId, iban, balance, currency, id, ct);
    
-   public Task<Result<Beneficiary>> AddBeneficiaryAsync(
+   public Task<Result<BeneficiaryDto>> AddBeneficiaryAsync(
       Guid accountId,
-      string name,
-      string ibanString,
-      string? id = null,
+      BeneficiaryDto beneficiaryDto,
       CancellationToken ct = default
-   ) => accountUcBeneficiaryAdd.ExecuteAsync(accountId, name, ibanString, id, ct);
+   ) => accountUcBeneficiaryAdd.ExecuteAsync(accountId, beneficiaryDto, ct);
    
    public Task<Result<Guid>> RemoveBeneficiaryAsync(
       Guid accountId,

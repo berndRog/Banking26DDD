@@ -16,10 +16,6 @@ public sealed class ConfigAccount(
       // -----------------------------
       builder.HasKey(a => a.Id);
       builder.Property(a => a.Id).ValueGeneratedNever();
-
-      builder.Property(a => a.Version)
-         .IsConcurrencyToken()
-         .IsRequired();
       
       // Auditing timestamps
       // -----------------------------

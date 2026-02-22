@@ -49,7 +49,7 @@ public class Program {
 
       var app = builder.Build();
 
-      SeedData(app);
+      // SeedData(app);
 
       // Configure the HTTP request pipeline.
       if (app.Environment.IsDevelopment()) {

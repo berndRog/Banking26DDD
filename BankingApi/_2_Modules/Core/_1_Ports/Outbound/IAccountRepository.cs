@@ -2,7 +2,7 @@ using BankingApi._2_Modules.Core._3_Domain.Aggregates;
 using BankingApi._2_Modules.Core._3_Domain.ValueObjects;
 namespace BankingApi._2_Modules.Core._1_Ports.Outbound;
 
-public interface IAccountsRepository {
+public interface IAccountRepository {
    Task<Account?> FindByIdAsync(
       Guid id, 
       CancellationToken ct = default

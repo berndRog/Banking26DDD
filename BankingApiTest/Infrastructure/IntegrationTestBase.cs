@@ -21,7 +21,7 @@ public abstract class IntegrationTestBase : IAsyncLifetime {
    /// Create a unique DB file per test (FileUnique).
    /// If you want a stable path per test name, keep FileUnique and use the test method name in DatabaseName.
    /// </summary>
-   protected virtual TestDatabase.DbMode DbMode => TestDatabase.DbMode.FileUnique;
+   protected virtual DbMode DbMode => DbMode.FileUnique;
 
    /// <summary>
    /// Base name for DB files (timestamp will be appended for FileUnique).

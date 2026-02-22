@@ -12,29 +12,7 @@ namespace BankingApiTest.Infrastructure;
 /// so students can inspect tables/views while debugging.
 /// </summary>
 public static class TestDatabase {
-   /// <summary>
-   /// Controls how the SQLite database is created.
-   /// </summary>
-   public enum DbMode {
-      /// <summary>
-      /// SQLite in-memory database. Requires an open connection for the whole test lifetime.
-      /// NOT suitable for Rider DB Viewer (no file to open).
-      /// </summary>
-      InMemory,
-
-      /// <summary>
-      /// One stable file path, reused between runs (file is deleted/recreated on CreateAsync).
-      /// Best for teaching: Rider can keep a stable DataSource.
-      /// </summary>
-      FilePersistent,
-
-      /// <summary>
-      /// Creates a unique file name per run (timestamped).
-      /// Good for CI / parallel runs; not ideal for teaching because the file changes every run.
-      /// </summary>
-      FileUnique
-   }
-
+   
    /// <summary>
    /// Creates and initializes a test database and returns:
    /// - dbPath: file path (empty string for in-memory)
@@ -260,6 +238,29 @@ public static class TestDatabase {
    
       throw new InvalidOperationException($"Could not find test project root for '{projectName}'.");
    }
+}
+
+/// <summary>
+/// Controls how the SQLite database is created.
+/// </summary>
+public enum DbMode {
+   /// <summary>
+   /// SQLite in-memory database. Requires an open connection for the whole test lifetime.
+   /// NOT suitable for Rider DB Viewer (no file to open).
+   /// </summary>
+   InMemory,
+
+   /// <summary>
+   /// One stable file path, reused between runs (file is deleted/recreated on CreateAsync).
+   /// Best for teaching: Rider can keep a stable DataSource.
+   /// </summary>
+   FilePersistent,
+
+   /// <summary>
+   /// Creates a unique file name per run (timestamped).
+   /// Good for CI / parallel runs; not ideal for teaching because the file changes every run.
+   /// </summary>
+   FileUnique
 }
 
 /*

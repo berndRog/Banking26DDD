@@ -1,6 +1,5 @@
-using BankingApiTest.Infrastructure;
 using Microsoft.Extensions.Logging;
-namespace BankingApiTest;
+namespace BankingApiTest.Infrastructure;
 
 public abstract class TestBase {
    protected static readonly bool EnableLogging =

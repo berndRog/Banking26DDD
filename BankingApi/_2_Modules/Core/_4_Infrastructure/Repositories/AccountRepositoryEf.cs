@@ -6,9 +6,9 @@ using Microsoft.EntityFrameworkCore;
 
 namespace BankingApi._2_Modules.Core._4_Infrastructure.Repositories;
 
-public sealed class AccountsRepositoryEf(
+public sealed class AccountRepositoryEf(
    BankingDbContext dbContext
-) : IAccountsRepository {
+) : IAccountRepository {
    
    // Loads a single account by its primary key (Id).
    public async Task<Account?> FindByIdAsync(

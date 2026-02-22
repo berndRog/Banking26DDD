@@ -32,6 +32,7 @@ public sealed class OwnerUcActivate(
    /// </summary>
    public async Task<Result> ExecuteAsync(
       Guid ownerId,
+      string? accountIdString,
       string? ibanString,
       CancellationToken ct
    ) {
@@ -53,7 +54,8 @@ public sealed class OwnerUcActivate(
          return Result.Failure(OwnerErrors.NotFound);
       
       // 4) create first account (Accounts-BC)
-      var resAccount = await accountsContract.OpenInitialAccountAsync(ownerId, ibanString, ct);
+      var resAccount = 
+         await accountsContract.OpenInitialAccountAsync(ownerId, accountIdString, ibanString, ct);
       if (resAccount.IsFailure)
          return Result.Failure(resAccount.Error);
 

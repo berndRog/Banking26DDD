@@ -1,39 +1,32 @@
 using BankingApi._2_Modules.Accounts._3_Domain.Errors;
 using BankingApi._2_Modules.Core._1_Ports.Outbound;
+using BankingApi._2_Modules.Core._2_Application.Mappings;
 using BankingApi._2_Modules.Core._3_Domain.Aggregates;
 using BankingApi._2_Modules.Core._3_Domain.ValueObjects;
 using BankingApi._3_Infrastructure._1_Ports.Inbound;
 using BankingApi._4_BuildingBlocks;
 using BankingApi._4_BuildingBlocks.Utils;
+using BankingApi.Core.Dto;
 namespace BankingApi._2_Modules.Core._2_Application.UseCases;
 
 public sealed class AccountUcBeneficiaryAdd(
-   IAccountsRepository accountsRepository,
+   IAccountRepository accountRepository,
    IUnitOfWork unitOfWork,
    ILogger<AccountUcBeneficiaryAdd> logger
 ) {
    
-   public async Task<Result<Beneficiary>> ExecuteAsync(
+   public async Task<Result<BeneficiaryDto>> ExecuteAsync(
       Guid accountId,
-      string name,
-      string ibanString,
-      string? id = null,
+      BeneficiaryDto beneficiaryDto,
       CancellationToken ct = default
    ) {
-
-      var account = await accountsRepository.FindWithBeneficiariesByIdAsync(accountId, ct);
+      var account = await accountRepository.FindWithBeneficiariesByIdAsync(accountId, ct);
       if (account is null) 
-         return Result<Beneficiary>.Failure(BeneficiaryErrors.AccountNotFound);
+         return Result<BeneficiaryDto>.Failure(BeneficiaryErrors.AccountNotFound);
       
-      // Domain logic
-      var resultIban = Iban.Create(ibanString);
-      if (resultIban.IsFailure) 
-         return Result<Beneficiary>.Failure(BeneficiaryErrors.InvalidIban);
-      var iban = resultIban.Value;
-      
-      var result = account.AddBeneficiary(name, iban, id );
+      var result = account.AddBeneficiary(beneficiaryDto);
       if (result.IsFailure) 
-         return Result<Beneficiary>.Failure(result.Error);
+         return Result<BeneficiaryDto>.Failure(result.Error);
       var beneficiary = result.Value;
       
       // unit of work, save changes to database
@@ -42,6 +35,6 @@ public sealed class AccountUcBeneficiaryAdd(
       logger.LogDebug("Beneficiary added ({Id}) to Account ({AccountId}) savedRows: {Rows}",
          beneficiary.Id.To8(), accountId.To8(), savedRows);
 
-      return result;
+      return Result<BeneficiaryDto>.Success(beneficiary.ToBeneficiaryDto());
    }
 }

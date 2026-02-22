@@ -37,6 +37,10 @@ public sealed class TestSeed {
       personnelNumber: "Emp002",
       adminRights: (AdminRights)511
    );
+   
+   public IReadOnlyList<Employee> Employees => [
+      Employee1(), Employee2()
+   ];
    #endregion
 
    #region -------------- Test Addresses (Value Objects) -------------------------------------

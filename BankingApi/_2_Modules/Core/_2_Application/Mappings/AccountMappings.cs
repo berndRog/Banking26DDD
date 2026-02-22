@@ -15,7 +15,7 @@ public static class AccountMappings {
    public static BeneficiaryDto ToBeneficiaryDto(this Beneficiary beneficiary) => new(
       Id: beneficiary.Id,
       Name: beneficiary.Name,
-      Iban: beneficiary.Iban.Value,
+      IbanString: beneficiary.Iban.Value,
       AccountId: beneficiary.AccountId
    );
    

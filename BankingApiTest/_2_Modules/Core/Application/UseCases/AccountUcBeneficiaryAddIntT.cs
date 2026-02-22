@@ -1,4 +1,5 @@
 using BankingApi._2_Modules.Core._1_Ports.Outbound;
+using BankingApi._2_Modules.Core._2_Application.Mappings;
 using BankingApi._2_Modules.Core._2_Application.UseCases;
 using BankingApi._2_Modules.Core._3_Domain.Aggregates;
 using BankingApi._2_Modules.Core._4_Infrastructure.Repositories;
@@ -6,6 +7,7 @@ using BankingApi._2_Modules.Owners._3_Domain.Aggregates;
 using BankingApi._3_Infrastructure._1_Ports.Inbound;
 using BankingApi._3_Infrastructure.Database;
 using BankingApi._4_BuildingBlocks._1_Ports.Inbound;
+using BankingApi.Core.Dto;
 using BankingApiTest.Infrastructure;
 using Microsoft.Data.Sqlite;
 using Microsoft.EntityFrameworkCore;
@@ -15,7 +17,7 @@ public sealed class AccountUcBeneficiaryAddIntT : TestBase, IAsyncLifetime {
 
    private SqliteConnection _dbConnection = null!;
    private BankingDbContext _dbContext = null!;
-   private IAccountsRepository _repository = null!;
+   private IAccountRepository _repository = null!;
    private IUnitOfWork _unitOfWork = null!;
    private TestSeed _seed = null!;
    private IClock _clock = null!;
@@ -39,7 +41,7 @@ public sealed class AccountUcBeneficiaryAddIntT : TestBase, IAsyncLifetime {
       _dbContext = new BankingDbContext(options);
       await _dbContext.Database.EnsureCreatedAsync(_ct);
 
-      _repository = new AccountsRepositoryEf(_dbContext);
+      _repository = new AccountRepositoryEf(_dbContext);
       _unitOfWork = new UnitOfWork(
          _dbContext, 
          _clock,
@@ -82,17 +84,15 @@ public sealed class AccountUcBeneficiaryAddIntT : TestBase, IAsyncLifetime {
       var account1 = _seed.Account1();
       var beneficiary = _seed.Beneficiary1();
       // create account for owner in database
-      var accountId = await CreateAccountForOwner(owner1, account1);
-      var account = await _repository.FindByIdAsync(accountId, _ct);
+      var accountDto = await CreateAccountForOwner(owner1, account1);
+      var account = await _repository.FindByIdAsync(accountDto.Id, _ct);
       NotNull(account);
       
       // Act
       // create beneficiary for account in database
       var result = await _sut.ExecuteAsync(
          accountId: account!.Id,
-         name: beneficiary.Name,
-         ibanString: beneficiary.Iban.Value,
-         id: beneficiary.Id.ToString(),
+         beneficiaryDto: beneficiary.ToBeneficiaryDto(),
          ct: _ct
       );
       _dbContext.ChangeTracker.Clear();
@@ -108,7 +108,7 @@ public sealed class AccountUcBeneficiaryAddIntT : TestBase, IAsyncLifetime {
    }
 
    //--- Helpers ---
-   private async Task<Guid> CreateAccountForOwner(Owner owner, Account account) {
+   private async Task<AccountDto> CreateAccountForOwner(Owner owner, Account account) {
       // create account in database
       var resultAccount = await _accountUcCreate.ExecuteAsync(
          ownerId: owner.Id,

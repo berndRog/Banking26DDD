@@ -33,7 +33,7 @@ public static class DiCoreExtensions {
       // Outbound ports
       // =========================================================
       // Repositories
-      services.AddScoped<IAccountsRepository, AccountsRepositoryEf>();
+      services.AddScoped<IAccountRepository, AccountRepositoryEf>();
       
       return services;
    }

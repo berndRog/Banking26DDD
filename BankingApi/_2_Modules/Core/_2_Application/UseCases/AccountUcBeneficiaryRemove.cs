@@ -6,7 +6,7 @@ using BankingApi._4_BuildingBlocks.Utils;
 namespace BankingApi._2_Modules.Core._2_Application.UseCases;
 
 public sealed class AccountUcBeneficiaryRemove(
-   IAccountsRepository accountsRepository,
+   IAccountRepository accountRepository,
    IUnitOfWork unitOfWork,
    ILogger<AccountUcBeneficiaryRemove> logger
 ) {
@@ -17,7 +17,7 @@ public sealed class AccountUcBeneficiaryRemove(
       CancellationToken ct = default
    ) {
       
-      var account = await accountsRepository.FindByIdAsync(accountId, ct);
+      var account = await accountRepository.FindByIdAsync(accountId, ct);
       if (account is null) 
          return Result<Guid>.Failure(BeneficiaryErrors.AccountNotFound);
       

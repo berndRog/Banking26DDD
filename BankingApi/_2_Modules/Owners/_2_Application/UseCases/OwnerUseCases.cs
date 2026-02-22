@@ -15,7 +15,7 @@ public class OwnerUseCases(
    OwnerUcUpdateEmail updateEmailUc
 ): IOwnerUseCases {
 
-   public Task<Result<Guid>> CreateAsync(
+   public Task<Result<OwnerDto>> CreateAsync(
       string firstname,
       string lastname,
       string? companyName,
@@ -55,9 +55,10 @@ public class OwnerUseCases(
    
    public Task<Result> ActivateAsync(
       Guid ownerId,
+      string? accountIdString,
       string? ibanString,
       CancellationToken ct
-   ) => activateUc.ExecuteAsync(ownerId, ibanString, ct);
+   ) => activateUc.ExecuteAsync(ownerId, accountIdString, ibanString, ct);
 
    public Task<Result> RejectAsync(
       Guid ownerId, 

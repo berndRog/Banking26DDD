@@ -7,6 +7,7 @@ public interface IAccountsContract {
    
    Task<Result<AccountDto>> OpenInitialAccountAsync(
       Guid ownerId,
+      string? accoutIdString,
       string? ibanString,
       CancellationToken ct
    ); 

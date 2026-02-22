@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Mvc;
 namespace BankingApi._1_Controllers;
 
 [ApiController]
+
 [Route("bankingapi/v1")]
 public sealed class OwnersController(
    IOwnerReadModel readModel,
@@ -27,6 +28,7 @@ public sealed class OwnersController(
    [ProducesResponseType<ProblemDetails>(StatusCodes.Status400BadRequest, "application/problem+json")]   
    public async Task<ActionResult<Guid>> CreateOwnerAsync(
       [FromQuery] string subject,
+      [FromQuery] string accountId,
       [FromQuery] string iban,
       [FromBody] OwnerDto dto,
       CancellationToken ct
@@ -156,6 +158,7 @@ public sealed class OwnersController(
    [HttpGet("owners/email/{email}", Name = nameof(GetOwnerByEmail))]
    [EndpointSummary("Get a customer by email")]
    [ProducesResponseType<OwnerDto>(StatusCodes.Status200OK)]
+   [ProducesResponseType<ProblemDetails>(StatusCodes.Status401Unauthorized, "application/problem+json")]
    [ProducesResponseType<ProblemDetails>(StatusCodes.Status404NotFound, "application/problem+json")]
    public async Task<ActionResult<OwnerDto>> GetOwnerByEmail(
       [FromRoute] string email,
@@ -166,7 +169,11 @@ public sealed class OwnersController(
          context: $"GET {UrlStart}/owners/email/{email}", args: email);
    }
    
+   [Authorize(Policy="EmployeesOnly")]
    [HttpGet("owners")]
+   [EndpointSummary("Get all owners")]
+   [ProducesResponseType<IEnumerable<OwnerDto>>(StatusCodes.Status200OK)]
+   [ProducesResponseType<ProblemDetails>(StatusCodes.Status401Unauthorized, "application/problem+json")]
    public async Task<ActionResult<IEnumerable<OwnerDto>>> GetAllOwnersAsync(
       CancellationToken ct
    ) {

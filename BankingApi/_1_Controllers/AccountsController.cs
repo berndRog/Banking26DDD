@@ -3,6 +3,7 @@ using System.Net.Mime;
 using BankingApi._2_Modules.Core._1_Ports.Inbound;
 using BankingApi._4_BuildingBlocks;
 using BankingApi.Core.Dto;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.VisualBasic.CompilerServices;
 namespace BankingApi._1_Controllers;
@@ -24,6 +25,7 @@ public class AccountsController(
    private string UrlStart = "http://localhost:5100/banking/v1";
    
    
+   [Authorize(Policy="OwnerOrEmployee")]
    [HttpGet("accounts/{id:guid}", Name = nameof(GetAccountByIdAsync))]
    [EndpointSummary("Get an account by id")]
    [ProducesResponseType(StatusCodes.Status200OK)]
@@ -39,6 +41,7 @@ public class AccountsController(
          context: $"GET {UrlStart}/accounts/{id:D}", args: id);
    }
    
+   [Authorize(Policy="OwnerOrEmployee")]
    [HttpGet("accounts/iban/{iban}")]
    [EndpointSummary("Get an account by Iban")]
    [ProducesResponseType(StatusCodes.Status200OK)]
@@ -55,6 +58,7 @@ public class AccountsController(
          context: $"GET {UrlStart}/accounts/iban/{iban}", args: iban);
    }
    
+   [Authorize(Policy="EmployeesOnly")]
    [HttpGet("accounts")]
    [EndpointSummary("Get all accounts")]
    [ProducesResponseType(StatusCodes.Status200OK)]
@@ -68,6 +72,7 @@ public class AccountsController(
          context: $"GET {UrlStart}/accounts", args: null);
    }
    
+   [Authorize(Policy="OwnerOrEmployee")]
    [HttpGet("owners/{ownerId:guid}/accounts")]
    [EndpointSummary("Get all accounts of a given ownerId")]
    [Produces(MediaTypeNames.Application.Json)]
@@ -82,7 +87,8 @@ public class AccountsController(
          context: $"GET {UrlStart}/owners/{ownerId:D}/accounts", args: ownerId);
    }
    
-   [HttpPost("owners/{ownerId:guid}/accounts")]
+   [Authorize(Policy="OwnerOrEmployee")]
+   [HttpPost("owners/{ownerId:guid}/accounts", Name = nameof(CreateAccountAsync))]
    [EndpointSummary("Create a new account for a given ownerId")]
    [ProducesResponseType(StatusCodes.Status201Created)]
    [ProducesResponseType<ProblemDetails>(StatusCodes.Status400BadRequest, "application/problem+json")]
@@ -102,9 +108,9 @@ public class AccountsController(
          ct: ctToken
       );
       
-      return this.ToCreatedAtRoute<Guid>(
+      return this.ToCreatedAtRoute<AccountDto>(
          routeName: nameof(GetAccountByIdAsync),
-         routeValues: new { id = result.Value },
+         routeValues: new { result.Value.Id },
          result: result,
          logger: logger,
          context: $"POST {UrlStart}/owners/{ownerId:D}/accounts"
@@ -159,20 +165,39 @@ public class AccountsController(
          context: $"GET {UrlStart}/beneficiaries/name/{{name}}", args: name);
    }
    
-   [HttpGet("beneficiaries/iban/{ibanString}")]
+   [HttpGet("beneficiaries/iban/{iban}")]
    [EndpointSummary("Get beneficiaries name, SQL like %name%")]
    [ProducesResponseType(typeof(BeneficiaryDto), StatusCodes.Status200OK)]
    [ProducesResponseType<ProblemDetails>(StatusCodes.Status404NotFound, "application/problem+json")]
    public async Task<ActionResult<IEnumerable<BeneficiaryDto>>> GetBeneficiaryByIbanAsync(
-      [FromRoute] string ibanString,
+      [FromRoute] string iban,
       CancellationToken ctToken = default
    ){
       // Find beneficiaries by SQL like %name%
       var result = 
-         await accountsReadModel.FindBeneficiaryByIbanAsync(ibanString, ctToken);
+         await accountsReadModel.FindBeneficiaryByIbanAsync(iban, ctToken);
 
       return this.ToActionResult(result: result, logger: logger,
-         context: $"GET {UrlStart}/beneficiaries/iban/{{ibanString}}", args: ibanString);
+         context: $"GET {UrlStart}/beneficiaries/iban/{{ibanString}}", args: iban);
    }
-   
+
+   [HttpPost("accounts/{accountId:guid}/beneficiaries")]
+   public async Task<ActionResult<BeneficiaryDto>> CreateBeneficiaryAsync(
+      [FromRoute] Guid accountId,
+      [FromBody] BeneficiaryDto beneficiaryDto,
+      CancellationToken ctToken = default
+   ) {
+      // Find beneficiaries by SQL like %name%
+      var result =
+         await accountsUseCases.AddBeneficiaryAsync(accountId, beneficiaryDto, ctToken);
+      
+      return this.ToCreatedAtRoute<BeneficiaryDto>(
+         routeName: nameof(GetBeneficiaryByIdAsync),
+         routeValues: new { result.Value.Id },
+         result: result,
+         logger: logger,
+         context: $"POST {UrlStart}/accounts/{{accountId:guid}}/beneficiaries"
+      );
+
+   }
 }

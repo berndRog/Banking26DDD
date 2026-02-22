@@ -16,11 +16,6 @@ public sealed class ConfigTransfer(
       builder.HasKey(t => t.Id);
       builder.Property(t => t.Id).ValueGeneratedNever();
 
-      builder.Property(t => t.Version)
-         .IsConcurrencyToken()
-         .IsRequired();
-
-            
       // Auditing timestamps
       // -----------------------------
       builder.Property(t => t.CreatedAt)

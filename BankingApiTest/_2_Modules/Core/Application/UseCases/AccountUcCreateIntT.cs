@@ -15,7 +15,7 @@ public sealed class AccountUcAddBeneficiaryIntT : TestBase, IAsyncLifetime {
    private SqliteConnection _dbConnection = null!;
    private BankingDbContext _dbContext = null!;
    private IOwnerLookupContract _ownerLookup = null!;
-   private IAccountsRepository _repository = null!;
+   private IAccountRepository _repository = null!;
    private IUnitOfWork _unitOfWork = null!;
    private TestSeed _seed = null!;
    private IClock _clock = null!;
@@ -39,7 +39,7 @@ public sealed class AccountUcAddBeneficiaryIntT : TestBase, IAsyncLifetime {
       await _dbContext.Database.EnsureCreatedAsync(_ct);
       
       
-      _repository = new AccountsRepositoryEf(_dbContext);
+      _repository = new AccountRepositoryEf(_dbContext);
       _unitOfWork = new UnitOfWork(
          _dbContext, 
          _clock,

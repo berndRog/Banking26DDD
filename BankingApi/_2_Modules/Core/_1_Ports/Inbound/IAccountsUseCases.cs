@@ -1,10 +1,11 @@
 using BankingApi._2_Modules.Core._3_Domain.Aggregates;
 using BankingApi._4_BuildingBlocks;
+using BankingApi.Core.Dto;
 namespace BankingApi._2_Modules.Core._1_Ports.Inbound;
 
 public interface IAccountsUseCases{
 
-   Task<Result<Guid>> CreateAsync(
+   Task<Result<AccountDto>> CreateAsync(
       Guid ownerId,
       string iban,
       decimal balance = 0m,
@@ -13,11 +14,9 @@ public interface IAccountsUseCases{
       CancellationToken ct = default
    );
    
-   Task<Result<Beneficiary>> AddBeneficiaryAsync(
+   Task<Result<BeneficiaryDto>> AddBeneficiaryAsync(
       Guid accountId,
-      string name,
-      string ibanString,
-      string? id = null,
+      BeneficiaryDto beneficiaryDto,
       CancellationToken ct = default
    );
    

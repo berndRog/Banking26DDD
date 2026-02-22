@@ -1,4 +1,5 @@
 using BankingApi._2_Modules.Accounts._3_Domain.Enums;
+using BankingApi._2_Modules.Core._2_Application.Mappings;
 using BankingApi._2_Modules.Core._3_Domain.Aggregates;
 using BankingApi._2_Modules.Core._3_Domain.ValueObjects;
 using BankingApi._2_Modules.Employees._3_Domain.Aggregates;
@@ -335,19 +336,6 @@ public sealed class Seed {
          ibanString: Account2.Iban.Value
       );
       
-      Account1.AddBeneficiary(name: Owner5.DisplayName, iban: Account6.Iban, "00000001-0000-0000-0000-000000000000");
-      Account1.AddBeneficiary(name: Owner5.DisplayName, iban: Account7.Iban, "00000002-0000-0000-0000-000000000000");
-      Account2.AddBeneficiary(name: Owner3.DisplayName, iban: Account4.Iban, "00000003-0000-0000-0000-000000000000");
-      Account2.AddBeneficiary(name: Owner4.DisplayName, iban: Account5.Iban, "00000004-0000-0000-0000-000000000000");
-      Account3.AddBeneficiary(name: Owner3.DisplayName, iban: Account4.Iban, "00000005-0000-0000-0000-000000000000");
-      Account3.AddBeneficiary(name: Owner4.DisplayName, iban: Account5.Iban, "00000006-0000-0000-0000-000000000000");
-      Account3.AddBeneficiary(name: Owner6.DisplayName, iban: Account8.Iban, "00000007-0000-0000-0000-000000000000");
-      Account4.AddBeneficiary(name: Owner6.DisplayName, iban: Account3.Iban, "00000008-0000-0000-0000-000000000000");
-      Account4.AddBeneficiary(name: Owner5.DisplayName, iban: Account6.Iban, "00000009-0000-0000-0000-000000000000");
-      Account5.AddBeneficiary(name: Owner1.DisplayName, iban: Account1.Iban, "00000010-0000-0000-0000-000000000000");
-      Account5.AddBeneficiary(name: Owner1.DisplayName, iban: Account2.Iban, "00000011-0000-0000-0000-000000000000");
-
-      
       Transfer1 = CreateTransfer(
          id: "00010000-0000-0000-0000-000000000000",
          fromAccountId: Account1.Id,       // Account1.Id,
@@ -429,6 +417,20 @@ public sealed class Seed {
       
    }
 
+
+   public void AddBenficiaries() {
+      Account1.AddBeneficiary(Beneficiary1.ToBeneficiaryDto());
+      Account1.AddBeneficiary(Beneficiary2.ToBeneficiaryDto());
+      Account2.AddBeneficiary(Beneficiary3.ToBeneficiaryDto());
+      Account2.AddBeneficiary(Beneficiary4.ToBeneficiaryDto());
+      Account3.AddBeneficiary(Beneficiary5.ToBeneficiaryDto());
+      Account3.AddBeneficiary(Beneficiary6.ToBeneficiaryDto());
+      Account3.AddBeneficiary(Beneficiary7.ToBeneficiaryDto());
+      Account4.AddBeneficiary(Beneficiary8.ToBeneficiaryDto());
+      Account4.AddBeneficiary(Beneficiary9.ToBeneficiaryDto());
+      Account5.AddBeneficiary(Beneficiary10.ToBeneficiaryDto());
+      Account5.AddBeneficiary(Beneficiary11.ToBeneficiaryDto());
+   }
 
    // ---------- Helper ----------
    private Employee CreateEmployee(

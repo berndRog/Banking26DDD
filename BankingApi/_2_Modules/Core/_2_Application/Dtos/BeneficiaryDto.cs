@@ -1,9 +1,8 @@
-﻿using System;
-namespace BankingApi.Core.Dto;
+﻿namespace BankingApi.Core.Dto;
 
 public record BeneficiaryDto(
    Guid Id,
    string Name,
-   string Iban,
+   string IbanString,
    Guid AccountId
 );
