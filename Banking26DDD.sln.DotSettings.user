@@ -47,6 +47,8 @@
 	<s:String x:Key="/Default/Environment/UnitTesting/UnitTestSessionStore/Sessions/=f0251992_002D2920_002D43b5_002D959f_002D837211e72ea8/@EntryIndexedValue">&lt;SessionState ContinuousTestingMode="0" IsActive="True" Name="AccountsControllerEndToEnd" xmlns="urn:schemas-jetbrains-com:jetbrains-ut-session"&gt;
   &lt;TestAncestor&gt;
     &lt;TestId&gt;xUnit::8F031B4C-A09C-4100-8434-F2F7C9EA42DE::net10.0::BankingApiTest._2_Modules.Owners.Application.AccountsControllerEndToEnd&lt;/TestId&gt;
+    &lt;TestId&gt;xUnit::8F031B4C-A09C-4100-8434-F2F7C9EA42DE::net10.0::BankingApiTest._2_Modules.Employees.Application.CustomersControllerEndtoEnd.PostCustomer_Provison_ok&lt;/TestId&gt;
+    &lt;TestId&gt;xUnit::8F031B4C-A09C-4100-8434-F2F7C9EA42DE::net10.0::BankingApiTest._2_Modules.Employees.Application.CustomersControllerEndtoEnd.GetAndPostCustomer_Profile_ok&lt;/TestId&gt;
   &lt;/TestAncestor&gt;
 &lt;/SessionState&gt;</s:String>
 	

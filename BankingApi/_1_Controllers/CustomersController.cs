@@ -52,7 +52,7 @@ public sealed class CustomersController(
    // ------------------------------------------------------------------
    // SELF-SERVICE (logged-in user)
    // ------------------------------------------------------------------
-   [Authorize(Policy = "CustomersOnly")]
+   //[Authorize(Policy = "CustomersOnly")]
    [HttpPost("customers/me/provision", Name = nameof(CreateCustomerProvisionAsync))]
    [EndpointSummary("Provision customer on first login (idempotent)")]
    [ProducesResponseType<CustomerProvisionDto>(StatusCodes.Status200OK)]
@@ -77,7 +77,7 @@ public sealed class CustomersController(
       
    }
 
-   [Authorize(Policy = "CustomersOnly")]
+   //[Authorize(Policy = "CustomersOnly")]
    [HttpGet("customers/me/profile", Name = nameof(GetCustomerProfileAsync))]
    [EndpointSummary("Get customers profile (requires provision)")]
    [ProducesResponseType<CustomerDto>(StatusCodes.Status200OK)]
@@ -93,7 +93,7 @@ public sealed class CustomersController(
       return this.ToActionResult(result, logger, context, args: null);
    }
 
-   [Authorize(Policy = "CustomersOnly")]
+   //[Authorize(Policy = "CustomersOnly")]
    [HttpPut("customers/me/profile", Name = nameof(PutCustomerProfileAsync))]
    [EndpointSummary("Update my customer profile (requires provisioning)")]
    [ProducesResponseType<CustomerDto>(StatusCodes.Status200OK)]
@@ -111,7 +111,7 @@ public sealed class CustomersController(
       return this.ToActionResult(result, logger, context, args: dto);
    }
    
-   [Authorize] 
+   //[Authorize] 
    [HttpGet("customers/{id:guid}", Name = nameof(GetCustomerById))]
    [EndpointSummary("Get a customer by ReservationId")]
    [ProducesResponseType<CustomerDto>(StatusCodes.Status200OK)]

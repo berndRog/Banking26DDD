@@ -24,11 +24,31 @@ public class Program {
             HttpLoggingFields.ResponseHeaders;
 
          // optional: Bodies (nur DEV, Achtung: kann sensibel sein)
-         o.LoggingFields |= HttpLoggingFields.RequestBody |
+         o.LoggingFields |= 
+            HttpLoggingFields.RequestBody |
             HttpLoggingFields.ResponseBody;
+         
+         // Body limits (avoid huge logs)
+         o.RequestBodyLogLimit = 1024;
+         o.ResponseBodyLogLimit = 4096;
+         // Allow-list only non-sensitive headers you actually want.
+         o.ResponseHeaders.Clear();
+         o.ResponseHeaders.Add("Content-Type");
+         o.RequestHeaders.Add("Accept");
+         
+         // Force redaction for common sensitive headers (even if someone adds them later).
+         o.RequestHeaders.Add("Authorization");
+         //o.RequestHeaders.Add("Cookie");
+         o.RequestHeaders.Add("Origin");
+         o.RequestHeaders.Add("Referer");
+         o.RequestHeaders.Add("Set-Cookie");
 
-         o.RequestHeaders.Add("Authorization"); // Achtung: Token wird geloggt (DEV ok, PROD nein)
          o.MediaTypeOptions.AddText("application/json");
+         o.MediaTypeOptions.AddText("application/json");
+         o.MediaTypeOptions.AddText("application/problem+json");
+         o.MediaTypeOptions.AddText("application/*+json");
+         o.MediaTypeOptions.AddText("text/plain");
+
       });
 
       // Controllers

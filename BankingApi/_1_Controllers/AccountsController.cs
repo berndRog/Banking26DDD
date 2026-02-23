@@ -57,7 +57,7 @@ public class AccountsController(
       return this.ToActionResult(result, logger, context, args: new { iban });
    }
    
-   [Authorize(Policy="EmployeesOnly")]
+   [Authorize(Policy="CustomersOrEmployees")]
    [HttpGet("accounts" , Name = nameof(GetAllAccountsAsync))]
    [EndpointSummary("Get all accounts")]
    [ProducesResponseType(StatusCodes.Status200OK)]
@@ -120,7 +120,7 @@ public class AccountsController(
    // ------------------------------------------------------------------   
    // Beneficiaries of accounts
    // ------------------------------------------------------------------
-   [Authorize(Policy="OwnersOrEmployees")]
+   [Authorize(Policy="CustomersOrEmployees")]
    [HttpGet("accounts/{accountId:guid}/beneficiaries", Name = nameof(GetBeneficiariesByAccountIdAsync))]
    [EndpointSummary("Get beneficiaries of an account by accountId")]
    [Produces(MediaTypeNames.Application.Json)]
@@ -136,7 +136,7 @@ public class AccountsController(
       return this.ToActionResult(result, logger, context, args: new { accountId });
    }
    
-   [Authorize(Policy="OwnersOrEmployees")]
+   [Authorize(Policy="CustomersOrEmployees")]
    [HttpGet("beneficiaries/{id:guid}", Name = nameof(GetBeneficiaryByIdAsync))]
    [EndpointSummary("Get a beneficiary by Id")]
    [ProducesResponseType(typeof(BeneficiaryDto), StatusCodes.Status200OK)]
@@ -152,7 +152,7 @@ public class AccountsController(
       return this.ToActionResult(result, logger, context, args: new { id });
    }
 
-   [Authorize(Policy="OwnersOrEmployees")]
+   [Authorize(Policy="CustomersOrEmployees")]
    [HttpGet("beneficiaries/name/{name}, Name = nameof(GetBeneficiariesByNameAsync)")]
    [EndpointSummary("Get beneficiaries name, SQL like %name%")]
    [ProducesResponseType(typeof(BeneficiaryDto), StatusCodes.Status200OK)]
@@ -170,7 +170,7 @@ public class AccountsController(
       return this.ToActionResult(result, logger, context, args: new { name });
    }
    
-   [Authorize(Policy="OwnersOrEmployees")]
+   [Authorize(Policy="CustomersOrEmployees")]
    [HttpGet("beneficiaries/iban/{iban}", Name = nameof(GetBeneficiaryByIbanAsync))]
    [EndpointSummary("Get beneficiaries name, SQL like %name%")]
    [ProducesResponseType(typeof(BeneficiaryDto), StatusCodes.Status200OK)]
@@ -188,6 +188,7 @@ public class AccountsController(
       return this.ToActionResult(result, logger, context, args: new { iban });
    }
 
+   [Authorize(Policy="CustomersOrEmployees")]
    [HttpPost("accounts/{accountId:guid}/beneficiaries", Name = nameof(CreateBeneficiaryAsync))]
    public async Task<ActionResult<BeneficiaryDto>> CreateBeneficiaryAsync(
       [FromRoute] Guid accountId,
