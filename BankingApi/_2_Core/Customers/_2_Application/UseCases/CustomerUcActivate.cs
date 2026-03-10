@@ -7,6 +7,7 @@ using BankingApi._2_Core.Customers._3_Domain.Errors;
 using BankingApi._2_Core.Employees._1_Ports.Inbound;
 using BankingApi._2_Core.Employees._3_Domain.Enums;
 using BankingApi._2_Core.Payments._1_Ports.Inbound;
+using BankingApi._2_Core.Payments._1_Ports.Outbound;
 namespace BankingApi._2_Core.Customers._2_Application.UseCases;
 
 /// <summary>

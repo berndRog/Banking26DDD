@@ -1,99 +1,50 @@
 using BankingApi._2_Core.BuildingBlocks._3_Domain.ValueObjects;
 using BankingApi._2_Core.Employees._3_Domain.Aggregates;
+
 namespace BankingApi._2_Core.Employees._1_Ports.Outbound;
 
-/// <summary>
-/// Repository interface for the Employee aggregate.
-///
-/// Purpose:
-/// - Provides access to Employee aggregates for application use cases
-/// - Encapsulates persistence concerns behind an abstraction
-/// - Supports domain-specific lookup and uniqueness checks required by the EM workflows
-///
-/// Architectural intent:
-/// - Part of the Domain Layer (Repository abstraction)
-/// - Implemented in the Infrastructure Layer (e.g. EF Core)
-/// - Used by Application UseCases (write side)
-///
-/// Important:
-/// - This repository works with domain aggregates (Employee)
-/// - It must NOT return DTOs/projections (that is the job of ReadModels)
-/// - It should return tracked aggregates (for state changes)
-/// </summary>
+// Repository port for accessing Employee aggregates.
+// Used by application use cases to load and persist employees.
+// Implemented in the Infrastructure layer (e.g. EF Core).
 public interface IEmployeeRepository {
 
-   // ------------------------------------------------------------------
    // Queries (0..1)
-   // ------------------------------------------------------------------
-
-   /// <summary>
-   /// Loads an employee aggregate by its identifier.
-   ///
-   /// Returns:
-   /// - The employee aggregate if it exists
-   /// - Null if no employee with the given id exists
-   /// </summary>
+   // --------------------------------------------------------------
+   // Load an employee aggregate by identifier
    Task<Employee?> FindByIdAsync(
       Guid id,
       CancellationToken ct = default
    );
 
+   // Load employee using the identity subject (IdP reference)
    Task<Employee?> FindByIdentitySubjectAsync(
       string subject,
       CancellationToken ct = default
    );
-   
+
+   // Load employee by email value object
    Task<Employee?> FindByEmailAsync(
       EmailVo emailVo,
       CancellationToken ct = default
    );
-   
-   /// <summary>
-   /// Loads an employee aggregate by its personnel number.
-   ///
-   /// Business meaning:
-   /// - Used to look up employees via their unique personnel number
-   ///
-   /// Returns:
-   /// - The employee aggregate if it exists
-   /// - Null if no employee with the given personnel number exists
-   /// </summary>
+
+   // Load employee by personnel number
    Task<Employee?> FindByPersonnelNumberAsync(
       string personnelNumber,
       CancellationToken ct = default
    );
-   
 
-   // ------------------------------------------------------------------
    // Queries (0..n)
-   // ------------------------------------------------------------------
-
-   /// <summary>
-   /// Returns all employees who are administrators.
-   ///
-   /// Business meaning:
-   /// - Admins are employees with AdminRights != None
-   ///
-   /// Returns:
-   /// - A list of admin employees
-   /// - The list may be empty
-   /// </summary>
+   // --------------------------------------------------------------
+   // Return all employees with administrative rights
    Task<IReadOnlyList<Employee>> SelectAdminsAsync(
       CancellationToken ct
    );
 
-   // ------------------------------------------------------------------
    // Commands
-   // ------------------------------------------------------------------
-
-   /// <summary>
-   /// Adds a new employee aggregate to the persistence context.
-   ///
-   /// Technical notes:
-   /// - This method is synchronous by design
-   /// - The aggregate is attached to the DbContext and tracked
-   /// - Persistence is finalized via UnitOfWork.SaveAllChangesAsync
-   /// </summary>
+   // --------------------------------------------------------------
+   // Add a new employee aggregate to the persistence context
+   // The entity becomes tracked by the ORM
    void Add(Employee employee);
 }
 

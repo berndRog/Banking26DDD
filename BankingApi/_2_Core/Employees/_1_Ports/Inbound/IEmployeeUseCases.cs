@@ -1,59 +1,16 @@
 using BankingApi._2_Core.BuildingBlocks._3_Domain;
 using BankingApi._2_Core.Employees._2_Application.Dtos;
 using BankingApi._2_Core.Employees._3_Domain.Enums;
+
 namespace BankingApi._2_Core.Employees._1_Ports.Inbound;
 
-/// <summary>
-/// Application use cases for the Employees bounded context (write side).
-///
-/// Purpose:
-/// - Defines all state-changing operations related to employees
-/// - Serves as the inbound application boundary (port)
-/// - Is used by API controllers and application services
-///
-/// Scope:
-/// - Employee creation
-/// - Employee deactivation
-/// - Setting or changing administrative rights
-///
-/// Architectural intent:
-/// - Part of the Application Layer
-/// - Represents COMMAND use cases (CQRS write side)
-/// - Hides concrete implementations behind an interface
-///
-/// Important:
-/// - This interface exposes write operations only
-/// - It must NOT be used for read/query scenarios
-/// - It must NOT return projections or DTOs
-///
-/// Result policy:
-/// - Success:
-///   - Returns identifiers or completes without payload
-/// - Failure:
-///   - Returns domain-specific errors (validation, conflict, not found)
-/// </summary>
+// Application port defining all command use cases for the Employees bounded context.
+// Represents the write side of the application (CQRS command side).
+// Used by API controllers to trigger state changes in the Employee domain.
 public interface IEmployeeUseCases {
 
-   /// <summary>
-   /// Creates a new employee.
-   ///
-   /// Business meaning:
-   /// - Registers a new employee in the system
-   /// - Assigns an initial set of administrative rights
-   ///
-   /// Preconditions:
-   /// - Personnel number must be unique
-   /// - Email address must be valid
-   ///
-   /// Side effects:
-   /// - Creates a new Employee aggregate
-   /// - Persists it in the database
-   ///
-   /// Returns:
-   /// - Success(Guid) containing the new employee id
-   /// - Invalid if input data is invalid
-   /// - Conflict if personnel number or email already exists
-   /// </summary>
+   // Create a new employee aggregate
+   // Validates input and persists the new employee
    Task<Result<Guid>> CreateAsync(
       string firstname,
       string lastname,
@@ -65,60 +22,29 @@ public interface IEmployeeUseCases {
       string? id = null,
       CancellationToken ct = default
    );
-   
+
+   // Create provisioning information for a new employee
+   // Typically used during identity or onboarding workflows
    Task<Result<EmployeeProvisionDto>> CreateProvisionAsync(
-      string?  id, 
-      CancellationToken ct = default
-   );
-   
-   Task<Result<EmployeeDto>> UpdateProfileAsync(
-      EmployeeDto dto, 
+      string? id,
       CancellationToken ct = default
    );
 
-   /// <summary>
-   /// Deactivates an existing employee.
-   ///
-   /// Business meaning:
-   /// - Marks an employee as inactive
-   /// - Prevents the employee from performing administrative actions
-   ///
-   /// Preconditions:
-   /// - The employee must exist
-   ///
-   /// Side effects:
-   /// - Changes the employee status to inactive
-   /// - Sets the deactivation timestamp
-   ///
-   /// Returns:
-   /// - Success if the employee was deactivated
-   /// - NotFound if the employee does not exist
-   /// - Conflict if the employee is already inactive
-   /// </summary>
+   // Update profile information of an existing employee
+   Task<Result<EmployeeDto>> UpdateProfileAsync(
+      EmployeeDto dto,
+      CancellationToken ct = default
+   );
+
+   // Deactivate an employee and prevent further administrative actions
    Task<Result> DeactivateAsync(
       Guid employeeId,
       DateTimeOffset deactivatedAt,
       CancellationToken ct = default
    );
 
-   /// <summary>
-   /// Sets or updates the administrative rights of an employee.
-   ///
-   /// Business meaning:
-   /// - Grants or revokes permissions for administrative actions
-   /// - Rights are represented as a bitmask (flags)
-   ///
-   /// Preconditions:
-   /// - The employee must exist
-   ///
-   /// Side effects:
-   /// - Updates the AdminRights of the employee
-   ///
-   /// Returns:
-   /// - Success if the rights were updated
-   /// - NotFound if the employee does not exist
-   /// - Invalid if the provided rights value is invalid
-   /// </summary>
+   // Grant or update administrative rights
+   // Rights are represented as a flag enum
    Task<Result> SetAdminRightsAsync(
       Guid employeeId,
       AdminRights adminRights,
@@ -153,9 +79,9 @@ public interface IEmployeeUseCases {
  *
  * Was gehört bewusst NICHT hierher?
  * ---------------------------------
- * - Anzeigen von Employee-Details (ST-4)
- * - Anzeigen von Listen (ST-5)
- * - Filtern / Suchen (ST-6)
+ * - Anzeigen von Employee-Details
+ * - Anzeigen von Listen
+ * - Filtern / Suchen
  *
  * Diese Fälle gehören in das ReadModel:
  * → IEmployeeReadModel

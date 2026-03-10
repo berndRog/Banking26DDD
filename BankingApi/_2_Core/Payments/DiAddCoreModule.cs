@@ -27,12 +27,7 @@ public static class DiCoreExtensions {
       services.AddScoped<IAccountsUseCases, AccountsUseCases>();      
       
       // Policies
-      
-      // =========================================================
-      // Outbound ports
-      // =========================================================
-      // Repositories
-      services.AddScoped<IAccountRepository, AccountRepositoryEf>();
+
       
       return services;
    }

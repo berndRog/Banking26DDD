@@ -7,6 +7,7 @@ using BankingApi._2_Core.Customers._2_Application.Errors;
 using BankingApi._2_Core.Customers._2_Application.Mappings;
 using BankingApi._2_Core.Customers._3_Domain.Entities;
 using BankingApi._2_Core.Payments._1_Ports.Inbound;
+using BankingApi._2_Core.Payments._1_Ports.Outbound;
 using BankingApi._3_Infrastructure.Logging;
 namespace BankingApi._2_Core.Customers._2_Application.UseCases;
 

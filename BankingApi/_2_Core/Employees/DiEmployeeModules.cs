@@ -31,12 +31,6 @@ public static class DiAddEmployeeModules {
 
       // Policies
 
-      // =========================================================
-      // Outbound ports
-      // =========================================================
-      // Repositories
-      services.AddScoped<IEmployeeRepository, EmployeesesRepositoryEf>();
-
       return services;
    }
 }

@@ -312,13 +312,13 @@ public sealed class Customer : AggregateRoot {
 
    // 
    public Result UpdateAddress(
-      AddressVo address,
+      AddressVo addressVo,
       DateTimeOffset updatedAt = default
    ) {
       if (updatedAt == default)
          return Result.Failure(CustomerErrors.UpdatedAtIsRequiredInUpdateAddress);
 
-      Address = address;
+      AddressVo = addressVo;
       Touch(updatedAt);
       return Result.Success();
    }
@@ -329,19 +329,19 @@ public sealed class Customer : AggregateRoot {
       if (updatedAt == default)
          return Result.Failure(CustomerErrors.UpdatedAtIsRequiredInRemoveAddress);
 
-      Address = null;
+      AddressVo = null;
       Touch(updatedAt);
       return Result.Success();
    }
    
    public Result UpdateEmail(
-      EmailVo email,
+      EmailVo emailVo,
       DateTimeOffset updatedAt = default
    ) {
       if (updatedAt == default)
          return Result.Failure(CustomerErrors.UpdatedAtIsRequiredInUpdateEmail);
  
-      Email = email;
+      EmailVo = emailVo;
       Touch(updatedAt);
       return Result.Success();
    }

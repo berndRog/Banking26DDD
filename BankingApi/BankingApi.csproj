@@ -38,7 +38,7 @@
 
 
   <ItemGroup>
-    <Folder Include="_2_Core\Employees\_4_Infrastructure\Persistence\" />
+    <Folder Include="_2_Core\Customers\_2_Application\Adapters\" />
   </ItemGroup>
 
 </Project>
