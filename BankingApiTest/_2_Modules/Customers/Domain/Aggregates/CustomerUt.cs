@@ -1,10 +1,10 @@
-using BankingApi._2_Modules.Customers._2_Application.Dtos;
-using BankingApi._2_Modules.Customers._3_Domain.Enum;
-using BankingApi._2_Modules.Employees._3_Domain.Aggregates;
-using BankingApi._2_Modules.Employees._3_Domain.Errors;
-using BankingApi._4_BuildingBlocks._1_Ports.Inbound;
-using BankingApi._4_BuildingBlocks._3_Domain.Errors;
-using BankingApi._4_BuildingBlocks._3_Domain.ValueObjects;
+using BankingApi._2_Core.BuildingBlocks._1_Ports.Inbound;
+using BankingApi._2_Core.BuildingBlocks._3_Domain.Errors;
+using BankingApi._2_Core.BuildingBlocks._3_Domain.ValueObjects;
+using BankingApi._2_Core.Customers._2_Application.Dtos;
+using BankingApi._2_Core.Customers._3_Domain.Entities;
+using BankingApi._2_Core.Customers._3_Domain.Enum;
+using BankingApi._2_Core.Customers._3_Domain.Errors;
 using BankingApiTest.Infrastructure;
 namespace BankingApiTest.Modules.Customers.Domain.Aggregates;
 
@@ -17,10 +17,10 @@ public sealed class CustomerUt {
    private readonly string _firstname;
    private readonly string _lastname;
    private readonly string _companyName;
-   private readonly Email _email;
+   private readonly EmailVo _emailVo;
    private readonly string _subject;
    private readonly string _id;
-   private readonly Address _address1 = default!;
+   private readonly AddressVo _address1 = default!;
 
    public CustomerUt() {
       _seed = new TestSeed();
@@ -32,13 +32,13 @@ public sealed class CustomerUt {
       _firstname = "Bernd";
       _lastname = "Rogalla";
       _companyName = "BR Software GmbH";
-      _email = Email.Create("b.rogalla@mail.local").Value;
+      _emailVo = EmailVo.Create("b.rogalla@mail.local").Value;
       _subject = "system";
 
       _address1 = _seed.Address1;
    }
 
-   public static IEnumerable<object[]> InvalidNameLengths() {
+   public static IEnumerable<object[]> InvalidLengths() {
       yield return new object[] { "A" };                         // too short (1)
       yield return new object[] { new string('A', 81) };         // too long (81)
    }
@@ -52,12 +52,12 @@ public sealed class CustomerUt {
    public void CreatePerson_valid_input_and_id_creates_owner() {
       // Act
       var result = Customer.Create(
-         clock: _clock,
          firstname: _firstname,
          lastname: _lastname,
          companyName: null,
-         email: _email,
+         emailVo: _emailVo,
          subject: _subject,
+         createdAt: _clock.UtcNow,
          id: _id
       );
 
@@ -69,7 +69,7 @@ public sealed class CustomerUt {
       Equal(Guid.Parse(_id), owner.Id);
       Equal(_firstname, owner.Firstname);
       Equal(_lastname, owner.Lastname);
-      Equal(_email, owner.Email);
+      Equal(_emailVo, owner.EmailVo);
       Equal(_subject, owner.Subject);
 
       Null(owner.CompanyName);
@@ -84,12 +84,12 @@ public sealed class CustomerUt {
    public void CreateCustomer_valid_input_and_without_id() {
       // Act
       var result = Customer.Create(
-         clock: _clock,
          firstname: _firstname,
          lastname: _lastname,
          companyName: null,
-         email: _email,
+         emailVo: _emailVo,
          subject: _subject,
+         createdAt: _clock.UtcNow,
          id: null // <== without id
       );
 
@@ -101,7 +101,7 @@ public sealed class CustomerUt {
       NotEqual(Guid.Empty, owner.Id);
       Equal(_firstname, owner.Firstname);
       Equal(_lastname, owner.Lastname);
-      Equal(_email, owner.Email);
+      Equal(_emailVo, owner.EmailVo);
       Equal(_subject, owner.Subject);
       Null(owner.CompanyName);
       Equal($"{_firstname} {_lastname}", owner.DisplayName);
@@ -113,12 +113,12 @@ public sealed class CustomerUt {
    public void CreateCustomer_invalid_firstname_fails(string firstname) {
       // Act
       var result = Customer.Create(
-         clock: _clock,
          firstname: firstname,
          lastname: _lastname,
          companyName: null,
-         email: _email,
+         emailVo: _emailVo,
          subject: _subject,
+         createdAt: _clock.UtcNow,
          id: _id
       );
 
@@ -128,15 +128,15 @@ public sealed class CustomerUt {
    }
 
    [Theory]
-   [MemberData(nameof(InvalidNameLengths))]
+   [MemberData(nameof(InvalidLengths))]
    public void CreateCutsomer_invalid_firstname_length_fails(string firstname) {
       var result = Customer.Create(
-         clock: _clock,
          firstname: firstname,
          lastname: _lastname,
          companyName: null,
-         email: _email,
+         emailVo: _emailVo,
          subject: _subject,
+         createdAt: _clock.UtcNow,
          id: _id
       );
 
@@ -150,12 +150,12 @@ public sealed class CustomerUt {
    public void CreateCustomer_invalid_lastname_fails(string lastname) {
       // Act
       var result = Customer.Create(
-         clock: _clock,
          firstname: _firstname,
          lastname: lastname,
          companyName: null,
-         email: _email,
+         emailVo: _emailVo,
          subject: _subject,
+         createdAt: _clock.UtcNow,
          id: _id
       );
 
@@ -165,15 +165,15 @@ public sealed class CustomerUt {
    }
 
    [Theory]
-   [MemberData(nameof(InvalidNameLengths))]
+   [MemberData(nameof(InvalidLengths))]
    public void CreateCustomer_invalid_lastname_length_fails(string lastname) {
       var result = Customer.Create(
-         clock: _clock,
          firstname: _firstname,
          lastname: lastname,
          companyName: null,
-         email: _email,
+         emailVo: _emailVo,
          subject: _subject,
+         createdAt: _clock.UtcNow,
          id: _id
       );
 
@@ -188,7 +188,7 @@ public sealed class CustomerUt {
    [InlineData("a.b.de")]
    public void CreateCustomer_invalid_email_fails(string email) {
       // Act
-      var result = Email.Create(email);
+      var result = EmailVo.Create(email);
       // Assert
       True(result.IsFailure);
       // depending on your VO implementation this might be EmailIsRequired or CommonErrors.InvalidEmail
@@ -202,12 +202,12 @@ public sealed class CustomerUt {
 
       // Act
       var result = Customer.Create(
-         clock: _clock,
          firstname: _firstname,
          lastname: _lastname,
          companyName: null,
-         email: _email,
+         emailVo: _emailVo,
          subject: _subject,
+         createdAt: _clock.UtcNow,
          id: id
       );
 
@@ -223,12 +223,12 @@ public sealed class CustomerUt {
 
       // Act
       var result = Customer.Create(
-         clock: _clock,
          firstname: _firstname,
          lastname: _lastname,
          companyName: null,
-         email: _email,
+         emailVo: _emailVo,
          subject: _subject,
+         createdAt: _clock.UtcNow,
          id: id
       );
 
@@ -248,17 +248,14 @@ public sealed class CustomerUt {
    public void CreateCustomer_valid_input_and_id_and_address() {
       // Act
       var result = Customer.Create(
-         clock: _clock,
          firstname: _firstname,
          lastname: _lastname,
          companyName: null,
-         email: _email,
+         emailVo: _emailVo,
          subject: _subject,
+         createdAt: _clock.UtcNow,
          id: _id,
-         street: _address1.Street,
-         postalCode: _address1.PostalCode,
-         city: _address1.City,
-         country: _address1.Country
+         addressVo: _address1
       );
 
       // Assert
@@ -266,80 +263,79 @@ public sealed class CustomerUt {
 
       var owner = result.Value!;
       Equal(Guid.Parse(_id), owner.Id);
-      NotNull(owner.Address);
-      Equal(_address1.Street, owner.Address!.Street);
-      Equal(_address1.PostalCode, owner.Address!.PostalCode);
-      Equal(_address1.City, owner.Address!.City);
-      Equal(_address1.Country, owner.Address!.Country);
+      NotNull(owner.AddressVo);
+      Equal(_address1.Street, owner.AddressVo!.Street);
+      Equal(_address1.PostalCode, owner.AddressVo!.PostalCode);
+      Equal(_address1.City, owner.AddressVo!.City);
+      Equal(_address1.Country, owner.AddressVo!.Country);
    }
 
+   
    [Theory]
    [InlineData("")]
    [InlineData("   ")]
+   [MemberData(nameof(InvalidLengths))]
    public void CreateCustomer_with_address_invalid_street_fails(string street) {
-      // Act
-      var result = Customer.Create(
-         clock: _clock,
-         firstname: _firstname,
-         lastname: _lastname,
-         companyName: null,
-         email: _email,
-         subject: _subject,
-         id: _id,
+      // Act      
+      var ResultAddress = AddressVo.Create(
          street: street,
          postalCode: _address1.PostalCode,
          city: _address1.City,
          country: _address1.Country
       );
+      
       // Assert
-      True(result.IsFailure);
-      Equivalent(CommonErrors.StreetIsRequired, result.Error);
+      True(ResultAddress.IsFailure);
+      if(string.IsNullOrWhiteSpace(street))
+         Equivalent(CommonErrors.StreetIsRequired, ResultAddress.Error);
+      else
+         Equal(CommonErrors.InvalidStreet, ResultAddress.Error);
+
    }
 
    [Theory]
    [InlineData("")]
    [InlineData("   ")]
+   [InlineData("A")]
+   [InlineData("AAAAAAAAAAA")]
    public void CreateCustomer_with_address_invalid_postal_code_fails(string postalCode) {
-      var result = Customer.Create(
-         clock: _clock,
-         firstname: _firstname,
-         lastname: _lastname,
-         companyName: null,
-         email: _email,
-         subject: _subject,
-         id: _id,
+      // Act      
+      var ResultAddress = AddressVo.Create(
          street: _address1.Street,
          postalCode: postalCode,
          city: _address1.City,
          country: _address1.Country
       );
-
-      True(result.IsFailure);
-      Equivalent(CommonErrors.PostalCodeIsRequired, result.Error);
+      
+      // Assert
+      True(ResultAddress.IsFailure);
+      if(string.IsNullOrWhiteSpace(postalCode))
+         Equivalent(CommonErrors.PostalCodeIsRequired, ResultAddress.Error);
+      else
+         Equal(CommonErrors.InvalidPostalCode, ResultAddress.Error);
+      
    }
 
    [Theory]
    [InlineData("")]
    [InlineData("   ")]
+   [MemberData(nameof(InvalidLengths))]
    public void CreateCustomer_with_address_invalid_city_fails(string city) {
-      var result = Customer.Create(
-         clock: _clock,
-         firstname: _firstname,
-         lastname: _lastname,
-         companyName: null,
-         email: _email,
-         subject: _subject,
-         id: _id,
+      // Act      
+      var ResultAddress = AddressVo.Create(
          street: _address1.Street,
          postalCode: _address1.PostalCode,
          city: city,
          country: _address1.Country
       );
-
-      True(result.IsFailure);
-      Equivalent(CommonErrors.CityIsRequired, result.Error);
+      
+      // Assert
+      True(ResultAddress.IsFailure);
+      if(string.IsNullOrWhiteSpace(city))
+         Equivalent(CommonErrors.CityIsRequired, ResultAddress.Error);
+      else
+         Equal(CommonErrors.InvalidCity, ResultAddress.Error);
    }
-
    #endregion
 
    // =========================================================================================
@@ -350,12 +346,12 @@ public sealed class CustomerUt {
    public void CreateCompany_valid_input_and_without_id() {
       // Act
       var result = Customer.Create(
-         clock: _clock,
          firstname: _firstname,
          lastname: _lastname,
          companyName: _companyName,
-         email: _email,
+         emailVo: _emailVo,
          subject: _subject,
+         createdAt: _clock.UtcNow,
          id: null
       );
 
@@ -366,7 +362,7 @@ public sealed class CustomerUt {
       Equal(_firstname, owner.Firstname);
       Equal(_lastname, owner.Lastname);
       Equal(_companyName, owner.CompanyName);
-      Equal(_email, owner.Email);
+      Equal(_emailVo, owner.EmailVo);
       Equal(_companyName, owner.DisplayName);
    }
    
@@ -376,12 +372,12 @@ public sealed class CustomerUt {
    [InlineData("   ")]
    public void CreateCompany_invalid_firstname_fails(string firstname) {
       var result = Customer.Create(
-         clock: _clock,
          firstname: firstname,
          lastname: _lastname,
          companyName: _companyName,
-         email: _email,
+         emailVo: _emailVo,
          subject: _subject,
+         createdAt: _clock.UtcNow,
          id: null
       );
 
@@ -394,12 +390,12 @@ public sealed class CustomerUt {
    [InlineData("   ")]
    public void CreateCompany_invalid_lastname_fails(string lastname) {
       var result = Customer.Create(
-         clock: _clock,
          firstname: _firstname,
          lastname: lastname,
          companyName: _companyName,
-         email: _email,
+         emailVo: _emailVo,
          subject: _subject,
+         createdAt: _clock.UtcNow,
          id: null
       );
 
@@ -408,15 +404,15 @@ public sealed class CustomerUt {
    }
 
    [Theory]
-   [MemberData(nameof(InvalidNameLengths))]
+   [MemberData(nameof(InvalidLengths))]
    public void CreateComnay_invalid_companyName_length_fails(string companyName) {
        var result = Customer.Create(
-         clock: _clock,
          firstname: _firstname,
          lastname: _lastname,
          companyName: companyName,
-         email: _email,
+         emailVo: _emailVo,
          subject: _subject,
+         createdAt: _clock.UtcNow,
          id: null
       );
        
@@ -432,7 +428,7 @@ public sealed class CustomerUt {
    [InlineData("a.b.de")]
    public void CreateCompany_invalid_email_fails(string email) {
       // Act
-      var result = Email.Create(email);
+      var result = EmailVo.Create(email);
       // Assert
       True(result.IsFailure);
    }
@@ -442,12 +438,12 @@ public sealed class CustomerUt {
       var id = "22222222-2222-2222-2222-222222222222";
 
       var result = Customer.Create(
-         clock: _clock,
          firstname: _firstname,
          lastname: _lastname,
          companyName: _companyName,
-         email: _email,
+         emailVo: _emailVo,
          subject: _subject,
+         createdAt: _clock.UtcNow,
          id: id
       );
 
@@ -460,12 +456,12 @@ public sealed class CustomerUt {
       var id = "not-a-guid";
 
       var result = Customer.Create(
-         clock: _clock,
          firstname: _firstname,
          lastname: _lastname,
          companyName: _companyName,
-         email: _email,
+         emailVo: _emailVo,
          subject: _subject,
+         createdAt: _clock.UtcNow,
          id: id
       );
 
@@ -486,9 +482,8 @@ public sealed class CustomerUt {
 
       // Act
       var result = Customer.CreateProvision(
-         clock: _clock,
          identitySubject: _subject,
-         email: _email,
+         emailVo: _emailVo,
          createdAt: identityCreatedAt,
          id: _id
       );
@@ -499,7 +494,7 @@ public sealed class CustomerUt {
 
       Equal(Guid.Parse(_id), owner.Id);
       Equal(_subject, owner.Subject);
-      Equal(_email, owner.Email);
+      Equal(_emailVo, owner.EmailVo);
 
       Equal(CustomerStatus.Pending, owner.Status);
       False(owner.IsProfileComplete);
@@ -512,9 +507,8 @@ public sealed class CustomerUt {
    [Fact]
    public void CreateProvisioned_createdAt_default_fails() {
       var result = Customer.CreateProvision(
-         clock: _clock,
          identitySubject: _subject,
-         email: _email,
+         emailVo: _emailVo,
          createdAt: default,
          id: _id
       );
@@ -535,7 +529,7 @@ public sealed class CustomerUt {
       string lastname,
       string? companyName,
       string emailString,
-      Address? address
+      AddressVo? address
    ) => new(
          Id: Guid.NewGuid(),
          Firstname: firstname,
@@ -543,11 +537,8 @@ public sealed class CustomerUt {
          CompanyName: companyName,
          EmailString: emailString,
          StatusInt: 1,
-         Street: address?.Street,
-         PostalCode: address?.PostalCode,
-         City: address?.City,
-         Country: address?.Country
-      );
+         AddressVo: address
+         );
 /*
    [Fact]
    public void UpdateProfile_valid_sets_fields_and_address_and_updates_updatedAt() {

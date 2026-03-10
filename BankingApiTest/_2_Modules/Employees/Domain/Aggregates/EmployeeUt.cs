@@ -1,7 +1,7 @@
-using BankingApi._2_Modules.Employees._3_Domain.Aggregates;
-using BankingApi._2_Modules.Employees._3_Domain.Enums;
-using BankingApi._4_BuildingBlocks._1_Ports.Inbound;
-using BankingApi._4_BuildingBlocks._3_Domain.ValueObjects;
+using BankingApi._2_Core.BuildingBlocks._1_Ports.Inbound;
+using BankingApi._2_Core.BuildingBlocks._3_Domain.ValueObjects;
+using BankingApi._2_Core.Employees._3_Domain.Aggregates;
+using BankingApi._2_Core.Employees._3_Domain.Enums;
 using BankingApiTest.Infrastructure;
 namespace BankingApiTest.Modules.Employees.Domain.Aggregates;
 
@@ -12,8 +12,8 @@ public sealed class EmployeeUt {
 
    private readonly string _firstname;
    private readonly string _lastname;
-   private readonly Email _email;
-   private readonly Phone _phone;
+   private readonly EmailVo _emailVo;
+   private readonly PhoneVo _phoneVo;
    private readonly string _subject;
    private readonly string _personnelNumber;
    private readonly AdminRights _adminRights;
@@ -25,8 +25,8 @@ public sealed class EmployeeUt {
       
       _firstname = "Bernd";
       _lastname = "Rogalla";
-      _email = Email.Create("b.rogalla@bankingapi.de").Value;
-      _phone = Phone.Create("+49 5826 123 4100").Value;
+      _emailVo = EmailVo.Create("b.rogalla@bankingapi.de").Value;
+      _phoneVo = PhoneVo.Create("+49 5826 123 4100").Value;
       _subject = "00000000-0010-0000-0000-00000000000";
       _personnelNumber = "EMP010";
       _adminRights = (AdminRights) 511;
@@ -45,8 +45,8 @@ public sealed class EmployeeUt {
          clock: _clock,
          firstname: _firstname,
          lastname: _lastname,
-         email: _email,
-         phone: _phone,
+         emailVo: _emailVo,
+         phone: _phoneVo,
          subject: _subject,
          personnelNumber: _personnelNumber,
          adminRights: (AdminRights) 511,
@@ -62,8 +62,8 @@ public sealed class EmployeeUt {
       Equal(Guid.Parse(_id), employee.Id);
       Equal(_firstname, employee.Firstname);
       Equal(_lastname, employee.Lastname);
-      Equal(_email, employee.Email);
-      Equal(_phone, employee.Phone);
+      Equal(_emailVo, employee.EmailVo);
+      Equal(_phoneVo, employee.Phone);
       Equal(_subject, employee.Subject);
       Equal(_personnelNumber, employee.PersonnelNumber);
       Equal(_adminRights, employee.AdminRights);
@@ -76,8 +76,8 @@ public sealed class EmployeeUt {
          clock: _clock,
          firstname: _firstname,
          lastname: _lastname,
-         email: _email,
-         phone: _phone,
+         emailVo: _emailVo,
+         phone: _phoneVo,
          subject: _subject,
          personnelNumber: _personnelNumber,
          adminRights: _adminRights,
@@ -90,8 +90,8 @@ public sealed class EmployeeUt {
       IsType<Employee>(employee);
       Equal(_firstname, employee.Firstname);
       Equal(_lastname, employee.Lastname);
-      Equal(_email, employee.Email);
-      Equal(_phone, employee.Phone);
+      Equal(_emailVo, employee.EmailVo);
+      Equal(_phoneVo, employee.Phone);
       Equal(_subject, employee.Subject);
       Equal(_personnelNumber, employee.PersonnelNumber);
    }

@@ -1,4 +1,4 @@
-using BankingApi._2_Modules.Employees._3_Domain.Enums;
+using BankingApi._3_Infrastructure._3_Security;
 using BankingApi._3_Infrastructure.Security;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;

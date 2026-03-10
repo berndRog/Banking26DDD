@@ -1,0 +1,64 @@
+using BankingApi._2_Core.BuildingBlocks._3_Domain;
+using BankingApi._2_Core.Customers._1_Ports.Inbound;
+using BankingApi._2_Core.Customers._2_Application.Dtos;
+namespace BankingApi._2_Core.Customers._2_Application.UseCases;
+
+
+// UseCases Facade for Customer aggregate
+public class CustomerUseCases(
+   CustomerUcCreate createUc,
+   CustomerUcCreateProvision createProvisionUc,
+   CustomerUcUpdateProfile updateProfileUc,
+   CustomerUcActivate activateUc,
+   CustomerUcReject rejectUc,
+   CustomerUcDeactivate deactivateUc,
+   CustomerUcUpdateEmail updateEmailUc
+): ICustomerUseCases {
+
+   public Task<Result<CustomerDto>> CreateAsync(
+      CustomerDto customerDto,
+      string? accountIdString,
+      string? ibanString,
+      CancellationToken ct
+   ) => createUc.ExecuteAsync(
+      customerDto: customerDto,
+      accountIdString: accountIdString,
+      ibanString: ibanString,
+      ct: ct
+   );
+
+   public Task<Result<CustomerProvisionDto>> CreateProvisionAsync(
+      string? id, 
+      CancellationToken ct
+   ) => createProvisionUc.ExecuteAsync(id, ct);
+
+   public Task<Result<CustomerDto>> UpdateProfileAsync(
+      CustomerDto dto, 
+      CancellationToken ct
+   ) => updateProfileUc.ExecuteAsync(dto, ct);
+   
+   public Task<Result> ActivateAsync(
+      Guid customerId,
+      string? accountIdString,
+      string? ibanString,
+      CancellationToken ct
+   ) => activateUc.ExecuteAsync(customerId, accountIdString, ibanString, ct);
+
+   public Task<Result> RejectAsync(
+      Guid customerId, 
+      string reason,
+      CancellationToken ct
+   ) => rejectUc.ExecuteAsync(customerId, reason, ct);
+   
+   public Task<Result> DeactivateAsync(
+      Guid customerId,
+      CancellationToken ct
+   ) => deactivateUc.ExecuteAsync(customerId, ct);
+   
+   public Task<Result> UpdateEmailAsync(
+      Guid customerId, 
+      string newEmail, 
+      CancellationToken ct = default
+   ) => updateEmailUc.ExecuteAsync(customerId, newEmail, ct);
+   
+}

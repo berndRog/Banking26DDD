@@ -1,4 +1,4 @@
-using BankingApi._2_Modules.Customers._1_Ports.Inbound;
+using BankingApi._2_Core.Customers._1_Ports.Inbound;
 using BankingApi._3_Infrastructure.Database;
 using BankingApiTest.Infrastructure;
 using Microsoft.Extensions.DependencyInjection;
@@ -39,7 +39,7 @@ public sealed class CustomerUcActivateIntT : IntegrationTestBase {
 
       
       // Act
-      Guid customerId;
+      //Guid customerId;
       await Factory.WithScopeAsync(async serviceProvider => {
          // Option A: resolve the "use case facade" (preferred)
          var ownerUseCases = serviceProvider.GetRequiredService<ICustomerUseCases>();

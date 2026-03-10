@@ -1,6 +1,6 @@
-using BankingApi._2_Modules.Customers._1_Ports.Inbound;
-using BankingApi._2_Modules.Customers._2_Application.Dtos;
-using BankingApi._2_Modules.Customers._2_Application.UseCases;
+using BankingApi._2_Core.Customers._1_Ports.Inbound;
+using BankingApi._2_Core.Customers._2_Application.Dtos;
+using BankingApi._2_Core.Customers._2_Application.UseCases;
 using BankingApi._4_BuildingBlocks;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -22,30 +22,23 @@ public sealed class CustomersController(
    [ProducesResponseType<CustomerDto>(StatusCodes.Status201Created)]
    [ProducesResponseType<ProblemDetails>(StatusCodes.Status400BadRequest, "application/problem+json")]   
    public async Task<ActionResult<Guid>> CreateCustomerAsync(
-      [FromQuery] string subject,
       [FromQuery] string accountId,
       [FromQuery] string iban,
-      [FromBody] CustomerDto dto,
+      [FromBody] CustomerDto customerDto,
       CancellationToken ct
    ) {
       const string context = $"{nameof(CustomersController)}.{nameof(CreateCustomerAsync)}";
 
       var result = await ucCreate.ExecuteAsync(
-         firstname: dto.Firstname,
-         lastname: dto.Lastname,
-         companyName: dto.CompanyName,
-         emailString: dto.EmailString,
-         subject: subject, // in real scenario, subject should come from auth token or be generated in use case
-         id: dto.Id.ToString(),
+         customerDto: customerDto,
+         accountIdString: accountId,
          ibanString: iban, 
-         street: dto.Street,
-         postalCode: dto.PostalCode,
-         city: dto.City,
-         country: dto.Country,
          ct: ct
       );
       
-      return this.ToCreatedAtRoute(routeName: nameof(GetCustomerById), routeValues: new { dto.Id }, 
+      return this.ToCreatedAtRoute(
+         routeName: nameof(GetCustomerById),
+         routeValues: new { id = customerDto.Id },
          result, logger, context);
    }
 

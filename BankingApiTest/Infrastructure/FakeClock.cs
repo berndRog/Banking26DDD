@@ -1,4 +1,4 @@
-using BankingApi._4_BuildingBlocks._1_Ports.Inbound;
+using BankingApi._2_Core.BuildingBlocks._1_Ports.Inbound;
 namespace BankingApiTest.Infrastructure;
 
 public sealed class FakeClock : IClock {

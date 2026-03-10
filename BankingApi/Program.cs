@@ -1,11 +1,14 @@
-using BankingApi._2_Modules.Core;
+using BankingApi._2_Core.BuildingBlocks;
+using BankingApi._2_Core.BuildingBlocks._1_Ports.Inbound;
+using BankingApi._2_Core.Customers;
+using BankingApi._2_Core.Employees;
+using BankingApi._2_Core.Payments;
 using BankingApi._2_Modules.Customers;
 using BankingApi._2_Modules.Employees;
 using BankingApi._3_Infrastructure;
-using BankingApi._3_Infrastructure._1_Ports.Inbound;
+using BankingApi._3_Infrastructure._2_Persistence;
 using BankingApi._3_Infrastructure.Database;
 using BankingApi._4_BuildingBlocks;
-using BankingApi._4_BuildingBlocks._1_Ports.Inbound;
 using Microsoft.AspNetCore.HttpLogging;
 namespace BankingApi;
 
@@ -103,14 +106,14 @@ public class Program {
          db.Database.EnsureCreated();
       
          // Seed if empty
-         if (!db.Employees.Any()) {
-            var seed = new Seed(clock);
-            db.Employees.AddRange(seed.Employee1, seed.Employee2);
-            db.Customers.AddRange(seed.Employees);
-            db.Accounts.AddRange(seed.Accounts);
-            db.Transfers.AddRange(seed.Transfers);
-            unitOfWork.SaveAllChangesAsync("");
-         }
+         // if (!db.Employees.Any()) {
+         //    var seed = new Seed(clock);
+         //    db.Employees.AddRange(seed.Employee1, seed.Employee2);
+         //    db.Customers.AddRange(seed.Employees);
+         //    db.Accounts.AddRange(seed.Accounts);
+         //    db.Transfers.AddRange(seed.Transfers);
+         //    unitOfWork.SaveAllChangesAsync("");
+         // }
       }
    }
 }

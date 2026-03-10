@@ -1,13 +1,12 @@
-using BankingApi._2_Modules.Core._1_Ports.Outbound;
-using BankingApi._2_Modules.Core._2_Application.Mappings;
-using BankingApi._2_Modules.Core._2_Application.UseCases;
-using BankingApi._2_Modules.Core._3_Domain.Aggregates;
-using BankingApi._2_Modules.Core._4_Infrastructure.Repositories;
-using BankingApi._2_Modules.Employees._3_Domain.Aggregates;
-using BankingApi._3_Infrastructure._1_Ports.Inbound;
+using BankingApi._2_Core.BuildingBlocks._1_Ports.Inbound;
+using BankingApi._2_Core.Customers._3_Domain.Entities;
+using BankingApi._2_Core.Payments._1_Ports.Outbound;
+using BankingApi._2_Core.Payments._2_Application.Dtos;
+using BankingApi._2_Core.Payments._2_Application.Mappings;
+using BankingApi._2_Core.Payments._2_Application.UseCases;
+using BankingApi._2_Core.Payments._3_Domain.Aggregates;
+using BankingApi._2_Core.Payments._4_Infrastructure.Repositories;
 using BankingApi._3_Infrastructure.Database;
-using BankingApi._4_BuildingBlocks._1_Ports.Inbound;
-using BankingApi.Core.Dto;
 using BankingApiTest.Infrastructure;
 using Microsoft.Data.Sqlite;
 using Microsoft.EntityFrameworkCore;
@@ -60,6 +59,7 @@ public sealed class AccountUcBeneficiaryAddIntT : TestBase, IAsyncLifetime {
       _sut = new AccountUcBeneficiaryAdd(
          _repository,
          _unitOfWork,
+         _clock,
          CreateLogger<AccountUcBeneficiaryAdd>()
       );
    }

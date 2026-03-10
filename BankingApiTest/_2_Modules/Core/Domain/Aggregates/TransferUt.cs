@@ -1,7 +1,6 @@
-using BankingApi._2_Modules.Accounts._3_Domain.Enums;
-using BankingApi._2_Modules.Core._3_Domain.Aggregates;
-using BankingApi._4_BuildingBlocks._1_Ports.Inbound;
-using BankingApi.Modules.Core.Domain.Aggregates;
+using BankingApi._2_Core.BuildingBlocks._1_Ports.Inbound;
+using BankingApi._2_Core.Payments._3_Domain.Aggregates;
+using BankingApi._2_Core.Payments._3_Domain.Enums;
 using BankingApiTest.Infrastructure;
 
 namespace BankingApiTest._2_Modules.Core.Domain.Aggregates;

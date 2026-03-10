@@ -1,9 +1,8 @@
 using System.Data.Common;
 using BankingApi;
-using BankingApi._3_Infrastructure._1_Ports.Inbound;
+using BankingApi._2_Core.BuildingBlocks._1_Ports.Inbound;
+using BankingApi._2_Core.BuildingBlocks._1_Ports.Outbound;
 using BankingApi._3_Infrastructure.Database;
-using BankingApi._4_BuildingBlocks._1_Ports.Inbound;
-using BankingApi._4_BuildingBlocks._1_Ports.Outbound;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc.Testing;

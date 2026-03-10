@@ -1,4 +1,4 @@
-using BankingApi._4_BuildingBlocks._1_Ports.Outbound;
+using BankingApi._2_Core.BuildingBlocks._1_Ports.Outbound;
 namespace BankingApiTest.Infrastructure;
 
 public sealed class FakeIdentityGateway : IIdentityGateway {

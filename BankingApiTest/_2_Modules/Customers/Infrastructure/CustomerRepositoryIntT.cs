@@ -1,8 +1,7 @@
-using BankingApi._2_Modules.Customers._1_Ports.Outbound;
+using BankingApi._2_Core.BuildingBlocks._1_Ports.Inbound;
+using BankingApi._2_Core.Customers._1_Ports.Outbound;
 using BankingApi._2_Modules.Customers._4_Infrastructure.Repositories;
-using BankingApi._3_Infrastructure._1_Ports.Inbound;
 using BankingApi._3_Infrastructure.Database;
-using BankingApi._4_BuildingBlocks._1_Ports.Inbound;
 using BankingApiTest.Infrastructure;
 using Microsoft.Data.Sqlite;
 using Microsoft.EntityFrameworkCore;
@@ -31,8 +30,9 @@ public sealed class CustomerRepositoryIntT : TestBase, IAsyncLifetime {
 
       _dbContext = new BankingDbContext(options);
       await _dbContext.Database.EnsureCreatedAsync();
-
-      _repository = new CustomerRepositoryEf(_dbContext);
+      
+      var customerDbContext = new CustomersDbContextEf(_dbContext);
+      _repository = new CustomerRepositoryEf(customerDbContext);
       _unitOfWork = new UnitOfWork(
          _dbContext, 
          _clock,
@@ -70,7 +70,7 @@ public sealed class CustomerRepositoryIntT : TestBase, IAsyncLifetime {
       Equal(customer.Id, actual.Id);
       Equal(customer.Firstname, actual.Firstname);
       Equal(customer.Lastname, actual.Lastname);
-      Equal(customer.Email, actual.Email); 
+      Equal(customer.EmailVo, actual.EmailVo); 
       Equal(customer.Subject, actual.Subject);
    }
    
@@ -95,7 +95,7 @@ public sealed class CustomerRepositoryIntT : TestBase, IAsyncLifetime {
       Equal(customer.Id, actual.Id);
       Equal(customer.Firstname, actual.Firstname);
       Equal(customer.Lastname, actual.Lastname);
-      Equal(customer.Email, actual.Email);
+      Equal(customer.EmailVo, actual.EmailVo);
       Equal(customer.Subject, actual.Subject);
    }
 

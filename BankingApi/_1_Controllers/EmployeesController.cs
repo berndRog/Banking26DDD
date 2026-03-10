@@ -1,7 +1,7 @@
-using BankingApi._2_Modules.Employees._1_Ports.Inbound;
-using BankingApi._2_Modules.Employees._2_Application.Dtos;
-using BankingApi._2_Modules.Employees._2_Application.UseCases;
-using BankingApi._2_Modules.Employees._3_Domain.Enums;
+using BankingApi._2_Core.Employees._1_Ports.Inbound;
+using BankingApi._2_Core.Employees._2_Application.Dtos;
+using BankingApi._2_Core.Employees._2_Application.UseCases;
+using BankingApi._2_Core.Employees._3_Domain.Enums;
 using BankingApi._4_BuildingBlocks;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -44,8 +44,10 @@ public sealed class EmployeesController(
          ct: ct
       );
       
-      return this.ToCreatedAtRoute(routeName: nameof(GetEmployeeById), 
-         routeValues: new { dto.Id }, result, logger, context, args: new { dto });
+      return this.ToCreatedAtRoute(
+         routeName: nameof(GetEmployeeById), 
+         routeValues: new { id = dto.Id },
+         result, logger, context, args: new { dto });
    }
    
    // ------------------------------------------------------------------

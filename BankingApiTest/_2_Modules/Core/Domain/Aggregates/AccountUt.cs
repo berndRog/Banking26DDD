@@ -1,9 +1,7 @@
-using BankingApi._2_Modules.Accounts._3_Domain.Enums;
-using BankingApi._2_Modules.Core._2_Application.Mappings;
-using BankingApi._2_Modules.Core._3_Domain.Aggregates;
-using BankingApi._2_Modules.Core._3_Domain.ValueObjects;
-using BankingApi._4_BuildingBlocks._1_Ports.Inbound;
-using BankingApi._4_BuildingBlocks._3_Domain.ValueObjects;
+using BankingApi._2_Core.BuildingBlocks._1_Ports.Inbound;
+using BankingApi._2_Core.Payments._2_Application.Mappings;
+using BankingApi._2_Core.Payments._3_Domain.Aggregates;
+using BankingApi._2_Core.Payments._3_Domain.ValueObjects;
 using BankingApiTest.Infrastructure;
 namespace BankingApiTest._2_Modules.Core.Domain.Aggregates;
 
@@ -153,7 +151,8 @@ public sealed class AccountUt {
       
       // Act
       account.AddBeneficiary(
-         beneficiaryDto: beneficiary.ToBeneficiaryDto()
+         beneficiaryDto: beneficiary.ToBeneficiaryDto(),
+         _clock.UtcNow
       );
       
       // Assert
@@ -167,11 +166,11 @@ public sealed class AccountUt {
       var account = _seed.Account1();
       var beneficiary1 = _seed.Beneficiary1();
       var beneficiary2 = _seed.Beneficiary2();
-      account.AddBeneficiary(beneficiary1.ToBeneficiaryDto());
-      account.AddBeneficiary(beneficiary2.ToBeneficiaryDto());
+      account.AddBeneficiary(beneficiary1.ToBeneficiaryDto(), _clock.UtcNow);
+      account.AddBeneficiary(beneficiary2.ToBeneficiaryDto(),_clock.UtcNow);
 
       // Act
-      account.RemoveBeneficiary(beneficiary1.Id);
+      account.RemoveBeneficiary(beneficiary1.Id,_clock.UtcNow);
     
       // Assert
       var actual = account.Beneficiaries.FirstOrDefault(b => b.Id == beneficiary1.Id);

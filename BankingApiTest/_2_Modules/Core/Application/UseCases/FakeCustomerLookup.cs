@@ -1,4 +1,4 @@
-using BankingApi._2_Modules.Customers._1_Ports.Inbound;
+using BankingApi._2_Core.Customers._1_Ports.Inbound;
 using BankingApiTest.Infrastructure;
 namespace BankingApiTest.Modules.Employees.Infrastructure;
 

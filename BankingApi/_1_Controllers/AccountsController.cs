@@ -1,8 +1,8 @@
 ﻿using System.ComponentModel;
 using System.Net.Mime;
-using BankingApi._2_Modules.Core._1_Ports.Inbound;
+using BankingApi._2_Core.Payments._1_Ports.Inbound;
+using BankingApi._2_Core.Payments._2_Application.Dtos;
 using BankingApi._4_BuildingBlocks;
-using BankingApi.Core.Dto;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.VisualBasic.CompilerServices;
@@ -113,7 +113,8 @@ public class AccountsController(
       );
       
       return this.ToCreatedAtRoute<AccountDto>(
-         routeName: nameof(GetAccountByIdAsync), routeValues: new { result.Value.Id },
+         routeName: nameof(GetAccountByIdAsync),
+         routeValues: new { id = result.Value.Id },
          result, logger, context, args: new { customerId, accountDto });
    }
    
@@ -153,7 +154,7 @@ public class AccountsController(
    }
 
    [Authorize(Policy="CustomersOrEmployees")]
-   [HttpGet("beneficiaries/name/{name}, Name = nameof(GetBeneficiariesByNameAsync)")]
+   [HttpGet("beneficiaries/name/{name}", Name = nameof(GetBeneficiariesByNameAsync))]
    [EndpointSummary("Get beneficiaries name, SQL like %name%")]
    [ProducesResponseType(typeof(BeneficiaryDto), StatusCodes.Status200OK)]
    [ProducesResponseType<ProblemDetails>(StatusCodes.Status404NotFound, "application/problem+json")]
@@ -202,7 +203,8 @@ public class AccountsController(
          await accountsUseCases.AddBeneficiaryAsync(accountId, beneficiaryDto, ctToken);
       
       return this.ToCreatedAtRoute<BeneficiaryDto>(
-         routeName: nameof(GetBeneficiaryByIdAsync), routeValues: new { result.Value.Id },
+         routeName: nameof(GetBeneficiaryByIdAsync),
+         routeValues: new { id = result.Value.Id },
          result, logger, context, args: new { accountId, beneficiaryDto }
       );
 

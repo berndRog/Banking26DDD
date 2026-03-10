@@ -1,10 +1,11 @@
 using System.Net;
 using System.Net.Http.Json;
-using BankingApi._2_Modules.Customers._2_Application.Dtos;
-using BankingApi._2_Modules.Customers._3_Domain.Enum;
-using BankingApi._3_Infrastructure._1_Ports.Inbound;
+using BankingApi._2_Core.BuildingBlocks._1_Ports.Inbound;
+using BankingApi._2_Core.Customers._2_Application.Dtos;
+using BankingApi._2_Core.Customers._2_Application.Mappings;
+using BankingApi._2_Core.Customers._3_Domain.Enum;
+using BankingApi._2_Core.Payments._2_Application.Dtos;
 using BankingApi._3_Infrastructure.Database;
-using BankingApi.Core.Dto;
 using BankingApiTest.Infrastructure;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
@@ -136,11 +137,11 @@ public sealed class AccountsControllerEndToEnd : IntegrationTestBase {
             .AsNoTracking()
             .FirstOrDefaultAsync(a => a.Id == accountId);
          
-         Equal(account2.Id, actualAccount.Id);
-         Equal(account2.Iban.Value, actualAccount.Iban.Value);
-         Equal(account2.Balance.Amount, actualAccount.Balance.Amount);
-         Equal(account2.Balance.Currency, actualAccount.Balance.Currency);
-         Equal(account2.CustomerId, actualAccount.CustomerId);
+         Equal(account2.Id, actualAccount?.Id);
+         Equal(account2.Iban.Value, actualAccount?.Iban.Value);
+         Equal(account2.Balance.Amount, actualAccount?.Balance.Amount);
+         Equal(account2.Balance.Currency, actualAccount?.Balance.Currency);
+         Equal(account2.CustomerId, actualAccount?.CustomerId);
       });
    }
    #endregion
@@ -193,11 +194,10 @@ public sealed class AccountsControllerEndToEnd : IntegrationTestBase {
             .AsNoTracking()
             .FirstOrDefaultAsync(a => a.Iban == account2.Iban);
          
-         Equal(account2.Id, actualAccount.Id);
-         Equal(account2.Iban.Value, actualAccount.Iban.Value);
-         Equal(account2.Balance.Amount, actualAccount.Balance.Amount);
-         Equal(account2.Balance.Currency, actualAccount.Balance.Currency);
-         Equal(account2.CustomerId, actualAccount.CustomerId);
+         Equal(account2.Id, actualAccount?.Id);
+         Equal(account2.Iban.Value, actualAccount?.Iban.Value);
+         Equal(account2.Balance, actualAccount?.Balance);
+         Equal(account2.CustomerId, actualAccount?.CustomerId);
       });
    }
    #endregion
@@ -319,7 +319,7 @@ public sealed class AccountsControllerEndToEnd : IntegrationTestBase {
    [Fact]
    public async Task PostBeneAccount_Create_ok() {
       // Arrange
-      var owner1 = _seed.Customer1();
+      var customer1 = _seed.Customer1();
       var account1 = _seed.Account1();
       var account2 = _seed.Account2();
       var beneficiary1 = _seed.Beneficiary1();
@@ -327,18 +327,8 @@ public sealed class AccountsControllerEndToEnd : IntegrationTestBase {
       // Customer with first account will be created with this endpoint
       var iban1String = account1.Iban.Value;
 
-      var requestOwnerDto = new CustomerDto(
-         Id: owner1.Id,
-         Firstname: owner1.Firstname,
-         Lastname: owner1.Lastname,
-         CompanyName: owner1.CompanyName,
-         EmailString: owner1.Email.Value,
-         StatusInt: (int)CustomerStatus.Active,
-         Street: owner1.Address?.Street,
-         PostalCode: owner1.Address?.PostalCode,
-         City: owner1.Address?.City,
-         Country: owner1.Address?.Country
-      );
+      var requestOwnerDto = customer1.ToCustomerDto();
+      
       // Act
       var subjectOwner =
          "12345678-0000-0000-0000-000000000000"; // in real scenario, subject should come from auth token or be generated in use case

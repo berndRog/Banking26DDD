@@ -1,9 +1,9 @@
 // using System.Data.Common;
-// using BankingApi._2_Modules.Core._1_Ports.Outbound;
-// using BankingApi._2_Modules.Core._2_Application.Dtos;
-// using BankingApi._2_Modules.Core._2_Application.UseCases;
-// using BankingApi._2_Modules.Core._3_Domain.Aggregates;
-// using BankingApi._2_Modules.Core._4_Infrastructure.Repositories;
+// using BankingApi._2_Modules.AccountsTransfers._1_Ports.Outbound;
+// using BankingApi._2_Modules.AccountsTransfers._2_Application.Dtos;
+// using BankingApi._2_Modules.AccountsTransfers._2_Application.UseCases;
+// using BankingApi._2_Modules.AccountsTransfers._3_Domain.Aggregates;
+// using BankingApi._2_Modules.AccountsTransfers._4_Infrastructure.Repositories;
 // using BankingApi._2_Modules.Customers._3_Domain.Aggregates;
 // using BankingApi._3_Infrastructure.Database;
 // using BankingApi._4_BuildingBlocks._1_Ports.Inbound;

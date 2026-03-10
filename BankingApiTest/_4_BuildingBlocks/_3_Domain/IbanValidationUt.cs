@@ -1,4 +1,4 @@
-using BankingApi._4_BuildingBlocks._3_Domain;
+using BankingApi._2_Core.BuildingBlocks._3_Domain;
 namespace BankingApiTest._4_BuildingBlocks._3_Domain;
 public class IbanValidationUt {
    // [Fact]

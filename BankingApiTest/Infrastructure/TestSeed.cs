@@ -1,11 +1,11 @@
-using BankingApi._2_Modules.Accounts._3_Domain.Enums;
-using BankingApi._2_Modules.Core._3_Domain.Aggregates;
-using BankingApi._2_Modules.Core._3_Domain.ValueObjects;
-using BankingApi._2_Modules.Employees._3_Domain.Aggregates;
-using BankingApi._2_Modules.Employees._3_Domain.Enums;
-using BankingApi._4_BuildingBlocks._1_Ports.Inbound;
-using BankingApi._4_BuildingBlocks._3_Domain.ValueObjects;
-using BankingApi.Modules.Core.Domain.Aggregates;
+using BankingApi._2_Core.BuildingBlocks._1_Ports.Inbound;
+using BankingApi._2_Core.BuildingBlocks._3_Domain.ValueObjects;
+using BankingApi._2_Core.Customers._3_Domain.Entities;
+using BankingApi._2_Core.Employees._3_Domain.Aggregates;
+using BankingApi._2_Core.Employees._3_Domain.Enums;
+using BankingApi._2_Core.Payments._3_Domain.Aggregates;
+using BankingApi._2_Core.Payments._3_Domain.Enums;
+using BankingApi._2_Core.Payments._3_Domain.ValueObjects;
 namespace BankingApiTest.Infrastructure;
 
 public sealed class TestSeed {
@@ -43,14 +43,14 @@ public sealed class TestSeed {
    #endregion
 
    #region -------------- Test Addresses (Value Objects) -------------------------------------
-   public Address Address1
-      => Address.Create("Hauptstr. 23", "29556", "Suderburg", "DE").GetValueOrThrow();
+   public AddressVo Address1
+      => AddressVo.Create("Hauptstr. 23", "29556", "Suderburg", "DE").GetValueOrThrow();
 
-   public Address Address2
-      => Address.Create("Bahnhofstr.10", "10115", "Berlin").GetValueOrThrow();
+   public AddressVo Address2
+      => AddressVo.Create("Bahnhofstr.10", "10115", "Berlin").GetValueOrThrow();
 
-   public Address Address3
-      => Address.Create("Schillerstr. 1", "30123", "Hannover", "DE").GetValueOrThrow();
+   public AddressVo Address3
+      => AddressVo.Create("Schillerstr. 1", "30123", "Hannover", "DE").GetValueOrThrow();
    #endregion
 
    #region -------------- Test Customers (Enities) ----------------------------------------------
@@ -61,7 +61,7 @@ public sealed class TestSeed {
       companyName: null,
       emailString: "erika.mustermann@t-online.de",
       subject: "A21990AD-D9DF-486A-8757-4A649E26A54E",
-      address: Address1
+      addressVo: Address1
    );
 
    public Customer Customer2() => CreateCustomer(
@@ -81,7 +81,7 @@ public sealed class TestSeed {
       companyName: null,
       emailString: "a.arndt@t-online.com",
       subject: "CB794E61-BA7A-4D2A-977F-766B42BB79A9",
-      address: Address2
+      addressVo: Address2
    );
 
    public Customer Customer4() => CreateCustomer(
@@ -111,7 +111,7 @@ public sealed class TestSeed {
       companyName: null,
       emailString: "d.deppe@icloud.com",
       subject: "F5674F67-72A3-4449-AF1F-803DCFADDB7F",
-      address: null
+      addressVo: null
    );
 
    public IReadOnlyList<Customer> Customers => [
@@ -398,12 +398,12 @@ public sealed class TestSeed {
       string personnelNumber,
       AdminRights adminRights
    ) {
-      var resultEmail = Email.Create(emailString);
+      var resultEmail = EmailVo.Create(emailString);
       if (resultEmail.IsFailure)
          throw new Exception($"Invalid email in test seed: {emailString}");
       var email = resultEmail.Value;
 
-      var resultPhone = Phone.Create(phoneString);
+      var resultPhone = PhoneVo.Create(phoneString);
       if (resultPhone.IsFailure)
          throw new Exception($"Invalid phone number in test seed: {phoneString}");
       var phone = resultPhone.Value;
@@ -412,7 +412,7 @@ public sealed class TestSeed {
          clock: Clock,
          firstname: firstname,
          lastname: lastname,
-         email: email,
+         emailVo: email,
          phone: phone,
          subject: subject,
          personnelNumber: personnelNumber,
@@ -432,25 +432,22 @@ public sealed class TestSeed {
       string? companyName,
       string emailString,
       string subject,
-      Address? address
+      AddressVo? addressVo
    ) {
-      var resultEmail = Email.Create(emailString);
+      var resultEmail = EmailVo.Create(emailString);
       if (resultEmail.IsFailure)
          throw new Exception($"Invalid email in test seed: {emailString}");
-      var email = resultEmail.Value;
+      var emailVo = resultEmail.Value;
 
       var result = Customer.Create(
-         clock: Clock,
          firstname: firstname,
          lastname: lastname,
          companyName: companyName,
-         email: email,
+         emailVo: emailVo,
          subject: subject,
          id: id,
-         street: address?.Street,
-         postalCode: address?.PostalCode,
-         city: address?.City,
-         country: address?.Country
+         createdAt: Clock.UtcNow,
+         addressVo: addressVo
       );
 
       True(result.IsSuccess);
