@@ -55,10 +55,9 @@ public class CustomerUseCases(
       CancellationToken ct
    ) => deactivateUc.ExecuteAsync(customerId, ct);
    
-   public Task<Result> UpdateEmailAsync(
-      Guid customerId, 
-      string newEmail, 
+   public Task<Result> UpdateAsync(
+      CustomerDto customerDto, 
       CancellationToken ct = default
-   ) => updateEmailUc.ExecuteAsync(customerId, newEmail, ct);
+   ) => updateEmailUc.ExecuteAsync(customerDto,ct);
    
 }

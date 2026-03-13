@@ -24,22 +24,14 @@ public interface ICustomerUseCases {
       CancellationToken ct = default
    );
 
-   // Update the customer profile after provisioning
-   // Typically used when the user completes their profile
+   // Update the customer profile after provisioning to add missing data (name, address etc.)
    Task<Result<CustomerDto>> UpdateProfileAsync(
       CustomerDto dto,
       CancellationToken ct = default
    );
-
-   // Change the customer's email address
-   Task<Result> UpdateEmailAsync(
-      Guid customerId,
-      string newEmail,
-      CancellationToken ct = default
-   );
-
-   // Employee action: activate a customer
-   // Optionally create the first account during activation
+   
+   // Employee action: activate a customer after review of the registration details
+   // and create the first account during activation
    Task<Result> ActivateAsync(
       Guid customerId,
       string? accountIdString,
@@ -57,6 +49,13 @@ public interface ICustomerUseCases {
    // Employee action: deactivate an existing customer
    Task<Result> DeactivateAsync(
       Guid customerId,
+      CancellationToken ct = default
+   );
+   
+   
+   // Change the customer's profile data
+   Task<Result> UpdateAsync(
+      CustomerDto customerDto,
       CancellationToken ct = default
    );
 }

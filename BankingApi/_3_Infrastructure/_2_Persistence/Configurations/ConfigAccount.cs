@@ -35,14 +35,14 @@ public sealed class ConfigAccount(
 
       // Business properties
       // -----------------------------
-      builder.Property(a => a.Iban)
+      builder.Property(a => a.IbanVo)
          .HasIbanConversion()
          .IsRequired();
-      builder.HasIndex(a => a.Iban).IsUnique();
+      builder.HasIndex(a => a.IbanVo).IsUnique();
       
 
       // EF Core mapping (Owned Type) example for Account.Balance (Money)
-      builder.OwnsOne(a => a.Balance, b =>
+      builder.OwnsOne(a => a.BalanceVo, b =>
       {
          b.Property(p => p.Amount)
             .HasColumnName("Balance")

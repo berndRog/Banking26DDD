@@ -31,7 +31,6 @@ public sealed class ConfigCustomer(
          .IsRequired();
 
       // Domain-only
-      builder.Ignore("_clock");
       builder.Ignore(o => o.DisplayName);
       builder.Ignore(o => o.IsActive);
       builder.Ignore(o => o.IsProfileComplete);

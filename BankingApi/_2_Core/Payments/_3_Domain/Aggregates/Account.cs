@@ -1,4 +1,5 @@
 using BankingApi._2_Core.BuildingBlocks._1_Ports.Inbound;
+using BankingApi._2_Core.BuildingBlocks._1_Ports.Outbound;
 using BankingApi._2_Core.BuildingBlocks._3_Domain;
 using BankingApi._2_Core.BuildingBlocks._3_Domain.Entities;
 using BankingApi._2_Core.Payments._2_Application.Dtos;
@@ -8,17 +9,13 @@ namespace BankingApi._2_Core.Payments._3_Domain.Aggregates;
 
 public sealed class Account : AggregateRoot {
    
-   // =========================================================
-   // Properties
-   // =========================================================
+   //--- Properties
+   //-------------------------------------------- 
    // IBAN as a domain value object.
-   public Iban Iban { get; private set; } = default!;
-
-   /// <summary>
-   /// Account balance as a domain value object.
-   /// Protects invariants (2 decimals, currency consistency, etc.).
-   /// </summary>
-   public Money Balance { get; private set; } = default!;
+   public IbanVo IbanVo { get; private set; } = default!;
+   
+   // Account balance as a domain value object.
+   public MoneyVo BalanceVo { get; private set; } = default!;
 
    public DateTimeOffset? DeactivatedAt { get; private set; } = null;
    public bool IsActive => DeactivatedAt == null;
@@ -30,38 +27,32 @@ public sealed class Account : AggregateRoot {
    private readonly List<Beneficiary> _beneficiaries = new();
    public IReadOnlyCollection<Beneficiary> Beneficiaries => _beneficiaries.AsReadOnly();
 
-   // =========================================================
-   // Ctors
-   // =========================================================
+   //--- Ctors
+   //-------------------------------------------- 
    // EF Core ctor, not used for testing
    private Account() : base() { }
 
    // Domain ctor, to inject IClock for testing
    private Account(
-      IClock clock,
       Guid id,
       Guid customerId,
-      Iban iban,
-      Money balance
+      IbanVo ibanVo,
+      MoneyVo balanceVo
    ) : base() {
       Id = id;
       CustomerId = customerId;
-      Iban = iban;
-      Balance = balance;
+      IbanVo = ibanVo;
+      BalanceVo = balanceVo;
    }
 
-   // =========================================================
-   // Factory
-   // =========================================================
-   /// <summary>
-   /// Static factory method to create a new account for an existing owner.
-   /// Money is created via Money.Create(...) to protect invariants.
-   /// </summary>
+   //--- Factory
+   //-------------------------------------------- 
+   // Static factory method to create a new account for an existing cutomer.
    public static Result<Account> Create(
-      IClock clock,
       Guid customerId,
-      Iban iban,
-      Money balance,
+      IbanVo ibanVo,
+      MoneyVo balanceVo,
+      DateTimeOffset createdAt,
       string? id = null
    ) {
       // invariant: customerId must be valid
@@ -73,21 +64,28 @@ public sealed class Account : AggregateRoot {
          return Result<Account>.Failure(idResult.Error);
       var accountId = idResult.Value;
 
-      return Result<Account>.Success(
-         new Account(clock, accountId, customerId, iban, balance)
+      // create entity
+      var account = new Account(
+         id: accountId, 
+         customerId: customerId, 
+         ibanVo: ibanVo, 
+         balanceVo: balanceVo
       );
+      
+      // 
+      account.Initialize(createdAt);
+      
+      
+      return Result<Account>.Success(account);
    }
 
-   // =========================================================
-   // Domain operations
-   // =========================================================
-   // -------------------- Money Transactions ------------------
-   /// <summary>
-   /// Credit = deposit money into THIS account.
-   /// Amount must be positive and in the same currency as the balance.
-   /// </summary>
+   //--- Domain operations
+   //-------------------------------------------- 
+
+   // Credit = deposit money into THIS account.
+   // Amount must be positive and in the same currency as the balance.
    public Result<Account> Credit(
-      Money amount, 
+      MoneyVo amount, 
       DateTimeOffset updatedAt
    ) {
       // invariant: only positive amounts
@@ -95,24 +93,22 @@ public sealed class Account : AggregateRoot {
          return Result<Account>.Failure(AccountErrors.InvalidCreditAmount);
 
       // invariant: currency must match
-      if (amount.Currency != Balance.Currency)
+      if (amount.Currency != BalanceVo.Currency)
          return Result<Account>.Failure(AccountErrors.CurrencyMismatch);
 
       // credit (Gutschrift)
-      Balance = Balance + amount;
+      BalanceVo = BalanceVo + amount;
       Touch(updatedAt);
 
       return Result<Account>.Success(this);
    }
-
    
-   /// <summary>
-   /// Debit = withdraw money from THIS account.
-   /// Amount must be positive and in the same currency as the balance.
-   /// Requires sufficient funds.
-   /// </summary>
+
+   // Debit = withdraw money from THIS account.
+   // Amount must be positive and in the same currency as the balance.
+   // Requires sufficient funds.
    public Result<Account> Debit(
-      Money amount,
+      MoneyVo amount,
       DateTimeOffset updatedAt
    ) {
       // invariant: only positive amounts
@@ -120,53 +116,35 @@ public sealed class Account : AggregateRoot {
          return Result<Account>.Failure(AccountErrors.InvalidDebitAmount);
 
       // invariant: currency must match
-      if (amount.Currency != Balance.Currency)
+      if (amount.Currency != BalanceVo.Currency)
          return Result<Account>.Failure(AccountErrors.CurrencyMismatch);
 
       // invariant: sufficient funds
-      if (Balance < amount)
+      if (BalanceVo < amount)
          return Result<Account>.Failure(AccountErrors.InsufficientFunds);
 
       // debit (Lastschrift)
-      Balance = Balance - amount;
+      BalanceVo = BalanceVo - amount;
       Touch(updatedAt);
 
       return Result<Account>.Success(this);
    }
 
-   public bool HasSufficientFunds(Money amount) =>
-      amount.Currency == Balance.Currency &&
+   public bool HasSufficientFunds(MoneyVo amount) =>
+      amount.Currency == BalanceVo.Currency &&
       amount.Amount > 0m &&
-      Balance >= amount;
+      BalanceVo >= amount;
 
    // -------------------- Beneficiaries -----------------------
    // Story 3.1: add a beneficiary to THIS account
    public Result<Beneficiary> AddBeneficiary(
-      BeneficiaryDto beneficiaryDto,
+      Beneficiary beneficiary,
       DateTimeOffset updatedAt
    ) {
-      // Domain logic
-      var resultIban = Iban.Create(beneficiaryDto.IbanString);
-      if (resultIban.IsFailure) 
-         return Result<Beneficiary>.Failure(BeneficiaryErrors.InvalidIban);
-      var iban = resultIban.Value;
-      
       // check for duplicate IBANs
-      if (_beneficiaries.Any(b => b.Iban.Equals(iban)))
+      if (_beneficiaries.Any(b => b.IbanVo.Equals(beneficiary.IbanVo)))
          return Result<Beneficiary>.Failure(BeneficiaryErrors.IbanAlreadyRegistred);
-
-      // create a new beneficiary
-      var result = Beneficiary.Create(
-         accountId: Id,
-         name: beneficiaryDto.Name,
-         iban: iban,
-         id: beneficiaryDto.Id.ToString()
-      );
-      if (result.IsFailure)
-         return Result<Beneficiary>.Failure(result.Error);
-
-      var beneficiary = result.Value;
-
+      
       // add to collection
       _beneficiaries.Add(beneficiary);
       Touch(updatedAt); 
@@ -175,9 +153,9 @@ public sealed class Account : AggregateRoot {
    }
 
    public Result<Beneficiary> FindBeneficiary(
-      Guid id
+      Guid beneficiaryId
    ) {
-      var found = _beneficiaries.FirstOrDefault(b => b.Id == id);
+      var found = _beneficiaries.FirstOrDefault(b => b.Id == beneficiaryId);
       return found is null
          ? Result<Beneficiary>.Failure(BeneficiaryErrors.NotFound)
          : Result<Beneficiary>.Success(found);

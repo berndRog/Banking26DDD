@@ -15,8 +15,11 @@ public interface IAccountsDbContext {
    // Add a new entity to the persistence context
    void Add<T>(T entity) where T : class;
 
+   // Update (mark as modified) an existing entity in the persistence context
+   void Update<T>(T entity) where T : class;
+
    // Remove an entity from the persistence context
-   void Remove<T>(T entity) where T : class;
+   void Remove(Beneficiary b);
 }
 
 /*

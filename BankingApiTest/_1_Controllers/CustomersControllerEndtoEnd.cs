@@ -35,7 +35,7 @@ public sealed class CustomersControllerEndtoEnd : IntegrationTestBase {
       var subject =
          "12345678-0000-0000-0000-000000000000"; // in real scenario, subject should come from auth token or be generated in use case
       var account1Id = account1.Id.ToString();
-      var iban1 = account1.Iban.Value;
+      var iban1 = account1.IbanVo.Value;
       
       var request = new HttpRequestMessage(
          HttpMethod.Post,

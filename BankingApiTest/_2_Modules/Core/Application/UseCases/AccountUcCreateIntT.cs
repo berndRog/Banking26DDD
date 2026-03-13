@@ -1,8 +1,12 @@
 using BankingApi._2_Core.BuildingBlocks._1_Ports.Inbound;
+using BankingApi._2_Core.BuildingBlocks._1_Ports.Outbound;
 using BankingApi._2_Core.Customers._1_Ports.Inbound;
+using BankingApi._2_Core.Customers._1_Ports.Outbound;
 using BankingApi._2_Core.Payments._1_Ports.Outbound;
 using BankingApi._2_Core.Payments._2_Application.UseCases;
 using BankingApi._2_Core.Payments._4_Infrastructure.Repositories;
+using BankingApi._2_Modules.Customers._4_Infrastructure.Repositories;
+using BankingApi._3_Infrastructure._2_Persistence.Repositories;
 using BankingApi._3_Infrastructure.Database;
 using BankingApiTest.Infrastructure;
 using Microsoft.Data.Sqlite;
@@ -14,7 +18,8 @@ public sealed class AccountUcAddBeneficiaryIntT : TestBase, IAsyncLifetime {
    private SqliteConnection _dbConnection = null!;
    private BankingDbContext _dbContext = null!;
    private ICustomerLookupContract _customerLookup = null!;
-   private IAccountRepository _repository = null!;
+   private ICustomerRepository _customerRepository = null!;
+   private IAccountRepository _accountRepository = null!;
    private IUnitOfWork _unitOfWork = null!;
    private TestSeed _seed = null!;
    private IClock _clock = null!;
@@ -36,25 +41,21 @@ public sealed class AccountUcAddBeneficiaryIntT : TestBase, IAsyncLifetime {
 
       _dbContext = new BankingDbContext(options);
       await _dbContext.Database.EnsureCreatedAsync(_ct);
+      var customersDbContext = new CustomersDbContextEf(_dbContext);
+      var accountsDbContext = new AccountsDbContextEf(_dbContext);
       
-      
-      _repository = new AccountRepositoryEf(_dbContext);
+      _customerRepository = new CustomerRepositoryEf(customersDbContext);
+      _accountRepository = new AccountRepositoryEf(accountsDbContext);
       _unitOfWork = new UnitOfWork(
          _dbContext, 
          _clock,
          CreateLogger<UnitOfWork>()
       );
       
-      var account1 = _seed.Account1();
-      var account2 = _seed.Account2();
-      _repository.Add(account1);
-      _repository.Add(account2);
-      await _unitOfWork.SaveAllChangesAsync("Seeding data", _ct);
-      
       // System under test
       _sut = new AccountUcCreate(
          _customerLookup,
-         _repository,
+         _accountRepository,
          _unitOfWork,
          _clock,
          CreateLogger<AccountUcCreate>()
@@ -77,26 +78,30 @@ public sealed class AccountUcAddBeneficiaryIntT : TestBase, IAsyncLifetime {
    [Fact]
    public async Task Create_account() {
       // Arrange
-      var owner = _seed.Customer5();
+      var customer = _seed.Customer5();
       var account = _seed.Account6();
+      // fill datbase with customer
+      _customerRepository.Add(customer);
+      await _unitOfWork.SaveAllChangesAsync("Seeding data", _ct);
+      _unitOfWork.ClearChangeTracker(); 
       
       // Act
       var result = await _sut.ExecuteAsync(
-         customerId: owner.Id,
-         ibanString: account.Iban.Value,
-         balanceDecimal: account.Balance.Amount,
-         currency: (int)account.Balance.Currency,
+         customerId: customer.Id,
+         ibanString: account.IbanVo.Value,
+         balanceDecimal: account.BalanceVo.Amount,
+         currency: (int)account.BalanceVo.Currency,
          id: account.Id.ToString(),
          ct: _ct
       );
       _dbContext.ChangeTracker.Clear();
       
       // Assert
-      var actual = await _repository.FindByIdAsync(account.Id, _ct);
+      var actual = await _accountRepository.FindByIdAsync(account.Id, _ct);
       NotNull(actual);
       Equal(account.Id, actual!.Id);
-      Equal(account.Iban, actual.Iban);
-      Equal(account.Balance, actual.Balance);
+      Equal(account.IbanVo, actual.IbanVo);
+      Equal(account.BalanceVo, actual.BalanceVo);
    }
    
    [Fact]
@@ -109,8 +114,8 @@ public sealed class AccountUcAddBeneficiaryIntT : TestBase, IAsyncLifetime {
       var result = await _sut.ExecuteAsync(
          customerId: owner.Id,
          ibanString: "ABC123456789",
-         balanceDecimal: account.Balance.Amount,
-         currency: (int)account.Balance.Currency,
+         balanceDecimal: account.BalanceVo.Amount,
+         currency: (int)account.BalanceVo.Currency,
          id: account.Id.ToString(),
          ct: _ct
       );
@@ -126,9 +131,9 @@ public sealed class AccountUcAddBeneficiaryIntT : TestBase, IAsyncLifetime {
       // Act
       var result = await _sut.ExecuteAsync(
          customerId: owner.Id,
-         ibanString: account.Iban.Value,
-         balanceDecimal: account.Balance.Amount,
-         currency: (int)account.Balance.Currency,
+         ibanString: account.IbanVo.Value,
+         balanceDecimal: account.BalanceVo.Amount,
+         currency: (int)account.BalanceVo.Currency,
          id: "1000000-abcd",
          ct: _ct
       );

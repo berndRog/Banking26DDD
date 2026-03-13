@@ -6,7 +6,7 @@ namespace BankingApi._2_Core.Payments._4_Infrastructure.Repositories;
 
 public sealed class TransfersRepository(
    BankingDbContext _dbContext
-) : ITransfersRepository {
+) : ITransferRepository {
    
    public async Task<Transfer?> FindByIdAsync(
       Guid transferId,

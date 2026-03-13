@@ -36,7 +36,7 @@ public sealed class ConfigEmployee(
       builder.HasIndex(x => x.EmailVo).IsUnique();
       
       // Phone-VO als Property mapped via Extension
-      builder.Property(x => x.Phone)
+      builder.Property(x => x.PhoneVo)
          .HasNullablePhoneConversion() // is optional, so no IsRequired()
          .IsRequired(false);
       

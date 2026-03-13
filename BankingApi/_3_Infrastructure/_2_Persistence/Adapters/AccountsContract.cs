@@ -1,4 +1,5 @@
 using BankingApi._2_Core.BuildingBlocks._1_Ports.Inbound;
+using BankingApi._2_Core.BuildingBlocks._1_Ports.Outbound;
 using BankingApi._2_Core.BuildingBlocks._3_Domain;
 using BankingApi._2_Core.BuildingBlocks.Utils;
 using BankingApi._2_Core.Payments._1_Ports.Inbound;
@@ -47,19 +48,19 @@ public class AccountsContract(
       }
       
       // Create Iban VO
-      var resultIban = Iban.Create(ibanString);
+      var resultIban = IbanVo.Create(ibanString);
       if(resultIban.IsFailure)
          return Result<AccountDto>.Failure(resultIban.Error);
       var iban = resultIban.Value;
       
       // Create initial account
-      var balance = Money.Create(0m, Currency.EUR).Value; // initial balance is always 0 EUR
+      var balance = MoneyVo.Create(0m, Currency.EUR).Value; // initial balance is always 0 EUR
       
       var resultAccount = Account.Create(
-         clock: clock, 
          customerId: customerId,
-         iban: iban,
-         balance: balance,
+         ibanVo: iban,
+         balanceVo: balance,
+         createdAt: clock.UtcNow,
          id: accoutIdString
       );
       if(resultAccount.IsFailure)

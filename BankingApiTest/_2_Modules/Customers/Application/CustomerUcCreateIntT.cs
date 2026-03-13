@@ -1,13 +1,13 @@
 using System.Data.Common;
 using BankingApi._2_Core.BuildingBlocks._1_Ports.Inbound;
+using BankingApi._2_Core.BuildingBlocks._1_Ports.Outbound;
 using BankingApi._2_Core.Customers._1_Ports.Outbound;
 using BankingApi._2_Core.Customers._2_Application.Mappings;
 using BankingApi._2_Core.Customers._2_Application.UseCases;
-using BankingApi._2_Core.Payments._1_Ports.Inbound;
 using BankingApi._2_Core.Payments._1_Ports.Outbound;
 using BankingApi._2_Core.Payments._4_Infrastructure.Adapters;
-using BankingApi._2_Core.Payments._4_Infrastructure.Repositories;
 using BankingApi._2_Modules.Customers._4_Infrastructure.Repositories;
+using BankingApi._3_Infrastructure._2_Persistence.Repositories;
 using BankingApi._3_Infrastructure.Database;
 using BankingApiTest.Infrastructure;
 using Microsoft.EntityFrameworkCore;
@@ -19,7 +19,6 @@ public sealed class CustomerUcCreateIntT : TestBase, IAsyncLifetime {
    private DbConnection? _dbConnection;
    private DbContext? _dbContext = null!;
    
-   private ICustomersDbContext _customersDbContext = null!;
    private ICustomerRepository _customerRepository = null!;
    private IAccountRepository _accountRepository = null!;
    private IAccountsContract _accountContract = null!;
@@ -48,19 +47,14 @@ public sealed class CustomerUcCreateIntT : TestBase, IAsyncLifetime {
       _dbContext = dbContext;
       var bankingDbContext = _dbContext   as BankingDbContext ?? 
          throw new InvalidOperationException("Create: DbContext is not of type BankingDbContext");
+      var customersDbContext = new CustomersDbContextEf(bankingDbContext);
+      var accountsDbContext = new AccountsDbContextEf(bankingDbContext);
       
-      _customersDbContext = new CustomersDbContextEf(bankingDbContext);
-      _customerRepository = new CustomerRepositoryEf(_customersDbContext);
-      _accountRepository = new AccountRepositoryEf(bankingDbContext);
+      _customerRepository = new CustomerRepositoryEf(customersDbContext);
+      _accountRepository = new AccountRepositoryEf(accountsDbContext);
       _unitOfWork = new UnitOfWork(bankingDbContext, _clock, CreateLogger<UnitOfWork>());
       _accountContract = new AccountsContract(_accountRepository,_unitOfWork, _clock,CreateLogger<AccountsContract>());
       
-      /*
-      _repository.Add(_seed.Customer1());
-      _repository.Add(_seed.Customer2());
-      await _unitOfWork.SaveAllChangesAsync("Seeding data", _ct);
-      */
-
       // System under test
       _sut = new CustomerUcCreate(
          _customerRepository,
@@ -94,20 +88,25 @@ public sealed class CustomerUcCreateIntT : TestBase, IAsyncLifetime {
       await _sut.ExecuteAsync(
          customerDto: customer1Dto,
          accountIdString: account1.Id.ToString(),
-         ibanString: account1.Iban.Value,
+         ibanString: account1.IbanVo.Value,
          _ct
       );
       _dbContext!.ChangeTracker.Clear();
 
       // Assert
-      var actual = await _customerRepository.FindByIdAsync(customer1.Id, _ct);
-      NotNull(actual);
-      Equal(customer1.Id, actual!.Id);
-      Equal(customer1.Firstname, actual.Firstname);
-      Equal(customer1.Lastname, actual.Lastname);
-      Equal(customer1.EmailVo, actual.EmailVo);
-      Equal(customer1.Subject, actual.Subject);
-      Equal(customer1.AddressVo, actual.AddressVo);
+      var actualCustomer = await _customerRepository.FindByIdAsync(customer1.Id, _ct);
+      NotNull(actualCustomer);
+      Equal(customer1.Id, actualCustomer!.Id);
+      Equal(customer1.Firstname, actualCustomer.Firstname);
+      Equal(customer1.Lastname, actualCustomer.Lastname);
+      Equal(customer1.EmailVo, actualCustomer.EmailVo);
+      Equal(customer1.Subject, actualCustomer.Subject);
+      Equal(customer1.AddressVo, actualCustomer.AddressVo);
+      var actualAccounts = await _accountRepository.SelelctByCustomerIdAsync(customer1.Id, _ct);
+      NotNull(actualAccounts);
+      var actualAccount = actualAccounts!.SingleOrDefault(a => a.Id == account1.Id);
+      NotNull(actualAccount);
+
    }
 
    [Fact]
@@ -121,7 +120,7 @@ public sealed class CustomerUcCreateIntT : TestBase, IAsyncLifetime {
       await _sut.ExecuteAsync(
          customerDto: customer5Dto,
          accountIdString: account6.Id.ToString(),
-         ibanString: account6.Iban.Value,
+         ibanString: account6.IbanVo.Value,
          _ct
       );
       _dbContext!.ChangeTracker.Clear();

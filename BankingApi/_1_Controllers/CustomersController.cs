@@ -1,4 +1,5 @@
 using BankingApi._2_Core.Customers._1_Ports.Inbound;
+using BankingApi._2_Core.Customers._1_Ports.Outbound;
 using BankingApi._2_Core.Customers._2_Application.Dtos;
 using BankingApi._2_Core.Customers._2_Application.UseCases;
 using BankingApi._4_BuildingBlocks;

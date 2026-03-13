@@ -1,4 +1,5 @@
 using BankingApi._2_Core.BuildingBlocks._1_Ports.Inbound;
+using BankingApi._2_Core.BuildingBlocks._1_Ports.Outbound;
 using BankingApi._2_Core.Payments._3_Domain.Aggregates;
 using BankingApi._2_Core.Payments._3_Domain.Enums;
 using BankingApiTest.Infrastructure;
@@ -30,12 +31,12 @@ public sealed class TransferUt {
       // Arrange
       // Act
       var result = Transfer.Create(
-         clock: _clock,
          fromAccountId: _fromAccount.Id,
-         amount: _transfer.Amount,
+         amountVo: _transfer.AmountVo,
          purpose: _transfer.Purpose,
          recipientName: _beneficiary.Name,
-         recipientIban: _beneficiary.Iban,
+         recipientIbanVo: _beneficiary.IbanVo,
+         createdAt: _clock.UtcNow,
          id: _id
       );
 
@@ -47,10 +48,10 @@ public sealed class TransferUt {
       IsType<Transfer>(actual);
       Equal(Guid.Parse(_id), actual.Id);
       Equal(_fromAccount.Id, actual.FromAccountId);
-      Equal(_transfer.Amount, actual.Amount);
+      Equal(_transfer.AmountVo, actual.AmountVo);
       Equal(_transfer.Purpose, actual.Purpose);
       Equal(_beneficiary.Name, actual.RecipientName);
-      Equal(_beneficiary.Iban, actual.RecipientIban);
+      Equal(_beneficiary.IbanVo, actual.RecipientIbanVo);
       Equal(TransferStatus.Initiated, actual.Status);
    }
 
@@ -59,12 +60,12 @@ public sealed class TransferUt {
       // Arrange
       // Act
       var result = Transfer.Create(
-         clock: _clock,
          fromAccountId: _fromAccount.Id,
-         amount: _transfer.Amount,
+         amountVo: _transfer.AmountVo,
          purpose: _transfer.Purpose,
          recipientName: _beneficiary.Name,
-         recipientIban: _beneficiary.Iban,
+         recipientIbanVo: _beneficiary.IbanVo,
+         createdAt: _clock.UtcNow,
          id: null
       );
 
@@ -77,10 +78,10 @@ public sealed class TransferUt {
       NotEqual(Guid.Empty, actual.Id);
       NotEqual(Guid.Parse(_id), actual.Id);
       Equal(_fromAccount.Id, actual.FromAccountId);
-      Equal(_transfer.Amount, actual.Amount);
+      Equal(_transfer.AmountVo, actual.AmountVo);
       Equal(_transfer.Purpose, actual.Purpose);
       Equal(_beneficiary.Name, actual.RecipientName);
-      Equal(_beneficiary.Iban, actual.RecipientIban);
+      Equal(_beneficiary.IbanVo, actual.RecipientIbanVo);
       Equal(TransferStatus.Initiated, actual.Status);
    }
 
@@ -89,12 +90,12 @@ public sealed class TransferUt {
       // Arrange
       // Act
       var result = Transfer.Create(
-         clock: _clock,
          fromAccountId: _fromAccount.Id,
-         amount: _transfer.Amount,
+         amountVo: _transfer.AmountVo,
          purpose: _transfer.Purpose,
          recipientName: _beneficiary.Name,
-         recipientIban: _beneficiary.Iban,
+         recipientIbanVo: _beneficiary.IbanVo,
+         createdAt: _clock.UtcNow,
          id: "is-not-a-guid"
       );
 
@@ -107,21 +108,21 @@ public sealed class TransferUt {
    public void Create_is_deterministic_for_same_input_id() {
       // Act
       var result1 = Transfer.Create(
-         clock: _clock,
          fromAccountId: _fromAccount.Id,
-         amount: _transfer.Amount,
+         amountVo: _transfer.AmountVo,
          purpose: _transfer.Purpose,
          recipientName: _beneficiary.Name,
-         recipientIban: _beneficiary.Iban,
+         recipientIbanVo: _beneficiary.IbanVo,
+         createdAt: _clock.UtcNow,
          id: _id
       );
       var result2 = Transfer.Create(
-         clock: _clock,
          fromAccountId: _fromAccount.Id,
-         amount: _transfer.Amount,
+         amountVo: _transfer.AmountVo,
          purpose: _transfer.Purpose,
          recipientName: _beneficiary.Name,
-         recipientIban: _beneficiary.Iban,
+         recipientIbanVo: _beneficiary.IbanVo,
+         createdAt: _clock.UtcNow,
          id: _id
       );
       var transfer1 = result1.Value!;
@@ -132,10 +133,10 @@ public sealed class TransferUt {
       True(result2.IsSuccess);
       Equal(transfer1.Id, transfer2.Id);
       Equal(transfer1.FromAccountId, transfer2.FromAccountId);
-      Equal(transfer1.Amount, transfer2.Amount);
+      Equal(transfer1.AmountVo, transfer2.AmountVo);
       Equal(transfer1.Purpose, transfer2.Purpose);
       Equal(transfer1.RecipientName, transfer2.RecipientName);
-      Equal(transfer1.RecipientIban, transfer2.RecipientIban);
+      Equal(transfer1.RecipientIbanVo, transfer2.RecipientIbanVo);
       Equal(transfer1.Status, transfer2.Status);
    }
    /*

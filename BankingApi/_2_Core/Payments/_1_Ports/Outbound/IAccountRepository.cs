@@ -16,7 +16,7 @@ public interface IAccountRepository {
 
    // Load an account using an IBAN value object
    Task<Account?> FindByIbanAsync(
-      Iban iban,
+      IbanVo ibanVo,
       CancellationToken ct = default
    );
 
@@ -32,11 +32,20 @@ public interface IAccountRepository {
       CancellationToken ct = default
    );
 
+   // Load all accounts for a customer
+   Task<IEnumerable<Account>> SelelctByCustomerIdAsync(
+      Guid customerId,
+      CancellationToken ct = default
+   );
+   
    // Add a new account aggregate to the persistence context
    void Add(Account account);
 
+   // Update an existing account aggregate in the persistence context
+   void Update(Account account);
+
    // Load an account that contains a specific beneficiary
-   Task<Account?> FindBeneficiaryByIdAsync(
+   Task<Beneficiary?> FindBeneficiaryByIdAsync(
       Guid id,
       CancellationToken ct = default
    );

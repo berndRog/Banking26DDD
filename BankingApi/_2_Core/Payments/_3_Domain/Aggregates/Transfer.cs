@@ -1,4 +1,3 @@
-using BankingApi._2_Core.BuildingBlocks._1_Ports.Inbound;
 using BankingApi._2_Core.BuildingBlocks._3_Domain;
 using BankingApi._2_Core.BuildingBlocks._3_Domain.Entities;
 using BankingApi._2_Core.Payments._3_Domain.Enums;
@@ -6,47 +5,27 @@ using BankingApi._2_Core.Payments._3_Domain.Errors;
 using BankingApi._2_Core.Payments._3_Domain.ValueObjects;
 namespace BankingApi._2_Core.Payments._3_Domain.Aggregates;
 
-public sealed class Transfer : AggregateRoot
-{
+public sealed class Transfer : AggregateRoot {
    private readonly List<Transaction> _transactions = new();
 
-   // =========================================================
    // Aggregate references (IDs only, no navigation properties)
-   // =========================================================
    public Guid FromAccountId { get; private set; }
-   //public Guid ToAccountId { get; private set; }
-
-   // =========================================================
-   // Business data
-   // =========================================================
-   /// <summary>
-   /// Transfer amount as a domain value object.
-   /// Protects invariants (2 decimals, currency consistency, etc.).
-   /// </summary>
-   public Money Amount { get; private set; } = default!;
+   
+   // Transfer amount as a domain value object.
+   public MoneyVo AmountVo { get; private set; } = default!;
    public string Purpose { get; private set; } = string.Empty;
 
-   // =========================================================
    // Snapshots for historical consistency
    // (e.g. if beneficiaries are deleted)
-   // =========================================================
    public string RecipientName { get; private set; } = string.Empty; // beneficiary name at time of transfer
-   public Iban RecipientIban { get; private set; } = default!;       // beneficiary IBAN at time of transfer
+   public IbanVo RecipientIbanVo { get; private set; } = default!;       // beneficiary IBAN at time of transfer
    
-   // =========================================================
    // State
-   // =========================================================
    public TransferStatus Status { get; private set; }
    public DateTimeOffset BookedAt { get; private set; } = default!;
 
-   // =========================================================
    // Child entities
-   // =========================================================
    public IReadOnlyList<Transaction> Transactions => _transactions;
-
-   // =========================================================
-   // Ctors
-   // =========================================================
 
    // EF Core ctor
    private Transfer() : base() { }
@@ -55,19 +34,19 @@ public sealed class Transfer : AggregateRoot
    private Transfer(
       Guid id,
       Guid fromAccountId,
-      Money amount,
+      MoneyVo amountVo,
       string purpose,
       string recipientName,
-      Iban recipientIban,
+      IbanVo recipientIbanVo,
       TransferStatus status
    ) : base()
    {
       Id = id;
       FromAccountId = fromAccountId;
-      Amount = amount;
+      AmountVo = amountVo;
       Purpose = purpose;
       RecipientName = recipientName;
-      RecipientIban = recipientIban;
+      RecipientIbanVo = recipientIbanVo;
       Status = status;
    }
 
@@ -82,15 +61,14 @@ public sealed class Transfer : AggregateRoot
    /// - Build Money in the UseCase (Money.Create) before calling this factory.
    /// </summary>
    public static Result<Transfer> Create(
-      IClock clock,
       Guid fromAccountId,
-      Money amount,
+      MoneyVo amountVo,
       string purpose,
       string recipientName,
-      Iban recipientIban,
+      IbanVo recipientIbanVo,
+      DateTimeOffset createdAt,
       string? id
-   )
-   {
+   ) {
       // trim early
       purpose = purpose?.Trim() ?? string.Empty;
       recipientName = recipientName?.Trim() ?? string.Empty;
@@ -99,35 +77,36 @@ public sealed class Transfer : AggregateRoot
       if (fromAccountId == Guid.Empty)
          return Result<Transfer>.Failure(TransferErrors.FromAccountNotFound);
 
-      if (amount.Amount <= 0m)
+      if (amountVo.Amount <= 0m)
          return Result<Transfer>.Failure(TransferErrors.AmountMustBePositive);
       
-      var resultId = Entity.Resolve(id, TransferErrors.InvalidId);
+      var resultId = Resolve(id, TransferErrors.InvalidId);
       if (resultId.IsFailure)
          return Result<Transfer>.Failure(resultId.Error);
 
+      // create Transfer object
       var transfer = new Transfer(
          id: resultId.Value,
          fromAccountId: fromAccountId,
-         amount: amount,
+         amountVo: amountVo,
          purpose: purpose,
          recipientName: recipientName,
-         recipientIban: recipientIban,
+         recipientIbanVo: recipientIbanVo,
          status: TransferStatus.Initiated
       );
+      
+      // sets CreatedAt and UpdatedAt
+      transfer.Initialize(createdAt); 
 
       return Result<Transfer>.Success(transfer);
    }
 
-   // =========================================================
-   // Domain operations
-   // =========================================================
-   /// <summary>
-   /// Books the transfer and creates exactly two transactions:
-   /// - Debit  on FromAccountId
-   /// - Credit on toAccountId
-   /// </summary>
-   public Result Book(
+    // Domain operations
+   
+   // Books the transfer and creates exactly two transactions:
+   // - Debit  on FromAccountId
+   // - Credit on toAccountId
+   public Result SendMoney(
       Guid toAccountId,
       DateTimeOffset bookedAt
    ) {
@@ -149,8 +128,8 @@ public sealed class Transfer : AggregateRoot
       // IMPORTANT:
       // Transactions should use Money too (not decimal).
       // Adjust Transaction.CreateDebit/CreateCredit accordingly.
-      var transactionDebit = Transaction.CreateDebit(Id, FromAccountId, Amount, Purpose, BookedAt);
-      var transactionCredit = Transaction.CreateCredit(Id, toAccountId, Amount, Purpose, BookedAt);
+      var transactionDebit = Transaction.CreateDebit(Id, FromAccountId, AmountVo, Purpose, BookedAt);
+      var transactionCredit = Transaction.CreateCredit(Id, toAccountId, AmountVo, Purpose, BookedAt);
 
       _transactions.Add(transactionDebit);
       _transactions.Add(transactionCredit);
@@ -162,136 +141,3 @@ public sealed class Transfer : AggregateRoot
       return Result.Success();
    }
 }
-
-// using BankingApi._2_Modules.Accounts._3_Domain.Enums;
-// using BankingApi._2_Modules.AccountsTransfers._3_Domain.ValueObjects;
-// using BankingApi._2_Modules.Transfers._3_Domain.Errors;
-// using BankingApi._4_BuildingBlocks;
-// using BankingApi._4_BuildingBlocks._1_Ports.Inbound;
-// using BankingApi._4_BuildingBlocks._3_Domain.Entities;
-// using BankingApi._4_BuildingBlocks._4_Infrastructure;
-// namespace BankingApi.Modules.Core.Domain.Aggregates;
-//
-// public sealed class Transfer : AggregateRoot<Guid> {
-//    private readonly List<Transaction> _transactions = new();
-//
-//    // Aggregate references (IDs only, no navigation properties)
-//    public Guid FromAccountId { get; private set; }
-//    //public Guid ToAccountId { get; private set; }
-//
-//    // Business data
-//    public decimal Amount { get; private set; }
-//    public string Purpose { get; private set; } = string.Empty;
-//
-//    // Snapshots for historical consistency (e.g. if beneficiaries are deleted)
-//    public string RecipientName { get; private set; } = string.Empty; // = beneficiary name at time of transfer
-//    public Iban RecipientIban { get; private set; } = default!;       // = beneficiary IBAN at time of transfer
-//
-//    // Idempotency (generated by client)
-//    public string IdempotencyKey { get; private set; } = string.Empty;
-//
-//    // State
-//    public TransferStatus Status { get; private set; }
-//    public DateTimeOffset BookedAt { get; private set; } = default!;
-//
-//    // Child entities
-//    public IReadOnlyList<Transaction> Transactions => _transactions;
-//
-//    //--- Ctor's ----------------------------------------------------------
-//    // EF Core ctor
-//    private Transfer() : base(new BankingSystemClock()) { }
-//
-//    // Domain ctor 
-//    private Transfer(
-//       IClock clock,
-//       Guid id,
-//       Guid fromAccountId,
-//       //Guid toAccountId,
-//       decimal amount,
-//       string purpose,
-//       string recipientName, // beneficiary name at time of transfer
-//       Iban recipientIban, // beneficiary IBAN at time of transfer
-//       string idempotencyKey,
-//       TransferStatus status
-//    ) : base(clock) {
-//       Id = id;
-//       FromAccountId = fromAccountId;
-//       //ToAccountId = toAccountId;
-//       Amount = amount;
-//       Purpose = purpose;
-//       RecipientName = recipientName;
-//       RecipientIban = recipientIban;
-//       IdempotencyKey = idempotencyKey;
-//       Status = status;
-//    }
-//
-//    //--- Factory method to create a new Transfer -------------------------
-//    public static Result<Transfer> Create(
-//       IClock clock,
-//       Guid fromAccountId,
-//       //Guid toAccountId,
-//       decimal amount,
-//       string purpose,
-//       string recipientName,
-//       Iban recipientIban,
-//       string idempotencyKey,
-//       string? id
-//    ) {
-//       // trim early
-//       purpose = purpose?.Trim() ?? string.Empty;
-//       recipientName = recipientName.Trim();
-//       idempotencyKey = idempotencyKey.Trim();
-//       
-//       if (amount <= 0m)
-//          return Result<Transfer>.Failure(TransferErrors.AmountMustBePositive);
-//
-//       if (string.IsNullOrWhiteSpace(idempotencyKey))
-//          return Result<Transfer>.Failure(TransferErrors.IdempotencyKeyRequired);
-//
-//       var resultId = EntityId.Resolve(id, TransferErrors.InvalidId);
-//       if (resultId.IsFailure)
-//          return Result<Transfer>.Failure(resultId.Error);
-//       var transferId = resultId.Value;
-//
-//       var transfer = new Transfer(
-//          clock: clock,
-//          id: transferId,
-//          fromAccountId: fromAccountId,
-//          //toAccountId: toAccountId,
-//          amount: amount,
-//          purpose: purpose,
-//          recipientName: recipientName,
-//          recipientIban: recipientIban,
-//          idempotencyKey: idempotencyKey,
-//          status: TransferStatus.Initiated
-//          // UpdatedAt are set in SaveChanges
-//       );
-//
-//       return Result<Transfer>.Success(transfer);
-//    }
-//
-//    // Books the transfer and creates exactly two transactions
-//    public Result Book(Guid toAccountId) {
-//       
-//       if (FromAccountId == toAccountId)
-//          return Result.Failure(TransferErrors.SameAccountNotAllowed);
-//       
-//       if (Status != TransferStatus.Initiated)
-//          return Result.Failure(TransferErrors.OnlyInitiatedCanBeBooked);
-//
-//       // local invariant: transactions should be empty before booking
-//       _transactions.Clear();
-//
-//       // create debit and credit transactions
-//       BookedAt = _clock.UtcNow;
-//       var transactionDebit = Transaction.CreateDebit(Id, FromAccountId, Amount, Purpose, BookedAt);
-//       var transactionCredit = Transaction.CreateCredit(Id, toAccountId, Amount, Purpose, BookedAt);
-//       _transactions.Add(transactionDebit);
-//       _transactions.Add(transactionCredit);
-//       
-//       // update status
-//       Status = TransferStatus.Booked;
-//       Touch(); // updates UpdatedAt
-//       return Result.Success();
-//    }
-// }

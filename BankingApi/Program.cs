@@ -1,5 +1,6 @@
 using BankingApi._2_Core.BuildingBlocks;
 using BankingApi._2_Core.BuildingBlocks._1_Ports.Inbound;
+using BankingApi._2_Core.BuildingBlocks._1_Ports.Outbound;
 using BankingApi._2_Core.Customers;
 using BankingApi._2_Core.Employees;
 using BankingApi._2_Core.Payments;

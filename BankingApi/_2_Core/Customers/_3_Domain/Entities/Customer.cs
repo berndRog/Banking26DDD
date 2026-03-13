@@ -309,68 +309,40 @@ public sealed class Customer : AggregateRoot {
       Touch(deactivatedAt);
       return Result.Success();
    }
-
-   // 
-   public Result UpdateAddress(
-      AddressVo addressVo,
-      DateTimeOffset updatedAt = default
-   ) {
-      if (updatedAt == default)
-         return Result.Failure(CustomerErrors.UpdatedAtIsRequiredInUpdateAddress);
-
-      AddressVo = addressVo;
-      Touch(updatedAt);
-      return Result.Success();
-   }
-   
-   public Result RemoveAddress(
-      DateTimeOffset updatedAt = default
-   ) {
-      if (updatedAt == default)
-         return Result.Failure(CustomerErrors.UpdatedAtIsRequiredInRemoveAddress);
-
-      AddressVo = null;
-      Touch(updatedAt);
-      return Result.Success();
-   }
-   
-   public Result UpdateEmail(
-      EmailVo emailVo,
-      DateTimeOffset updatedAt = default
-   ) {
-      if (updatedAt == default)
-         return Result.Failure(CustomerErrors.UpdatedAtIsRequiredInUpdateEmail);
- 
-      EmailVo = emailVo;
-      Touch(updatedAt);
-      return Result.Success();
-   }
-
    
    /// <summary>
-   /// Change email (communication channel). Requires valid email.
+   /// Customer updates their profile
    /// </summary>
-   public Result ChangeEmail(
-      string email, 
+   public Result Update(
+      string? lastname,
+      string? companyName,
+      EmailVo? emailVo,
+      AddressVo? addressVo,
       DateTimeOffset updatedAt
    ) {
       if (updatedAt == default)
          return Result.Failure(CommonErrors.TimestampIsRequired);
       
-      // Normalize email early
-      email = email.Trim();
-      // fail early if preconditions for email change are not met
-      if (string.IsNullOrWhiteSpace(email))
-         return Result.Failure(CustomerErrors.EmailIsRequired);
-      
-      var resultEmail = EmailVo.Create(email);
-      if (resultEmail.IsFailure)
-         return Result.Failure(resultEmail.Error);
+      lastname  = lastname?.Trim();
+      companyName = companyName?.Trim();
 
-      EmailVo = resultEmail.Value;
+      if (!string.IsNullOrWhiteSpace(lastname) && lastname.Length is < 2 or > 80)
+         return Result.Failure(CustomerErrors.InvalidLastname);
+
+      if (!string.IsNullOrWhiteSpace(companyName) && companyName.Length is < 2 or > 80)
+         return Result.Failure(CustomerErrors.InvalidCompanyName);
+      
+      // Apply changes
+      if(lastname is not null) Lastname  = lastname;
+      if(companyName is not null) CompanyName = companyName;
+      if(emailVo is not null) EmailVo = emailVo;
+      if(addressVo is not null) AddressVo = addressVo;
+      
       Touch(updatedAt);
       return Result.Success();
    }
+   
+   
 }
 
 /*

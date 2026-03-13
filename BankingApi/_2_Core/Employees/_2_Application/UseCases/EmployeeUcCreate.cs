@@ -24,7 +24,6 @@ namespace BankingApi._2_Core.Employees._2_Application.UseCases;
 public sealed class EmployeeUcCreate(
    IEmployeeRepository _repository,
    IUnitOfWork _unitOfWork,
-   IClock _clock,
    ILogger<EmployeeUcCreate> _logger
 ) {
    public async Task<Result<Guid>> ExecuteAsync(
@@ -65,7 +64,6 @@ public sealed class EmployeeUcCreate(
 
       // ---- Domain factory (invariants) ----
       var result = Employee.Create(
-         _clock,
          firstname: firstname,
          lastname: lastname,
          emailVo: email,
@@ -73,7 +71,6 @@ public sealed class EmployeeUcCreate(
          subject: subject,
          personnelNumber: personnelNumber,
          adminRights: adminRights,
-         isActive: true,
          id: id
       );
       if (result.IsFailure)

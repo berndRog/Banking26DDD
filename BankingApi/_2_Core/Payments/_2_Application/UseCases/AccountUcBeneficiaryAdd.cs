@@ -1,10 +1,13 @@
 using BankingApi._2_Core.BuildingBlocks._1_Ports.Inbound;
+using BankingApi._2_Core.BuildingBlocks._1_Ports.Outbound;
 using BankingApi._2_Core.BuildingBlocks._3_Domain;
 using BankingApi._2_Core.BuildingBlocks.Utils;
 using BankingApi._2_Core.Payments._1_Ports.Outbound;
 using BankingApi._2_Core.Payments._2_Application.Dtos;
 using BankingApi._2_Core.Payments._2_Application.Mappings;
+using BankingApi._2_Core.Payments._3_Domain.Aggregates;
 using BankingApi._2_Core.Payments._3_Domain.Errors;
+using BankingApi._2_Core.Payments._3_Domain.ValueObjects;
 namespace BankingApi._2_Core.Payments._2_Application.UseCases;
 
 public sealed class AccountUcBeneficiaryAdd(
@@ -19,11 +22,33 @@ public sealed class AccountUcBeneficiaryAdd(
       BeneficiaryDto beneficiaryDto,
       CancellationToken ct = default
    ) {
+      // find account with beneficiaries
       var account = await accountRepository.FindWithBeneficiariesByIdAsync(accountId, ct);
       if (account is null) 
          return Result<BeneficiaryDto>.Failure(BeneficiaryErrors.AccountNotFound);
       
-      var result = account.AddBeneficiary(beneficiaryDto, clock.UtcNow);
+      // Domain logic
+      // create IbanVo
+      var resultIban = IbanVo.Create(beneficiaryDto.IbanString);
+      if (resultIban.IsFailure) 
+         return Result<BeneficiaryDto>.Failure(BeneficiaryErrors.InvalidIban);
+      var ibanVo = resultIban.Value;
+      
+      // create a new beneficiary
+      var resultBeneficiary = Beneficiary.Create(
+         accountId: accountId,
+         name: beneficiaryDto.Name,
+         ibanVo: ibanVo,
+         id: beneficiaryDto.Id.ToString()
+      );
+      if (resultBeneficiary.IsFailure)
+         return Result<BeneficiaryDto>.Failure(resultBeneficiary.Error);
+      
+      // add beneficiary to account
+      var result = account.AddBeneficiary(
+         beneficiary:   resultBeneficiary.Value,
+         updatedAt: clock.UtcNow
+      );
       if (result.IsFailure) 
          return Result<BeneficiaryDto>.Failure(result.Error);
       var beneficiary = result.Value;

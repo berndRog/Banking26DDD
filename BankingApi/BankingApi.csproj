@@ -9,6 +9,16 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Content Update="appsettings.json">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Update="appsettings.Development.json">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+  </ItemGroup>
+  
+  
+  <ItemGroup>
     <!-- Authentication / Authorization -->
     <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="10.0.1" />
     <!-- Token validation primitives (optional but explicit) -->
@@ -38,7 +48,9 @@
 
 
   <ItemGroup>
-    <Folder Include="_2_Core\Customers\_2_Application\Adapters\" />
+    <Folder Include="_2_Core\BuildingBlocks\_1_Ports\Inbound\" />
   </ItemGroup>
+  
+  
 
 </Project>

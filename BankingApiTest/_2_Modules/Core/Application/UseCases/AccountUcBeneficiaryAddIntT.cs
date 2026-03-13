@@ -1,11 +1,12 @@
 using BankingApi._2_Core.BuildingBlocks._1_Ports.Inbound;
+using BankingApi._2_Core.BuildingBlocks._1_Ports.Outbound;
 using BankingApi._2_Core.Customers._3_Domain.Entities;
 using BankingApi._2_Core.Payments._1_Ports.Outbound;
 using BankingApi._2_Core.Payments._2_Application.Dtos;
 using BankingApi._2_Core.Payments._2_Application.Mappings;
 using BankingApi._2_Core.Payments._2_Application.UseCases;
 using BankingApi._2_Core.Payments._3_Domain.Aggregates;
-using BankingApi._2_Core.Payments._4_Infrastructure.Repositories;
+using BankingApi._3_Infrastructure._2_Persistence.Repositories;
 using BankingApi._3_Infrastructure.Database;
 using BankingApiTest.Infrastructure;
 using Microsoft.Data.Sqlite;
@@ -39,8 +40,9 @@ public sealed class AccountUcBeneficiaryAddIntT : TestBase, IAsyncLifetime {
 
       _dbContext = new BankingDbContext(options);
       await _dbContext.Database.EnsureCreatedAsync(_ct);
+      var accountsDbContext = new AccountsDbContextEf(_dbContext);
 
-      _repository = new AccountRepositoryEf(_dbContext);
+      _repository = new AccountRepositoryEf(accountsDbContext);
       _unitOfWork = new UnitOfWork(
          _dbContext, 
          _clock,
@@ -104,7 +106,7 @@ public sealed class AccountUcBeneficiaryAddIntT : TestBase, IAsyncLifetime {
          .FirstOrDefault(b => b.Id == beneficiary.Id);
       NotNull(actual);
       Equal(beneficiary.Name, actual!.Name);
-      Equal(beneficiary.Iban, actual.Iban); 
+      Equal(beneficiary.IbanVo, actual.IbanVo); 
    }
 
    //--- Helpers ---
@@ -112,9 +114,9 @@ public sealed class AccountUcBeneficiaryAddIntT : TestBase, IAsyncLifetime {
       // create account in database
       var resultAccount = await _accountUcCreate.ExecuteAsync(
          customerId: customer.Id,
-         ibanString: account.Iban.Value,
-         balanceDecimal: account.Balance.Amount,
-         currency: (int)account.Balance.Currency,
+         ibanString: account.IbanVo.Value,
+         balanceDecimal: account.BalanceVo.Amount,
+         currency: (int)account.BalanceVo.Currency,
          id: account.Id.ToString(),
          ct: _ct
       );

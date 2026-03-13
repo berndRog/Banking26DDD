@@ -69,7 +69,7 @@ public sealed class EmployeesControllerEndToEnd : IntegrationTestBase {
          Equal(requestDto.Firstname, employee.Firstname);
          Equal(requestDto.Lastname, employee.Lastname);
          Equal(expectedEmail, employee.EmailVo);
-         Equal(expectdPhone, employee.Phone);
+         Equal(expectdPhone, employee.PhoneVo);
          Equal(subject, employee.Subject);
          Equal(requestDto.PersonnelNumber, employee.PersonnelNumber);
          Equal(requestDto.IsActive, employee.IsActive);
@@ -216,7 +216,7 @@ public sealed class EmployeesControllerEndToEnd : IntegrationTestBase {
          Equal(reqPostProfileOwnerDto.Firstname, employee.Firstname);
          Equal(reqPostProfileOwnerDto.Lastname, employee.Lastname);
          Equal(expectedEmail, employee.EmailVo);
-         Equal(expectdPhone, employee.Phone);
+         Equal(expectdPhone, employee.PhoneVo);
          Equal(reqPostProfileOwnerDto.PersonnelNumber, employee.PersonnelNumber);
          Equal(reqPostProfileOwnerDto.IsActive, employee.IsActive);  
       });
@@ -264,7 +264,7 @@ public sealed class EmployeesControllerEndToEnd : IntegrationTestBase {
       Equals(employee.Firstname, actualEmployeeDto?.Firstname);
       Equals(employee.Lastname, actualEmployeeDto?.Lastname);
       Equals(employee.EmailVo, actualEmployeeDto?.EmailString);
-      Equals(employee.Phone, actualPhone);
+      Equals(employee.PhoneVo, actualPhone);
       Equals(employee.PersonnelNumber, actualEmployeeDto?.PersonnelNumber);
       Equals(employee.IsActive, actualEmployeeDto?.IsActive);
    }
@@ -310,7 +310,7 @@ public sealed class EmployeesControllerEndToEnd : IntegrationTestBase {
       Equals(employee.Firstname, actualEmployeeDto?.Firstname);
       Equals(employee.Lastname, actualEmployeeDto?.Lastname);
       Equals(employee.EmailVo, actualEmail);
-      Equals(employee.Phone, actualPhone);
+      Equals(employee.PhoneVo, actualPhone);
       Equals(employee.PersonnelNumber, actualEmployeeDto?.PersonnelNumber);
       Equals(employee.IsActive, actualEmployeeDto?.IsActive);
  

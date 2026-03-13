@@ -16,10 +16,10 @@ public static class IbanEf {
    /// IMPORTANT:
    /// Uses FromPersisted, not Create.
    /// </summary>
-   public static readonly ValueConverter<Iban, string> Converter =
+   public static readonly ValueConverter<IbanVo, string> Converter =
       new(
          iban => iban.Value,
-         value => Iban.FromPersisted(value)
+         value => IbanVo.FromPersisted(value)
       );
 
    // ---------------------------------------------------------
@@ -28,9 +28,9 @@ public static class IbanEf {
    /// <summary>
    /// Ensures EF Core compares and snapshots by canonical value.
    /// </summary>
-   public static readonly ValueComparer<Iban> Comparer =
-      EfValueObjectComparer.Create<Iban, string>(
+   public static readonly ValueComparer<IbanVo> Comparer =
+      EfValueObjectComparer.Create<IbanVo, string>(
          toPersisted: v => v.Value,
-         fromPersisted: v => Iban.FromPersisted(v)
+         fromPersisted: v => IbanVo.FromPersisted(v)
       );
 }

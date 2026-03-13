@@ -6,16 +6,16 @@ public static class AccountMappings {
 
    public static AccountDto ToAccountDto(this Account account) => new(
       Id: account.Id,
-      IbanString: account.Iban.Value,
-      BalanceDecimal: account.Balance.Amount,
-      CurrencyInt: (int)account.Balance.Currency,
+      IbanString: account.IbanVo.Value,
+      BalanceDecimal: account.BalanceVo.Amount,
+      CurrencyInt: (int)account.BalanceVo.Currency,
       CustomerId: account.CustomerId   
    );
 
    public static BeneficiaryDto ToBeneficiaryDto(this Beneficiary beneficiary) => new(
       Id: beneficiary.Id,
       Name: beneficiary.Name,
-      IbanString: beneficiary.Iban.Value,
+      IbanString: beneficiary.IbanVo.Value,
       AccountId: beneficiary.AccountId
    );
    

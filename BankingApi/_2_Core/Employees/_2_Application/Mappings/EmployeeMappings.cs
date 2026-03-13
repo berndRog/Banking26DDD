@@ -9,7 +9,7 @@ public static class EmployeeMappings {
       Firstname: employee.Firstname,
       Lastname: employee.Lastname,
       EmailString: employee.EmailVo.Value,
-      PhoneString: employee.Phone?.Value,
+      PhoneString: employee.PhoneVo?.Value,
       PersonnelNumber: employee!.PersonnelNumber,
       IsActive: employee.IsActive,
       AdminRights: (int) employee.AdminRights

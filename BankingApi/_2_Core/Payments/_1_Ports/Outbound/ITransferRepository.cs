@@ -5,7 +5,7 @@ namespace BankingApi._2_Core.Payments._1_Ports.Outbound;
 // Repository port for accessing Transfer aggregates.
 // Used by application use cases to load and persist transfers.
 // Implemented in the Infrastructure layer (e.g. EF Core).
-public interface ITransfersRepository {
+public interface ITransferRepository {
 
    // Load a transfer by its identifier
    Task<Transfer?> FindByIdAsync(
@@ -19,12 +19,12 @@ public interface ITransfersRepository {
       CancellationToken ct = default
    );
 
-   // Find a transfer using the idempotency key
-   // Used to prevent duplicate execution of payment requests
-   Task<Transfer?> FindByIdempotencyKeyAsync(
-      string key,
-      CancellationToken ct
-   );
+   // // Find a transfer using the idempotency key
+   // // Used to prevent duplicate execution of payment requests
+   // Task<Transfer?> FindByIdempotencyKeyAsync(
+   //    string key,
+   //    CancellationToken ct
+   // );
 
    // Add a new transfer aggregate to the persistence context
    void Add(Transfer transfer);

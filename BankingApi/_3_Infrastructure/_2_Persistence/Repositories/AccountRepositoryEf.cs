@@ -1,12 +1,11 @@
 using BankingApi._2_Core.Payments._1_Ports.Outbound;
 using BankingApi._2_Core.Payments._3_Domain.Aggregates;
 using BankingApi._2_Core.Payments._3_Domain.ValueObjects;
-using BankingApi._3_Infrastructure.Database;
 using Microsoft.EntityFrameworkCore;
-namespace BankingApi._2_Core.Payments._4_Infrastructure.Repositories;
+namespace BankingApi._3_Infrastructure._2_Persistence.Repositories;
 
 public sealed class AccountRepositoryEf(
-   BankingDbContext dbContext
+   IAccountsDbContext dbContext
 ) : IAccountRepository {
    
    // Loads a single account by its primary key (Id).
@@ -20,11 +19,11 @@ public sealed class AccountRepositoryEf(
 
    // Loads a single account by its IBAN (unique business key).
    public async Task<Account?> FindByIbanAsync(
-      Iban iban,
+      IbanVo ibanVo,
       CancellationToken ct = default
    ) {
       return await dbContext.Accounts
-         .FirstOrDefaultAsync(a => a.Iban == iban, ct);
+         .FirstOrDefaultAsync(a => a.IbanVo == ibanVo, ct);
    }
 
    // Loads a single account by Id and eager-loads the Beneficiaries navigation.
@@ -47,39 +46,37 @@ public sealed class AccountRepositoryEf(
       return await dbContext.Accounts.AnyAsync(a => a.CustomerId == customerId, ct);
    }
 
+   public async Task<IEnumerable<Account>> SelelctByCustomerIdAsync(
+      Guid customerId, 
+      CancellationToken ct = default
+   ) {
+      return await dbContext.Accounts
+         .Where(a => a.CustomerId == customerId)
+         .ToListAsync(ct);
+   }
+
    // Adds a new account to the context so it will be inserted on SaveChanges.
    public void Add(Account account) {
-      dbContext.Accounts.Add(account);
+      dbContext.Add(account);
    }
    
    // Updates an existing account.
-   // If an entity with the same key is already tracked, update the tracked instance
-   // to avoid "The instance of entity type ... cannot be tracked..." exceptions.
    public void Update(Account account) {
-      var tracked = dbContext.ChangeTracker
-         .Entries<Account>()
-         .FirstOrDefault(e => e.Entity.Id == account.Id);
-
-      if (tracked is not null) {
-         // Copy scalar values to the tracked entity.
-         tracked.CurrentValues.SetValues(account);
-         return;
-      }
-
-      // Not tracked yet: attach + mark as modified.
-      dbContext.Accounts.Update(account);
+      dbContext.Update(account);
    }
    
-   public Task<Account?> FindBeneficiaryByIdAsync(Guid id, CancellationToken ct = default) {
-      throw new NotImplementedException();
+   public async Task<Beneficiary?> FindBeneficiaryByIdAsync(Guid id, CancellationToken ct = default) {
+      return await dbContext.Beneficiaries
+         .FirstOrDefaultAsync(b => b.Id == id, ct);
+      
    }
 
    public void Add(Beneficiary beneficiary) {
-      throw new NotImplementedException();
+      dbContext.Add(beneficiary);
    }
 
    public void Remove(Beneficiary beneficiary) {
-      throw new NotImplementedException();
+      dbContext.Remove(beneficiary);
    }
 
    

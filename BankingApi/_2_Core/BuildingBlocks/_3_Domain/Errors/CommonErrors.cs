@@ -69,7 +69,7 @@ public static class CommonErrors {
       new(ErrorCode.BadRequest,
          Title: "Address: Invalid country",
          Message: "The provided country is too short or too long (2–80 characters).");
-   
+
    // Time / auditing
    // ------------------------------------------------------------------------
    public static readonly DomainErrors TimestampIsRequired =

@@ -1,4 +1,4 @@
-using BankingApi._2_Core.BuildingBlocks._1_Ports.Inbound;
+using BankingApi._2_Core.BuildingBlocks._1_Ports.Outbound;
 using BankingApi._2_Core.BuildingBlocks._3_Domain.Errors;
 using BankingApi._2_Core.BuildingBlocks._3_Domain.ValueObjects;
 using BankingApi._2_Core.Customers._2_Application.Dtos;
@@ -49,7 +49,7 @@ public sealed class CustomerUt {
    #region--- CreatePerson tests ---------------------------
 
    [Fact]
-   public void CreatePerson_valid_input_and_id_creates_owner() {
+   public void CreatePerson_valid_input_and_id_creates_customer() {
       // Act
       var result = Customer.Create(
          firstname: _firstname,
@@ -64,20 +64,20 @@ public sealed class CustomerUt {
       // Assert
       True(result.IsSuccess);
 
-      var owner = result.Value!;
-      IsType<Customer>(owner);
-      Equal(Guid.Parse(_id), owner.Id);
-      Equal(_firstname, owner.Firstname);
-      Equal(_lastname, owner.Lastname);
-      Equal(_emailVo, owner.EmailVo);
-      Equal(_subject, owner.Subject);
+      var customer = result.Value!;
+      IsType<Customer>(customer);
+      Equal(Guid.Parse(_id), customer.Id);
+      Equal(_firstname, customer.Firstname);
+      Equal(_lastname, customer.Lastname);
+      Equal(_emailVo, customer.EmailVo);
+      Equal(_subject, customer.Subject);
 
-      Null(owner.CompanyName);
-      Equal($"{_firstname} {_lastname}", owner.DisplayName);
+      Null(customer.CompanyName);
+      Equal($"{_firstname} {_lastname}", customer.DisplayName);
 
-      Equal(CustomerStatus.Pending, owner.Status);
-      False(owner.IsActive);
-      True(owner.IsProfileComplete);
+      Equal(CustomerStatus.Active, customer.Status);
+      True(customer.IsActive);
+      True(customer.IsProfileComplete);
    }
 
    [Fact]
@@ -478,7 +478,7 @@ public sealed class CustomerUt {
    [Fact]
    public void CreateProvision_valid_sets_pending_and_profile_incomplete_and_createdAt() {
       // Arrange
-      var identityCreatedAt = _seed.UtcNow;
+      var identityCreatedAt = _clock.UtcNow;
 
       // Act
       var result = Customer.CreateProvision(

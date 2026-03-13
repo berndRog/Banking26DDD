@@ -20,7 +20,7 @@ namespace BankingApi._2_Core.Payments._3_Domain.ValueObjects;
 /// - characters A-Z / 0-9 only
 /// - MOD-97 checksum must pass
 /// </summary>
-public sealed record class Iban {
+public sealed record class IbanVo {
    /// <summary>
    /// Canonical IBAN (uppercase, no separators).
    /// Example: "de44 5001 0517 5407 3249 31" -> "DE44500105175407324931"
@@ -42,7 +42,7 @@ public sealed record class Iban {
    /// Private constructor enforces factory usage.
    /// Iban can never exist in invalid state.
    /// </summary>
-   private Iban(string normalized) => Value = normalized;
+   private IbanVo(string normalized) => Value = normalized;
 
    // =========================================================
    // COUNTRY RULES (DACH)
@@ -64,13 +64,13 @@ public sealed record class Iban {
    /// Creates an Iban from user input.
    /// Performs normalization (removes separators, uppercases) and full validation.
    /// </summary>
-   public static Result<Iban> Create(string? input) {
+   public static Result<IbanVo> Create(string? input) {
       var normalized = NormalizeFromInput(input);
 
       if (!TryValidate(normalized, out var error))
-         return Result<Iban>.Failure(InvalidIban(error));
+         return Result<IbanVo>.Failure(InvalidIban(error));
 
-      return Result<Iban>.Success(new Iban(normalized));
+      return Result<IbanVo>.Success(new IbanVo(normalized));
    }
 
    // =========================================================
@@ -81,7 +81,7 @@ public sealed record class Iban {
    /// Only cheap invariant checks — no separator stripping etc.
    /// Throws if DB contains corrupted (non-canonical) data.
    /// </summary>
-   internal static Iban FromPersisted(string value) {
+   internal static IbanVo FromPersisted(string value) {
       if (!IsCanonical(value))
          throw new InvalidOperationException($"Invalid Iban in database: '{value}'");
 
@@ -90,7 +90,7 @@ public sealed record class Iban {
       if (!TryValidate(value, out var error))
          throw new InvalidOperationException($"Invalid Iban in database: '{value}'. {error}");
 
-      return new Iban(value);
+      return new IbanVo(value);
    }
 
    // =========================================================

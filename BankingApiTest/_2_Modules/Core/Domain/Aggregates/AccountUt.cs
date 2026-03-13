@@ -1,5 +1,4 @@
-using BankingApi._2_Core.BuildingBlocks._1_Ports.Inbound;
-using BankingApi._2_Core.Payments._2_Application.Mappings;
+using BankingApi._2_Core.BuildingBlocks._1_Ports.Outbound;
 using BankingApi._2_Core.Payments._3_Domain.Aggregates;
 using BankingApi._2_Core.Payments._3_Domain.ValueObjects;
 using BankingApiTest.Infrastructure;
@@ -10,8 +9,8 @@ public sealed class AccountUt {
    private readonly IClock _clock;
 
    private readonly Guid _customerId;
-   private readonly Iban _iban;
-   private readonly Money _balance;
+   private readonly IbanVo _ibanVo;
+   private readonly MoneyVo _balance;
    private readonly string _id;
 
    public AccountUt() {
@@ -22,8 +21,8 @@ public sealed class AccountUt {
       var owner = _seed.Customer1();
       var account = _seed.Account1();
       _customerId = owner.Id;
-      _iban = account.Iban;
-      _balance = account.Balance;
+      _ibanVo = account.IbanVo;
+      _balance = account.BalanceVo;
       _id = "11111111-0000-0000-0000-000000000000";
    }
 
@@ -32,10 +31,10 @@ public sealed class AccountUt {
       // Arrange
       // Act
       var result = Account.Create(
-         clock: _clock,
          customerId: _customerId,
-         iban: _iban,
-         balance: _balance,
+         ibanVo: _ibanVo,
+         balanceVo: _balance,
+         createdAt: _clock.UtcNow,
          id: _id
       );
 
@@ -47,8 +46,8 @@ public sealed class AccountUt {
       IsType<Account>(actual);
       NotEqual(Guid.Empty, actual.Id);
       Equal(Guid.Parse(_id), actual.Id);
-      Equal(_iban, actual.Iban);
-      Equal(_balance, actual.Balance);
+      Equal(_ibanVo, actual.IbanVo);
+      Equal(_balance, actual.BalanceVo);
       Equal(_customerId, actual.CustomerId);
    }
 
@@ -56,10 +55,10 @@ public sealed class AccountUt {
    public void Create_without_id_generates_new_id() {
       // Act
       var result = Account.Create(
-         clock: _clock,
          customerId: _customerId,
-         iban: _iban,
-         balance: _balance,
+         ibanVo: _ibanVo,
+         balanceVo: _balance,
+         createdAt: _clock.UtcNow,
          id: null
       );
 
@@ -76,10 +75,10 @@ public sealed class AccountUt {
    public void Create_with_invalid_id_fails() {
       // Act
       var result = Account.Create(
-         clock: _clock,
          customerId: _customerId,
-         iban: _iban,
-         balance: _balance,
+         ibanVo: _ibanVo,
+         balanceVo: _balance,
+         createdAt: _clock.UtcNow,
          id: "not-a-guid"
       );
       // Assert
@@ -94,7 +93,7 @@ public sealed class AccountUt {
    [InlineData("XX00 0000 0000 0000 0000 00")] // unknown country
    public void Create_with_invalid_iban_fails(string iban) {
       // Act
-      var result = Iban.Create(iban);
+      var result = IbanVo.Create(iban);
   
       // Assert
       True(result.IsFailure);
@@ -105,10 +104,10 @@ public sealed class AccountUt {
    public void Create_with_empty_customerId_is_failure() {
       // Act
       var result = Account.Create(
-         clock: _clock,
          customerId: Guid.Empty,
-         iban: _iban,
-         balance: _balance,
+         ibanVo: _ibanVo,
+         balanceVo: _balance,
+         createdAt: _clock.UtcNow,
          id: _id
       );
       // Assert
@@ -119,27 +118,27 @@ public sealed class AccountUt {
    public void Create_is_deterministic_for_same_input_id() {
       // Act
       var result1 = Account.Create(
-         clock: _clock,
          customerId: _customerId,
-         iban: _iban,
-         balance: _balance,
+         ibanVo: _ibanVo,
+         balanceVo: _balance,
+         createdAt: _clock.UtcNow,
          id: _id
       );
 
       var result2 = Account.Create(
-         clock: _clock,
          customerId: _customerId,
-         iban: _iban,
-         balance: _balance,
+         ibanVo: _ibanVo,
+         balanceVo: _balance,
+         createdAt: _clock.UtcNow,
          id: _id
       );
 
       True(result1.IsSuccess);
       True(result2.IsSuccess);
       Equal(result1.Value!.Id, result2.Value!.Id);
-      Equal(result1.Value!.Iban, result2.Value!.Iban);
+      Equal(result1.Value!.IbanVo, result2.Value!.IbanVo);
       Equal(result1.Value!.CustomerId, result2.Value!.CustomerId);
-      Equal(result1.Value!.Balance, result2.Value!.Balance);
+      Equal(result1.Value!.BalanceVo, result2.Value!.BalanceVo);
    }
  
    #region --- Beneficiaries ----------------------------------------------------------------
@@ -151,8 +150,8 @@ public sealed class AccountUt {
       
       // Act
       account.AddBeneficiary(
-         beneficiaryDto: beneficiary.ToBeneficiaryDto(),
-         _clock.UtcNow
+         beneficiary: beneficiary,
+         updatedAt: _clock.UtcNow
       );
       
       // Assert
@@ -166,8 +165,8 @@ public sealed class AccountUt {
       var account = _seed.Account1();
       var beneficiary1 = _seed.Beneficiary1();
       var beneficiary2 = _seed.Beneficiary2();
-      account.AddBeneficiary(beneficiary1.ToBeneficiaryDto(), _clock.UtcNow);
-      account.AddBeneficiary(beneficiary2.ToBeneficiaryDto(),_clock.UtcNow);
+      account.AddBeneficiary(beneficiary1, _clock.UtcNow);
+      account.AddBeneficiary(beneficiary2,_clock.UtcNow);
 
       // Act
       account.RemoveBeneficiary(beneficiary1.Id,_clock.UtcNow);

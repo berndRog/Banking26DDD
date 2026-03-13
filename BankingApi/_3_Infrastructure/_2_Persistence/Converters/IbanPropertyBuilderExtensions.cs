@@ -4,8 +4,8 @@ namespace BankingApi._3_Infrastructure._2_Persistence.Converters;
 
 public static class IbanPropertyBuilderExtensions {
    
-   public static PropertyBuilder<Iban> HasIbanConversion(
-      this PropertyBuilder<Iban> builder) {
+   public static PropertyBuilder<IbanVo> HasIbanConversion(
+      this PropertyBuilder<IbanVo> builder) {
       builder.HasConversion(IbanEf.Converter);
       builder.Metadata.SetValueComparer(IbanEf.Comparer);
       builder.HasMaxLength(34);

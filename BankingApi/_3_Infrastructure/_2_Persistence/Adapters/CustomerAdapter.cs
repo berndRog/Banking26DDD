@@ -2,7 +2,7 @@ using BankingApi._2_Core.Customers._1_Ports.Inbound;
 using BankingApi._2_Core.Customers._1_Ports.Outbound;
 namespace BankingApi._2_Core.Customers._2_Application.Adapters;
 
-internal sealed class CustomerLookupAdapter(
+internal sealed class CustomerAdapter(
    ICustomerRepository repository  
 ) : ICustomerLookupContract {
    

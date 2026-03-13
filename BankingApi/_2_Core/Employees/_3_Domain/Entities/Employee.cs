@@ -1,4 +1,5 @@
 using BankingApi._2_Core.BuildingBlocks._1_Ports.Inbound;
+using BankingApi._2_Core.BuildingBlocks._1_Ports.Outbound;
 using BankingApi._2_Core.BuildingBlocks._3_Domain;
 using BankingApi._2_Core.BuildingBlocks._3_Domain.Entities;
 using BankingApi._2_Core.BuildingBlocks._3_Domain.ValueObjects;
@@ -6,33 +7,15 @@ using BankingApi._2_Core.Employees._3_Domain.Enums;
 using BankingApi._2_Core.Employees._3_Domain.Errors;
 namespace BankingApi._2_Core.Employees._3_Domain.Aggregates;
 
-/// <summary>
-/// Employee aggregate root.
-///
-/// Represents an employee of the organization and defines
-/// all domain rules related to employee lifecycle and administration.
-///
-/// Responsibilities:
-/// - Holds identity and personal data (via Person base class)
-/// - Manages administrative rights
-/// - Controls activation and deactivation lifecycle
-///
-/// Invariants:
-/// - Personnel number must be present
-/// - Creation timestamp must be defined
-/// - Admin rights must only contain allowed flag values
-///
-/// Notes:
-/// - This aggregate contains no persistence or application logic
-/// - All state changes are enforced via domain methods
-/// </summary>
+// Employee aggregate root.
 public sealed class Employee : AggregateRoot {
    
-   public string  Firstname { get; private set; } = string.Empty;
-   public string  Lastname  { get; private set; } = string.Empty;
+   // properties
+   public string Firstname { get; private set; } = string.Empty;
+   public string Lastname  { get; private set; } = string.Empty;
    
    public EmailVo EmailVo { get; private set; } = default!; 
-   public PhoneVo?  Phone { get; private set; } = null;
+   public PhoneVo? PhoneVo { get; private set; } = null;
   
    public string  Subject { get; private set; } = default!; // IdentityAccessServer
    
@@ -58,7 +41,7 @@ public sealed class Employee : AggregateRoot {
       string firstname,
       string lastname,
       EmailVo emailVo,
-      PhoneVo? phone,
+      PhoneVo? phoneVo,
       string subject,
       string personnelNumber,
       AdminRights adminRights,
@@ -68,7 +51,7 @@ public sealed class Employee : AggregateRoot {
       Firstname = firstname;
       Lastname  = lastname;
       EmailVo     = emailVo;
-      Phone = phone;
+      PhoneVo = phoneVo;
       Subject = subject;
       PersonnelNumber = personnelNumber;
       AdminRights = adminRights;
@@ -78,7 +61,6 @@ public sealed class Employee : AggregateRoot {
    // ---------- Factory (Result-based) ----------
    /// </summary>
    public static Result<Employee> Create(
-      IClock clock,
       string firstname,
       string lastname,
       EmailVo emailVo,
@@ -86,7 +68,7 @@ public sealed class Employee : AggregateRoot {
       string subject,
       string personnelNumber,
       AdminRights adminRights,
-      bool isActive = true,
+      DateTimeOffset createdAt = default!,
       string? id = null
    ) {
       // Normalize input early
@@ -97,16 +79,16 @@ public sealed class Employee : AggregateRoot {
       // required firstname
       if (string.IsNullOrWhiteSpace(firstname))
          return Result<Employee>.Failure(EmployeeErrors.FirstnameIsRequired);
-      if (firstname.Length is < 2 or > 100)
+      if (firstname.Length is < 2 or > 80)
          return Result<Employee>.Failure(EmployeeErrors.InvalidFirstname);
       
       // required lastname
       if (string.IsNullOrWhiteSpace(lastname))
          return Result<Employee>.Failure(EmployeeErrors.LastnameIsRequired);
-      if (lastname.Length is < 2 or > 100)
+      if (lastname.Length is < 2 or > 80)
          return Result<Employee>.Failure(EmployeeErrors.InvalidFirstname);
 
-
+      // check required subject (identity)
       var resultSubject = IdentitySubject.Check(subject);
       if (resultSubject.IsFailure)
          return Result<Employee>.Failure(resultSubject.Error);
@@ -115,21 +97,35 @@ public sealed class Employee : AggregateRoot {
       if (string.IsNullOrWhiteSpace(personnelNumber))
          return Result<Employee>.Failure(EmployeeErrors.PersonnelNumberIsRequired);
 
+      // createdAt must be provided by caller (not default)
+      if(createdAt == default)
+         return Result<Employee>.Failure(EmployeeErrors.CreatedAtIsRequired);
+      
+      // Resolve an entity id from an optional raw string.
       var resultId = Entity.Resolve(id, EmployeeErrors.InvalidId);
       if (resultId.IsFailure)
          return Result<Employee>.Failure(resultId.Error);
+      var Id = resultId.Value;
 
+      // Admin rights must only contain allowed flags
+      if ((adminRights & ~AllowedRights) != 0)
+         return Result<Employee>.Failure(EmployeeErrors.InvalidAdminRightsBitmask);
+      
       var employee = new Employee(
-         id: resultId.Value, 
+         id: Id, 
          firstname: firstname,
          lastname: lastname,
          emailVo: emailVo,
-         phone: phone,
+         phoneVo: phone,
          subject: subject,
          personnelNumber: personnelNumber,
          adminRights: adminRights,
-         isActive: isActive
+         isActive: true
       );
+      
+      // Creation timestamp is set to createdAt
+      employee.Initialize(createdAt);
+      
       return Result<Employee>.Success(employee);
    }
 
@@ -162,7 +158,7 @@ public sealed class Employee : AggregateRoot {
          firstname: string.Empty,
          lastname: string.Empty,
          emailVo: emailVo,
-         phone: null,
+         phoneVo: null,
          subject: resultSubject.Value,
          personnelNumber: string.Empty, 
          adminRights: adminRights,
@@ -215,7 +211,7 @@ public sealed class Employee : AggregateRoot {
       Firstname = firstname;
       Lastname  = lastname;
       EmailVo = emailVo;
-      Phone = phone;
+      PhoneVo = phone;
       PersonnelNumber = personnelNumber;
       
       Touch(updatedAt);

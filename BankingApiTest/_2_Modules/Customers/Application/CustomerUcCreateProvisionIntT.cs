@@ -8,6 +8,7 @@ using BankingApi._2_Core.Payments._1_Ports.Outbound;
 using BankingApi._2_Core.Payments._4_Infrastructure.Adapters;
 using BankingApi._2_Core.Payments._4_Infrastructure.Repositories;
 using BankingApi._2_Modules.Customers._4_Infrastructure.Repositories;
+using BankingApi._3_Infrastructure._2_Persistence.Repositories;
 using BankingApi._3_Infrastructure.Database;
 using BankingApiTest.Infrastructure;
 using Microsoft.EntityFrameworkCore;
@@ -18,8 +19,7 @@ public sealed class CustomerUcCreateProvisionIntT : TestBase, IAsyncLifetime {
    private string? _dbPath;
    private DbConnection? _dbConnection;
    private DbContext? _dbContext = null!;
-
-   private ICustomersDbContext _customersDbContext = null!;
+   
    private ICustomerRepository _customerRepository = null!;
    private IAccountRepository _accountRepository = null!;
    private IAccountsContract _accountContract = null!;
@@ -57,12 +57,11 @@ public sealed class CustomerUcCreateProvisionIntT : TestBase, IAsyncLifetime {
       _dbContext = dbContext;
       var bankingDbContext = _dbContext as BankingDbContext ??
          throw new InvalidOperationException("Create: DbContext is not of type BankingDbContext");
-
-      _customersDbContext = new CustomersDbContextEf(bankingDbContext);
-      _customerRepository = new CustomerRepositoryEf(_customersDbContext);
-
-      _accountRepository = new AccountRepositoryEf(bankingDbContext);
-
+      var customersDbContext = new CustomersDbContextEf(bankingDbContext);
+      var accountsDbContext = new AccountsDbContextEf(bankingDbContext);
+      
+      _customerRepository = new CustomerRepositoryEf(customersDbContext);
+      _accountRepository = new AccountRepositoryEf(accountsDbContext);
       _unitOfWork = new UnitOfWork(bankingDbContext, _clock, CreateLogger<UnitOfWork>());
       _accountContract = new AccountsContract(_accountRepository, _unitOfWork,
          _clock, CreateLogger<AccountsContract>());

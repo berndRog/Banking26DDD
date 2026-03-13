@@ -38,7 +38,7 @@ public sealed class ConfigTransfer(
 
       // Business properties
       // -----------------------------
-      builder.OwnsOne(t => t.Amount, b => {
+      builder.OwnsOne(t => t.AmountVo, b => {
          b.Property(p => p.Amount)
             .HasColumnName("Amount")
             .HasColumnType("decimal(18,2)")
@@ -59,10 +59,10 @@ public sealed class ConfigTransfer(
          .HasMaxLength(200)
          .IsRequired();
       
-      builder.Property(t => t.RecipientIban)
+      builder.Property(t => t.RecipientIbanVo)
          .HasIbanConversion()
          .IsRequired();
-      builder.HasIndex(a => a.RecipientIban).IsUnique();
+      builder.HasIndex(a => a.RecipientIbanVo).IsUnique();
       
       // State
       builder.Property(t => t.Status)

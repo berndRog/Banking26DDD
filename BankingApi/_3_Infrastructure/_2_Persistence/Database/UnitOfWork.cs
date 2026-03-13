@@ -1,4 +1,5 @@
 using BankingApi._2_Core.BuildingBlocks._1_Ports.Inbound;
+using BankingApi._2_Core.BuildingBlocks._1_Ports.Outbound;
 using BankingApi._2_Core.BuildingBlocks._3_Domain.Entities;
 using Microsoft.EntityFrameworkCore;
 namespace BankingApi._3_Infrastructure.Database;
@@ -32,7 +33,6 @@ public sealed class UnitOfWork(
       LogOutput(text, output);
    }
    
-   // -----------------------------
    // Audit
    // -----------------------------
    private void ApplyAuditInfo() {
@@ -48,8 +48,7 @@ public sealed class UnitOfWork(
          }
       }
    }
-   
-   // -----------------------------
+
    // Logging helpers
    // -----------------------------
    private void LogBefore(string? text) {

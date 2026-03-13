@@ -33,14 +33,14 @@ public sealed class AccountsReadModelEf(
       CancellationToken ct
    ) {
       
-      var resultIban = Iban.Create(ibanString);
+      var resultIban = IbanVo.Create(ibanString);
       if (resultIban.IsFailure)
          return Result<AccountDto>.Failure(resultIban.Error);
       var iban = resultIban.Value;
       
       var accountDto = await dbContext.Accounts
          .AsNoTracking()
-         .Where(a => a.Iban == iban)      // filter
+         .Where(a => a.IbanVo == iban)      // filter
          .Select(c => c.ToAccountDto())   // projection
          .SingleOrDefaultAsync(ct);       // take single or default (null if not found)
       
@@ -133,7 +133,7 @@ public sealed class AccountsReadModelEf(
       string ibanString,
       CancellationToken ct = default
    ) {
-      var resultIban = Iban.Create(ibanString);
+      var resultIban = IbanVo.Create(ibanString);
       if (resultIban.IsFailure)
          return Result<BeneficiaryDto>.Failure(resultIban.Error);
 
@@ -141,7 +141,7 @@ public sealed class AccountsReadModelEf(
 
       var beneficiaryDto = await dbContext.Beneficiaries
          .AsNoTracking()
-         .Where(b => b.Iban == iban)
+         .Where(b => b.IbanVo == iban)
          .Select(b => b.ToBeneficiaryDto())
          .SingleOrDefaultAsync(ct);
 

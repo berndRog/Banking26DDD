@@ -15,7 +15,7 @@ public static class DiCustomerModules {
       // Inbound ports (HTTP / UI)
       // =========================================================
       // Adapters
-      services.AddScoped<ICustomerLookupContract, CustomerLookupAdapter>();
+      services.AddScoped<ICustomerLookupContract, CustomerAdapter>();
      
       // ReadModels
       services.AddScoped<ICustomerReadModel, CustomerReadModelEf>();      

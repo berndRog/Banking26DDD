@@ -21,7 +21,7 @@ public sealed class Transaction : Entity {
    /// Monetary value of the booking.
    /// Uses Money value object instead of decimal.
    /// </summary>
-   public Money Amount { get; private set; } = default!;
+   public MoneyVo Amount { get; private set; } = default!;
 
    /// <summary>
    /// Purpose text copied from transfer at booking time
@@ -51,7 +51,7 @@ public sealed class Transaction : Entity {
       Guid transferId,
       TransactionType type,
       Guid accountId,
-      Money amount,
+      MoneyVo amount,
       string purpose,
       DateTimeOffset bookedAt
    ) {
@@ -74,7 +74,7 @@ public sealed class Transaction : Entity {
    public static Transaction CreateDebit(
       Guid transferId,
       Guid accountId,
-      Money amount,
+      MoneyVo amount,
       string purpose,
       DateTimeOffset bookedAt
    ) {
@@ -99,7 +99,7 @@ public sealed class Transaction : Entity {
    public static Transaction CreateCredit(
       Guid transferId,
       Guid accountId,
-      Money amount,
+      MoneyVo amount,
       string purpose,
       DateTimeOffset bookedAt
    ) {
