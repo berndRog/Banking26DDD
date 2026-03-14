@@ -8,13 +8,13 @@ using BankingApi._2_Core.Customers._2_Application.Dtos;
 using BankingApi._2_Core.Customers._2_Application.Errors;
 using BankingApi._2_Core.Customers._2_Application.Mappings;
 using BankingApi._2_Core.Customers._3_Domain.Entities;
-using BankingApi._2_Core.Payments._1_Ports.Inbound;
 using BankingApi._2_Core.Payments._1_Ports.Outbound;
 using BankingApi._3_Infrastructure.Logging;
 [assembly: InternalsVisibleTo("BankingApiTest")]
 namespace BankingApi._2_Core.Customers._2_Application.UseCases;
 
 internal sealed class CustomerUcCreate(
+   IIdentityGateway identityGateway,
    ICustomerRepository repository,
    IAccountContract accountContract,
    IUnitOfWork unitOfWork,
@@ -31,8 +31,11 @@ internal sealed class CustomerUcCreate(
       var lastname = customerDto.Lastname.Trim();
       var companyName = customerDto.CompanyName?.Trim();
       
-      // subject required from token - but wie don't have an identity gateway yet
-      var subject = "aaaaaaaa-bbbbbbbb"; // TODO: get from token via identity gateway
+      // 1) subject required
+      var resultSubject = IdentitySubject.Check(identityGateway.Subject);
+      if (resultSubject.IsFailure) 
+         return Result<CustomerDto>.Failure(resultSubject.Error);
+      var subject = resultSubject.Value;
       
       // create email value object (domain logic inside)
       var emailString = customerDto.EmailString;
@@ -80,9 +83,6 @@ internal sealed class CustomerUcCreate(
      
       logger.LogInformation("CustomerUcCreate done OpenInitialAccount for CustomerId={id} with iban={iban}",
          customer.Id, resultAccount.Value!.IbanString);  
-      
-      
-      
       
       return Result<CustomerDto>.Success(customer.ToCustomerDto());
    }

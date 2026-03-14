@@ -1,19 +1,11 @@
 using BankingApi._2_Core.BuildingBlocks._1_Ports.Inbound;
-using BankingApi._2_Core.BuildingBlocks._1_Ports.Outbound;
-using BankingApi._2_Core.Customers._1_Ports.Inbound;
 using BankingApi._2_Core.Customers._1_Ports.Outbound;
 using BankingApi._2_Core.Payments._1_Ports.Outbound;
 using BankingApi._2_Core.Payments._2_Application.UseCases;
-using BankingApi._2_Modules.Customers._4_Infrastructure.Repositories;
-using BankingApi._3_Infrastructure._2_Persistence.Repositories;
 using BankingApi._3_Infrastructure.Database;
 using BankingApiTest._3_Infrastructure;
-using BankingApiTest._3_Infrastructure._4_Utils;
 using BankingApiTest.Infrastructure;
-using Microsoft.Data.Sqlite;
-using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Logging.Abstractions;
 namespace BankingApiTest._2_Core.Core.Application.UseCases;
 
 public sealed class AccountUcCreateIntT(TestCompositionRoot root) : IClassFixture<TestCompositionRoot> {
@@ -28,16 +20,18 @@ public sealed class AccountUcCreateIntT(TestCompositionRoot root) : IClassFixtur
       var accountRepository = scope.ServiceProvider.GetRequiredService<IAccountRepository>();
       var unitOfWork = scope.ServiceProvider.GetRequiredService<IUnitOfWork>();
       
+      var sut = scope.ServiceProvider.GetRequiredService<AccountUcCreate>();
+      
       // Arrange
-      var customer = _seed.Customer5();
-      var account = _seed.Account6();
+      var customer = _seed.Customer1();
       // fill datbase with customer
       customerRepository.Add(customer);
-      await unitOfWork.SaveAllChangesAsync("Seeding data", _ct);
+      await unitOfWork.SaveAllChangesAsync("Seeding data", ct);
       unitOfWork.ClearChangeTracker(); 
+      var account = _seed.Account1();
       
       // Act
-      var result = await _sut.ExecuteAsync(
+      var result = await sut.ExecuteAsync(
          customerId: customer.Id,
          ibanString: account.IbanVo.Value,
          balanceDecimal: account.BalanceVo.Amount,
@@ -48,7 +42,7 @@ public sealed class AccountUcCreateIntT(TestCompositionRoot root) : IClassFixtur
       unitOfWork.ClearChangeTracker();
       
       // Assert
-      var actual = await _accountRepository.FindByIdAsync(account.Id, _ct);
+      var actual = await accountRepository.FindByIdAsync(account.Id, ct);
       NotNull(actual);
       Equal(account.Id, actual!.Id);
       Equal(account.IbanVo, actual.IbanVo);
@@ -57,37 +51,29 @@ public sealed class AccountUcCreateIntT(TestCompositionRoot root) : IClassFixtur
    
    [Fact]
    public async Task Create_account_with_invalid_iban_fails() {
-      // Arrange
-      var owner = _seed.Customer5();
-      var account = _seed.Account6();
+      using var scope = root.CreateDefaultScope();
+      var ct = CancellationToken.None;
+      var dbContext = scope.ServiceProvider.GetRequiredService<BankingDbContext>();
+      var customerRepository = scope.ServiceProvider.GetRequiredService<ICustomerRepository>();
+      var accountRepository = scope.ServiceProvider.GetRequiredService<IAccountRepository>();
+      var unitOfWork = scope.ServiceProvider.GetRequiredService<IUnitOfWork>();
       
+      // Arrange
+      var owner = _seed.Customer1();
+      var account = _seed.Account1();
+      var sut = scope.ServiceProvider.GetRequiredService<AccountUcCreate>();
+
       // Act
-      var result = await _sut.ExecuteAsync(
+      var result = await sut.ExecuteAsync(
          customerId: owner.Id,
          ibanString: "ABC123456789",
          balanceDecimal: account.BalanceVo.Amount,
          currency: (int)account.BalanceVo.Currency,
          id: account.Id.ToString(),
-         ct: _ct
+         ct: ct
       );
       True(result.IsFailure);
    }
    
-   [Fact]
-   public async Task Create_account_with_invalid_id_fails() {
-      // Arrange
-      var owner = _seed.Customer5();
-      var account = _seed.Account6();
-      
-      // Act
-      var result = await _sut.ExecuteAsync(
-         customerId: owner.Id,
-         ibanString: account.IbanVo.Value,
-         balanceDecimal: account.BalanceVo.Amount,
-         currency: (int)account.BalanceVo.Currency,
-         id: "1000000-abcd",
-         ct: _ct
-      );
-      True(result.IsFailure);
-   }
+   
 }

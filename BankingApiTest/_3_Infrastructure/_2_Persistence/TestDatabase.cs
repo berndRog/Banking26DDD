@@ -2,6 +2,8 @@ using System.Data.Common;
 using BankingApi._3_Infrastructure.Database;
 using Microsoft.Data.Sqlite;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 
 namespace BankingApiTest.Infrastructure;
 
@@ -111,13 +113,7 @@ public static class TestDatabase {
       var options = BuildOptions(connection, enableSensitiveDataLogging);
       var dbContext = new BankingDbContext(options);
 
-      // IMPORTANT:
-      // - EnsureCreated() does NOT apply migrations and does not create SQL objects defined in migrations (e.g. views).
-      // - Migrate() DOES apply migrations, including migrationBuilder.Sql("CREATE VIEW ...").
-      if (applyMigrations)
-         await dbContext.Database.MigrateAsync(ct);
-      else
-         await dbContext.Database.EnsureCreatedAsync(ct);
+      await InitializeSchemaAsync(dbContext, applyMigrations, ct);
 
       return (string.Empty, connection, dbContext);
    }
@@ -150,12 +146,22 @@ public static class TestDatabase {
       var options = BuildOptions(connection, enableSensitiveDataLogging);
       var dbContext = new BankingDbContext(options);
 
-      if (applyMigrations)
+      await InitializeSchemaAsync(dbContext, applyMigrations, ct);
+
+      return (dbPath, connection, dbContext);
+   }
+
+   private static async Task InitializeSchemaAsync(BankingDbContext dbContext, bool applyMigrations, CancellationToken ct) {
+      // IMPORTANT:
+      // - EnsureCreated() does NOT apply migrations and does not create SQL objects defined in migrations (e.g. views).
+      // - Migrate() DOES apply migrations, including migrationBuilder.Sql("CREATE VIEW ...").
+      // - If the project has no migrations yet, Migrate() leaves the database empty.
+      var hasMigrations = applyMigrations && dbContext.Database.GetService<IMigrationsAssembly>().Migrations.Any();
+
+      if (hasMigrations)
          await dbContext.Database.MigrateAsync(ct);
       else
          await dbContext.Database.EnsureCreatedAsync(ct);
-
-      return (dbPath, connection, dbContext);
    }
 
    private static DbContextOptions<BankingDbContext> BuildOptions(

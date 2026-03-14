@@ -8,7 +8,7 @@ namespace BankingApiTest._3_Infrastructure;
 
 public sealed class TestCompositionRoot : IAsyncLifetime {
    // Enable logging locally, disable in CI
-   protected static readonly bool EnableLogging =
+   private static readonly bool EnableLogging =
 #if DEBUG
       true;
 #else

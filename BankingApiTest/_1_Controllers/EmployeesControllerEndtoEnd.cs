@@ -18,6 +18,8 @@ public sealed class EmployeesControllerEndToEnd : IntegrationTestBase {
 
    [Fact]
    public async Task Post_EmployeesCreate_ok() {
+      var ct = TestContext.Current.CancellationToken;
+      
       // Arrange
       var requestDto = new EmployeeDto(
          Id: Guid.NewGuid(),
@@ -33,14 +35,14 @@ public sealed class EmployeesControllerEndToEnd : IntegrationTestBase {
       var expectdPhone = PhoneVo.Create(requestDto.PhoneString).Value; 
       
       // Act
-      
       var subject = "12345678-0000-0000-0000-000000000000"; // in real scenario, subject should come from auth token or be generated in use case
       var response = await Client.PostAsJsonAsync(
-         $"/bankingapi/v1/employees?subject={Uri.EscapeDataString(subject)}",
-         requestDto
+         requestUri: $"/bankingapi/v1/employees?subject={Uri.EscapeDataString(subject)}",
+         value: requestDto,
+         cancellationToken: ct
       );
       
-     var body = await response.Content.ReadAsStringAsync(); // helpful for debugging
+     var body = await response.Content.ReadAsStringAsync(ct); // helpful for debugging
      body = body.Trim().Trim('"'); // remove quotes if response is a plain string (e.g. Id)
      Guid.TryParse(body, out var id);
      
@@ -62,7 +64,7 @@ public sealed class EmployeesControllerEndToEnd : IntegrationTestBase {
          var employee = await dbContext.Employees
             .AsNoTracking()
             .Where(o => o.Id == id)
-            .SingleOrDefaultAsync();
+            .SingleOrDefaultAsync(ct);
          
          NotNull(employee);
 
@@ -80,6 +82,8 @@ public sealed class EmployeesControllerEndToEnd : IntegrationTestBase {
    
    [Fact]
    public async Task Post_EmployeeProvison_ok() {
+      var ct = TestContext.Current.CancellationToken;
+      
       // Arrange
       Factory.TestSubject = "testOwner-123";
       Factory.TestUsername = "test.owner@test.local";
@@ -87,18 +91,19 @@ public sealed class EmployeesControllerEndToEnd : IntegrationTestBase {
       
       // Act
       var request = new HttpRequestMessage(
-         HttpMethod.Post,
-         "/bankingapi/v1/employees/me/provision"
+         method: HttpMethod.Post,
+         requestUri: "/bankingapi/v1/employees/me/provision"
       );
       request.Headers.Add(TestAuthHandler.Header, "Employee");
       
-      var response = await Client.SendAsync(request);
+      var response = await Client.SendAsync(request,ct);
       True(
          condition: response.StatusCode is HttpStatusCode.Created || response.StatusCode is HttpStatusCode.OK,
          userMessage: $"Unexpected status {(int)response.StatusCode} {response.StatusCode}\n"
       );
       
-     var ownerProvisionDto = await response.Content.ReadFromJsonAsync<CustomerProvisionDto>(); // helpful for debugging
+     var ownerProvisionDto = 
+        await response.Content.ReadFromJsonAsync<CustomerProvisionDto>(ct); // helpful for debugging
      NotNull(ownerProvisionDto);
      var id = ownerProvisionDto.Id;
      
@@ -110,7 +115,7 @@ public sealed class EmployeesControllerEndToEnd : IntegrationTestBase {
         var employee = await dbContext.Employees
            .AsNoTracking()
            .Where(o => o.Id == id)
-           .SingleOrDefaultAsync();
+           .SingleOrDefaultAsync(ct);
 
         NotNull(employee);
         
@@ -123,6 +128,8 @@ public sealed class EmployeesControllerEndToEnd : IntegrationTestBase {
    
    [Fact]
    public async Task GetAndPut_EmployeeProfile_ok() {
+      var ct = TestContext.Current.CancellationToken;
+      
       // Arrange
       Factory.TestSubject = "test-employee";
       Factory.TestUsername = "test.employee@test.local";
@@ -130,19 +137,19 @@ public sealed class EmployeesControllerEndToEnd : IntegrationTestBase {
       
       // Provisioning (idempotent, should return same owner on repeated calls)
       var request = new HttpRequestMessage(
-         HttpMethod.Post,
-         "/bankingapi/v1/employees/me/provision"
+         method: HttpMethod.Post,
+         requestUri: "/bankingapi/v1/employees/me/provision"
       );
       request.Headers.Add(TestAuthHandler.Header, "Employee");
       
-      var responsePostProvision = await Client.SendAsync(request);
+      var responsePostProvision = await Client.SendAsync(request, ct);
       True(
          condition: responsePostProvision.StatusCode is HttpStatusCode.Created,
          userMessage: $"Unexpected status {(int)responsePostProvision.StatusCode} {responsePostProvision.StatusCode}\n"
       );
       
       var employeeProvisionDto = 
-         await responsePostProvision.Content.ReadFromJsonAsync<EmployeeProvisionDto>(); 
+         await responsePostProvision.Content.ReadFromJsonAsync<EmployeeProvisionDto>(ct); 
       
       // Act Get Profile and Post Profile (update)
       request = new HttpRequestMessage(
@@ -151,14 +158,14 @@ public sealed class EmployeesControllerEndToEnd : IntegrationTestBase {
       );
       request.Headers.Add(TestAuthHandler.Header, "Employee");
       
-      var responseGetProfile = await Client.SendAsync(request);
+      var responseGetProfile = await Client.SendAsync(request, ct);
       
       True(
          condition: responseGetProfile.StatusCode is HttpStatusCode.OK,
          userMessage: $"Unexpected status {(int)responseGetProfile.StatusCode} {responseGetProfile.StatusCode}\n"
       );
       var getProfileEmployeeDto = 
-         await responseGetProfile.Content.ReadFromJsonAsync<EmployeeDto>();
+         await responseGetProfile.Content.ReadFromJsonAsync<EmployeeDto>(ct);
       NotNull(getProfileEmployeeDto);
       
       // update profile with new data (except Id, Email and Status, which are not updatable in this scenario)
@@ -175,20 +182,21 @@ public sealed class EmployeesControllerEndToEnd : IntegrationTestBase {
 
       // build request manually
       request = new HttpRequestMessage(
-         HttpMethod.Put,
-         "/bankingapi/v1/employees/me/profile"
+         method: HttpMethod.Put,
+         requestUri: "/bankingapi/v1/employees/me/profile"
       );
       request.Headers.Add(TestAuthHandler.Header, "Employee");
       request.Content = JsonContent.Create(reqPostProfileOwnerDto);
 
-      var responsePutProfile = await Client.SendAsync(request);
+      var responsePutProfile = await Client.SendAsync(request, ct);
       
       True(
          condition: responsePutProfile.StatusCode is HttpStatusCode.OK,
          userMessage: $"Unexpected status {(int)responsePutProfile.StatusCode} {responsePutProfile.StatusCode}\n"
       );
     
-      var resPostProfileEmployeeDto = await responsePutProfile.Content.ReadFromJsonAsync<EmployeeDto>();
+      var resPostProfileEmployeeDto = 
+         await responsePutProfile.Content.ReadFromJsonAsync<EmployeeDto>(ct);
       NotNull(resPostProfileEmployeeDto);
 
       var actualEmail = EmailVo.Create(resPostProfileEmployeeDto.EmailString).Value;
@@ -209,7 +217,7 @@ public sealed class EmployeesControllerEndToEnd : IntegrationTestBase {
          var employee = await dbContext.Employees
             .AsNoTracking()
             .Where(o => o.Id == id)
-            .SingleOrDefaultAsync();
+            .SingleOrDefaultAsync(ct);
 
          NotNull(employee);
          
@@ -225,6 +233,8 @@ public sealed class EmployeesControllerEndToEnd : IntegrationTestBase {
    
    [Fact]
    public async Task Employee_GetById_ok() {
+      var ct = TestContext.Current.CancellationToken;
+      
       // Assert
       var employees = _seed.Employees;
       var employee = employees[1];
@@ -234,19 +244,19 @@ public sealed class EmployeesControllerEndToEnd : IntegrationTestBase {
          var db = serviceProvider.GetRequiredService<BankingDbContext>();
          // seed here...
          db.Employees.AddRange(employees);
-         await db.SaveChangesAsync();
+         await db.SaveChangesAsync(ct);
       });
 
       // Act
       var id = employee.Id;
       
       var request = new HttpRequestMessage(
-         HttpMethod.Get,
-         $"/bankingapi/v1/employees/{id}"
+         method: HttpMethod.Get,
+         requestUri: $"/bankingapi/v1/employees/{id}"
       );
       request.Headers.Add(TestAuthHandler.Header, "Customer");
       
-      var response = await Client.SendAsync(request);
+      var response = await Client.SendAsync(request, ct);
       
       // status code must be 200 OK
       True(
@@ -255,7 +265,8 @@ public sealed class EmployeesControllerEndToEnd : IntegrationTestBase {
       );
       
       // Assert
-      var actualEmployeeDto = await response.Content.ReadFromJsonAsync<EmployeeDto>();
+      var actualEmployeeDto = 
+         await response.Content.ReadFromJsonAsync<EmployeeDto>(ct);
       NotNull(actualEmployeeDto);
       
       var actualEmail = EmailVo.Create(actualEmployeeDto?.EmailString).Value;
@@ -272,6 +283,8 @@ public sealed class EmployeesControllerEndToEnd : IntegrationTestBase {
    
    [Fact]
    public async Task Employee_GetByEmail_ok() {
+      var ct = TestContext.Current.CancellationToken;
+      
       // Assert
       var employees = _seed.Employees; // damit TestAuthHandler den
       var employee = employees[0];
@@ -279,19 +292,19 @@ public sealed class EmployeesControllerEndToEnd : IntegrationTestBase {
          var dbContext = serviceProvider.GetRequiredService<BankingDbContext>();
          // seed here...
          dbContext.Employees.AddRange(employees);
-         await dbContext.SaveChangesAsync();
+         await dbContext.SaveChangesAsync(ct);
       });
 
       // Act
       var email = employee.EmailVo.Value;
       
       var request = new HttpRequestMessage(
-         HttpMethod.Get,
-         $"/bankingapi/v1/employees/email/{email}"
+         method: HttpMethod.Get,
+         requestUri: $"/bankingapi/v1/employees/email/{email}"
       );
       request.Headers.Add(TestAuthHandler.Header, "Employee");
       
-      var response = await Client.SendAsync(request);
+      var response = await Client.SendAsync(request, ct);
       
       // status code must be 200 OK
       True(
@@ -302,7 +315,8 @@ public sealed class EmployeesControllerEndToEnd : IntegrationTestBase {
       // Assert
       response.EnsureSuccessStatusCode();
       Equal(HttpStatusCode.OK, response.StatusCode);
-      var actualEmployeeDto = await response.Content.ReadFromJsonAsync<EmployeeDto>();
+      var actualEmployeeDto = 
+         await response.Content.ReadFromJsonAsync<EmployeeDto>(ct);
 
       var actualEmail = EmailVo.Create(actualEmployeeDto?.EmailString).Value;
       var actualPhone = PhoneVo.Create(actualEmployeeDto?.PhoneString).Value;

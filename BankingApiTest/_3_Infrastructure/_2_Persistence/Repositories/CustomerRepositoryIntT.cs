@@ -3,22 +3,19 @@ using BankingApi._2_Core.Customers._1_Ports.Outbound;
 using BankingApi._2_Core.Customers._3_Domain.Entities;
 using BankingApi._3_Infrastructure._2_Persistence;
 using BankingApi._3_Infrastructure.Database;
-using BankingApiTest._3_Infrastructure;
 using BankingApiTest.Infrastructure;
 using Microsoft.Extensions.DependencyInjection;
-namespace BankingApiTest._2_Core.Customers.Infrastructure;
+namespace BankingApiTest._3_Infrastructure._2_Persistence.Repositories;
 
-public sealed class CustomerRepositoryIntTests : IClassFixture<TestCompositionRoot> {
-   private readonly TestCompositionRoot _root;
-   
-   public CustomerRepositoryIntTests(TestCompositionRoot root) {
-      _root = root;
-   }
+public sealed class CustomerRepositoryIntTests(
+   TestCompositionRoot root
+) : IClassFixture<TestCompositionRoot> {
 
    [Fact]
    public async Task Add_customer_ok() {
+      var ct = TestContext.Current.CancellationToken;
       
-      using var scope = _root.CreateDefaultScope();
+      using var scope = root.CreateDefaultScope();
       var dbContext = scope.ServiceProvider.GetRequiredService<BankingDbContext>();
       var repository = scope.ServiceProvider.GetRequiredService<ICustomerRepository>();
       var unitOfWork = scope.ServiceProvider.GetRequiredService<IUnitOfWork>();
@@ -29,10 +26,10 @@ public sealed class CustomerRepositoryIntTests : IClassFixture<TestCompositionRo
 
       // Act
       repository.Add(customer);
-      await unitOfWork.SaveAllChangesAsync("Add a customer", CancellationToken.None);
+      await unitOfWork.SaveAllChangesAsync("Add a customer", ct);
 
       // Assert
-      var actual = await dbContext.Customers.FindAsync(customer.Id);
+      var actual = await repository.FindByIdAsync(customer.Id, ct);
       NotNull(actual);
       Equal(customer.Id, actual.Id);
       Equal(customer.Firstname, actual.Firstname);
@@ -44,7 +41,9 @@ public sealed class CustomerRepositoryIntTests : IClassFixture<TestCompositionRo
 
    [Fact]
    public async Task FindByIdAsync_returns_Customer1() {
-      using var scope = _root.CreateDefaultScope();
+      var ct = TestContext.Current.CancellationToken;
+      
+      using var scope = root.CreateDefaultScope();
       var dbContext = scope.ServiceProvider.GetRequiredService<BankingDbContext>();
       var repository = scope.ServiceProvider.GetRequiredService<ICustomerRepository>();
       var unitOfWork = scope.ServiceProvider.GetRequiredService<IUnitOfWork>();
@@ -53,14 +52,14 @@ public sealed class CustomerRepositoryIntTests : IClassFixture<TestCompositionRo
       // Arrange
       var customers = seed.Customers;
       dbContext.Customers.AddRange(customers);
-      await unitOfWork.SaveAllChangesAsync();
+      await unitOfWork.SaveAllChangesAsync("Add customers", ct);
       dbContext.ChangeTracker.Clear();
 
       var customer = customers[0]; // Customer1
       var id = customer.Id;
 
       // Act
-      var actual = await repository.FindByIdAsync(id, CancellationToken.None);
+      var actual = await repository.FindByIdAsync(id, ct);
 
       // Assert
       NotNull(actual);
@@ -75,7 +74,9 @@ public sealed class CustomerRepositoryIntTests : IClassFixture<TestCompositionRo
    
    [Fact]
    public async Task FindByEmailAsync_returns_Customer3() {
-      using var scope = _root.CreateDefaultScope();
+      var ct = TestContext.Current.CancellationToken;
+      
+      using var scope = root.CreateDefaultScope();
       var dbContext = scope.ServiceProvider.GetRequiredService<BankingDbContext>();
       var repository = scope.ServiceProvider.GetRequiredService<ICustomerRepository>();
       var unitOfWork = scope.ServiceProvider.GetRequiredService<IUnitOfWork>();
@@ -84,14 +85,14 @@ public sealed class CustomerRepositoryIntTests : IClassFixture<TestCompositionRo
       // Arrange
       var customers = seed.Customers;
       dbContext.Customers.AddRange(customers);
-      await unitOfWork.SaveAllChangesAsync();
+      await unitOfWork.SaveAllChangesAsync("Add customers", ct);
       dbContext.ChangeTracker.Clear();
 
       var customer = customers[2]; // Customer3
       var emailVo = customer.EmailVo;
 
       // Act
-      var actual = await repository.FindByEmailAsync(emailVo, CancellationToken.None);
+      var actual = await repository.FindByEmailAsync(emailVo, ct);
 
       // Assert
       NotNull(actual);
@@ -106,7 +107,9 @@ public sealed class CustomerRepositoryIntTests : IClassFixture<TestCompositionRo
    
    [Fact]
    public async Task SelectAsync_returns_all_customers() {
-      using var scope = _root.CreateDefaultScope();
+      var ct = TestContext.Current.CancellationToken;
+      
+      using var scope = root.CreateDefaultScope();
       var dbContext = scope.ServiceProvider.GetRequiredService<BankingDbContext>();
       var repository = scope.ServiceProvider.GetRequiredService<ICustomerRepository>();
       var unitOfWork = scope.ServiceProvider.GetRequiredService<IUnitOfWork>();
@@ -114,11 +117,11 @@ public sealed class CustomerRepositoryIntTests : IClassFixture<TestCompositionRo
 
       // Arrange
       dbContext.Customers.AddRange(seed.Customers);
-      await unitOfWork.SaveAllChangesAsync();
+      await unitOfWork.SaveAllChangesAsync("Add customers", ct);
       dbContext.ChangeTracker.Clear();
 
       // Act
-      var customers = await repository.SelectAllAsync(CancellationToken.None);
+      var customers = await repository.SelectAllAsync(ct);
       
       // Assert
       Equal(6, customers.Count()); 
@@ -127,7 +130,9 @@ public sealed class CustomerRepositoryIntTests : IClassFixture<TestCompositionRo
    
    [Fact]
    public async Task SelectByName_returns_all_customers() {
-      using var scope = _root.CreateDefaultScope();
+      var ct = TestContext.Current.CancellationToken;
+      
+      using var scope = root.CreateDefaultScope();
       var dbContext = scope.ServiceProvider.GetRequiredService<BankingDbContext>();
       var repository = scope.ServiceProvider.GetRequiredService<ICustomerRepository>();
       var unitOfWork = scope.ServiceProvider.GetRequiredService<IUnitOfWork>();
@@ -135,12 +140,12 @@ public sealed class CustomerRepositoryIntTests : IClassFixture<TestCompositionRo
 
       // Arrange
       dbContext.Customers.AddRange(seed.Customers);
-      await unitOfWork.SaveAllChangesAsync();
+      await unitOfWork.SaveAllChangesAsync("Add customers", ct);
       dbContext.ChangeTracker.Clear();
       var expected = new List<Customer>() { seed.Customers[0], seed.Customers[1] };
 
       // Act
-      var customers = await repository.SelectByDisplayNameAsync("Mustermann",CancellationToken.None);
+      var customers = await repository.SelectByDisplayNameAsync("Mustermann", ct);
       
       // Assert
       Equal(2, customers.Count()); 

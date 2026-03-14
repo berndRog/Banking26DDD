@@ -15,6 +15,7 @@ public sealed class CustomerUcCreateIntT(TestCompositionRoot root) : IClassFixtu
    [Fact]
    public async Task Add_customer_ok() {
       using var scope = root.CreateDefaultScope();
+     
       var ct = CancellationToken.None;
       var dbContext = scope.ServiceProvider.GetRequiredService<BankingDbContext>();
       var customerRepository = scope.ServiceProvider.GetRequiredService<ICustomerRepository>();

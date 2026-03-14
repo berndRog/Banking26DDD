@@ -49,8 +49,14 @@
   &lt;Or&gt;
     &lt;ProjectFile&gt;8F031B4C-A09C-4100-8434-F2F7C9EA42DE/d:_2_Modules/d:Core/d:Application/d:UseCases/f:AccountUcCreateIntT.cs&lt;/ProjectFile&gt;
     &lt;ProjectFile&gt;8F031B4C-A09C-4100-8434-F2F7C9EA42DE/d:_1_Controllers/f:CustomersControllerEndtoEnd.cs&lt;/ProjectFile&gt;
+    &lt;ProjectFolder&gt;8F031B4C-A09C-4100-8434-F2F7C9EA42DE/d:_2_Core/d:Customers/d:Domain&lt;/ProjectFolder&gt;
+    &lt;ProjectFolder&gt;8F031B4C-A09C-4100-8434-F2F7C9EA42DE/d:_2_Core/d:Customers/d:Application&lt;/ProjectFolder&gt;
+    &lt;TestAncestor&gt;
+      &lt;TestId&gt;xUnit::8F031B4C-A09C-4100-8434-F2F7C9EA42DE::net10.0::BankingApiTest._3_Infrastructure._2_Persistence.Repositories.CustomerRepositoryIntTests&lt;/TestId&gt;
+    &lt;/TestAncestor&gt;
   &lt;/Or&gt;
 &lt;/SessionState&gt;</s:String>
+	
 	
 	
 	

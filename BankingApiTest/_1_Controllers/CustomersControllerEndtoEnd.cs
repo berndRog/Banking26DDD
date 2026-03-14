@@ -18,6 +18,8 @@ public sealed class CustomersControllerEndtoEnd : IntegrationTestBase {
    #region Post_Customer_Create
    [Fact]
    public async Task PostCustomer_Create_ok() {
+      var ct = TestContext.Current.CancellationToken;
+      
       // Arrange
       var customer1 = _seed.Customer1();
       var account1 = _seed.Account1();
@@ -39,8 +41,8 @@ public sealed class CustomersControllerEndtoEnd : IntegrationTestBase {
       var iban1 = account1.IbanVo.Value;
       
       var request = new HttpRequestMessage(
-         HttpMethod.Post,
-         "/bankingapi/v1/customers?"+
+         method: HttpMethod.Post,
+         requestUri:"/bankingapi/v1/customers?"+
          $"subject={Uri.EscapeDataString(subject)}&"+
          $"accountId={Uri.EscapeDataString(account1Id)}&"+
          $"iban={Uri.EscapeDataString(iban1)}"
@@ -48,9 +50,10 @@ public sealed class CustomersControllerEndtoEnd : IntegrationTestBase {
       //request.Headers.Add(TestAuthHandler.Header, "Employee");
       request.Content = JsonContent.Create(requestDto);
 
-      var response = await Client.SendAsync(request);
+      var response = await Client.SendAsync(request, ct);
       
-      var customerDto = await response.Content.ReadFromJsonAsync<CustomerDto>();
+      var customerDto = 
+         await response.Content.ReadFromJsonAsync<CustomerDto>(ct);
       NotNull(customerDto);
       True(
          condition: response.StatusCode is HttpStatusCode.Created,
@@ -70,7 +73,7 @@ public sealed class CustomersControllerEndtoEnd : IntegrationTestBase {
          var owner = await dbContext.Customers
             .AsNoTracking()
             .Where(o => o.Id == customerDto!.Id)
-            .SingleOrDefaultAsync();
+            .SingleOrDefaultAsync(ct);
 
          NotNull(owner);
 
@@ -85,7 +88,7 @@ public sealed class CustomersControllerEndtoEnd : IntegrationTestBase {
          var accounts = await dbContext.Accounts
             .AsNoTracking()
             .Where(a => a.CustomerId == customerDto!.Id)
-            .ToListAsync();
+            .ToListAsync(ct);
          Equal(1, accounts?.Count); // exactly one account should be created
       });
    }
@@ -94,6 +97,8 @@ public sealed class CustomersControllerEndtoEnd : IntegrationTestBase {
    #region Post_Customer_Provision
    [Fact]
    public async Task PostCustomer_Provison_ok() {
+      var ct = TestContext.Current.CancellationToken;
+      
       // Arrange
       Factory.TestSubject = "testCustomer-123";
       Factory.TestUsername = "test.customer@test.local";
@@ -101,12 +106,12 @@ public sealed class CustomersControllerEndtoEnd : IntegrationTestBase {
 
       // Act
       var request = new HttpRequestMessage(
-         HttpMethod.Post,
-         "/bankingapi/v1/customers/me/provision"
+         method: HttpMethod.Post,
+         requestUri: "/bankingapi/v1/customers/me/provision"
       );
       request.Headers.Add(TestAuthHandler.Header, "Customer");
 
-      var response = await Client.SendAsync(request);
+      var response = await Client.SendAsync(request, ct);
 
       // status code can be 201 Created (if owner was just provisioned) or 200 OK (if owner already exist)
       True(
@@ -114,7 +119,8 @@ public sealed class CustomersControllerEndtoEnd : IntegrationTestBase {
          userMessage: $"Unexpected status {(int)response.StatusCode} {response.StatusCode}\n"
       );
 
-      var ownerProvisionDto = await response.Content.ReadFromJsonAsync<CustomerProvisionDto>(); // helpful for debugging
+      var ownerProvisionDto = 
+         await response.Content.ReadFromJsonAsync<CustomerProvisionDto>(ct); // helpful for debugging
       NotNull(ownerProvisionDto);
       var id = ownerProvisionDto.Id;
 
@@ -126,7 +132,7 @@ public sealed class CustomersControllerEndtoEnd : IntegrationTestBase {
          var owner = await dbContext.Customers
             .AsNoTracking()
             .Where(o => o.Id == id)
-            .SingleOrDefaultAsync();
+            .SingleOrDefaultAsync(ct);
 
          NotNull(owner);
 
@@ -139,6 +145,8 @@ public sealed class CustomersControllerEndtoEnd : IntegrationTestBase {
    #region Get_and_Post_Customer_Profile
    [Fact]
    public async Task GetAndPostCustomer_Profile_ok() {
+      var ct = TestContext.Current.CancellationToken;
+      
       // Arrange
       Factory.TestSubject = "testCustomer-123";
       Factory.TestUsername = "test.customer@test.local";
@@ -146,29 +154,29 @@ public sealed class CustomersControllerEndtoEnd : IntegrationTestBase {
 
       // Provisioning (idempotent, should return same owner on repeated calls)
       var request = new HttpRequestMessage(
-         HttpMethod.Post,
-         "/bankingapi/v1/customers/me/provision"
+         method: HttpMethod.Post,
+         requestUri: "/bankingapi/v1/customers/me/provision"
       );
       request.Headers.Add(TestAuthHandler.Header, "Customer");
 
-      var responsePostProvision = await Client.SendAsync(request);
+      var responsePostProvision = await Client.SendAsync(request, ct);
       // status code must be 201 Created 
       True(
          condition: responsePostProvision.StatusCode is HttpStatusCode.Created,
          userMessage: $"Unexpected status {(int)responsePostProvision.StatusCode} {responsePostProvision.StatusCode}\n"
       );
 
-      var ownerProvisionDto =
-         await responsePostProvision.Content.ReadFromJsonAsync<CustomerProvisionDto>();
+      var customerProvisionDto =
+         await responsePostProvision.Content.ReadFromJsonAsync<CustomerProvisionDto>(ct);
 
       // Act Get Profile and Put Profile (update)
       request = new HttpRequestMessage(
-         HttpMethod.Get,
-         "/bankingapi/v1/customers/me/profile"
+         method: HttpMethod.Get,
+         requestUri: "/bankingapi/v1/customers/me/profile"
       );
       request.Headers.Add(TestAuthHandler.Header, "Customer");
 
-      var responseGetProfile = await Client.SendAsync(request);
+      var responseGetProfile = await Client.SendAsync(request, ct);
 
       // status code must be 200 OK
       True(
@@ -176,7 +184,8 @@ public sealed class CustomersControllerEndtoEnd : IntegrationTestBase {
          userMessage: $"Unexpected status {(int)responseGetProfile.StatusCode} {responseGetProfile.StatusCode}\n"
       );
 
-      var getProfileOwnerDto = await responseGetProfile.Content.ReadFromJsonAsync<CustomerDto>();
+      var getProfileOwnerDto = 
+         await responseGetProfile.Content.ReadFromJsonAsync<CustomerDto>(ct);
       NotNull(getProfileOwnerDto);
 
       // update profile with new data (except Id, Email and Status, which are not updatable in this scenario)
@@ -197,13 +206,13 @@ public sealed class CustomersControllerEndtoEnd : IntegrationTestBase {
 
       // build request manually
       request = new HttpRequestMessage(
-         HttpMethod.Put,
-         "/bankingapi/v1/customers/me/profile"
+         method: HttpMethod.Put,
+         requestUri: "/bankingapi/v1/customers/me/profile"
       );
       request.Headers.Add(TestAuthHandler.Header, "Customer");
       request.Content = JsonContent.Create(reqPostProfileOwnerDto);
 
-      var responsePutProfile = await Client.SendAsync(request);
+      var responsePutProfile = await Client.SendAsync(request, ct);
 
       // status code must be 200 Ok
       True(
@@ -211,7 +220,8 @@ public sealed class CustomersControllerEndtoEnd : IntegrationTestBase {
          userMessage: $"Unexpected status {(int)responsePutProfile.StatusCode} {responsePutProfile.StatusCode}\n"
       );
 
-      var resPostProfileOwnerDto = await responsePutProfile.Content.ReadFromJsonAsync<CustomerDto>();
+      var resPostProfileOwnerDto = 
+         await responsePutProfile.Content.ReadFromJsonAsync<CustomerDto>(ct);
       NotNull(resPostProfileOwnerDto);
 
       Equal(reqPostProfileOwnerDto.Id, resPostProfileOwnerDto.Id);
@@ -229,7 +239,7 @@ public sealed class CustomersControllerEndtoEnd : IntegrationTestBase {
          var owner = await dbContext.Customers
             .AsNoTracking()
             .Where(o => o.Id == id)
-            .SingleOrDefaultAsync();
+            .SingleOrDefaultAsync(ct);
 
          NotNull(owner);
 
@@ -246,6 +256,8 @@ public sealed class CustomersControllerEndtoEnd : IntegrationTestBase {
    #region Get_Customer_ById_and_Email
    [Fact]
    public async Task GetCustomer_ById_ok() {
+      var ct = TestContext.Current.CancellationToken;
+      
       // Assert
       var employees = _seed.Customers;
       //  var owner = employees[0];
@@ -256,19 +268,19 @@ public sealed class CustomersControllerEndtoEnd : IntegrationTestBase {
          var db = serviceProvider.GetRequiredService<BankingDbContext>();
          // seed here...
          db.Customers.AddRange(employees);
-         await db.SaveChangesAsync();
+         await db.SaveChangesAsync(ct);
       });
 
       // Act
       var id = customer.Id;
 
       var request = new HttpRequestMessage(
-         HttpMethod.Get,
-         $"/bankingapi/v1/customers/{id}"
+         method: HttpMethod.Get,
+         requestUri: $"/bankingapi/v1/customers/{id}"
       );
       request.Headers.Add(TestAuthHandler.Header, "Customer");
 
-      var response = await Client.SendAsync(request);
+      var response = await Client.SendAsync(request, ct);
 
       // status code must be 200 OK
       True(
@@ -277,7 +289,8 @@ public sealed class CustomersControllerEndtoEnd : IntegrationTestBase {
       );
 
       // Assert
-      var actualCustomerDto = await response.Content.ReadFromJsonAsync<CustomerDto>();
+      var actualCustomerDto = 
+         await response.Content.ReadFromJsonAsync<CustomerDto>(ct);
       NotNull(actualCustomerDto);
 
       Equals(customer.Id, actualCustomerDto?.Id);
@@ -292,6 +305,8 @@ public sealed class CustomersControllerEndtoEnd : IntegrationTestBase {
 
    [Fact]
    public async Task GetOwner_ByEmail_ok() {
+      var ct = TestContext.Current.CancellationToken;
+      
       // Assert
       var customers = _seed.Customers;
       var customer1 = customers[0];
@@ -299,19 +314,19 @@ public sealed class CustomersControllerEndtoEnd : IntegrationTestBase {
          var dbContext = serviceProvider.GetRequiredService<BankingDbContext>();
          // seed here...
          dbContext.Customers.AddRange(customers);
-         await dbContext.SaveChangesAsync();
+         await dbContext.SaveChangesAsync(ct);
       });
 
       // Act
       var email = customer1.EmailVo.Value;
 
       var request = new HttpRequestMessage(
-         HttpMethod.Get,
-         $"/bankingapi/v1/customers/email/{email}"
+         method: HttpMethod.Get,
+         requestUri: $"/bankingapi/v1/customers/email/{email}"
       );
       request.Headers.Add(TestAuthHandler.Header, "Customer");
 
-      var response = await Client.SendAsync(request);
+      var response = await Client.SendAsync(request, ct);
 
       // status code must be 200 OK
       True(
@@ -322,38 +337,41 @@ public sealed class CustomersControllerEndtoEnd : IntegrationTestBase {
       // Assert
       response.EnsureSuccessStatusCode();
       Equal(HttpStatusCode.OK, response.StatusCode);
-      var actualOwnerDto = await response.Content.ReadFromJsonAsync<CustomerDto>();
+      var actualCustomerDto = 
+         await response.Content.ReadFromJsonAsync<CustomerDto>(ct);
 
-      Equals(customer1.Id, actualOwnerDto?.Id);
-      Equals(customer1.Firstname, actualOwnerDto?.Firstname);
-      Equals(customer1.Lastname, actualOwnerDto?.Lastname);
-      Equals(customer1.CompanyName, actualOwnerDto?.CompanyName);
-      Equals(customer1.EmailVo, actualOwnerDto?.EmailString);
-      Equals((int)customer1.Status, actualOwnerDto?.StatusInt);
-      Equals(customer1.AddressVo, actualOwnerDto);
+      Equals(customer1.Id, actualCustomerDto?.Id);
+      Equals(customer1.Firstname, actualCustomerDto?.Firstname);
+      Equals(customer1.Lastname, actualCustomerDto?.Lastname);
+      Equals(customer1.CompanyName, actualCustomerDto?.CompanyName);
+      Equals(customer1.EmailVo, actualCustomerDto?.EmailString);
+      Equals((int)customer1.Status, actualCustomerDto?.StatusInt);
+      Equals(customer1.AddressVo, actualCustomerDto);
    }
    #endregion
 
-   #region Get_All_Owners
+   #region Get_All_Customers
    [Fact]
    public async Task GetAllCustomers_ok() {
+      var ct = TestContext.Current.CancellationToken;
+      
       // Assert
       var customers = _seed.Customers;
       await Factory.WithScopeAsync(async serviceProvider => {
          var dbContext = serviceProvider.GetRequiredService<BankingDbContext>();
          // seed here...
          dbContext.Customers.AddRange(customers);
-         await dbContext.SaveChangesAsync();
+         await dbContext.SaveChangesAsync(ct);
       });
 
       // Act
       var request = new HttpRequestMessage(
-         HttpMethod.Get,
-         $"/bankingapi/v1/customers"
+         method: HttpMethod.Get,
+         requestUri: $"/bankingapi/v1/customers"
       );
       request.Headers.Add(TestAuthHandler.Header, "Employee");
 
-      var response = await Client.SendAsync(request);
+      var response = await Client.SendAsync(request, ct);
 
       // status code must be 200 OK
       True(
@@ -364,7 +382,8 @@ public sealed class CustomersControllerEndtoEnd : IntegrationTestBase {
       // Assert
       response.EnsureSuccessStatusCode();
       Equal(HttpStatusCode.OK, response.StatusCode);
-      var actualCustomersDtos = await response.Content.ReadFromJsonAsync<List<CustomerDto>>();
+      var actualCustomersDtos = 
+         await response.Content.ReadFromJsonAsync<List<CustomerDto>>(ct);
 
       Equal(customers.Count, actualCustomersDtos?.Count);
       
