@@ -1,5 +1,6 @@
 using BankingApi._2_Core.Employees._3_Domain.Aggregates;
 using BankingApi._3_Infrastructure._2_Persistence.Converters;
+using BankingApi._3_Infrastructure._2_Persistence.Database.Converter;
 using BankingApi._3_Infrastructure.Database;
 using BankingApi._3_Infrastructure.Database.ValueObjects;
 using Microsoft.EntityFrameworkCore;

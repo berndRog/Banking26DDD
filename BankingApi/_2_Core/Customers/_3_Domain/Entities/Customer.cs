@@ -127,6 +127,7 @@ public sealed class Customer : AggregateRoot {
          addressVo: addressVo
       );
       
+      // set timestamps
       customer.Initialize(createdAt);
       
       // auto-activate on creation (no employee involved)
@@ -224,10 +225,8 @@ public sealed class Customer : AggregateRoot {
       return Result.Success();
    }
 
-   /// <summary>
-   /// Employee activates the owner after external identity verification.
-   /// Activation is only possible if the owner is Pending and profile is complete.
-   /// </summary>
+   // Employee activates the owner after external identity verification.
+   // Activation is only possible if the owner is Pending and profile is complete.
    public Result Activate(
       Guid activatedByEmployeeId, 
       DateTimeOffset activatedAt

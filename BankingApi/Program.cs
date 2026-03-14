@@ -59,10 +59,9 @@ public class Program {
       builder.Services.AddControllers();
 
       // Modules
-      builder.Services.AddCoreModule();
       builder.Services.AddCustomerModules();
       builder.Services.AddEmployeesModules();
-      builder.Services.AddBuildingBlocks();
+      builder.Services.AddPaymentModules();
       builder.Services.AddInfrastructureModule(builder.Configuration);
 
       // AuthN (Bearer) + AuthZ

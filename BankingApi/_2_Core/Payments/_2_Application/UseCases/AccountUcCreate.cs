@@ -13,7 +13,7 @@ using BankingApi._2_Core.Payments._3_Domain.ValueObjects;
 namespace BankingApi._2_Core.Payments._2_Application.UseCases;
 
 public sealed class AccountUcCreate(
-   ICustomerLookupContract customerLookup,
+   ICustomerContract customer,
    IAccountRepository accountRepository,
    IUnitOfWork unitOfWork,
    IClock clock,
@@ -29,7 +29,7 @@ public sealed class AccountUcCreate(
       CancellationToken ct = default
    ) {
       
-      if (!await customerLookup.ExistsActiveAsync(customerId, ct))
+      if (!await customer.ExistsActiveAsync(customerId, ct))
          return Result<AccountDto>.Failure(AccountErrors.OwnerIdNotFoundOrInactive);
       
       // invariant: initial balance must be >= 0

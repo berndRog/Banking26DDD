@@ -113,6 +113,9 @@ public sealed class Seed(
       subject: "f0004f67-72a3-4449-af1f-803dcfaddb7f",
       addressVo: null
    );
+   public IReadOnlyList<Customer> Customers => [
+      Customer1(), Customer2(), Customer3(), Customer4(), Customer5(), Customer6()
+   ];
    #endregion
 
    #region -------------- Test Iban (Value Objects) ------------------------------------------
@@ -200,6 +203,10 @@ public sealed class Seed(
       ibanVo: Iban8Vo,
       balanceDecimal: 4300.0m
    );
+   public IReadOnlyList<Account> Accounts => [
+       Account1(), Account2(), Account3(), Account4(),
+       Account5(), Account6(), Account7(), Account8(),
+   ];
    #endregion
 
    #region -------------- Test Beneficiaries (Entities) --------------------------------------

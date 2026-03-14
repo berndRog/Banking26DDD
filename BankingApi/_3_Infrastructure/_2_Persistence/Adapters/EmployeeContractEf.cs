@@ -1,3 +1,4 @@
+using System.Runtime.CompilerServices;
 using BankingApi._2_Core.BuildingBlocks._1_Ports.Outbound;
 using BankingApi._2_Core.BuildingBlocks._3_Domain;
 using BankingApi._2_Core.Employees._1_Ports.Inbound;
@@ -7,9 +8,10 @@ using BankingApi._2_Core.Employees._2_Application.Mappings;
 using BankingApi._2_Core.Employees._3_Domain.Enums;
 using BankingApi._3_Infrastructure.Database;
 using Microsoft.EntityFrameworkCore;
+[assembly: InternalsVisibleTo("BankingApiTest")]
 namespace BankingApi._2_Core.Employees._4_Infrastructure.Adapters;
 
-public class EmployeeContractEf(
+internal class EmployeeContractEf(
    BankingDbContext dbContext,
    IIdentityGateway identityGateway   
 ): IEmployeeContract {

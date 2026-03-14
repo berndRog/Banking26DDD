@@ -20,7 +20,7 @@ public sealed class CustomerUcActivate(
 
    ICustomerRepository repository,
    IEmployeeContract employeeContract,
-   IAccountsContract accountsContract,
+   IAccountContract accountContract,
    IUnitOfWork unitOfWork,
    IClock clock,
    ILogger<CustomerUcActivate> logger
@@ -55,7 +55,7 @@ public sealed class CustomerUcActivate(
       
       // 4) create first account (Accounts-BC)
       var resAccount = 
-         await accountsContract.OpenInitialAccountAsync(customerId, accountIdString, ibanString, ct);
+         await accountContract.OpenInitialAccountAsync(customerId, accountIdString, ibanString, ct);
       if (resAccount.IsFailure)
          return Result.Failure(resAccount.Error);
 

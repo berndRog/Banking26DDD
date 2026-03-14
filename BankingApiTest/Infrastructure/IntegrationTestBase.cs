@@ -29,7 +29,7 @@ public abstract class IntegrationTestBase : IAsyncLifetime {
    /// </summary>
    protected virtual string DatabaseName => "BankingApiTest";
 
-   public async Task InitializeAsync() {
+   public async ValueTask InitializeAsync() {
       Factory = new BankingApiFactory(
          dbMode: DbMode,
          databaseName: DatabaseName,
@@ -45,14 +45,10 @@ public abstract class IntegrationTestBase : IAsyncLifetime {
       Console.WriteLine($"---> Test DB Path: {Factory.DatabasePath}");
    }
 
-   public async Task DisposeAsync() {
-      if (Client is not null)
-         Client.Dispose();
-
-      if (Factory is not null) {
-         await Factory.DisposeAsync();
-         Factory.Dispose(); // dispose underlying WebApplicationFactory resources
-      }
+   public async ValueTask DisposeAsync() {
+      Client.Dispose();
+      await Factory.DisposeAsync();
+      Factory.Dispose(); // dispose underlying WebApplicationFactory resources
    }
 }
 

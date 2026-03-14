@@ -12,9 +12,7 @@ namespace BankingApi._1_Controllers;
 [Route("bankingapi/v1")]
 public sealed class CustomersController(
    ICustomerReadModel readModel,
-   CustomerUcCreate ucCreate,
-   CustomerUcCreateProvision ucCreateProvision,
-   CustomerUcUpdateProfile ucUpdateProfile,
+   ICustomerUseCases useCases,
    ILogger<CustomersController> logger
 ) : ControllerBase {
    
@@ -30,7 +28,7 @@ public sealed class CustomersController(
    ) {
       const string context = $"{nameof(CustomersController)}.{nameof(CreateCustomerAsync)}";
 
-      var result = await ucCreate.ExecuteAsync(
+      var result = await useCases.CreateAsync(
          customerDto: customerDto,
          accountIdString: accountId,
          ibanString: iban, 
@@ -57,7 +55,7 @@ public sealed class CustomersController(
 
       const string context = $"{nameof(CustomersController)}.{nameof(CreateCustomerProvisionAsync)}";
 
-      var result = await ucCreateProvision.ExecuteAsync(null, ct);
+      var result = await useCases.CreateProvisionAsync(null, ct);
       if(result.IsFailure)
          return this.ToActionResult(result: result, logger: logger, context: context);
       
@@ -100,7 +98,7 @@ public sealed class CustomersController(
    ) {
       const string context = $"{nameof(CustomersController)}.{nameof(PutCustomerProfileAsync)}";
       
-      var result = await ucUpdateProfile.ExecuteAsync(dto, ct);
+      var result = await useCases.UpdateProfileAsync(dto, ct);
 
       return this.ToActionResult(result, logger, context, args: dto);
    }

@@ -4,6 +4,7 @@ using BankingApi._2_Core.BuildingBlocks._3_Domain.ValueObjects;
 using BankingApi._2_Core.Customers._2_Application.Dtos;
 using BankingApi._2_Core.Employees._2_Application.Dtos;
 using BankingApi._3_Infrastructure.Database;
+using BankingApiTest._3_Infrastructure._3_Security;
 using BankingApiTest.Infrastructure;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;

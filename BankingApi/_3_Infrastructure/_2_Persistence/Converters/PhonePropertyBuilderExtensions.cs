@@ -7,16 +7,16 @@ namespace BankingApi._3_Infrastructure._2_Persistence.Converters;
 /// </summary>
 public static class PhonePropertyBuilderExtensions {
    public static PropertyBuilder<PhoneVo> HasPhoneConversion(this PropertyBuilder<PhoneVo> builder) {
-      builder.HasConversion(PhoneEf.Converter);
-      builder.Metadata.SetValueComparer(PhoneEf.Comparer);
+      builder.HasConversion(PhoneConversionEf.Converter);
+      builder.Metadata.SetValueComparer(PhoneConversionEf.Comparer);
       builder.HasMaxLength(32);
       return builder;
    }
 
    //  nullable Phone?
    public static PropertyBuilder<PhoneVo?> HasNullablePhoneConversion(this PropertyBuilder<PhoneVo?> builder) {
-      builder.HasConversion(PhoneEf.NullableConverter);
-      builder.Metadata.SetValueComparer(PhoneEf.NullableComparer);
+      builder.HasConversion(PhoneConversionEf.NullableConverter);
+      builder.Metadata.SetValueComparer(PhoneConversionEf.NullableComparer);
       builder.HasMaxLength(32);
       builder.IsUnicode(false);
       return builder;

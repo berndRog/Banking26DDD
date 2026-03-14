@@ -17,8 +17,8 @@ namespace BankingApi._1_Controllers;
 [Produces("application/json")] //default
 
 public class AccountsController(
-   IAccountsReadModel accountsReadModel,
-   IAccountsUseCases accountsUseCases,
+   IAccountReadModel accountReadModel,
+   IAccountUseCases accountUseCases,
    ILogger<AccountsController> logger
 ) : ControllerBase {
    
@@ -34,7 +34,7 @@ public class AccountsController(
    ) {
       const string context = $"{nameof(AccountsController)}.{nameof(GetAccountByIdAsync)}";
       
-      var result = await accountsReadModel.FindByIdAsync(id, ct);
+      var result = await accountReadModel.FindByIdAsync(id, ct);
 
       return this.ToActionResult(result, logger, context, args: new { id });
    }
@@ -52,7 +52,7 @@ public class AccountsController(
    ) {
       const string context = $"{nameof(AccountsController)}.{nameof(GetAccountByIbanAsync)}";
       
-      var result = await accountsReadModel.FindByIbanAsync(iban, ct);
+      var result = await accountReadModel.FindByIbanAsync(iban, ct);
       
       return this.ToActionResult(result, logger, context, args: new { iban });
    }
@@ -67,7 +67,7 @@ public class AccountsController(
    ) {
       const string context = $"{nameof(AccountsController)}.{nameof(GetAllAccountsAsync)}";
 
-      var result = await accountsReadModel.SelectAsync(ct);
+      var result = await accountReadModel.SelectAsync(ct);
       
       return this.ToActionResult(result, logger, context, args: null);
    }
@@ -84,7 +84,7 @@ public class AccountsController(
    ) {
       const string context = $"{nameof(AccountsController)}.{nameof(GetAccountsByOwnerIdAsync)}";
       
-      var result = await accountsReadModel.SelectByOwnerIdAsync(customerId, ct);
+      var result = await accountReadModel.SelectByOwnerIdAsync(customerId, ct);
       
       return this.ToActionResult(result, logger, context, args: new { customerId });
    }
@@ -104,7 +104,7 @@ public class AccountsController(
    ) {
       const string context = $"{nameof(AccountsController)}.{nameof(CreateAccountAsync)}";
 
-      var result = await accountsUseCases.CreateAsync(
+      var result = await accountUseCases.CreateAsync(
          customerId: customerId,
          iban: accountDto.IbanString,
          balance: accountDto.BalanceDecimal,
@@ -132,7 +132,7 @@ public class AccountsController(
    ){
       const string context = $"{nameof(AccountsController)}.{nameof(GetBeneficiariesByAccountIdAsync)}";
       
-      var result = await accountsReadModel.SelectBeneficiariesByAccountIdAsync(accountId, ct);
+      var result = await accountReadModel.SelectBeneficiariesByAccountIdAsync(accountId, ct);
       
       return this.ToActionResult(result, logger, context, args: new { accountId });
    }
@@ -148,7 +148,7 @@ public class AccountsController(
    ) {
       const string context = $"{nameof(AccountsController)}.{nameof(GetBeneficiaryByIdAsync)}";
 
-      var result = await accountsReadModel.FindBeneficiaryByIdAsync(id, ctToken);
+      var result = await accountReadModel.FindBeneficiaryByIdAsync(id, ctToken);
       
       return this.ToActionResult(result, logger, context, args: new { id });
    }
@@ -166,7 +166,7 @@ public class AccountsController(
 
       // Find beneficiaries by SQL like %name%
       var result = 
-         await accountsReadModel.SelectBeneficiariesByNameAsync(name, ct);
+         await accountReadModel.SelectBeneficiariesByNameAsync(name, ct);
 
       return this.ToActionResult(result, logger, context, args: new { name });
    }
@@ -184,7 +184,7 @@ public class AccountsController(
 
       // Find beneficiaries by SQL like %name%
       var result = 
-         await accountsReadModel.FindBeneficiaryByIbanAsync(iban, ct);
+         await accountReadModel.FindBeneficiaryByIbanAsync(iban, ct);
 
       return this.ToActionResult(result, logger, context, args: new { iban });
    }
@@ -200,7 +200,7 @@ public class AccountsController(
 
       // Find beneficiaries by SQL like %name%
       var result =
-         await accountsUseCases.AddBeneficiaryAsync(accountId, beneficiaryDto, ctToken);
+         await accountUseCases.AddBeneficiaryAsync(accountId, beneficiaryDto, ctToken);
       
       return this.ToCreatedAtRoute<BeneficiaryDto>(
          routeName: nameof(GetBeneficiaryByIdAsync),

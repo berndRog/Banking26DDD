@@ -1,11 +1,13 @@
+using System.Runtime.CompilerServices;
 using BankingApi._2_Core.BuildingBlocks._3_Domain;
 using BankingApi._2_Core.Customers._1_Ports.Inbound;
 using BankingApi._2_Core.Customers._2_Application.Dtos;
+[assembly: InternalsVisibleTo("BankingApiTest")]
 namespace BankingApi._2_Core.Customers._2_Application.UseCases;
 
 
 // UseCases Facade for Customer aggregate
-public class CustomerUseCases(
+internal class CustomerUseCases(
    CustomerUcCreate createUc,
    CustomerUcCreateProvision createProvisionUc,
    CustomerUcUpdateProfile updateProfileUc,

@@ -6,8 +6,8 @@ public static class IbanPropertyBuilderExtensions {
    
    public static PropertyBuilder<IbanVo> HasIbanConversion(
       this PropertyBuilder<IbanVo> builder) {
-      builder.HasConversion(IbanEf.Converter);
-      builder.Metadata.SetValueComparer(IbanEf.Comparer);
+      builder.HasConversion(IbanConversionEf.Converter);
+      builder.Metadata.SetValueComparer(IbanConversionEf.Comparer);
       builder.HasMaxLength(34);
       return builder;
    }

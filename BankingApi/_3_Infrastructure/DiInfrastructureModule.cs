@@ -1,8 +1,22 @@
 using BankingApi._2_Core.BuildingBlocks._1_Ports.Inbound;
+using BankingApi._2_Core.BuildingBlocks._1_Ports.Outbound;
+using BankingApi._2_Core.Customers._1_Ports.Inbound;
 using BankingApi._2_Core.Customers._1_Ports.Outbound;
+using BankingApi._2_Core.Customers._2_Application.Adapters;
+using BankingApi._2_Core.Employees._1_Ports.Inbound;
 using BankingApi._2_Core.Employees._1_Ports.Outbound;
+using BankingApi._2_Core.Employees._4_Infrastructure.Adapters;
+using BankingApi._2_Core.Payments._1_Ports.Inbound;
+using BankingApi._2_Core.Payments._1_Ports.Outbound;
+using BankingApi._2_Core.Payments._4_Infrastructure.Adapters;
+using BankingApi._2_Core.Payments._4_Infrastructure.ReadModel;
+using BankingApi._2_Modules.Customers._4_Infrastructure.Repositories;
+using BankingApi._2_Modules.Employees._4_Infrastructure.ReadModel;
+using BankingApi._3_Infrastructure._2_Persistence.ReadModel;
 using BankingApi._3_Infrastructure._2_Persistence.Repositories;
+using BankingApi._3_Infrastructure._5_Utils;
 using BankingApi._3_Infrastructure.Database;
+using BankingApi._3_Infrastructure.Security;
 using Microsoft.EntityFrameworkCore;
 namespace BankingApi._3_Infrastructure;
 
@@ -21,16 +35,35 @@ public static class DiInfrastructureModule {
       );
 
       // BC Db Contexts
-      services.AddScoped<IEmployeesDbContext, EmployeesDbContextEf>(); 
-      services.AddScoped<ICustomersDbContext, CustomersDbContextEf>(); 
-      services.AddScoped<ICustomersDbContext, CustomersDbContextEf>(); 
+      services.AddScoped<IEmployeesDbContext, EmployeeDbContextEf>(); 
+      services.AddScoped<ICustomerDbContext, CustomerDbContextEf>(); 
+      services.AddScoped<IAccountDbContext, AccountDbContextEf>(); 
+      services.AddScoped<ITransferDbContext, TransferDbContextEf>();
+      
+      // Adapters
+      services.AddScoped<IEmployeeContract, EmployeeContractEf>();
+      services.AddScoped<ICustomerContract, CustomerContractEf>();
+      services.AddScoped<IAccountContract, AccountContractEf>();
       
       // Repositories
-      services.AddScoped<IEmployeeRepository, EmployeesesRepositoryEf>();
+      services.AddScoped<IEmployeeRepository, EmployeeRepositoryEf>();
+      services.AddScoped<ICustomerRepository, CustomerRepositoryEf>();
+      services.AddScoped<IAccountRepository, AccountRepositoryEf>();
+      
+      // ReadModels
+      services.AddScoped<IEmployeeReadModel, EmployeeReadModelEf>();     
+      services.AddScoped<ICustomerReadModel, CustomerReadModelEf>();  
+      services.AddScoped<IAccountReadModel, AccountReadModelEf>();  
       
       // Unit of Work
       services.AddScoped<IUnitOfWork, UnitOfWork>();
 
+      // IdentityGateway
+      services.AddScoped<IIdentityGateway, IdentityGatewayHttpContext>();
+      
+      // IClock
+      services.AddScoped<IClock, BankingSystemClock>();
+      
       return services;
    }
 }

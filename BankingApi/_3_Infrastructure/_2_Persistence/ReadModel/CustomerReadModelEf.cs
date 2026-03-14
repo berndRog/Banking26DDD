@@ -1,3 +1,4 @@
+using System.Runtime.CompilerServices;
 using BankingApi._2_Core.BuildingBlocks._1_Ports.Outbound;
 using BankingApi._2_Core.BuildingBlocks._3_Domain;
 using BankingApi._2_Core.BuildingBlocks._3_Domain.ValueObjects;
@@ -10,10 +11,11 @@ using BankingApi._2_Core.Customers._2_Application.Mappings;
 using BankingApi._2_Core.Customers._2_Application.ReadModel;
 using BankingApi._2_Core.Customers._3_Domain.Entities;
 using Microsoft.EntityFrameworkCore;
+[assembly: InternalsVisibleTo("BankingApiTest")]
 namespace BankingApi._2_Modules.Employees._4_Infrastructure.ReadModel;
 
-public sealed class CustomerReadModelEf(
-   ICustomersDbContext customersDbContext,
+internal sealed class CustomerReadModelEf(
+   ICustomerDbContext customerDbContext,
    IIdentityGateway identityGateway
 ) : ICustomerReadModel {
    
@@ -25,7 +27,7 @@ public sealed class CustomerReadModelEf(
       var subject = subjectResult.Value;
 
       // 2) load Customer by subject (NO tracking, read-only)
-      var customerDto = await customersDbContext.Customers
+      var customerDto = await customerDbContext.Customers
          .AsNoTracking()
          .Where(c => c.Subject == subject)    // filter by subject
          .Select(c => c.ToCustomerDto())  // project to OwnerProfileDto (map)
@@ -40,7 +42,7 @@ public sealed class CustomerReadModelEf(
       Guid Id,
       CancellationToken ct
    ) {
-      var customerDto = await customersDbContext.Customers
+      var customerDto = await customerDbContext.Customers
          .AsNoTracking()
          .Where(c => c.Id == Id)       // filter by Id
          .Select(c => c.ToCustomerDto())  // project to CustomerDto (map)
@@ -60,7 +62,7 @@ public sealed class CustomerReadModelEf(
          return Result<CustomerDto>.Failure(resultEmail.Error);
       var email = resultEmail.Value;
       
-      var customerDto = await customersDbContext.Customers
+      var customerDto = await customerDbContext.Customers
          .AsNoTracking()
          .Where(c => c.EmailVo == email) // filter by email
          .Select(c => c.ToCustomerDto())  // projection to CustomerDto
@@ -74,7 +76,7 @@ public sealed class CustomerReadModelEf(
    public async Task<Result<IEnumerable<CustomerDto>>> SelectAllAsync(
       CancellationToken ct
    ) {
-      var customerDtos = await customersDbContext.Customers
+      var customerDtos = await customerDbContext.Customers
          .AsNoTracking()
          .Select(c => c.ToCustomerDto()) // project to CustomerDto (map)
          .ToListAsync(ct);
@@ -94,7 +96,7 @@ public sealed class CustomerReadModelEf(
       var pageSize   = page?.PageSize    > 0 ? page.PageSize    : 20;
       var skip       = (pageNumber - 1) * pageSize;
    
-      IQueryable<Customer> query = customersDbContext.Customers
+      IQueryable<Customer> query = customerDbContext.Customers
          .AsNoTracking();
    
       // Filters

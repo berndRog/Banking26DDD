@@ -26,15 +26,28 @@ public interface ICustomerRepository {
       CancellationToken ct = default
    );
 
+   // Load all customers with SQL like displayName
+   Task<IEnumerable<Customer>> SelectByDisplayNameAsync(
+      string displayName,
+      CancellationToken ct = default
+   );
+   
    // Check if the customer exists and is currently active
    Task<bool> ExistsActiveAsync(
       Guid customerId,
       CancellationToken ct = default
    );
 
+   // Select all customers
+   Task<IEnumerable<Customer>> SelectAllAsync(
+      CancellationToken ct = default
+   );
+   
    // Add a new customer aggregate to the repository
    void Add(Customer customer);
-
+   
+   // Update a customer aggregate in the repository
+   void Update(Customer customer);
 }
 
 /*

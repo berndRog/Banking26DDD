@@ -1,14 +1,8 @@
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Logging.Abstractions;
 namespace BankingApiTest.Infrastructure;
 
 public abstract class TestBase {
-   protected static readonly bool EnableLogging =
-#if DEBUG
-      true;   // lokal: Logs ON
-#else
-      false;  // CI: Logs OFF
-#endif
-
-   protected ILogger<T> CreateLogger<T>()
-      => TestLogger.Create<T>(EnableLogging);
+   protected static ILogger<T> CreateLogger<T>() => NullLogger<T>.Instance;
 }
+

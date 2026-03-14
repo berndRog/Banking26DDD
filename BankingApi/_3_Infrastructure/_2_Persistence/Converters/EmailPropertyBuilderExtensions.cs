@@ -6,8 +6,8 @@ namespace BankingApi._3_Infrastructure.Database.ValueObjects;
 public static class EmailPropertyBuilderExtensions {
    
    public static PropertyBuilder<EmailVo> HasEmailConversion(this PropertyBuilder<EmailVo> builder) {
-      builder.HasConversion(EmailEf.Converter);
-      builder.Metadata.SetValueComparer(EmailEf.Comparer);
+      builder.HasConversion(EmailConversionEf.Converter);
+      builder.Metadata.SetValueComparer(EmailConversionEf.Comparer);
       builder.HasMaxLength(254);
       return builder;
    }

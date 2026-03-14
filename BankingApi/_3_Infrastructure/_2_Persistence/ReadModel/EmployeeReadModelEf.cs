@@ -1,3 +1,4 @@
+using System.Runtime.CompilerServices;
 using BankingApi._2_Core.BuildingBlocks._1_Ports.Outbound;
 using BankingApi._2_Core.BuildingBlocks._3_Domain;
 using BankingApi._2_Core.BuildingBlocks._3_Domain.ValueObjects;
@@ -8,9 +9,14 @@ using BankingApi._2_Core.Employees._2_Application.Errors;
 using BankingApi._2_Core.Employees._2_Application.Mappings;
 using BankingApi._2_Core.Employees._3_Domain.Errors;
 using Microsoft.EntityFrameworkCore;
+[assembly: InternalsVisibleTo("BankingApiTest")]
 namespace BankingApi._3_Infrastructure._2_Persistence.ReadModel;
 
-public sealed class EmployeeReadModelEf(
+interface IInterface {
+   
+}
+
+sealed class EmployeeReadModelEf(
    IEmployeesDbContext employeesDbContext,
    IIdentityGateway identityGateway
 ) : IEmployeeReadModel {
