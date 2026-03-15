@@ -1,7 +1,7 @@
 using BankingApi._2_Core.BuildingBlocks._1_Ports.Outbound;
 using BankingApi._2_Core.Payments._3_Domain.Aggregates;
 using BankingApi._2_Core.Payments._3_Domain.ValueObjects;
-using BankingApiTest.Infrastructure;
+using BankingApiTest.TestInfrastructure;
 namespace BankingApiTest._2_Core.Core.Domain.Aggregates;
 
 public sealed class AccountUt {

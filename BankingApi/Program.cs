@@ -1,15 +1,9 @@
-using BankingApi._2_Core.BuildingBlocks;
-using BankingApi._2_Core.BuildingBlocks._1_Ports.Inbound;
 using BankingApi._2_Core.BuildingBlocks._1_Ports.Outbound;
 using BankingApi._2_Core.Customers;
 using BankingApi._2_Core.Employees;
 using BankingApi._2_Core.Payments;
-using BankingApi._2_Modules.Customers;
-using BankingApi._2_Modules.Employees;
 using BankingApi._3_Infrastructure;
-using BankingApi._3_Infrastructure._2_Persistence;
 using BankingApi._3_Infrastructure._2_Persistence.Database;
-using BankingApi._4_BuildingBlocks;
 using Microsoft.AspNetCore.HttpLogging;
 namespace BankingApi;
 

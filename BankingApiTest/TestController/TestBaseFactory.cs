@@ -1,10 +1,10 @@
 using System.Data.Common;
 using BankingApi;
-using BankingApi._2_Core.BuildingBlocks._1_Ports.Inbound;
 using BankingApi._2_Core.BuildingBlocks._1_Ports.Outbound;
 using BankingApi._3_Infrastructure._2_Persistence.Database;
 using BankingApiTest._3_Infrastructure._3_Security;
 using BankingApiTest._3_Infrastructure._5_Utils;
+using BankingApiTest.TestInfrastructure;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc.Testing;
@@ -12,7 +12,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
-namespace BankingApiTest.Infrastructure;
+namespace BankingApiTest.TestController;
 
 /// <summary>
 /// Integration-test host for BankingApi.
@@ -31,7 +31,7 @@ public sealed class TestBaseFactory : WebApplicationFactory<Program> {
    public string TestSubject { get; set; } = "11111111-a224-492b-bb8f-b4bac23d7c88";
    public string TestUsername { get; set; } = "j.doe@mail.local";
    public DateTimeOffset TestCreatedAt { get; set; } = DateTimeOffset.Parse("2025-01-01T00:00:00+01:00");
-   public int TestAdminRights { get; set; } = 0;
+   public int TestAdminRights { get; set; }
 
    
    public TestBaseFactory(
@@ -63,7 +63,7 @@ public sealed class TestBaseFactory : WebApplicationFactory<Program> {
       await dbContext.DisposeAsync();
    }
 
-   public override async System.Threading.Tasks.ValueTask DisposeAsync() {
+   public override async ValueTask DisposeAsync() {
       await TestDatabase.DisposeAsync(
          mode: _dbMode,
          dbPath: _dbPath,
@@ -118,14 +118,14 @@ public sealed class TestBaseFactory : WebApplicationFactory<Program> {
          // Register test auth scheme (do NOT try to register "Bearer")
          services.AddAuthentication()
             .AddScheme<AuthenticationSchemeOptions, TestAuthHandler>(
-               TestAuthHandler.Scheme, _ => { });
+               TestAuthHandler.SchemeName, _ => { });
 
          // Force defaults LAST (this is the important bit for [Authorize])
          services.PostConfigureAll<AuthenticationOptions>(o =>
          {
-            o.DefaultScheme = TestAuthHandler.Scheme;
-            o.DefaultAuthenticateScheme = TestAuthHandler.Scheme;
-            o.DefaultChallengeScheme = TestAuthHandler.Scheme;
+            o.DefaultScheme = TestAuthHandler.SchemeName;
+            o.DefaultAuthenticateScheme = TestAuthHandler.SchemeName;
+            o.DefaultChallengeScheme = TestAuthHandler.SchemeName;
          });
 
          // Important: ensures authorization sees an authenticated user

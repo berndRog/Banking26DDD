@@ -1,23 +1,34 @@
 using System.Data.Common;
 using BankingApi._3_Infrastructure._2_Persistence.Database;
-using BankingApiTest.Infrastructure;
+using BankingApiTest.TestController;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Logging;
+namespace BankingApiTest.TestInfrastructure;
 
-namespace BankingApiTest._3_Infrastructure;
+// Concrete test composition root for BankingDbContext
+public sealed class TestCompositionRoot : TestCompositionRoot<BankingDbContext> {
 
-internal static class TestConfiguration {
-   private const string AppSettingsFileName = "appsettingsTest.json";
+   public TestCompositionRoot() {
+      DatabaseName = "BankingTest";
+      DatabaseMode = DbMode.FileUnique;
+      ApplyMigrations =  true;
+      EnableSensitiveDataLoggingForDatabase =  true;
+   }
 
-   internal static IConfigurationRoot Load() {
-      return new ConfigurationBuilder()
-         .SetBasePath(AppContext.BaseDirectory)
-         .AddJsonFile(path: AppSettingsFileName, optional: false, reloadOnChange: false)
-         .AddEnvironmentVariables()
-         .Build();
+   // Create the concrete BankingDbContext
+   protected override BankingDbContext CreateDbContext(DbContextOptions<BankingDbContext> options) {
+      return new BankingDbContext(options);
+   }
+
+   // Register all project services needed for tests
+   protected override void AddProjectServices(IServiceCollection services) {
+      services.AddTestModules(
+         dbConnection: DbConnection,
+         enableSensitiveDataLogging: EnableSensitiveDataLoggingForDatabase
+      );
    }
 }
 
@@ -27,23 +38,22 @@ public abstract class TestCompositionRoot<TDbContext> : IAsyncLifetime
    where TDbContext : DbContext {
 
    // Logical name of the test database
-   public string DatabaseName { get; private set; } = "BankingTest";
+   public string DatabaseName { get; protected set; } = "DatabaseTest";
 
    // Database mode used for test execution
-   protected virtual DbMode DatabaseMode => DbMode.FileUnique;
+   public DbMode DatabaseMode{ get; protected set; } = DbMode.InMemory;
 
    // Apply EF Core migrations on startup
-   protected virtual bool ApplyMigrations => true;
+   public  bool ApplyMigrations { get; protected set; } =  true;
 
    // Enable EF sensitive data logging for tests
-   protected virtual bool EnableSensitiveDataLoggingForDatabase => true;
+   public bool EnableSensitiveDataLoggingForDatabase { get; protected set; }
 
    // File path of the created test database
    public string DbPath { get; private set; } = string.Empty;
-
    // Shared database connection used by tests
    public DbConnection DbConnection { get; private set; } = default!;
-
+   
    // DbContext used during initialization and seeding
    internal TDbContext InitDbContext { get; private set; } = default!;
 
@@ -53,6 +63,8 @@ public abstract class TestCompositionRoot<TDbContext> : IAsyncLifetime
    public IConfiguration Configuration { get; private set; } = default!;
 
    public async ValueTask InitializeAsync() {
+      
+      // load appsettingTest.json
       Configuration = TestConfiguration.Load();
 
       // Create database, connection, and initialization DbContext
@@ -61,7 +73,8 @@ public abstract class TestCompositionRoot<TDbContext> : IAsyncLifetime
          mode: DatabaseMode,
          databaseName: DatabaseName,
          applyMigrations: ApplyMigrations,
-         enableSensitiveDataLogging: EnableSensitiveDataLoggingForDatabase
+         enableSensitiveDataLogging: EnableSensitiveDataLoggingForDatabase,
+         ct: default
       );
 
       DbPath = dbPath;
@@ -167,22 +180,18 @@ public abstract class TestCompositionRoot<TDbContext> : IAsyncLifetime
    }
 }
 
-// Concrete test composition root for BankingDbContext
-public sealed class TestCompositionRoot : TestCompositionRoot<BankingDbContext> {
+internal static class TestConfiguration {
+   private const string AppSettingsFileName = "appsettingsTest.json";
 
-   // Create the concrete BankingDbContext
-   protected override BankingDbContext CreateDbContext(DbContextOptions<BankingDbContext> options) {
-      return new BankingDbContext(options);
-   }
-
-   // Register all project services needed for tests
-   protected override void AddProjectServices(IServiceCollection services) {
-      services.AddTestModules(
-         dbConnection: DbConnection,
-         enableSensitiveDataLogging: EnableSensitiveDataLoggingForDatabase
-      );
+   internal static IConfigurationRoot Load() {
+      return new ConfigurationBuilder()
+         .SetBasePath(AppContext.BaseDirectory)
+         .AddJsonFile(path: AppSettingsFileName, optional: false, reloadOnChange: false)
+         .AddEnvironmentVariables()
+         .Build();
    }
 }
+
 
 /*
 Didaktik

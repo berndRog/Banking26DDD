@@ -1,7 +1,7 @@
 using BankingApi._2_Core.BuildingBlocks._1_Ports.Outbound;
 using BankingApi._2_Core.BuildingBlocks._3_Domain.ValueObjects;
 using BankingApi._2_Core.Customers._3_Domain.Entities;
-using BankingApi._2_Core.Employees._3_Domain.Aggregates;
+using BankingApi._2_Core.Employees._3_Domain.Entities;
 using BankingApi._2_Core.Employees._3_Domain.Enums;
 using BankingApi._2_Core.Payments._3_Domain.Aggregates;
 using BankingApi._2_Core.Payments._3_Domain.Enums;
@@ -40,10 +40,21 @@ public sealed class Seed(
    #region -------------- Test Addresses (Value Objects) -------------------------------------
    public AddressVo Address1
       => AddressVo.Create("Hauptstr. 23", "29556", "Suderburg", "DE").GetValueOrThrow();
+   
    public AddressVo Address2
-      => AddressVo.Create("Bahnhofstr.10", "10115", "Berlin").GetValueOrThrow();
+      => AddressVo.Create("Hauptstr. 23", "29556", "Suderburg", "DE").GetValueOrThrow();
+
    public AddressVo Address3
+      => AddressVo.Create("Neuperverstraße. 29", "29410", "Salzwedel").GetValueOrThrow();  
+   
+   public AddressVo Address4
       => AddressVo.Create("Schillerstr. 1", "30123", "Hannover", "DE").GetValueOrThrow();
+   
+   public AddressVo Address5
+      => AddressVo.Create("Berliner Platz 8", "29614", "Soltau", "DE").GetValueOrThrow();
+   
+   public AddressVo Address6
+      => AddressVo.Create("Am Markt 14", "04109", "Leipzig", "DE").GetValueOrThrow();
    public AddressVo AddressReg
       => AddressVo.Create("Allertalweg. 2", "29227", "Celle", "DE").GetValueOrThrow();
    #endregion
@@ -63,8 +74,8 @@ public sealed class Seed(
       firstname: "Erika",
       lastname: "Mustermann",
       companyName: null,
-      emailString: "erika.mustermann@t-online.de",
       subject: "a00090ad-d9df-486a-8757-4a649e26a54e",
+      emailString: "erika.mustermann@t-online.de",
       addressVo: Address1
    );
 
@@ -73,9 +84,9 @@ public sealed class Seed(
       firstname: "Max",
       lastname: "Mustermann",
       companyName: null,
-      emailString: "max.mustermann@gmail.com",
       subject: "b0000640-161e-4228-9729-d6b142C2dfad",
-      addressVo: null
+      emailString: "max.mustermann@gmail.com",
+      addressVo: Address2
    );
 
    public Customer Customer3() => CreateCustomer(
@@ -85,7 +96,7 @@ public sealed class Seed(
       companyName: null,
       emailString: "a.arndt@t-online.com",
       subject: "c0004e61-ba7a-4d2a-977f-766b42bb79a9",
-      addressVo: Address2
+      addressVo: Address3
    );
 
    public Customer Customer4() => CreateCustomer(
@@ -93,9 +104,9 @@ public sealed class Seed(
       firstname: "Benno",
       lastname: "Bauer",
       companyName: null,
-      emailString: "b.bauer@gmail.com",
       subject: "d0024ab-43c5-4c64-872d-6ca05f66756b",
-      addressVo: null
+      emailString: "b.bauer@gmail.com",
+      addressVo: Address4
    );
 
    public Customer Customer5() => CreateCustomer(
@@ -103,9 +114,9 @@ public sealed class Seed(
       firstname: "Christine",
       lastname: "Conrad",
       companyName: "Conrad Consulting GmbH",
-      emailString: "c.conrad@gmx.de",
       subject: "e00050fb-a381-4e3f-a44b-81ffa7610b72",
-      addressVo: Address3
+      emailString: "c.conrad@gmx.de",
+      addressVo: Address5
    );
 
    public Customer Customer6() => CreateCustomer(
@@ -113,9 +124,9 @@ public sealed class Seed(
       firstname: "Dana",
       lastname: "Deppe",
       companyName: null,
-      emailString: "d.deppe@icloud.com",
       subject: "f0004f67-72a3-4449-af1f-803dcfaddb7f",
-      addressVo: null
+      emailString: "d.deppe@icloud.com",
+      addressVo: Address6
    );
    
    public Customer CustomerRegister() => CreateCustomer(
@@ -509,7 +520,7 @@ public sealed class Seed(
       string? companyName,
       string emailString,
       string subject,
-      AddressVo? addressVo
+      AddressVo addressVo
    ) {
       var resultEmail = EmailVo.Create(emailString);
       if (resultEmail.IsFailure)

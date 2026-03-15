@@ -53,6 +53,11 @@ public static class CustomerErrors {
          Title: "Customer: Invalid company name",
          Message: "The provided company name is too short or too long (2–80 characters).");
 
+   public static readonly DomainErrors AddressIsRequired =
+      new(ErrorCode.BadRequest,
+         Title: "Customer: Address required",
+         Message: "A valid address with street, postal code and city must be provided.");
+
    public static readonly DomainErrors EmailIsRequired =
       new(ErrorCode.BadRequest,
          Title: "Customer: Email required",

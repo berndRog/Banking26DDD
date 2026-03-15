@@ -1,4 +1,5 @@
-namespace BankingApiTest.Infrastructure;
+using BankingApiTest.TestInfrastructure;
+namespace BankingApiTest.TestController;
 
 /// Base class for end to end tests that need a fresh database per test.
 /// Creates a new BankingApiFactory (and thus a new DB file) for every test instance.
@@ -40,7 +41,6 @@ public abstract class TestBaseEndToEnd : IAsyncLifetime {
    public async ValueTask DisposeAsync() {
       Client.Dispose();
       await Factory.DisposeAsync();
-      Factory.Dispose(); // dispose underlying WebApplicationFactory resources
    }
 }
 
@@ -75,3 +75,4 @@ Lernziele:
 - Studierende können den DB-Zustand als Debug-Artefakt nutzen (Tabellen/Views/Rows).
 - Studierende verstehen den Zusammenhang DI (Program.cs) + Test-Overrides (Factory).
 */
+

@@ -1,7 +1,6 @@
 using BankingApi._2_Core.BuildingBlocks._3_Domain;
 using BankingApi._2_Core.Payments._2_Application.Dtos;
-
-namespace BankingApi._2_Core.Payments._1_Ports.Outbound;
+namespace BankingApi._2_Core.Payments._1_Ports.Inbound;
 
 // Contract used by other bounded contexts to interact with the Accounts domain.
 // Provides a minimal interface for account-related operations without exposing

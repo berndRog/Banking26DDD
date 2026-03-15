@@ -12,16 +12,14 @@ public sealed class ConfigCustomer(
 
    public void Configure(EntityTypeBuilder<Customer> builder) {
       
-      
+      // Tablename
       builder.ToTable("Customers");
 
-      // Key + concurrency
-      // -----------------------------
+      // Primary Key will never be generated
       builder.HasKey(o => o.Id);
       builder.Property(o => o.Id).ValueGeneratedNever();
       
       // Auditing timestamps
-      // -----------------------------
       builder.Property(o => o.CreatedAt)
          .HasConversion(dtConv)
          .IsRequired();
@@ -29,12 +27,7 @@ public sealed class ConfigCustomer(
       builder.Property(o => o.UpdatedAt)
          .HasConversion(dtConv)
          .IsRequired();
-
-      // Domain-only
-      builder.Ignore(o => o.DisplayName);
-      builder.Ignore(o => o.IsActive);
-      builder.Ignore(o => o.IsProfileComplete);
-
+      
       // Profile data
       builder.Property(o => o.Firstname)
          .HasMaxLength(80)
@@ -45,13 +38,6 @@ public sealed class ConfigCustomer(
       builder.Property(o => o.CompanyName)
          .HasMaxLength(80)
          .IsRequired(false);
-
-      // Email-VO als Property mapped via Extension
-      builder.Property(x => x.EmailVo)
-         .HasEmailConversion()
-         .IsRequired();
-      // optional: unique index
-      builder.HasIndex(x => x.EmailVo).IsUnique();;
 
       builder.Property(o => o.Subject)
          .HasMaxLength(200)
@@ -72,7 +58,7 @@ public sealed class ConfigCustomer(
          .HasConversion(dtConvNul)
          .IsRequired(false);
 
-      builder.Property(o => o.RejectionReasonCode)
+      builder.Property(o => o.RejectionReason)
          .HasMaxLength(100)
          .IsRequired(false);
 
@@ -86,15 +72,42 @@ public sealed class ConfigCustomer(
       builder.Property(o => o.DeactivatedByEmployeeId)
          .IsRequired(false);
 
+      // Domain-only
+      builder.Ignore(o => o.DisplayName);
+      builder.Ignore(o => o.IsActive);
+      builder.Ignore(o => o.IsProfileComplete);
+      
+      // Email-VO als Property mapped via Extension
+      builder.Property(x => x.EmailVo)
+         .HasEmailConversion()
+         .IsRequired();
+      // optional: unique index
+      builder.HasIndex(x => x.EmailVo).IsUnique();;
+      
       // Address (owned value object)
       builder.OwnsOne(o => o.AddressVo, a => {
-         a.Property(p => p.Street).HasMaxLength(200).HasColumnName("Street").IsRequired(false);
-         a.Property(p => p.PostalCode).HasMaxLength(20).HasColumnName("PostalCode").IsRequired(false);
-         a.Property(p => p.City).HasMaxLength(100).HasColumnName("City").IsRequired(false);
-         a.Property(p => p.Country).HasMaxLength(100).HasColumnName("Country").IsRequired(false);
-      });
+         
+         a.Property(p => p.Street)
+            .HasMaxLength(80)
+            .HasColumnName("Street")
+            .IsRequired();
 
-      builder.Navigation(o => o.AddressVo).IsRequired(false);
+         a.Property(p => p.PostalCode)
+            .HasMaxLength(20)
+            .HasColumnName("PostalCode")
+            .IsRequired();
+
+         a.Property(p => p.City)
+            .HasMaxLength(80)
+            .HasColumnName("City")
+            .IsRequired();
+
+         a.Property(p => p.Country)
+            .HasMaxLength(80)
+            .HasColumnName("Country")
+            .IsRequired(false);
+      });
+      builder.Navigation(o => o.AddressVo).IsRequired();
 
       // Optional indexes for admin filtering
       builder.HasIndex(o => o.Status);

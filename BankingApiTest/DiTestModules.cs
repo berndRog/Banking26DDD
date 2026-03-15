@@ -1,6 +1,4 @@
 using System.Data.Common;
-using System.Security.Cryptography.X509Certificates;
-using BankingApi._2_Core.BuildingBlocks._1_Ports.Inbound;
 using BankingApi._2_Core.BuildingBlocks._1_Ports.Outbound;
 using BankingApi._2_Core.Customers._1_Ports.Inbound;
 using BankingApi._2_Core.Customers._1_Ports.Outbound;
@@ -17,10 +15,10 @@ using BankingApi._3_Infrastructure._2_Persistence.ReadModel;
 using BankingApi._3_Infrastructure._2_Persistence.Repositories;
 using BankingApiTest._3_Infrastructure._3_Security;
 using BankingApiTest._3_Infrastructure._5_Utils;
-using BankingApiTest.Infrastructure;
+using BankingApiTest.TestInfrastructure;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
-namespace BankingApiTest._3_Infrastructure;
+namespace BankingApiTest.TestController;
 
 public static class DiTestModules {
    

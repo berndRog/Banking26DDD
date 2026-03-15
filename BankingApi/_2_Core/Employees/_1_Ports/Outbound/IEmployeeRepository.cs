@@ -1,5 +1,5 @@
 using BankingApi._2_Core.BuildingBlocks._3_Domain.ValueObjects;
-using BankingApi._2_Core.Employees._3_Domain.Aggregates;
+using BankingApi._2_Core.Employees._3_Domain.Entities;
 
 namespace BankingApi._2_Core.Employees._1_Ports.Outbound;
 

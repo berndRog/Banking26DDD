@@ -17,10 +17,9 @@ public interface ICustomerUseCases {
       CancellationToken ct = default
    );
 
-   // Provision a customer with minimal data (e.g. identity/email)
-   // Used in onboarding scenarios before the full profile is known
+   // Provision a customer on first login using identity data plus required business profile data.
    Task<Result<CustomerProvisionDto>> CreateProvisionAsync(
-      string? id,
+      CustomerDto customerDto,
       CancellationToken ct = default
    );
 
@@ -84,10 +83,10 @@ Typische Anwendungsfälle:
 Ein wichtiger Aspekt ist die Trennung zwischen:
 
 Provisioning
-→ minimaler Datensatz (z.B. aus Identity-System)
+→ Identity-Daten plus verpflichtende Profildaten inklusive Adresse
 
 Profile Update
-→ vollständige Kundendaten (Name, Adresse etc.)
+→ Änderung der vollständigen Kundendaten (Name, Adresse etc.)
 
 Dadurch wird der typische Onboarding-Prozess sauber modelliert.
 

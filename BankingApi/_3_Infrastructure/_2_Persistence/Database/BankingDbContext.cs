@@ -1,5 +1,5 @@
 using BankingApi._2_Core.Customers._3_Domain.Entities;
-using BankingApi._2_Core.Employees._3_Domain.Aggregates;
+using BankingApi._2_Core.Employees._3_Domain.Entities;
 using BankingApi._2_Core.Payments._3_Domain.Aggregates;
 using BankingApi._3_Infrastructure._2_Persistence.Configurations;
 using BankingApi._3_Infrastructure._2_Persistence.Database.Converter;

@@ -1,7 +1,6 @@
 using BankingApi._2_Core.BuildingBlocks._3_Domain;
 using BankingApi._2_Core.Payments._2_Application.Dtos;
-
-namespace BankingApi._2_Core.Payments._1_Ports.Inbound;
+namespace BankingApi._2_Core.Payments._1_Ports.Outbound;
 
 // Read model interface for querying account and beneficiary data.
 // Used by API controllers and application services to retrieve

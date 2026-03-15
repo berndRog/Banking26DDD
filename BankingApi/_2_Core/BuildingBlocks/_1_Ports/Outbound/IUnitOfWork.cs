@@ -1,4 +1,4 @@
-namespace BankingApi._2_Core.BuildingBlocks._1_Ports.Inbound;
+namespace BankingApi._2_Core.BuildingBlocks._1_Ports.Outbound;
 
 public interface IUnitOfWork {
    Task<int> SaveAllChangesAsync(

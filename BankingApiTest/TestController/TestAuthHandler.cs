@@ -3,10 +3,10 @@ using System.Text.Encodings.Web;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
-namespace BankingApiTest._3_Infrastructure._3_Security;
+namespace BankingApiTest.TestController;
 
 public sealed class TestAuthHandler : AuthenticationHandler<AuthenticationSchemeOptions> {
-   public const string Scheme = "TestScheme";
+   public const string SchemeName = "TestScheme";
    public const string Header = "X-Test-Roles"; // z.B. "Customer" oder "Employee" oder "Customer,Employee"
 
    public TestAuthHandler(
@@ -32,9 +32,9 @@ public sealed class TestAuthHandler : AuthenticationHandler<AuthenticationScheme
       // Rollen als Role-Claims
       claims.AddRange(roles.Select(r => new Claim(ClaimTypes.Role, r)));
 
-      var identity = new ClaimsIdentity(claims, Scheme);
+      var identity = new ClaimsIdentity(claims, Scheme.Name);
       var principal = new ClaimsPrincipal(identity);
-      var ticket = new AuthenticationTicket(principal, Scheme);
+      var ticket = new AuthenticationTicket(principal, Scheme.Name);
 
       return Task.FromResult(AuthenticateResult.Success(ticket));
    }

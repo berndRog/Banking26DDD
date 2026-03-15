@@ -2,8 +2,7 @@ using BankingApi._2_Core.BuildingBlocks._3_Domain;
 using BankingApi._2_Core.BuildingBlocks._3_Domain.Enums;
 using BankingApi._3_Infrastructure._4_Logging;
 using Microsoft.AspNetCore.Mvc;
-
-namespace BankingApi._4_BuildingBlocks;
+namespace BankingApi._1_Controllers.Extensions;
 
 public static class ResultApiExtensions {
 

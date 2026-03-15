@@ -9,13 +9,13 @@ public static class CustomerMappings {
       Firstname:   customer.Firstname,
       Lastname:    customer.Lastname,
       CompanyName: customer.CompanyName,
-      EmailString: customer.EmailVo.Value,
       StatusInt: (int) customer.Status,
+      EmailString: customer.EmailVo.Value,
       AddressVo: customer.AddressVo
    );
    
-   public static CustomerProvisionDto ToCustomerProvisionDto(this Customer customer) => new(
+   public static CustomerProvisionDto ToCustomerProvisionDto(this Customer customer, bool wasCreated) => new(
       Id: customer.Id,
-      WasCreated: true
+      WasCreated: wasCreated
    );
 }

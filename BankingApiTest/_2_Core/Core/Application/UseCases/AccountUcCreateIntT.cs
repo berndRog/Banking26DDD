@@ -1,19 +1,19 @@
-using BankingApi._2_Core.BuildingBlocks._1_Ports.Inbound;
+using BankingApi._2_Core.BuildingBlocks._1_Ports.Outbound;
 using BankingApi._2_Core.Customers._1_Ports.Outbound;
 using BankingApi._2_Core.Payments._1_Ports.Outbound;
 using BankingApi._2_Core.Payments._2_Application.UseCases;
 using BankingApi._3_Infrastructure._2_Persistence.Database;
 using BankingApiTest._3_Infrastructure;
-using BankingApiTest.Infrastructure;
+using BankingApiTest.TestInfrastructure;
 using Microsoft.Extensions.DependencyInjection;
 namespace BankingApiTest._2_Core.Core.Application.UseCases;
 
-public sealed class AccountUcCreateIntT(TestCompositionRoot root) : IClassFixture<TestCompositionRoot> {
+public sealed class AccountUcCreateIntT : TestBaseIntegration {
    private readonly TestSeed _seed = new();
    
    [Fact]
    public async Task Create_account_ok() {
-      using var scope = root.CreateDefaultScope();
+      using var scope = Root.CreateDefaultScope();
       var ct = CancellationToken.None;
       var dbContext = scope.ServiceProvider.GetRequiredService<BankingDbContext>();
       var customerRepository = scope.ServiceProvider.GetRequiredService<ICustomerRepository>();
@@ -51,7 +51,7 @@ public sealed class AccountUcCreateIntT(TestCompositionRoot root) : IClassFixtur
    
    [Fact]
    public async Task Create_account_with_invalid_iban_fails() {
-      using var scope = root.CreateDefaultScope();
+      using var scope = Root.CreateDefaultScope();
       var ct = CancellationToken.None;
       var dbContext = scope.ServiceProvider.GetRequiredService<BankingDbContext>();
       var customerRepository = scope.ServiceProvider.GetRequiredService<ICustomerRepository>();

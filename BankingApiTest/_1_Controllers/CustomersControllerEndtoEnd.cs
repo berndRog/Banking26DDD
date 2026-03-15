@@ -2,9 +2,11 @@ using System.Net;
 using System.Net.Http.Json;
 using BankingApi._2_Core.BuildingBlocks._3_Domain.ValueObjects;
 using BankingApi._2_Core.Customers._2_Application.Dtos;
+using BankingApi._2_Core.Customers._2_Application.Mappings;
 using BankingApi._3_Infrastructure._2_Persistence.Database;
 using BankingApiTest._3_Infrastructure._3_Security;
-using BankingApiTest.Infrastructure;
+using BankingApiTest.TestController;
+using BankingApiTest.TestInfrastructure;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 namespace BankingApiTest._2_Modules.Employees.Application;
@@ -103,6 +105,8 @@ public sealed class CustomersControllerEndtoEnd : TestBaseEndToEnd {
       Factory.TestSubject = "testCustomer-123";
       Factory.TestUsername = "test.customer@test.local";
       Factory.TestAdminRights = 0; // Customer, kein Employe
+      var provisionCustomer = _seed.CustomerRegister();
+      var provisionDto = provisionCustomer.ToCustomerDto();
 
       // Act
       var request = new HttpRequestMessage(
@@ -110,6 +114,7 @@ public sealed class CustomersControllerEndtoEnd : TestBaseEndToEnd {
          requestUri: "/bankingapi/v1/customers/me/provision"
       );
       request.Headers.Add(TestAuthHandler.Header, "Customer");
+      request.Content = JsonContent.Create(provisionDto);
 
       var response = await Client.SendAsync(request, ct);
 
@@ -136,6 +141,10 @@ public sealed class CustomersControllerEndtoEnd : TestBaseEndToEnd {
 
          NotNull(owner);
 
+         Equal(provisionDto.Firstname, owner.Firstname);
+         Equal(provisionDto.Lastname, owner.Lastname);
+         Equal(provisionDto.CompanyName, owner.CompanyName);
+         Equal(provisionDto.AddressVo, owner.AddressVo);
          Equal(Factory.TestUsername, owner.EmailVo.Value);
          Equal(Factory.TestSubject, owner.Subject);
       });
@@ -151,6 +160,8 @@ public sealed class CustomersControllerEndtoEnd : TestBaseEndToEnd {
       Factory.TestSubject = "testCustomer-123";
       Factory.TestUsername = "test.customer@test.local";
       Factory.TestAdminRights = 0; // Customer
+      var provisionCustomer = _seed.CustomerRegister();
+      var provisionDto = provisionCustomer.ToCustomerDto();
 
       // Provisioning (idempotent, should return same owner on repeated calls)
       var request = new HttpRequestMessage(
@@ -158,6 +169,7 @@ public sealed class CustomersControllerEndtoEnd : TestBaseEndToEnd {
          requestUri: "/bankingapi/v1/customers/me/provision"
       );
       request.Headers.Add(TestAuthHandler.Header, "Customer");
+      request.Content = JsonContent.Create(provisionDto);
 
       var responsePostProvision = await Client.SendAsync(request, ct);
       // status code must be 201 Created 
@@ -187,6 +199,10 @@ public sealed class CustomersControllerEndtoEnd : TestBaseEndToEnd {
       var getProfileOwnerDto = 
          await responseGetProfile.Content.ReadFromJsonAsync<CustomerDto>(ct);
       NotNull(getProfileOwnerDto);
+      Equal(provisionDto.Firstname, getProfileOwnerDto.Firstname);
+      Equal(provisionDto.Lastname, getProfileOwnerDto.Lastname);
+      Equal(provisionDto.CompanyName, getProfileOwnerDto.CompanyName);
+      Equal(provisionDto.AddressVo, getProfileOwnerDto.AddressVo);
 
       // update profile with new data (except Id, Email and Status, which are not updatable in this scenario)
       var id = getProfileOwnerDto.Id;

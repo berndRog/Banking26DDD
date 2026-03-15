@@ -7,56 +7,58 @@ using BankingApi._2_Core.Customers._3_Domain.Errors;
 namespace BankingApi._2_Core.Customers._3_Domain.Entities;
 
 public sealed class Customer : AggregateRoot {
-
-   // Identity & profile data
-   // --------------------------------------------------------------------------
-   // inherited from AggregateRoot<GUID>: Entity<Guid>
+   //--- properties ------------------------------------------------------------
+   // is inherited from Entity base class
    // public Guid Id { get; private set; } 
+   // is inherited from Aggregate root base class
+   // public DateTimeOffset CreatedAt { get; private set; }
+   // public DateTimeOffset UpdatedAt { get; private set; }
    public string Firstname { get; private set; } = string.Empty;
-   public string Lastname  { get; private set; } = string.Empty;
+   public string Lastname { get; private set; } = string.Empty;
    public string? CompanyName { get; private set; }
 
    // Display name used in UIs and documents (derived, not persisted)
    public string DisplayName => CompanyName ?? $"{Firstname} {Lastname}";
 
-   // Email used for communication (not authentication)
-   private string _email = default!;         // for EF Core mapping (backing field)
-   public EmailVo EmailVo {
-      get => EmailVo.Create(_email).Value;     // domain VO
-      private set => _email = value.Value;   // keep scalar normalized
-   }
-
    // Subject identifier from the identity provider (OIDC / OAuth)
    public string Subject { get; private set; } = default!;
-   
+
    // Status (business lifecycle)
    public CustomerStatus Status { get; private set; } = CustomerStatus.Pending;
-   
+
    // Employee decisions (audit facts)
    public DateTimeOffset? ActivatedAt { get; private set; }
-   public DateTimeOffset? RejectedAt  { get; private set; }
-   public string? RejectionReasonCode { get; private set; }
-   public Guid? AuditedByEmployeeId   { get; private set; }
+   public DateTimeOffset? RejectedAt { get; private set; }
+   public string? RejectionReason { get; private set; }
+   public Guid? AuditedByEmployeeId { get; private set; }
 
    public DateTimeOffset? DeactivatedAt { get; private set; }
    public Guid? DeactivatedByEmployeeId { get; private set; }
-   
+
+   // EmailVo 
+   public EmailVo EmailVo { get; private set; } = default!;
+
+   // Value Objects
+   public AddressVo AddressVo { get; private set; } = default!;
+
    // Derived state (read convenience, not persisted)
    public bool IsProfileComplete =>
       !string.IsNullOrWhiteSpace(Firstname) &&
       !string.IsNullOrWhiteSpace(Lastname) &&
       !string.IsNullOrWhiteSpace(Subject) &&
-      EmailVo is not null && !string.IsNullOrWhiteSpace(EmailVo.Value);
+      !string.IsNullOrWhiteSpace(EmailVo.Value) &&
+      !string.IsNullOrWhiteSpace(AddressVo.Street) &&
+      !string.IsNullOrWhiteSpace(AddressVo.PostalCode) &&
+      !string.IsNullOrWhiteSpace(AddressVo.City);
 
    public bool IsActive =>
       Status == CustomerStatus.Active &&
       DeactivatedAt is null;
 
-   // Value Objects (0..1)
-    public AddressVo? AddressVo { get; private set; }
-
-    // EF Core constructor
-    private Customer() : base() { }
+   //--- ctors -----------------------------------------------------------------
+   // EF Core constructor
+   private Customer() {
+   }
 
    // Domain constructor (used by factories)
    private Customer(
@@ -64,10 +66,10 @@ public sealed class Customer : AggregateRoot {
       string firstname,
       string lastname,
       string? companyName,
-      EmailVo emailVo,
       string subject,
-      AddressVo? addressVo
-   ) : base() {
+      EmailVo emailVo,
+      AddressVo addressVo
+   ) {
       Id = id;
       Firstname = firstname;
       Lastname = lastname;
@@ -78,19 +80,20 @@ public sealed class Customer : AggregateRoot {
    }
 
    // --- static factory to create a Customer object ---------------------------
+   // Create a Customer with an account and activate it
    public static Result<Customer> Create(
       string firstname,
       string lastname,
       string? companyName,
-      EmailVo emailVo,
       string subject,
-      DateTimeOffset createdAt,
-      string? id = null,
-      AddressVo? addressVo = null
+      EmailVo emailVo,
+      AddressVo addressVo,
+      DateTimeOffset createdAt = default!,
+      string? id = null
    ) {
       // Normalize inputs early
       firstname = firstname.Trim();
-      lastname  = lastname.Trim();
+      lastname = lastname.Trim();
       companyName = companyName?.Trim();
 
       // Validate basic fields
@@ -106,7 +109,9 @@ public sealed class Customer : AggregateRoot {
 
       if (!string.IsNullOrWhiteSpace(companyName) && companyName.Length is < 2 or > 80)
          return Result<Customer>.Failure(CustomerErrors.InvalidCompanyName);
-      
+      if (addressVo is null)
+         return Result<Customer>.Failure(CustomerErrors.AddressIsRequired);
+
       var resultSubject = IdentitySubject.Check(subject);
       if (resultSubject.IsFailure)
          return Result<Customer>.Failure(resultSubject.Error);
@@ -116,85 +121,92 @@ public sealed class Customer : AggregateRoot {
       if (resultId.IsFailure)
          return Result<Customer>.Failure(resultId.Error);
       var customerId = resultId.Value;
-      
+
       var customer = new Customer(
          id: customerId,
          firstname: firstname,
          lastname: lastname,
          companyName: companyName,
-         emailVo: emailVo,
          subject: resultSubject.Value,
+         emailVo: emailVo,
          addressVo: addressVo
       );
-      
+
       // set timestamps
       customer.Initialize(createdAt);
-      
+
       // auto-activate on creation (no employee involved)
       var employeeId = Guid.Parse("00000000-0000-0000-0000-123456789000"); // system employee for self-service actions
-      customer.Activate(employeeId, customer.CreatedAt); 
-      
+      customer.Activate(employeeId, customer.CreatedAt);
+
       return Result<Customer>.Success(customer);
    }
 
-   /// <summary>
-   /// Create an owner on first login (provisioning).
-   /// - Only identity facts are known for sure (subject, email, createdAt).
-   /// - Business profile data is still missing and must be completed by the owner.
-   /// </summary>
+   // Create an owner on first login (provisioning).
    public static Result<Customer> CreateProvision(
       string identitySubject,
       EmailVo emailVo,
-      DateTimeOffset createdAt,
+      DateTimeOffset createdAt = default!,
       string? id = null
    ) {
       if (createdAt == default)
          return Result<Customer>.Failure(CustomerErrors.CreatedAtIsRequired);
 
-      var subjectResult = IdentitySubject.Check(identitySubject);
-      if (subjectResult.IsFailure)
-         return Result<Customer>.Failure(subjectResult.Error);
+      var resultSubject = IdentitySubject.Check(identitySubject);
+      if (resultSubject.IsFailure)
+         return Result<Customer>.Failure(resultSubject.Error);
+      var subject = resultSubject.Value;
 
       var resultId = Resolve(id, CustomerErrors.InvalidId);
       if (resultId.IsFailure)
          return Result<Customer>.Failure(resultId.Error);
+      var Id = resultId.Value;
 
-      // Provisioned owner starts with empty profile fields
-      var owner = new Customer(
-         id: resultId.Value,
-         firstname: string.Empty,
-         lastname: string.Empty,
-         companyName: null,
+      // create am empty address
+      var resultAddress = AddressVo.Create(
+         street: "empty",
+         postalCode: "empty",
+         city: "empty",
+         country: null
+      );
+      if (resultAddress.IsFailure)
+         return Result<Customer>.Failure(resultAddress.Error);
+      var addressVo = resultAddress.Value;
+
+      // Provisioned customer starts with identity data plus required business profile data.
+      var customer = new Customer(
+         id: Id,
+         firstname: string.Empty, // profile incomplete at provisioning, customer must update profile later
+         lastname: string.Empty, // profile incomplete at provisioning, customer must update profile later
+         companyName: null, // 
+         subject: subject,
          emailVo: emailVo,
-         subject: subjectResult.Value,
-         addressVo: null
+         addressVo: addressVo
       );
 
-      // Provisioning should reflect identity creation time (not "now")
-      owner.Initialize(createdAt);
+      // Provisioning should reflect identity creation time in IA-Server
+      customer.Initialize(createdAt);
 
-      return Result<Customer>.Success(owner);
+      return Result<Customer>.Success(customer);
    }
 
    // --------------------------------------------------------------------------
    // Domain methods (mutations)
    // --------------------------------------------------------------------------
-   /// <summary>
-   /// Customer completes or updates their profile after provisioning.
-   /// </summary>
+   // Customer completes or updates their profile after provisioning.
    public Result UpdateProfile(
       string firstname,
       string lastname,
       string? companyName,
-      EmailVo email,
-      AddressVo? address,
+      EmailVo emailVo,
+      AddressVo addressVo,
       DateTimeOffset updatedAt
    ) {
       if (updatedAt == default)
          return Result.Failure(CommonErrors.TimestampIsRequired);
 
       firstname = firstname.Trim();
-      lastname  = lastname.Trim();
+      lastname = lastname.Trim();
       companyName = companyName?.Trim();
 
       // Validate required profile fields
@@ -210,30 +222,32 @@ public sealed class Customer : AggregateRoot {
 
       if (!string.IsNullOrWhiteSpace(companyName) && companyName.Length is < 2 or > 80)
          return Result.Failure(CustomerErrors.InvalidCompanyName);
-      
+
       // Apply changes
       Firstname = firstname;
-      Lastname  = lastname;
+      Lastname = lastname;
       CompanyName = companyName;
-      EmailVo = email;
-      AddressVo = address;
+      EmailVo = emailVo;
+      AddressVo = addressVo;
 
-      //SELF-SERVICE: if profile is complete, we auto-activate the owner without employee involvement.
+      // SELF-SERVICE: if profile is complete, we auto-activate the owner without employee involvement.
       // auto-activate on profile completion (no employee involved)
-      Activate(Guid.Empty, updatedAt); 
+      Activate(Guid.Empty, updatedAt);
+
       Touch(updatedAt);
+
       return Result.Success();
    }
 
    // Employee activates the owner after external identity verification.
    // Activation is only possible if the owner is Pending and profile is complete.
    public Result Activate(
-      Guid activatedByEmployeeId, 
+      Guid activatedByEmployeeId,
       DateTimeOffset activatedAt
    ) {
       if (activatedAt == default)
          return Result.Failure(CommonErrors.TimestampIsRequired);
-      
+
       // fail early if preconditions for activation are not met
       // (employee, timestamp, status, profile)
       if (activatedByEmployeeId == Guid.Empty)
@@ -242,14 +256,14 @@ public sealed class Customer : AggregateRoot {
          return Result.Failure(CustomerErrors.NotPending);
       if (!IsProfileComplete)
          return Result.Failure(CustomerErrors.ProfileIncomplete);
-   
+
       Status = CustomerStatus.Active;
       ActivatedAt = activatedAt;
       AuditedByEmployeeId = activatedByEmployeeId;
-      
+
       RejectedAt = null;
-      RejectionReasonCode = null;
-      
+      RejectionReason = null;
+
       // create initial account for the owner (domain event, handled in application layer)
       Touch(activatedAt);
       return Result.Success();
@@ -259,13 +273,13 @@ public sealed class Customer : AggregateRoot {
    /// Employee rejects the owner (e.g., KYC failed).
    /// </summary>
    public Result Reject(
-      Guid rejectedByEmployeeId, 
-      string reasonCode, 
+      Guid rejectedByEmployeeId,
+      string reasonCode,
       DateTimeOffset rejectedAt
    ) {
       if (rejectedAt == default)
-         return Result.Failure(CommonErrors.TimestampIsRequired); 
-      
+         return Result.Failure(CommonErrors.TimestampIsRequired);
+
       // fail early if preconditions for rejection are not met
       // (employee, timestamp, status, reason code)
       if (rejectedByEmployeeId == Guid.Empty)
@@ -274,12 +288,12 @@ public sealed class Customer : AggregateRoot {
          return Result.Failure(CustomerErrors.RejectionRequiresReason);
       if (Status != CustomerStatus.Pending)
          return Result.Failure(CustomerErrors.NotPending);
-      
+
       Status = CustomerStatus.Rejected;
       RejectedAt = rejectedAt;
       AuditedByEmployeeId = rejectedByEmployeeId;
-      RejectionReasonCode = reasonCode.Trim();
-   
+      RejectionReason = reasonCode.Trim();
+
       Touch(rejectedAt);
       return Result.Success();
    }
@@ -288,12 +302,12 @@ public sealed class Customer : AggregateRoot {
    /// Employee deactivates the owner (end customer relationship).
    /// </summary>
    public Result Deactivate(
-      Guid deactivatedByEmployeeId, 
+      Guid deactivatedByEmployeeId,
       DateTimeOffset deactivatedAt
    ) {
       if (deactivatedAt == default)
          return Result.Failure(CommonErrors.TimestampIsRequired);
-      
+
       // fail early if preconditions for deactivation are not met
       // (employee, timestamp, status)
       if (deactivatedByEmployeeId == Guid.Empty)
@@ -308,7 +322,7 @@ public sealed class Customer : AggregateRoot {
       Touch(deactivatedAt);
       return Result.Success();
    }
-   
+
    /// <summary>
    /// Customer updates their profile
    /// </summary>
@@ -321,8 +335,10 @@ public sealed class Customer : AggregateRoot {
    ) {
       if (updatedAt == default)
          return Result.Failure(CommonErrors.TimestampIsRequired);
-      
-      lastname  = lastname?.Trim();
+      if (addressVo is null)
+         return Result.Failure(CustomerErrors.AddressIsRequired);
+
+      lastname = lastname?.Trim();
       companyName = companyName?.Trim();
 
       if (!string.IsNullOrWhiteSpace(lastname) && lastname.Length is < 2 or > 80)
@@ -330,18 +346,16 @@ public sealed class Customer : AggregateRoot {
 
       if (!string.IsNullOrWhiteSpace(companyName) && companyName.Length is < 2 or > 80)
          return Result.Failure(CustomerErrors.InvalidCompanyName);
-      
+
       // Apply changes
-      if(lastname is not null) Lastname  = lastname;
-      if(companyName is not null) CompanyName = companyName;
-      if(emailVo is not null) EmailVo = emailVo;
-      if(addressVo is not null) AddressVo = addressVo;
-      
+      if (lastname is not null) Lastname = lastname;
+      if (companyName is not null) CompanyName = companyName;
+      if (emailVo is not null) EmailVo = emailVo;
+      if (addressVo is not null) AddressVo = addressVo;
+
       Touch(updatedAt);
       return Result.Success();
    }
-   
-   
 }
 
 /*
@@ -365,7 +379,8 @@ Didaktik & Lernziele (Vorlesung BankingAPI / DDD)
   Sie unterstützen Nachvollziehbarkeit, Compliance und spätere Reports.
 
 4) Value Objects (Address) im Domainmodell
-- Address ist ein Value Object (0..1) und wird optional gesetzt.
+- Address ist ein verpflichtendes Value Object.
+- Street, PostalCode und City sind erforderlich; Country bleibt optional.
 - Der UI-Transport kann flach sein, im Domainmodell bleibt die Fachstruktur klar.
 
 5) Zeit und Testbarkeit (IClock / now Injection)

@@ -1,5 +1,6 @@
 using BankingApi._2_Core.Customers._1_Ports.Inbound;
-using BankingApiTest.Infrastructure;
+using BankingApi._2_Core.Customers._1_Ports.Outbound;
+using BankingApiTest.TestInfrastructure;
 namespace BankingApiTest._2_Core.Core.Application.UseCases;
 
 public class FakeCustomer(

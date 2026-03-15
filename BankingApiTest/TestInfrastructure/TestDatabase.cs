@@ -4,8 +4,7 @@ using Microsoft.Data.Sqlite;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Migrations;
-
-namespace BankingApiTest.Infrastructure;
+namespace BankingApiTest.TestInfrastructure;
 
 // Helper for creating and disposing test databases.
 // Supports SQLite in-memory and file-based modes.
@@ -14,11 +13,11 @@ public static class TestDatabase {
    // Create a test database for the given DbContext type
    public static Task<(string dbPath, DbConnection dbConnection, TDbContext dbContext)> CreateAsync<TDbContext>(
       Func<DbContextOptions<TDbContext>, TDbContext> createDbContext,
-      DbMode mode = DbMode.FilePersistent,
-      string databaseName = "DatabaseTest",
-      bool applyMigrations = true,
-      bool enableSensitiveDataLogging = true,
-      CancellationToken ct = default
+      DbMode mode,
+      string databaseName,
+      bool applyMigrations,
+      bool enableSensitiveDataLogging,
+      CancellationToken ct
    )
       where TDbContext : DbContext {
 

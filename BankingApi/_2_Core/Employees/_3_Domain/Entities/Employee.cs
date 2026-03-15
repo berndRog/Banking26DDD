@@ -1,11 +1,10 @@
-using BankingApi._2_Core.BuildingBlocks._1_Ports.Inbound;
 using BankingApi._2_Core.BuildingBlocks._1_Ports.Outbound;
 using BankingApi._2_Core.BuildingBlocks._3_Domain;
 using BankingApi._2_Core.BuildingBlocks._3_Domain.Entities;
 using BankingApi._2_Core.BuildingBlocks._3_Domain.ValueObjects;
 using BankingApi._2_Core.Employees._3_Domain.Enums;
 using BankingApi._2_Core.Employees._3_Domain.Errors;
-namespace BankingApi._2_Core.Employees._3_Domain.Aggregates;
+namespace BankingApi._2_Core.Employees._3_Domain.Entities;
 
 // Employee aggregate root.
 public sealed class Employee : AggregateRoot {

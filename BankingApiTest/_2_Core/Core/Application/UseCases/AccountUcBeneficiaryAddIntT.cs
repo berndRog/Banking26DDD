@@ -1,4 +1,3 @@
-using BankingApi._2_Core.BuildingBlocks._1_Ports.Inbound;
 using BankingApi._2_Core.BuildingBlocks._1_Ports.Outbound;
 using BankingApi._2_Core.Customers._1_Ports.Outbound;
 using BankingApi._2_Core.Customers._3_Domain.Entities;
@@ -11,19 +10,19 @@ using BankingApi._3_Infrastructure._2_Persistence.Database;
 using BankingApi._3_Infrastructure._2_Persistence.Repositories;
 using BankingApiTest._3_Infrastructure;
 using BankingApiTest._3_Infrastructure._5_Utils;
-using BankingApiTest.Infrastructure;
+using BankingApiTest.TestInfrastructure;
 using Microsoft.Data.Sqlite;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging.Abstractions;
 namespace BankingApiTest._2_Core.Core.Application.UseCases;
 
-public sealed class AccountUcBeneficiaryAddIntT(TestCompositionRoot root) : IClassFixture<TestCompositionRoot> {
+public sealed class AccountUcBeneficiaryAddIntT : TestBaseIntegration {
    private readonly TestSeed _seed = new();
 
    [Fact]
    public async Task AddBeneficiaryUt() {
-      using var scope = root.CreateDefaultScope();
+      using var scope = Root.CreateDefaultScope();
       var ct = CancellationToken.None;
       var dbContext = scope.ServiceProvider.GetRequiredService<BankingDbContext>();
       var customerRepository = scope.ServiceProvider.GetRequiredService<ICustomerRepository>();

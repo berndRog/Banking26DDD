@@ -1,8 +1,9 @@
 ﻿using System.ComponentModel;
 using System.Net.Mime;
+using BankingApi._1_Controllers.Extensions;
 using BankingApi._2_Core.Payments._1_Ports.Inbound;
+using BankingApi._2_Core.Payments._1_Ports.Outbound;
 using BankingApi._2_Core.Payments._2_Application.Dtos;
-using BankingApi._4_BuildingBlocks;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.VisualBasic.CompilerServices;

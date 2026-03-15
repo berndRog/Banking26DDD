@@ -1,8 +1,8 @@
 using BankingApi._2_Core.BuildingBlocks._1_Ports.Outbound;
 using BankingApi._2_Core.BuildingBlocks._3_Domain.ValueObjects;
-using BankingApi._2_Core.Employees._3_Domain.Aggregates;
+using BankingApi._2_Core.Employees._3_Domain.Entities;
 using BankingApi._2_Core.Employees._3_Domain.Enums;
-using BankingApiTest.Infrastructure;
+using BankingApiTest.TestInfrastructure;
 namespace BankingApiTest._2_Core.Employees.Domain.Aggregates;
 
 public sealed class EmployeeUt {

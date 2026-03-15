@@ -1,18 +1,13 @@
-using System.Security.Principal;
-using BankingApi._2_Core.BuildingBlocks._1_Ports.Inbound;
 using BankingApi._2_Core.BuildingBlocks._1_Ports.Outbound;
 using BankingApi._2_Core.Customers._1_Ports.Outbound;
+using BankingApi._2_Core.Customers._2_Application.Mappings;
 using BankingApi._2_Core.Customers._2_Application.UseCases;
-using BankingApi._2_Core.Payments._1_Ports.Outbound;
-using BankingApi._3_Infrastructure._2_Persistence.Database;
 using BankingApiTest._3_Infrastructure;
-using BankingApiTest.Infrastructure;
+using BankingApiTest.TestInfrastructure;
 using Microsoft.Extensions.DependencyInjection;
 namespace BankingApiTest._2_Core.Customers.Application;
 
-public sealed class CustomerUcCreateProvisionIntT(
-   TestCompositionRoot root
-) : IClassFixture<TestCompositionRoot> {
+public sealed class CustomerUcCreateProvisionIntT : TestBaseIntegration {
 
    private TestSeed _seed = new();
    
@@ -20,8 +15,7 @@ public sealed class CustomerUcCreateProvisionIntT(
    public async Task CustomerUcCreateProvison_ok() {
       var ct = TestContext.Current.CancellationToken;
       
-      using var scope = root.CreateDefaultScope();
-      var dbContext = scope.ServiceProvider.GetRequiredService<BankingDbContext>();
+      using var scope = Root.CreateDefaultScope();
       var customerRepository = scope.ServiceProvider.GetRequiredService<ICustomerRepository>();
       var unitOfWork = scope.ServiceProvider.GetRequiredService<IUnitOfWork>();
       var identity = scope.ServiceProvider.GetRequiredService<IIdentityGateway>();
@@ -29,10 +23,10 @@ public sealed class CustomerUcCreateProvisionIntT(
       
       // Test Onwer
       var customer = _seed.CustomerRegister();
-      var id = customer.Id.ToString();
+      var customerDto = customer.ToCustomerDto();
       
       // Act
-      var result = await sut.ExecuteAsync(id, ct);
+      var result = await sut.ExecuteAsync(customerDto, ct);
       unitOfWork.ClearChangeTracker();
       
       // Assert
@@ -44,8 +38,32 @@ public sealed class CustomerUcCreateProvisionIntT(
       NotNull(actual);
 
       Equal(customerId, actual.Id);
-      Equal(identity.Username, actual.EmailVo.Value);
       Equal(identity.Subject, actual.Subject);
+      Equal(identity.Username, actual.EmailVo.Value);
       Equal(identity.CreatedAt, actual.CreatedAt);
+   }
+
+   [Fact]
+   public async Task CustomerUcCreateProvision_second_call_is_idempotent() {
+      var ct = TestContext.Current.CancellationToken;
+
+      using var scope = Root.CreateDefaultScope();
+      var sut = scope.ServiceProvider.GetRequiredService<CustomerUcCreateProvision>();
+
+      var customerDto = _seed.CustomerRegister().ToCustomerDto();
+
+      var first = await sut.ExecuteAsync(customerDto, ct);
+      var second = await sut.ExecuteAsync(customerDto, ct);
+
+      if (first.IsFailure)
+         Fail($"First provision call failed: {first.Error}");
+      if (second.IsFailure)
+         Fail($"Second provision call failed: {second.Error}");
+
+      var firstProvision = first.Value;
+      var secondProvision = second.Value;
+
+      False(secondProvision.WasCreated);
+      Equal(firstProvision.Id, secondProvision.Id);
    }
 }

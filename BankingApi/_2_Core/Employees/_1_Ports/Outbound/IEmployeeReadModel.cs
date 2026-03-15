@@ -1,6 +1,6 @@
 using BankingApi._2_Core.BuildingBlocks._3_Domain;
 using BankingApi._2_Core.Employees._2_Application.Dtos;
-namespace BankingApi._2_Core.Employees._1_Ports.Inbound;
+namespace BankingApi._2_Core.Employees._1_Ports.Outbound;
 
 // Read model interface for querying employee data.
 // Used by the application layer to retrieve employee information

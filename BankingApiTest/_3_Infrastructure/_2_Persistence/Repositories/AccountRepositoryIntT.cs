@@ -1,23 +1,17 @@
-using BankingApi._2_Core.BuildingBlocks._1_Ports.Inbound;
+using BankingApi._2_Core.BuildingBlocks._1_Ports.Outbound;
 using BankingApi._2_Core.Customers._1_Ports.Outbound;
 using BankingApi._2_Core.Customers._3_Domain.Entities;
 using BankingApi._3_Infrastructure._2_Persistence;
 using BankingApi._3_Infrastructure._2_Persistence.Database;
-using BankingApiTest.Infrastructure;
+using BankingApiTest.TestInfrastructure;
 using Microsoft.Extensions.DependencyInjection;
 namespace BankingApiTest._3_Infrastructure._2_Persistence.Repositories;
-
-public sealed class AccountRepositoryIntTests(
-   TestCompositionRoot root
-) : IClassFixture<TestCompositionRoot> {
-
-   
-
+public sealed class AccountRepositoryIntTests : TestBaseIntegration {
    [Fact]
    public async Task FindByIdAsync_returns_Customer1() {
       var ct = TestContext.Current.CancellationToken;
       
-      using var scope = root.CreateDefaultScope();
+      using var scope = Root.CreateDefaultScope();
       var dbContext = scope.ServiceProvider.GetRequiredService<BankingDbContext>();
       var repository = scope.ServiceProvider.GetRequiredService<ICustomerRepository>();
       var unitOfWork = scope.ServiceProvider.GetRequiredService<IUnitOfWork>();
@@ -37,7 +31,7 @@ public sealed class AccountRepositoryIntTests(
 
       // Assert
       NotNull(actual);
-      Equal(id, actual!.Id);
+      Equal(id, actual.Id);
       Equal(customer.Id, actual.Id);
       Equal(customer.Firstname, actual.Firstname);
       Equal(customer.Lastname, actual.Lastname);
@@ -50,7 +44,7 @@ public sealed class AccountRepositoryIntTests(
    public async Task FindByEmailAsync_returns_Customer3() {
       var ct = TestContext.Current.CancellationToken;
       
-      using var scope = root.CreateDefaultScope();
+      using var scope = Root.CreateDefaultScope();
       var dbContext = scope.ServiceProvider.GetRequiredService<BankingDbContext>();
       var repository = scope.ServiceProvider.GetRequiredService<ICustomerRepository>();
       var unitOfWork = scope.ServiceProvider.GetRequiredService<IUnitOfWork>();
@@ -83,7 +77,7 @@ public sealed class AccountRepositoryIntTests(
    public async Task SelectAsync_returns_all_customers() {
       var ct = TestContext.Current.CancellationToken;
       
-      using var scope = root.CreateDefaultScope();
+      using var scope = Root.CreateDefaultScope();
       var dbContext = scope.ServiceProvider.GetRequiredService<BankingDbContext>();
       var repository = scope.ServiceProvider.GetRequiredService<ICustomerRepository>();
       var unitOfWork = scope.ServiceProvider.GetRequiredService<IUnitOfWork>();
@@ -98,15 +92,17 @@ public sealed class AccountRepositoryIntTests(
       var customers = await repository.SelectAllAsync(ct);
       
       // Assert
-      Equal(6, customers.Count()); 
-      Equals(seed.Customers, customers);
+      var actualIds = customers.Select(c => c.Id).OrderBy(id => id).ToList();
+      var expectedIds = seed.Customers.Select(c => c.Id).OrderBy(id => id).ToList();
+      Equal(6, actualIds.Count());
+      Equal(expectedIds, actualIds);
    }
    
    [Fact]
    public async Task SelectByName_returns_all_customers() {
       var ct = TestContext.Current.CancellationToken;
       
-      using var scope = root.CreateDefaultScope();
+      using var scope = Root.CreateDefaultScope();
       var dbContext = scope.ServiceProvider.GetRequiredService<BankingDbContext>();
       var repository = scope.ServiceProvider.GetRequiredService<ICustomerRepository>();
       var unitOfWork = scope.ServiceProvider.GetRequiredService<IUnitOfWork>();
@@ -122,8 +118,10 @@ public sealed class AccountRepositoryIntTests(
       var customers = await repository.SelectByDisplayNameAsync("Mustermann", ct);
       
       // Assert
-      Equal(2, customers.Count()); 
-      Equals(expected, customers);
+      var actualIds = customers.Select(c => c.Id).OrderBy(id => id).ToList();
+      var expectedIds = expected.Select(c => c.Id).OrderBy(id => id).ToList();
+      Equal(2, actualIds.Count());
+      Equal(expectedIds, actualIds);
    }
 
 

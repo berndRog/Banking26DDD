@@ -1,4 +1,3 @@
-using BankingApi._2_Core.BuildingBlocks._1_Ports.Inbound;
 using BankingApi._2_Core.BuildingBlocks._1_Ports.Outbound;
 using BankingApi._2_Core.BuildingBlocks._3_Domain;
 using BankingApi._2_Core.BuildingBlocks._3_Domain.Errors;
@@ -19,9 +18,11 @@ public class CustomerUcCreateProvision(
 ) {
    
    public async Task<Result<CustomerProvisionDto>> ExecuteAsync(
-      string? id,
+      CustomerDto customerDto,
       CancellationToken ct
    ) {
+      ArgumentNullException.ThrowIfNull(customerDto);
+
       // 1) subject required
       var resultSubject = IdentitySubject.Check(identityGateway.Subject);
       if (resultSubject.IsFailure) 
@@ -31,7 +32,7 @@ public class CustomerUcCreateProvision(
       // 2) idempotent lookup
       var existing = await repository.FindByIdentitySubjectAsync(subject, ct);
       if (existing is not null) 
-         return Result<CustomerProvisionDto>.Success(existing.ToCustomerProvisionDto());
+         return Result<CustomerProvisionDto>.Success(existing.ToCustomerProvisionDto(wasCreated: false));
       
       // 3) required identity data (translate missing-claim exceptions)
       string username;
@@ -55,18 +56,18 @@ public class CustomerUcCreateProvision(
       var existingWithEmail = await repository.FindByEmailAsync(emailVo, ct);
       if (existingWithEmail is not null)
          return Result<CustomerProvisionDto>.Failure(CustomerApplicationErrors.EmailAlreadyInUse);
-
+      
       // 4) create aggregate
       var resultCustomer = Customer.CreateProvision(
-         identitySubject: subject, 
-         emailVo: emailVo, 
-         createdAt: createdAt, 
-         id: id
+         identitySubject: subject,
+         emailVo: emailVo,
+         createdAt: createdAt,
+         id: customerDto.Id.ToString()
       );
       if (resultCustomer.IsFailure)
          return Result<CustomerProvisionDto>.Failure(resultCustomer.Error)
             .LogIfFailure(logger, "CustomerUcCreateProvision.DomainRejected", 
-               new { subject, email = emailVo, createdAt, id });
+               new { subject, email = emailVo, createdAt, customerDto.Id });
 
       // 5) add to repository
       var customer = resultCustomer.Value;
@@ -80,6 +81,6 @@ public class CustomerUcCreateProvision(
          subject, customer.Id, savedRows
       );
       
-      return Result<CustomerProvisionDto>.Success(customer.ToCustomerProvisionDto());
+      return Result<CustomerProvisionDto>.Success(customer.ToCustomerProvisionDto(wasCreated: true));
    }
 }

@@ -6,7 +6,7 @@ public sealed record CustomerDto(
    string Firstname,
    string Lastname,
    string? CompanyName,
-   string EmailString,
    int StatusInt,            // "Pending = 0 | Active = 1 | Rejected ? 2 | Deactivated = 3"
-   AddressVo? AddressVo
+   string EmailString,
+   AddressVo AddressVo
 );

@@ -30,9 +30,9 @@ internal class CustomerUseCases(
    );
 
    public Task<Result<CustomerProvisionDto>> CreateProvisionAsync(
-      string? id, 
+      CustomerDto customerDto,
       CancellationToken ct
-   ) => createProvisionUc.ExecuteAsync(id, ct);
+   ) => createProvisionUc.ExecuteAsync(customerDto, ct);
 
    public Task<Result<CustomerDto>> UpdateProfileAsync(
       CustomerDto dto, 

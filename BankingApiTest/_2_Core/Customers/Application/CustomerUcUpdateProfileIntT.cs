@@ -1,17 +1,15 @@
-using BankingApi._2_Core.BuildingBlocks._1_Ports.Inbound;
 using BankingApi._2_Core.BuildingBlocks._1_Ports.Outbound;
 using BankingApi._2_Core.Customers._1_Ports.Outbound;
 using BankingApi._2_Core.Customers._2_Application.Mappings;
 using BankingApi._2_Core.Customers._2_Application.UseCases;
+using BankingApi._2_Core.Customers._3_Domain.Enum;
 using BankingApi._3_Infrastructure._2_Persistence.Database;
 using BankingApiTest._3_Infrastructure;
-using BankingApiTest.Infrastructure;
+using BankingApiTest.TestInfrastructure;
 using Microsoft.Extensions.DependencyInjection;
 namespace BankingApiTest._2_Modules.Customers.Application;
 
-public sealed class CustomerUcUpdateProfileIntT(
-   TestCompositionRoot root
-) : IClassFixture<TestCompositionRoot> {
+public sealed class CustomerUcUpdateProfileIntT : TestBaseIntegration {
 
    private TestSeed _seed = new();
 
@@ -19,7 +17,7 @@ public sealed class CustomerUcUpdateProfileIntT(
    public async Task UpdateProfile_ok() {
       var ct = TestContext.Current.CancellationToken;
 
-      using var scope = root.CreateDefaultScope();
+      using var scope = Root.CreateDefaultScope();
       var dbContext = scope.ServiceProvider.GetRequiredService<BankingDbContext>();
       var customerRepository = scope.ServiceProvider.GetRequiredService<ICustomerRepository>();
       var unitOfWork = scope.ServiceProvider.GetRequiredService<IUnitOfWork>();
@@ -28,10 +26,9 @@ public sealed class CustomerUcUpdateProfileIntT(
       var sut = scope.ServiceProvider.GetRequiredService<CustomerUcUpdateProfile>();
 
       // Arrange
-      var customer = _seed.Customer1();
+      var customer = _seed.CustomerRegister();
       var customerDto = customer.ToCustomerDto();
-      var id = customer.Id.ToString();
-      var result = await customerUcCreateProvision.ExecuteAsync(id, ct);
+      var result = await customerUcCreateProvision.ExecuteAsync(customerDto, ct);
       True(result.IsSuccess);
 
       // Act
@@ -42,9 +39,7 @@ public sealed class CustomerUcUpdateProfileIntT(
       True(resultProfile.IsSuccess);
       var actualProfile = resultProfile.Value;
       var actual = await customerRepository.FindByIdAsync(customer.Id, ct);
-
-
-
+      
       NotNull(actual);
       Equal(customer.Id, actual.Id);
       Equal(customer.Firstname, actual!.Firstname);
@@ -52,9 +47,8 @@ public sealed class CustomerUcUpdateProfileIntT(
       Equal(customer.CompanyName, actual.CompanyName);
       Equal(customer.DisplayName, actual.DisplayName);
       Equal(customer.Subject, actual.Subject);
-      Equal(customer.Status, actual.Status);
+      Equal(CustomerStatus.Pending, actual.Status);
       Equal(customer.EmailVo, actual.EmailVo);
-      Equal(customer.CreatedAt, actual.CreatedAt);
       Equal(customer.AddressVo, actual.AddressVo);
    }
 }

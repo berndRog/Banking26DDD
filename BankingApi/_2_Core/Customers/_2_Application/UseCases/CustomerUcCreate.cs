@@ -1,5 +1,4 @@
 using System.Runtime.CompilerServices;
-using BankingApi._2_Core.BuildingBlocks._1_Ports.Inbound;
 using BankingApi._2_Core.BuildingBlocks._1_Ports.Outbound;
 using BankingApi._2_Core.BuildingBlocks._3_Domain;
 using BankingApi._2_Core.BuildingBlocks._3_Domain.ValueObjects;
@@ -7,7 +6,9 @@ using BankingApi._2_Core.Customers._1_Ports.Outbound;
 using BankingApi._2_Core.Customers._2_Application.Dtos;
 using BankingApi._2_Core.Customers._2_Application.Errors;
 using BankingApi._2_Core.Customers._2_Application.Mappings;
+using BankingApi._2_Core.Customers._3_Domain.Errors;
 using BankingApi._2_Core.Customers._3_Domain.Entities;
+using BankingApi._2_Core.Payments._1_Ports.Inbound;
 using BankingApi._2_Core.Payments._1_Ports.Outbound;
 using BankingApi._3_Infrastructure._4_Logging;
 [assembly: InternalsVisibleTo("BankingApiTest")]
@@ -30,6 +31,8 @@ internal sealed class CustomerUcCreate(
       var firstname = customerDto.Firstname.Trim();
       var lastname = customerDto.Lastname.Trim();
       var companyName = customerDto.CompanyName?.Trim();
+      if (customerDto.AddressVo is null)
+         return Result<CustomerDto>.Failure(CustomerErrors.AddressIsRequired);
       
       // 1) subject required
       var resultSubject = IdentitySubject.Check(identityGateway.Subject);

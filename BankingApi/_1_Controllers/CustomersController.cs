@@ -1,8 +1,8 @@
+using BankingApi._1_Controllers.Extensions;
 using BankingApi._2_Core.Customers._1_Ports.Inbound;
 using BankingApi._2_Core.Customers._1_Ports.Outbound;
 using BankingApi._2_Core.Customers._2_Application.Dtos;
 using BankingApi._2_Core.Customers._2_Application.UseCases;
-using BankingApi._4_BuildingBlocks;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 namespace BankingApi._1_Controllers;
@@ -51,11 +51,14 @@ public sealed class CustomersController(
    [ProducesResponseType<CustomerProvisionDto>(StatusCodes.Status201Created)]
    [ProducesResponseType<ProblemDetails>(StatusCodes.Status400BadRequest, "application/problem+json")]
    [ProducesResponseType<ProblemDetails>(StatusCodes.Status401Unauthorized, "application/problem+json")]
-   public async Task<ActionResult<CustomerProvisionDto>> CreateCustomerProvisionAsync(CancellationToken ct) {
+   public async Task<ActionResult<CustomerProvisionDto>> CreateCustomerProvisionAsync(
+      [FromBody] CustomerDto customerDto,
+      CancellationToken ct
+   ) {
 
       const string context = $"{nameof(CustomersController)}.{nameof(CreateCustomerProvisionAsync)}";
 
-      var result = await useCases.CreateProvisionAsync(null, ct);
+      var result = await useCases.CreateProvisionAsync(customerDto, ct);
       if(result.IsFailure)
          return this.ToActionResult(result: result, logger: logger, context: context);
       
