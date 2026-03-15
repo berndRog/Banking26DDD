@@ -13,23 +13,23 @@ public sealed class CustomerUcCreateIntT(TestCompositionRoot root) : IClassFixtu
    private readonly TestSeed _seed = new();
    
    [Fact]
-   public async Task Add_customer_ok() {
+   public async Task Create_Customer_ok() {
+      var ct = TestContext.Current.CancellationToken;
+      
       using var scope = root.CreateDefaultScope();
-     
-      var ct = CancellationToken.None;
       var dbContext = scope.ServiceProvider.GetRequiredService<BankingDbContext>();
       var customerRepository = scope.ServiceProvider.GetRequiredService<ICustomerRepository>();
       var accountRepository = scope.ServiceProvider.GetRequiredService<IAccountRepository>();
       var sut = scope.ServiceProvider.GetRequiredService<CustomerUcCreate>();
 
       // Arrange
-      var customer1 = _seed.Customer1(); // without address
-      var customer1Dto = customer1.ToCustomerDto(); 
-      var account1 = _seed.Account1(); // for owner1, but not required for this test, as account creation is not part of this use case
+      var customer = _seed.CustomerRegister(); // with address
+      var customerDto = customer.ToCustomerDto(); 
+      var account1 = _seed.Account1(); 
      
       // Act
       await sut.ExecuteAsync(
-         customerDto: customer1Dto,
+         customerDto: customerDto,
          accountIdString: account1.Id.ToString(),
          ibanString: account1.IbanVo.Value,
          ct
@@ -37,15 +37,15 @@ public sealed class CustomerUcCreateIntT(TestCompositionRoot root) : IClassFixtu
       dbContext.ChangeTracker.Clear();
 
       // Assert
-      var actualCustomer = await customerRepository.FindByIdAsync(customer1.Id, ct);
+      var actualCustomer = await customerRepository.FindByIdAsync(customer.Id, ct);
       NotNull(actualCustomer);
-      Equal(customer1.Id, actualCustomer.Id);
-      Equal(customer1.Firstname, actualCustomer.Firstname);
-      Equal(customer1.Lastname, actualCustomer.Lastname);
-      Equal(customer1.EmailVo, actualCustomer.EmailVo);
-      Equal(customer1.Subject, actualCustomer.Subject);
-      Equal(customer1.AddressVo, actualCustomer.AddressVo);
-      var actualAccounts = await accountRepository.SelelctByCustomerIdAsync(customer1.Id, ct);
+      Equal(customer.Id, actualCustomer.Id);
+      Equal(customer.Firstname, actualCustomer.Firstname);
+      Equal(customer.Lastname, actualCustomer.Lastname);
+      Equal(customer.EmailVo, actualCustomer.EmailVo);
+      Equal(customer.Subject, actualCustomer.Subject);
+      Equal(customer.AddressVo, actualCustomer.AddressVo);
+      var actualAccounts = await accountRepository.SelelctByCustomerIdAsync(customer.Id, ct);
       NotNull(actualAccounts);
       var actualAccount = actualAccounts.SingleOrDefault(a => a.Id == account1.Id);
       NotNull(actualAccount);

@@ -44,6 +44,8 @@ public sealed class Seed(
       => AddressVo.Create("Bahnhofstr.10", "10115", "Berlin").GetValueOrThrow();
    public AddressVo Address3
       => AddressVo.Create("Schillerstr. 1", "30123", "Hannover", "DE").GetValueOrThrow();
+   public AddressVo AddressReg
+      => AddressVo.Create("Allertalweg. 2", "29227", "Celle", "DE").GetValueOrThrow();
    #endregion
 
    #region -------------- Test Customers (Entities) ------------------------------------------
@@ -53,7 +55,9 @@ public sealed class Seed(
    public string customer4Id = "40000000-0000-0000-0000-000000000000";
    public string customer5Id = "50000000-0000-0000-0000-000000000000";
    public string customer6Id = "60000000-0000-0000-0000-000000000000";
-   
+
+   public string customerRegister = "11111111-0000-0000-0000-000000000000";
+
    public Customer Customer1() => CreateCustomer(
       id: customer1Id,
       firstname: "Erika",
@@ -113,6 +117,17 @@ public sealed class Seed(
       subject: "f0004f67-72a3-4449-af1f-803dcfaddb7f",
       addressVo: null
    );
+   
+   public Customer CustomerRegister() => CreateCustomer(
+      id: customerRegister,
+      firstname: "Jane",
+      lastname: "Doe",
+      companyName: null,
+      emailString: "j.doe@mail.local",
+      subject: "11111111-a224-492b-bb8f-b4bac23d7c88",
+      addressVo: AddressReg
+   );
+   
    public IReadOnlyList<Customer> Customers => [
       Customer1(), Customer2(), Customer3(), Customer4(), Customer5(), Customer6()
    ];

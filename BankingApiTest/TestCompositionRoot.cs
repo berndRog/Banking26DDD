@@ -1,93 +1,116 @@
 using System.Data.Common;
 using BankingApi._3_Infrastructure.Database;
 using BankingApiTest.Infrastructure;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Logging;
+
 namespace BankingApiTest._3_Infrastructure;
 
-public sealed class TestCompositionRoot : IAsyncLifetime {
-   // Enable logging locally, disable in CI
-   private static readonly bool EnableLogging =
-#if DEBUG
-      true;
-#else
-      false;
-#endif
+internal static class TestConfiguration {
+   private const string AppSettingsFileName = "appsettingsTest.json";
 
-   // Path of the test database file
+   internal static IConfigurationRoot Load() {
+      return new ConfigurationBuilder()
+         .SetBasePath(AppContext.BaseDirectory)
+         .AddJsonFile(path: AppSettingsFileName, optional: false, reloadOnChange: false)
+         .AddEnvironmentVariables()
+         .Build();
+   }
+}
+
+// Base composition root for integration tests
+// Creates database, DI container, and shared infrastructure
+public abstract class TestCompositionRoot<TDbContext> : IAsyncLifetime
+   where TDbContext : DbContext {
+
+   // Logical name of the test database
+   public string DatabaseName { get; private set; } = "BankingTest";
+
+   // Database mode used for test execution
+   protected virtual DbMode DatabaseMode => DbMode.FileUnique;
+
+   // Apply EF Core migrations on startup
+   protected virtual bool ApplyMigrations => true;
+
+   // Enable EF sensitive data logging for tests
+   protected virtual bool EnableSensitiveDataLoggingForDatabase => true;
+
+   // File path of the created test database
    public string DbPath { get; private set; } = string.Empty;
 
-   // Shared SQLite connection for tests
+   // Shared database connection used by tests
    public DbConnection DbConnection { get; private set; } = default!;
 
-   // DbContext used during initialization (migrations / seeding)
-   internal BankingDbContext InitDbContext { get; private set; } = default!;
+   // DbContext used during initialization and seeding
+   internal TDbContext InitDbContext { get; private set; } = default!;
 
-   // Default DI container used by most tests
+   // Default service provider used by most tests
    public ServiceProvider DefaultProvider { get; private set; } = default!;
 
+   public IConfiguration Configuration { get; private set; } = default!;
+
    public async ValueTask InitializeAsync() {
-      // Create test database
-      var (dbPath, dbConnection, dbContext) = await TestDatabase.CreateAsync(
-         mode: DbMode.FileUnique,
-         databaseName: "WebApiTest",
-         applyMigrations: true,
-         enableSensitiveDataLogging: true
+      Configuration = TestConfiguration.Load();
+
+      // Create database, connection, and initialization DbContext
+      var (dbPath, dbConnection, dbContext) = await TestDatabase.CreateAsync<TDbContext>(
+         createDbContext: CreateDbContext,
+         mode: DatabaseMode,
+         databaseName: DatabaseName,
+         applyMigrations: ApplyMigrations,
+         enableSensitiveDataLogging: EnableSensitiveDataLoggingForDatabase
       );
 
       DbPath = dbPath;
       DbConnection = dbConnection;
-      InitDbContext = (BankingDbContext)dbContext;
+      InitDbContext = dbContext;
 
-      // Build default container
+      // Build the default DI container
       DefaultProvider = CreateProviderCore();
    }
 
    private void AddBaseServices(IServiceCollection services) {
-      // Logging setup
+      services.AddSingleton(Configuration);
+
+      // Configure logging for test runs
       services.AddLogging(builder => {
          builder.ClearProviders();
 
-         if (EnableLogging) {
-            builder.AddSimpleConsole(o => {
-               o.SingleLine = false;
-               o.TimestampFormat = "HH:mm:ss ";
-            });
-
-            builder.SetMinimumLevel(LogLevel.Debug);
-
-            builder.AddFilter(
-               "Microsoft.EntityFrameworkCore.Infrastructure",
-               LogLevel.Information
-            );
-         }
-         else {
-            builder.SetMinimumLevel(LogLevel.None);
-         }
+         builder.AddConfiguration(Configuration.GetSection("Logging"));
+         builder.AddSimpleConsole(o => {
+            o.SingleLine = false;
+            o.TimestampFormat = "HH:mm:ss ";
+         });
       });
 
-      // Register infrastructure (DbContext, repositories, UnitOfWork)
-      services.AddTestModules(
-         dbConnection: DbConnection,
-         enableSensitiveDataLogging: true
-      );
+      // Register project-specific services
+      AddProjectServices(services);
    }
+
+   // Factory method for creating the concrete DbContext
+   protected abstract TDbContext CreateDbContext(DbContextOptions<TDbContext> options);
+
+   // Register application and infrastructure services for tests
+   protected abstract void AddProjectServices(IServiceCollection services);
 
    private ServiceProvider CreateProviderCore(
       Action<IServiceCollection>? overrides = null
    ) {
       var services = new ServiceCollection();
 
-      // Base registrations
+      // Register base services
       AddBaseServices(services);
 
-      // Optional test-specific overrides
+      // Apply optional test overrides
       overrides?.Invoke(services);
 
       return services.BuildServiceProvider();
    }
 
+   // Return the default provider or build a custom one with overrides
    public ServiceProvider BuildServiceProvider(
       Action<IServiceCollection>? overrides = null
    ) {
@@ -96,17 +119,19 @@ public sealed class TestCompositionRoot : IAsyncLifetime {
          : CreateProviderCore(overrides);
    }
 
+   // Create a scope from the default provider
    public IServiceScope CreateDefaultScope() {
       return DefaultProvider.CreateScope();
    }
 
+   // Build a custom provider for a specific test setup
    public ServiceProvider CreateCustomProvider(
       Action<IServiceCollection> overrides
    ) {
       return CreateProviderCore(overrides);
    }
 
-   // Replace a singleton service in tests
+   // Replace a singleton registration in tests
    public static void ReplaceSingleton<TService>(
       IServiceCollection services,
       TService implementation
@@ -116,7 +141,7 @@ public sealed class TestCompositionRoot : IAsyncLifetime {
       services.AddSingleton(implementation);
    }
 
-   // Replace a scoped service in tests
+   // Replace a scoped registration in tests
    public static void ReplaceScoped<TService, TImplementation>(
       IServiceCollection services
    )
@@ -127,11 +152,13 @@ public sealed class TestCompositionRoot : IAsyncLifetime {
    }
 
    public async ValueTask DisposeAsync() {
-      if (DefaultProvider is not null)
-         await DefaultProvider.DisposeAsync();
 
+      // Dispose the default DI container
+      await DefaultProvider.DisposeAsync();
+
+      // Dispose database resources
       await TestDatabase.DisposeAsync(
-         mode: DbMode.FileUnique,
+         mode: DatabaseMode,
          dbPath: DbPath,
          dbConnection: DbConnection,
          dbContext: InitDbContext,
@@ -140,72 +167,60 @@ public sealed class TestCompositionRoot : IAsyncLifetime {
    }
 }
 
+// Concrete test composition root for BankingDbContext
+public sealed class TestCompositionRoot : TestCompositionRoot<BankingDbContext> {
+
+   // Create the concrete BankingDbContext
+   protected override BankingDbContext CreateDbContext(DbContextOptions<BankingDbContext> options) {
+      return new BankingDbContext(options);
+   }
+
+   // Register all project services needed for tests
+   protected override void AddProjectServices(IServiceCollection services) {
+      services.AddTestModules(
+         dbConnection: DbConnection,
+         enableSensitiveDataLogging: EnableSensitiveDataLoggingForDatabase
+      );
+   }
+}
+
 /*
-====================================================================
-DIDAKTIK & LERNZIELE
-====================================================================
+Didaktik
+--------
 
-1. Test Composition Root
+Diese Klasse bildet den zentralen Composition Root
+für Integrationstests.
 
-Diese Klasse bildet den zentralen Composition Root für
-Integrationstests. Hier wird die komplette Infrastruktur
-für Tests aufgebaut:
+Hier wird die technische Testinfrastruktur aufgebaut:
 
 - Testdatenbank
+- DbContext
 - Dependency Injection Container
 - Logging
-- Infrastrukturmodule
+- Projektmodule
 
-Lernziel:
-Studierende verstehen, dass auch Tests eine Architektur
-und einen eigenen Composition Root besitzen.
+Dadurch bleiben einzelne Tests klein und konzentrieren
+sich auf fachliches Verhalten.
 
---------------------------------------------------------------------
+Ein wichtiger Punkt ist die Möglichkeit, Registrierungen
+für Tests gezielt zu ersetzen, z.B. durch Fakes oder Mocks.
 
-2. Default Container vs Test Overrides
-
-Der DefaultProvider stellt einen Standard-DI-Container bereit,
-den die meisten Tests unverändert verwenden können.
-
-Einzelne Tests können jedoch gezielt Abhängigkeiten ersetzen,
-z.B.:
+Beispiele:
 
 - FakeClock
 - FakeIdentityGateway
 - FakePaymentGateway
 
-Dies geschieht über CreateCustomProvider().
+So kann die Testumgebung flexibel angepasst werden,
+ohne den Produktionscode zu verändern.
 
-Lernziel:
-Studierende verstehen, wie Dependency Injection gezielt
-für Test Doubles verwendet werden kann.
 
---------------------------------------------------------------------
+Lernziele
+---------
 
-3. Stabiler Infrastrukturaufbau
-
-Der TestCompositionRoot kapselt alle technischen Details
-des Test-Setups. Dadurch bleiben einzelne Tests klein
-und konzentrieren sich auf fachliches Verhalten.
-
-Lernziel:
-Studierende lernen, wie man eine stabile Infrastruktur
-für Integrationstests aufbaut.
-
---------------------------------------------------------------------
-
-4. Replace Pattern
-
-Die Methoden ReplaceSingleton und ReplaceScoped erlauben
-das gezielte Überschreiben vorhandener DI-Registrierungen.
-
-Beispiel:
-
-ReplaceSingleton<IClock>(services, new FakeClock());
-
-Lernziel:
-Studierende verstehen, wie bestehende DI-Registrierungen
-im Testkontext ersetzt werden können.
-
-====================================================================
+- Verständnis eines Composition Root für Tests
+- Aufbau einer stabilen Infrastruktur für Integrationstests
+- Einsatz von Dependency Injection im Testkontext
+- Überschreiben von Registrierungen mit Test Doubles
+- Trennung zwischen technischem Setup und fachlichem Testcode
 */

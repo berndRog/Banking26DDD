@@ -4,7 +4,7 @@ using BankingApiTest.Infrastructure;
 using Microsoft.Extensions.DependencyInjection;
 namespace BankingApiTest._2_Core.Customers.Application;
 
-public sealed class CustomerUcActivateIntT : IntegrationTestBase {
+public sealed class CustomerUcActivateIntT : TestBaseEndToEnd {
    
    TestSeed _seed = new TestSeed();
    

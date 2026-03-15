@@ -9,7 +9,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 namespace BankingApiTest._2_Modules.Employees.Application;
 
-public sealed class CustomersControllerEndtoEnd : IntegrationTestBase {
+public sealed class CustomersControllerEndtoEnd : TestBaseEndToEnd {
    private TestSeed _seed = new TestSeed();
 
    // For teaching: keep DB so students can inspect it afterwards.

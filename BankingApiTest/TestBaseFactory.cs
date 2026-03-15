@@ -9,6 +9,7 @@ using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 namespace BankingApiTest.Infrastructure;
@@ -17,7 +18,7 @@ namespace BankingApiTest.Infrastructure;
 /// Integration-test host for BankingApi.
 /// Uses the real Program.cs DI setup and only replaces selected infrastructure services (e.g., the database).
 /// </summary>
-public sealed class BankingApiFactory : WebApplicationFactory<Program> {
+public sealed class TestBaseFactory : WebApplicationFactory<Program> {
    private readonly DbMode _dbMode;
    private readonly string _databaseName;
    private readonly bool _applyMigrations;
@@ -27,13 +28,13 @@ public sealed class BankingApiFactory : WebApplicationFactory<Program> {
    private string _dbPath = string.Empty;
    private DbConnection? _dbConnection;
    
-   public string TestSubject { get; set; } = "test-subject";
-   public string TestUsername { get; set; } = "test@user.local";
+   public string TestSubject { get; set; } = "11111111-a224-492b-bb8f-b4bac23d7c88";
+   public string TestUsername { get; set; } = "j.doe@mail.local";
    public DateTimeOffset TestCreatedAt { get; set; } = DateTimeOffset.Parse("2025-01-01T00:00:00+01:00");
    public int TestAdminRights { get; set; } = 0;
 
    
-   public BankingApiFactory(
+   public TestBaseFactory(
       DbMode dbMode,
       string databaseName = "BankingApiTest",
       bool applyMigrations = true,
@@ -75,6 +76,13 @@ public sealed class BankingApiFactory : WebApplicationFactory<Program> {
    }
 
    protected override void ConfigureWebHost(IWebHostBuilder builder) {
+      builder.ConfigureAppConfiguration((_, config) => {
+         config.AddJsonFile(
+            path: Path.Combine(AppContext.BaseDirectory, "appsettingsTest.json"),
+            optional: false,
+            reloadOnChange: false
+         );
+      });
       
       builder.ConfigureServices(services => {
          if (_dbConnection is null)

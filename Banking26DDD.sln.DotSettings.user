@@ -53,6 +53,7 @@
     &lt;ProjectFolder&gt;8F031B4C-A09C-4100-8434-F2F7C9EA42DE/d:_2_Core/d:Customers/d:Application&lt;/ProjectFolder&gt;
     &lt;TestAncestor&gt;
       &lt;TestId&gt;xUnit::8F031B4C-A09C-4100-8434-F2F7C9EA42DE::net10.0::BankingApiTest._3_Infrastructure._2_Persistence.Repositories.CustomerRepositoryIntTests&lt;/TestId&gt;
+      &lt;TestId&gt;xUnit::8F031B4C-A09C-4100-8434-F2F7C9EA42DE::net10.0::BankingApiTest._2_Core.Core.Domain.Aggregates.AccountUt&lt;/TestId&gt;
     &lt;/TestAncestor&gt;
   &lt;/Or&gt;
 &lt;/SessionState&gt;</s:String>

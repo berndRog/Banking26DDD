@@ -82,10 +82,10 @@ public static class DiTestModules {
       services.AddScoped<IUnitOfWork, UnitOfWork>();
       // Clock 
       services.AddSingleton<IClock>(_ => new FakeClock(FakeClock.DefaultUtcNow));
-      // IdentityGateway
+      // IdentityGateway = CustomerRegister() from TestSeed
       services.AddScoped<IIdentityGateway>(_ => new FakeIdentityGateway(
-         subject: "a00090ad-d9df-486a-8757-4a649e26a54e",
-         username: "erika.mustermann@t-online.de",
+         subject: "11111111-a224-492b-bb8f-b4bac23d7c88",
+         username: "j.doe@mail.local",
          createdAt: FakeClock.DefaultUtcNow,
          adminRights: null
       ));

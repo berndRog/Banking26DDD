@@ -1,36 +1,28 @@
 namespace BankingApiTest.Infrastructure;
 
-/// <summary>
-/// Base class for integration tests that need a fresh database per test.
+/// Base class for end to end tests that need a fresh database per test.
 /// Creates a new BankingApiFactory (and thus a new DB file) for every test instance.
 /// xUnit creates a NEW instance of the test class per test method by default.
-/// </summary>
-public abstract class IntegrationTestBase : IAsyncLifetime {
-   protected BankingApiFactory Factory { get; private set; } = null!;
+public abstract class TestBaseEndToEnd : IAsyncLifetime {
+   protected TestBaseFactory Factory { get; private set; } = null!;
    protected HttpClient Client { get; private set; } = null!;
 
-   /// <summary>y
-   /// Teaching mode:
-   /// - Keep DB files so students can inspect them in Rider after a debug session.
-   /// CI mode:
-   /// - Set to true to delete DB files after each test.
-   /// </summary>
+   // Teaching mode:
+   // - Keep DB files so students can inspect them in Rider after a debug session.
+   // CI mode:
+   // - Set to true to delete DB files after each test.
    protected virtual bool DeleteDatabaseOnDispose => false;
 
-   /// <summary>
-   /// Create a unique DB file per test (FileUnique).
-   /// If you want a stable path per test name, keep FileUnique and use the test method name in DatabaseName.
-   /// </summary>
+   // Create a unique DB file per test (FileUnique).
+   // If you want a stable path per test name, keep FileUnique and use the test method name in DatabaseName.
    protected virtual DbMode DbMode => DbMode.FileUnique;
 
-   /// <summary>
-   /// Base name for DB files (timestamp will be appended for FileUnique).
-   /// Override to include the test name if you want even nicer traceability.
-   /// </summary>
+   // Base name for DB files (timestamp will be appended for FileUnique).
+   // Override to include the test name if you want even nicer traceability.
    protected virtual string DatabaseName => "BankingApiTest";
 
    public async ValueTask InitializeAsync() {
-      Factory = new BankingApiFactory(
+      Factory = new TestBaseFactory(
          dbMode: DbMode,
          databaseName: DatabaseName,
          applyMigrations: true,

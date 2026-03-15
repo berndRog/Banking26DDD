@@ -48,6 +48,8 @@ public sealed class TestSeed {
    public Customer Customer4() => _seed.Customer4();
    public Customer Customer5() => _seed.Customer5();
    public Customer Customer6() => _seed.Customer6();
+   
+   public Customer CustomerRegister() => _seed.CustomerRegister();
 
    public IReadOnlyList<Customer> Customers => [
       Customer1(), Customer2(), Customer3(), Customer4(), Customer5(), Customer6()
