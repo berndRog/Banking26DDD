@@ -8,7 +8,7 @@ using BankingApi._2_Core.Customers._2_Application.Dtos;
 using BankingApi._2_Core.Customers._2_Application.Errors;
 using BankingApi._2_Core.Customers._2_Application.Mappings;
 using BankingApi._2_Core.Customers._3_Domain.Entities;
-using BankingApi._3_Infrastructure.Logging;
+using BankingApi._3_Infrastructure._4_Logging;
 namespace BankingApi._2_Core.Customers._2_Application.UseCases;
 
 public class CustomerUcCreateProvision(

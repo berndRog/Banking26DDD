@@ -1,6 +1,6 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Design;
-namespace BankingApi._3_Infrastructure.Database;
+namespace BankingApi._3_Infrastructure._2_Persistence.Database;
 
 public class BankingDbContextFactory : IDesignTimeDbContextFactory<BankingDbContext> {
    public BankingDbContext CreateDbContext(string[] args) {

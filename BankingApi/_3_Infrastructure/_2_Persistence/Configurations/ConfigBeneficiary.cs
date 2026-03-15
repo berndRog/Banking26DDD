@@ -2,7 +2,7 @@ using BankingApi._2_Core.Payments._3_Domain.Aggregates;
 using BankingApi._3_Infrastructure._2_Persistence.Converters;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
-namespace BankingApi._2_Core.Payments._4_Infrastructure.Persistence;
+namespace BankingApi._3_Infrastructure._2_Persistence.Configurations;
 
 internal sealed class ConfigBeneficiary : IEntityTypeConfiguration<Beneficiary> {
 

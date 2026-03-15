@@ -1,9 +1,8 @@
 using BankingApi._2_Core.Payments._3_Domain.Aggregates;
 using BankingApi._3_Infrastructure._2_Persistence.Database.Converter;
-using BankingApi._3_Infrastructure.Database;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
-namespace BankingApi._2_Core.Payments._4_Infrastructure.Persistence;
+namespace BankingApi._3_Infrastructure._2_Persistence.Configurations;
 
 public sealed class ConfigTransaction(
    DateTimeOffsetToIsoStringConverter dtConv

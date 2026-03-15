@@ -1,6 +1,6 @@
 using System.Security.Claims;
 using BankingApi._2_Core.BuildingBlocks._1_Ports.Outbound;
-namespace BankingApi._3_Infrastructure.Security;
+namespace BankingApi._3_Infrastructure._3_Security;
 
 // Reads identity-related claims of the currently authenticated user
 // from the ASP.NET Core HttpContext and exposes them via IIdentityGateway.

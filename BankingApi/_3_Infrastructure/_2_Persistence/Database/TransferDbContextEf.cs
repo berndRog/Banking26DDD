@@ -1,6 +1,6 @@
 using BankingApi._2_Core.Payments._1_Ports.Outbound;
 using BankingApi._2_Core.Payments._3_Domain.Aggregates;
-namespace BankingApi._3_Infrastructure.Database;
+namespace BankingApi._3_Infrastructure._2_Persistence.Database;
 
 internal sealed class TransferDbContextEf(
    BankingDbContext db

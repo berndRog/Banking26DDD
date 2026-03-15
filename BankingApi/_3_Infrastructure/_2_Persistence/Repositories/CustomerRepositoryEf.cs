@@ -2,10 +2,9 @@ using System.Runtime.CompilerServices;
 using BankingApi._2_Core.BuildingBlocks._3_Domain.ValueObjects;
 using BankingApi._2_Core.Customers._1_Ports.Outbound;
 using BankingApi._2_Core.Customers._3_Domain.Entities;
-using BankingApi._3_Infrastructure.Database;
 using Microsoft.EntityFrameworkCore;
 [assembly: InternalsVisibleTo("BankingApiTest")]
-namespace BankingApi._2_Modules.Customers._4_Infrastructure.Repositories;
+namespace BankingApi._3_Infrastructure._2_Persistence.Repositories;
 
 internal class CustomerRepositoryEf(
    ICustomerDbContext customerDbContext

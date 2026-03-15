@@ -3,7 +3,6 @@ using BankingApi._2_Core.BuildingBlocks._1_Ports.Outbound;
 using BankingApi._2_Core.BuildingBlocks._3_Domain;
 using BankingApi._2_Core.BuildingBlocks._3_Domain.ValueObjects;
 using BankingApi._2_Core.BuildingBlocks._4_Infrastructure.ReadModel;
-using BankingApi._2_Core.Customers._1_Ports.Inbound;
 using BankingApi._2_Core.Customers._1_Ports.Outbound;
 using BankingApi._2_Core.Customers._2_Application.Dtos;
 using BankingApi._2_Core.Customers._2_Application.Errors;
@@ -12,7 +11,7 @@ using BankingApi._2_Core.Customers._2_Application.ReadModel;
 using BankingApi._2_Core.Customers._3_Domain.Entities;
 using Microsoft.EntityFrameworkCore;
 [assembly: InternalsVisibleTo("BankingApiTest")]
-namespace BankingApi._2_Modules.Employees._4_Infrastructure.ReadModel;
+namespace BankingApi._3_Infrastructure._2_Persistence.ReadModel;
 
 internal sealed class CustomerReadModelEf(
    ICustomerDbContext customerDbContext,

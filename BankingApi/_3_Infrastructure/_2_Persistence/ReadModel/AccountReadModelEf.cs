@@ -5,10 +5,10 @@ using BankingApi._2_Core.Payments._2_Application.Dtos;
 using BankingApi._2_Core.Payments._2_Application.Errors;
 using BankingApi._2_Core.Payments._2_Application.Mappings;
 using BankingApi._2_Core.Payments._3_Domain.ValueObjects;
-using BankingApi._3_Infrastructure.Database;
+using BankingApi._3_Infrastructure._2_Persistence.Database;
 using Microsoft.EntityFrameworkCore;
 [assembly: InternalsVisibleTo("BankingApiTest")]
-namespace BankingApi._2_Core.Payments._4_Infrastructure.ReadModel;
+namespace BankingApi._3_Infrastructure._2_Persistence.ReadModel;
 
 internal sealed class AccountReadModelEf(
    BankingDbContext dbContext

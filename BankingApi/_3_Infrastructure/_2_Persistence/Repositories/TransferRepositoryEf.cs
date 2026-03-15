@@ -1,10 +1,10 @@
 using System.Runtime.CompilerServices;
 using BankingApi._2_Core.Payments._1_Ports.Outbound;
 using BankingApi._2_Core.Payments._3_Domain.Aggregates;
-using BankingApi._3_Infrastructure.Database;
+using BankingApi._3_Infrastructure._2_Persistence.Database;
 using Microsoft.EntityFrameworkCore;
 [assembly: InternalsVisibleTo("BankingApiTest")]
-namespace BankingApi._2_Core.Payments._4_Infrastructure.Repositories;
+namespace BankingApi._3_Infrastructure._2_Persistence.Repositories;
 
 internal sealed class TransferRepositoryEf(
    BankingDbContext _dbContext

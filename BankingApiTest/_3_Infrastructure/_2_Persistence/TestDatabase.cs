@@ -1,5 +1,5 @@
 using System.Data.Common;
-using BankingApi._3_Infrastructure.Database;
+using BankingApi._3_Infrastructure._2_Persistence.Database;
 using Microsoft.Data.Sqlite;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;

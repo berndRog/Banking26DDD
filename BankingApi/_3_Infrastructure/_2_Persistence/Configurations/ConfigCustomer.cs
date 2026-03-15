@@ -1,7 +1,6 @@
 using BankingApi._2_Core.Customers._3_Domain.Entities;
+using BankingApi._3_Infrastructure._2_Persistence.Converters;
 using BankingApi._3_Infrastructure._2_Persistence.Database.Converter;
-using BankingApi._3_Infrastructure.Database;
-using BankingApi._3_Infrastructure.Database.ValueObjects;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 namespace BankingApi._3_Infrastructure._2_Persistence.Configurations;

@@ -1,6 +1,6 @@
 using BankingApi._2_Core.Employees._1_Ports.Outbound;
 using BankingApi._2_Core.Employees._3_Domain.Aggregates;
-namespace BankingApi._3_Infrastructure.Database;
+namespace BankingApi._3_Infrastructure._2_Persistence.Database;
 
 internal sealed class EmployeeDbContextEf(
    BankingDbContext db

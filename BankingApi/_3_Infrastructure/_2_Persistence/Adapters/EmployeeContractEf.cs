@@ -6,10 +6,10 @@ using BankingApi._2_Core.Employees._2_Application.Dtos;
 using BankingApi._2_Core.Employees._2_Application.Errors;
 using BankingApi._2_Core.Employees._2_Application.Mappings;
 using BankingApi._2_Core.Employees._3_Domain.Enums;
-using BankingApi._3_Infrastructure.Database;
+using BankingApi._3_Infrastructure._2_Persistence.Database;
 using Microsoft.EntityFrameworkCore;
 [assembly: InternalsVisibleTo("BankingApiTest")]
-namespace BankingApi._2_Core.Employees._4_Infrastructure.Adapters;
+namespace BankingApi._3_Infrastructure._2_Persistence.Adapters;
 
 internal class EmployeeContractEf(
    BankingDbContext dbContext,

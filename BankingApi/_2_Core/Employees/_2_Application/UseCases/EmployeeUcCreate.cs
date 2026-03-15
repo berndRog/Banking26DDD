@@ -5,7 +5,7 @@ using BankingApi._2_Core.Employees._1_Ports.Outbound;
 using BankingApi._2_Core.Employees._3_Domain.Aggregates;
 using BankingApi._2_Core.Employees._3_Domain.Enums;
 using BankingApi._2_Core.Employees._3_Domain.Errors;
-using BankingApi._3_Infrastructure.Logging;
+using BankingApi._3_Infrastructure._4_Logging;
 namespace BankingApi._2_Core.Employees._2_Application.UseCases;
 
 /// <summary>

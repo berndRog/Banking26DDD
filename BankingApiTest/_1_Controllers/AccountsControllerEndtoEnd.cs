@@ -5,7 +5,7 @@ using BankingApi._2_Core.Customers._2_Application.Dtos;
 using BankingApi._2_Core.Customers._2_Application.Mappings;
 using BankingApi._2_Core.Customers._3_Domain.Enum;
 using BankingApi._2_Core.Payments._2_Application.Dtos;
-using BankingApi._3_Infrastructure.Database;
+using BankingApi._3_Infrastructure._2_Persistence.Database;
 using BankingApiTest._3_Infrastructure._3_Security;
 using BankingApiTest.Infrastructure;
 using Microsoft.EntityFrameworkCore;

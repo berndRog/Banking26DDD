@@ -3,7 +3,7 @@ using BankingApi._2_Core.Customers._1_Ports.Outbound;
 using BankingApi._2_Core.Customers._3_Domain.Entities;
 [assembly: InternalsVisibleTo("BankingApiTest")]
 
-namespace BankingApi._3_Infrastructure.Database;
+namespace BankingApi._3_Infrastructure._2_Persistence.Database;
 
 internal sealed class CustomerDbContextEf(
    BankingDbContext db

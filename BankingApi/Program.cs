@@ -8,7 +8,7 @@ using BankingApi._2_Modules.Customers;
 using BankingApi._2_Modules.Employees;
 using BankingApi._3_Infrastructure;
 using BankingApi._3_Infrastructure._2_Persistence;
-using BankingApi._3_Infrastructure.Database;
+using BankingApi._3_Infrastructure._2_Persistence.Database;
 using BankingApi._4_BuildingBlocks;
 using Microsoft.AspNetCore.HttpLogging;
 namespace BankingApi;

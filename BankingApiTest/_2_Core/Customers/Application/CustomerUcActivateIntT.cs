@@ -1,5 +1,5 @@
 using BankingApi._2_Core.Customers._1_Ports.Inbound;
-using BankingApi._3_Infrastructure.Database;
+using BankingApi._3_Infrastructure._2_Persistence.Database;
 using BankingApiTest.Infrastructure;
 using Microsoft.Extensions.DependencyInjection;
 namespace BankingApiTest._2_Core.Customers.Application;

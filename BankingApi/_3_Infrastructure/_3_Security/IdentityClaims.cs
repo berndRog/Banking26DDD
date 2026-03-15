@@ -1,4 +1,4 @@
-namespace BankingApi._3_Infrastructure.Security;
+namespace BankingApi._3_Infrastructure._3_Security;
 
 /// <summary>
 /// Well-known claim names used by the Identity Provider (OIDC/OAuth).

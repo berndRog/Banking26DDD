@@ -1,5 +1,5 @@
 using BankingApi._2_Core.BuildingBlocks._3_Domain;
-namespace BankingApi._3_Infrastructure.Logging;
+namespace BankingApi._3_Infrastructure._4_Logging;
 
 /// <summary>
 /// Centralized logging extensions for Result and Result&lt;T&gt;.

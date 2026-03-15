@@ -2,7 +2,7 @@ using BankingApi._2_Core.BuildingBlocks._1_Ports.Inbound;
 using BankingApi._2_Core.BuildingBlocks._1_Ports.Outbound;
 using BankingApi._2_Core.BuildingBlocks._3_Domain.Entities;
 using Microsoft.EntityFrameworkCore;
-namespace BankingApi._3_Infrastructure.Database;
+namespace BankingApi._3_Infrastructure._2_Persistence.Database;
 
 public sealed class UnitOfWork(
    BankingDbContext _dbContext,
