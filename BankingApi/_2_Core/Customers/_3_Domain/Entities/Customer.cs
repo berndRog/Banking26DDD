@@ -109,9 +109,6 @@ public sealed class Customer : AggregateRoot {
 
       if (!string.IsNullOrWhiteSpace(companyName) && companyName.Length is < 2 or > 80)
          return Result<Customer>.Failure(CustomerErrors.InvalidCompanyName);
-      if (addressVo is null)
-         return Result<Customer>.Failure(CustomerErrors.AddressIsRequired);
-
       var resultSubject = IdentitySubject.Check(subject);
       if (resultSubject.IsFailure)
          return Result<Customer>.Failure(resultSubject.Error);
@@ -145,13 +142,32 @@ public sealed class Customer : AggregateRoot {
    // Create an owner on first login (provisioning).
    public static Result<Customer> CreateProvision(
       string identitySubject,
+      string firstname,
+      string lastname,
+      string? companyName,
       EmailVo emailVo,
+      AddressVo addressVo,
       DateTimeOffset createdAt = default!,
       string? id = null
    ) {
+      firstname = firstname.Trim();
+      lastname = lastname.Trim();
+      companyName = companyName?.Trim();
+
       if (createdAt == default)
          return Result<Customer>.Failure(CustomerErrors.CreatedAtIsRequired);
+      if (string.IsNullOrWhiteSpace(firstname))
+         return Result<Customer>.Failure(CustomerErrors.FirstnameIsRequired);
+      if (firstname.Length is < 2 or > 80)
+         return Result<Customer>.Failure(CustomerErrors.InvalidFirstname);
 
+      if (string.IsNullOrWhiteSpace(lastname))
+         return Result<Customer>.Failure(CustomerErrors.LastnameIsRequired);
+      if (lastname.Length is < 2 or > 80)
+         return Result<Customer>.Failure(CustomerErrors.InvalidLastname);
+
+      if (!string.IsNullOrWhiteSpace(companyName) && companyName.Length is < 2 or > 80)
+         return Result<Customer>.Failure(CustomerErrors.InvalidCompanyName);
       var resultSubject = IdentitySubject.Check(identitySubject);
       if (resultSubject.IsFailure)
          return Result<Customer>.Failure(resultSubject.Error);
@@ -160,25 +176,14 @@ public sealed class Customer : AggregateRoot {
       var resultId = Resolve(id, CustomerErrors.InvalidId);
       if (resultId.IsFailure)
          return Result<Customer>.Failure(resultId.Error);
-      var Id = resultId.Value;
-
-      // create am empty address
-      var resultAddress = AddressVo.Create(
-         street: "empty",
-         postalCode: "empty",
-         city: "empty",
-         country: null
-      );
-      if (resultAddress.IsFailure)
-         return Result<Customer>.Failure(resultAddress.Error);
-      var addressVo = resultAddress.Value;
+      var customerId = resultId.Value;
 
       // Provisioned customer starts with identity data plus required business profile data.
       var customer = new Customer(
-         id: Id,
-         firstname: string.Empty, // profile incomplete at provisioning, customer must update profile later
-         lastname: string.Empty, // profile incomplete at provisioning, customer must update profile later
-         companyName: null, // 
+         id: customerId,
+         firstname: firstname,
+         lastname: lastname,
+         companyName: companyName,
          subject: subject,
          emailVo: emailVo,
          addressVo: addressVo

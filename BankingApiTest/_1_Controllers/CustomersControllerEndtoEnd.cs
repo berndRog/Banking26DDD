@@ -36,16 +36,13 @@ public sealed class CustomersControllerEndtoEnd : TestBaseEndToEnd {
          AddressVo: customer1.AddressVo
       );
       // Act
-
-      var subject =
-         "12345678-0000-0000-0000-000000000000"; // in real scenario, subject should come from auth token or be generated in use case
+      Factory.TestSubject = "12345678-0000-0000-0000-000000000000";
       var account1Id = account1.Id.ToString();
       var iban1 = account1.IbanVo.Value;
       
       var request = new HttpRequestMessage(
          method: HttpMethod.Post,
          requestUri:"/bankingapi/v1/customers?"+
-         $"subject={Uri.EscapeDataString(subject)}&"+
          $"accountId={Uri.EscapeDataString(account1Id)}&"+
          $"iban={Uri.EscapeDataString(iban1)}"
       );
@@ -84,7 +81,7 @@ public sealed class CustomersControllerEndtoEnd : TestBaseEndToEnd {
          Equal(requestDto.Lastname, owner.Lastname);
          Equal(requestDto.EmailString, owner.EmailVo.Value);
          Equal(requestDto.StatusInt, (int)owner.Status);
-         Equal(subject, owner.Subject);
+         Equal(Factory.TestSubject, owner.Subject);
          Equal(requestDto.AddressVo, owner.AddressVo);
          
          var accounts = await dbContext.Accounts

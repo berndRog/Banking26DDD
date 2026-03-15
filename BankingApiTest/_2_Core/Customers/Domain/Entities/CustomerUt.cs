@@ -361,18 +361,26 @@ public sealed class CustomerUt {
 
    #region --- CreateProvision tests ---------------------------
    [Fact]
-   public void CreateProvision_valid_sets_pending_and_profile_incomplete_and_createdAt() {
+   public void CreateProvision_valid_sets_pending_and_profile_data_and_createdAt() {
       // Arrange
       var customerRegister = _seed.CustomerRegister();
       var customerId = customerRegister.Id;
       var subject = customerRegister.Subject;
+      var firstname = customerRegister.Firstname;
+      var lastname = customerRegister.Lastname;
+      var companyName = customerRegister.CompanyName;
       var emailVo = customerRegister.EmailVo;
+      var addressVo = customerRegister.AddressVo;
       var createdAt = customerRegister.CreatedAt;
       
       // Act
       var result = Customer.CreateProvision(
          identitySubject: subject,
+         firstname: firstname,
+         lastname: lastname,
+         companyName: companyName,
          emailVo: emailVo,
+         addressVo: addressVo,
          createdAt: createdAt,
          id: customerId.ToString()
       );
@@ -382,11 +390,15 @@ public sealed class CustomerUt {
       var customer = result.Value!;
 
       Equal(customerId, customer.Id);
+      Equal(firstname, customer.Firstname);
+      Equal(lastname, customer.Lastname);
+      Equal(companyName, customer.CompanyName);
       Equal(subject, customer.Subject);
       Equal(emailVo, customer.EmailVo);
+      Equal(addressVo, customer.AddressVo);
       Equal(createdAt, customer.CreatedAt);
       Equal(CustomerStatus.Pending, customer.Status);
-      False(customer.IsProfileComplete);
+      True(customer.IsProfileComplete);
       False(customer.IsActive);
    }
 
@@ -395,14 +407,17 @@ public sealed class CustomerUt {
       // Arrange
       var customerRegister = _seed.CustomerRegister();
       var customerId = customerRegister.Id;
-      var subject = customerRegister.Subject;
       var emailVo = customerRegister.EmailVo;
       var createdAt = customerRegister.CreatedAt;
       
       // Act
       var result = Customer.CreateProvision(
          identitySubject: "",
+         firstname: customerRegister.Firstname,
+         lastname: customerRegister.Lastname,
+         companyName: customerRegister.CompanyName,
          emailVo: emailVo,
+         addressVo: customerRegister.AddressVo,
          createdAt: createdAt,
          id: customerId.ToString()
       );

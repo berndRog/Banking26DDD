@@ -2,7 +2,6 @@ using BankingApi._2_Core.BuildingBlocks._1_Ports.Outbound;
 using BankingApi._2_Core.Customers._1_Ports.Outbound;
 using BankingApi._2_Core.Customers._2_Application.Mappings;
 using BankingApi._2_Core.Customers._2_Application.UseCases;
-using BankingApiTest._3_Infrastructure;
 using BankingApiTest.TestInfrastructure;
 using Microsoft.Extensions.DependencyInjection;
 namespace BankingApiTest._2_Core.Customers.Application;
@@ -38,6 +37,10 @@ public sealed class CustomerUcCreateProvisionIntT : TestBaseIntegration {
       NotNull(actual);
 
       Equal(customerId, actual.Id);
+      Equal(customer.Firstname, actual.Firstname);
+      Equal(customer.Lastname, actual.Lastname);
+      Equal(customer.CompanyName, actual.CompanyName);
+      Equal(customer.AddressVo, actual.AddressVo);
       Equal(identity.Subject, actual.Subject);
       Equal(identity.Username, actual.EmailVo.Value);
       Equal(identity.CreatedAt, actual.CreatedAt);

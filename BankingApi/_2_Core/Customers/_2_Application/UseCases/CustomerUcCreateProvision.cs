@@ -60,7 +60,11 @@ public class CustomerUcCreateProvision(
       // 4) create aggregate
       var resultCustomer = Customer.CreateProvision(
          identitySubject: subject,
+         firstname: customerDto.Firstname,
+         lastname: customerDto.Lastname,
+         companyName: customerDto.CompanyName,
          emailVo: emailVo,
+         addressVo: customerDto.AddressVo,
          createdAt: createdAt,
          id: customerDto.Id.ToString()
       );

@@ -46,7 +46,7 @@ public static class TestDatabase {
 
          DbMode.FileUnique => CreateFileAsync<TDbContext>(
             createDbContext: createDbContext,
-            stableFileName: $"{databaseName}_{DateTimeOffset.UtcNow.ToUnixTimeMilliseconds()}.db",
+            stableFileName: $"{databaseName}_{DateTimeOffset.UtcNow:yyyyMMdd_HHmmss_fff}_{Guid.NewGuid():N}.db",
             uniquePerRun: true,
             applyMigrations: applyMigrations,
             enableSensitiveDataLogging: enableSensitiveDataLogging,
