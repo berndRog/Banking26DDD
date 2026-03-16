@@ -3,23 +3,21 @@ using BankingApi._3_Infrastructure._2_Persistence.Converters;
 using BankingApi._3_Infrastructure._2_Persistence.Database.Converter;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
+
 namespace BankingApi._3_Infrastructure._2_Persistence.Configurations;
 
 public sealed class ConfigAccount(
-   DateTimeOffsetToIsoStringConverter dtConv,
-   DateTimeOffsetToIsoStringConverterNullable dtConvNul
+   DateTimeOffsetToIsoStringConverter dtConv
 ) : IEntityTypeConfiguration<Account> {
 
    public void Configure(EntityTypeBuilder<Account> builder) {
       builder.ToTable("Accounts");
-      
-      // Key + concurrency
-      // -----------------------------
+
+      // key
       builder.HasKey(a => a.Id);
       builder.Property(a => a.Id).ValueGeneratedNever();
-      
-      // Auditing timestamps
-      // -----------------------------
+
+      // audit fields
       builder.Property(a => a.CreatedAt)
          .HasConversion(dtConv)
          .IsRequired();
@@ -28,21 +26,22 @@ public sealed class ConfigAccount(
          .HasConversion(dtConv)
          .IsRequired();
 
-      // Domain-only
-      builder.Ignore("_clock");
-      builder.Ignore(a => a.IsActive);
+      // business properties
+      builder.Property(a => a.CustomerId)
+         .IsRequired();
 
-      // Business properties
-      // -----------------------------
+      builder.Property(a => a.DeactivatedAt)
+         .HasConversion(dtConv)
+         .IsRequired(false);
+
       builder.Property(a => a.IbanVo)
          .HasIbanConversion()
          .IsRequired();
-      builder.HasIndex(a => a.IbanVo).IsUnique();
-      
 
-      // EF Core mapping (Owned Type) example for Account.Balance (Money)
-      builder.OwnsOne(a => a.BalanceVo, b =>
-      {
+      builder.HasIndex(a => a.IbanVo)
+         .IsUnique();
+
+      builder.OwnsOne(a => a.BalanceVo, b => {
          b.Property(p => p.Amount)
             .HasColumnName("Balance")
             .HasColumnType("decimal(18,2)")
@@ -50,34 +49,54 @@ public sealed class ConfigAccount(
 
          b.Property(p => p.Currency)
             .HasColumnName("Currency")
-            .HasConversion<int>() // enum -> int
+            .HasConversion<int>()
             .IsRequired();
       });
-      
-      builder.Property(a => a.DeactivatedAt)
-         .HasConversion(dtConvNul)
-         .IsRequired(false);
-      
-      // Cross-BC reference (by Id)
-      // -----------------------------
-      builder.Property(a => a.CustomerId)
-         .IsRequired();
-      builder.HasIndex(a => a.CustomerId);
 
-
-      // Account -> Beneficiaries (child entities)
-      // -----------------------------
-      builder.HasMany<Beneficiary>(a => a.Beneficiaries)
+      // child entities: beneficiaries
+      builder.HasMany(a => a.Beneficiaries)
          .WithOne()
          .HasForeignKey(b => b.AccountId)
-         .OnDelete(DeleteBehavior.Cascade); // beneficiaries die with account
+         .OnDelete(DeleteBehavior.Cascade);
 
-      // Use backing field to protect invariants
+      // child entities: transactions
+      builder.HasMany(a => a.Transactions)
+         .WithOne()
+         .HasForeignKey(t => t.AccountId)
+         .OnDelete(DeleteBehavior.Cascade);
+
+      // navigation access mode for backing fields
       builder.Navigation(a => a.Beneficiaries)
-         .HasField("_beneficiaries")
          .UsePropertyAccessMode(PropertyAccessMode.Field);
 
-      // Optional indexes for admin queries
+      builder.Navigation(a => a.Transactions)
+         .UsePropertyAccessMode(PropertyAccessMode.Field);
+
+      // useful query indexes
+      builder.HasIndex(a => a.CustomerId);
       builder.HasIndex(a => a.CreatedAt);
    }
 }
+
+/*
+Didaktik und Lernziele
+
+Das Account-Aggregat ist die Konsistenzgrenze für kontobezogene Daten.
+Dazu gehören neben dem Kontostand auch die Child Entities Beneficiary und
+Transaction.
+
+Wichtig ist die Unterscheidung:
+
+- BalanceVo ist ein Value Object und wird deshalb mit OwnsOne gemappt.
+- Beneficiary und Transaction sind Entities mit eigener Identität und werden
+  deshalb mit HasMany als Child Entities des Account-Aggregats konfiguriert.
+
+Die Konfiguration macht außerdem sichtbar, dass Child Entities zwar eigene
+Tabellenzeilen besitzen können, fachlich aber trotzdem zum Aggregate Root
+gehören. Änderungen an Transactions oder Beneficiaries sollen nicht direkt
+über eigene Repositories erfolgen, sondern immer über den Account.
+
+Damit wird ein zentrales DDD-Prinzip deutlich:
+Ein Aggregate Root schützt die Invarianten seiner untergeordneten Entities
+und bildet die fachliche Zugriffsstelle für Änderungen.
+*/

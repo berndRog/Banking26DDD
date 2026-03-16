@@ -65,11 +65,17 @@
   &lt;/Or&gt;
 &lt;/SessionState&gt;</s:String>
 	<s:String x:Key="/Default/Environment/UnitTesting/UnitTestSessionStore/Sessions/=e0b6f067_002D3936_002D40ab_002Da53e_002D7b79bae5d766/@EntryIndexedValue">&lt;SessionState ContinuousTestingMode="0" IsActive="True" Name="SendMoney_ok" xmlns="urn:schemas-jetbrains-com:jetbrains-ut-session"&gt;
-  &lt;TestAncestor&gt;
-    &lt;TestId&gt;xUnit::8F031B4C-A09C-4100-8434-F2F7C9EA42DE::net10.0::BankingApiTest._2_Core.Core.Application.UseCases.TransferUcSendMoneyIntT.SendMoney_ok&lt;/TestId&gt;
-    &lt;TestId&gt;xUnit::8F031B4C-A09C-4100-8434-F2F7C9EA42DE::net10.0::BankingApiTest._2_Core.Core.Domain.Aggregates.AccountUt.PostDebitUt&lt;/TestId&gt;
-    &lt;TestId&gt;xUnit::8F031B4C-A09C-4100-8434-F2F7C9EA42DE::net10.0::BankingApiTest._2_Core.Core.Domain.Aggregates.AccountUt&lt;/TestId&gt;
-  &lt;/TestAncestor&gt;
+  &lt;Or&gt;
+    &lt;TestAncestor&gt;
+      &lt;TestId&gt;xUnit::8F031B4C-A09C-4100-8434-F2F7C9EA42DE::net10.0::BankingApiTest._2_Core.Core.Application.UseCases.TransferUcSendMoneyIntT.SendMoney_ok&lt;/TestId&gt;
+      &lt;TestId&gt;xUnit::8F031B4C-A09C-4100-8434-F2F7C9EA42DE::net10.0::BankingApiTest._2_Core.Core.Domain.Aggregates.AccountUt.PostDebitUt&lt;/TestId&gt;
+      &lt;TestId&gt;xUnit::8F031B4C-A09C-4100-8434-F2F7C9EA42DE::net10.0::BankingApiTest._2_Core.Core.Domain.Aggregates.AccountUt&lt;/TestId&gt;
+    &lt;/TestAncestor&gt;
+    &lt;ProjectFolder&gt;8F031B4C-A09C-4100-8434-F2F7C9EA42DE/d:_1_Controllers&lt;/ProjectFolder&gt;
+    &lt;ProjectFolder&gt;8F031B4C-A09C-4100-8434-F2F7C9EA42DE/d:_2_Core/d:Customers/d:Application&lt;/ProjectFolder&gt;
+    &lt;ProjectFolder&gt;8F031B4C-A09C-4100-8434-F2F7C9EA42DE/d:_2_Core/d:Customers/d:Domain&lt;/ProjectFolder&gt;
+    &lt;ProjectFolder&gt;8F031B4C-A09C-4100-8434-F2F7C9EA42DE/d:_2_Core/d:Core/d:Domain&lt;/ProjectFolder&gt;
+  &lt;/Or&gt;
 &lt;/SessionState&gt;</s:String>
 	
 	

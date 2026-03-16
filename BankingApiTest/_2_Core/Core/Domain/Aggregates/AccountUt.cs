@@ -203,8 +203,16 @@ public sealed class AccountUt {
       );
       
       // Assert
-      var actual = fromAccount.Transactions.FirstOrDefault(t => t.Id == transfer.CreditTransactionId);
-      NotNull(actual);
+      var actualDebit = fromAccount.Transactions.FirstOrDefault(t => t.Id == transfer.DebitTransactionId);
+      NotNull(actualDebit);
+            
+
+      var actualCredit = toAccount.Transactions.FirstOrDefault(t => t.Id == transfer.CreditTransactionId);
+      NotNull(actualCredit);
+
+      
+      
+      
       // Equal(beneficiary, actual);
    }
    #endregion

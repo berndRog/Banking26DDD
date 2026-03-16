@@ -6,11 +6,12 @@ namespace BankingApi._2_Core.Payments._3_Domain.Entities;
 
 // Child entity of Account Aggregate
 public sealed class Beneficiary : Entity {
-   // Properties
+   //--- Properties ------------------------------------------------------------
    public string Name { get; private set; } = string.Empty;
    public IbanVo IbanVo { get; private set; } = default!;
    public Guid AccountId { get; private set; }
 
+   //--- Constructors -----------------------------------------------------------
    // EfCore ctor
    private Beneficiary() {
    }
@@ -28,6 +29,7 @@ public sealed class Beneficiary : Entity {
       IbanVo = ibanVo;
    }
 
+   //--- Static Factory Methods ------------------------------------------------
    // static factory method to create a beneficiary
    public static Result<Beneficiary> Create(
       Guid accountId,

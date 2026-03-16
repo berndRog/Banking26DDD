@@ -32,7 +32,7 @@ public sealed partial class BankingDbContext(
       modelBuilder.ApplyConfiguration(new ConfigCustomer(dtConv, dtConvNul));
       modelBuilder.ApplyConfiguration(new ConfigEmployee(dtConv, dtConvNul));
 
-      modelBuilder.ApplyConfiguration(new ConfigAccount(dtConv, dtConvNul));
+      modelBuilder.ApplyConfiguration(new ConfigAccount(dtConv));
       modelBuilder.ApplyConfiguration(new ConfigBeneficiary());
 
       modelBuilder.ApplyConfiguration(new ConfigTransfer(dtConv));

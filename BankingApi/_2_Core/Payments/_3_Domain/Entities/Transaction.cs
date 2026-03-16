@@ -31,7 +31,7 @@ public sealed class Transaction : Entity {
    public Guid? TransferId { get; private set; }
    
 
-   //--- Ctors -----------------------------------------------------------------
+   //--- Constructors ----------------------------------------------------------
    // EF Core ctor
    private Transaction() { }
 
@@ -54,6 +54,7 @@ public sealed class Transaction : Entity {
       BookedAt = bookedAt;
    }
 
+   //--- Static Factories ------------------------------------------------------
    public static Result<Transaction> CreateDebit(
       Guid accountId,
       string purpose,
@@ -106,6 +107,7 @@ public sealed class Transaction : Entity {
       return Result<Transaction>.Success(transaction);
    }
    
+   //--- Domain operations -----------------------------------------------------
    internal void AttachTransfer(Guid transferId) {
       TransferId = transferId;
    }
@@ -119,8 +121,8 @@ public sealed class Transaction : Entity {
    1. Account
       Das Account-Aggregate verwaltet den Kontostand und die komplette
       Buchungshistorie eines Kontos. Jede Änderung des Kontostands erfolgt
-      ausschließlich über Debit oder Credit. Dabei wird gleichzeitig eine
-      Transaction erzeugt.
+      ausschließlich über PostDebit oder PostCredit. Dabei wird gleichzeitig 
+      eine Transaction erzeugt.
    
    2. Transfer
       Das Transfer-Aggregate modelliert den fachlichen Geschäftsvorfall einer
