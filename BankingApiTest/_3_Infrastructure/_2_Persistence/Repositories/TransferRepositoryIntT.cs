@@ -38,8 +38,7 @@ public sealed class TransferRepositoryIntT : TestBaseIntegration {
       Equal(transfer.FromAccountId, actual.FromAccountId);
       Equal(transfer.AmountVo, actual.AmountVo);
       Equal(transfer.Purpose, actual.Purpose);
-      Equal(transfer.ToName, actual.ToName);
-      Equal(transfer.ToIbanVo, actual.ToIbanVo);
+
       
    }
 

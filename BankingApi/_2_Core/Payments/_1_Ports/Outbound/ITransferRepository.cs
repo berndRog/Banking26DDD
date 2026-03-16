@@ -12,12 +12,6 @@ public interface ITransferRepository {
       CancellationToken ct = default
    );
 
-   // Load a transfer including its transactions
-   Task<Transfer?> FindWithTransactionsByIdAsync(
-      Guid id,
-      CancellationToken ct = default
-   );
-
    // // Find a transfer using the idempotency key
    // // Used to prevent duplicate execution of payment requests
    // Task<Transfer?> FindByIdempotencyKeyAsync(

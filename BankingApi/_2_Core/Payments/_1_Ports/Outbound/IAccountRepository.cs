@@ -25,7 +25,12 @@ public interface IAccountRepository {
       Guid id,
       CancellationToken ct = default
    );
-
+   
+   Task<Account?> FindWithTransactionByIdAsync(
+      Guid id,
+      CancellationToken ct = default
+   );
+   
    // Check whether a customer already owns an account
    Task<bool> ExistsByOwnerIdAsync(
       Guid customerId,

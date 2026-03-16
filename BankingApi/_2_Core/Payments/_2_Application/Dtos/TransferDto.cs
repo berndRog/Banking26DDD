@@ -3,9 +3,10 @@
 public record TransferDto(
    Guid Id,
    Guid FromAccountId,
-   string ToName,         // Receipient name
-   string ToIbanString,    // Receipient Iban
+   Guid ToAccountId,         // Receipient name
    string Purpose,
    decimal AmountDecimal,
-   int? CurrencyInt
+   int CurrencyInt,
+   Guid DebitTransactionId,
+   Guid CreditTransactionId
 ); 

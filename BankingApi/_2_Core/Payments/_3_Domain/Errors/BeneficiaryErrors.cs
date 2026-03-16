@@ -35,5 +35,14 @@ public static class BeneficiaryErrors {
       new(ErrorCode.BadRequest, 
          Title: "Beneficiary not found",
          Message: "The beneficiary with the given AccountId is not found.");
+   
+   public static readonly DomainErrors InValidAccountId =
+      new(
+         ErrorCode.BadRequest,
+         Title: "Beneficiary: Invalid AccountId",
+         Message: "The given accountId is invalid."
+      );
+   
+   
 }
 

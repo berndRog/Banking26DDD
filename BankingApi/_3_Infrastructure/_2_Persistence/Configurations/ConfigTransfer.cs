@@ -1,23 +1,22 @@
 using BankingApi._2_Core.Payments._3_Domain.Entities;
-using BankingApi._3_Infrastructure._2_Persistence.Converters;
 using BankingApi._3_Infrastructure._2_Persistence.Database.Converter;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
+
 namespace BankingApi._3_Infrastructure._2_Persistence.Configurations;
 
 public sealed class ConfigTransfer(
    DateTimeOffsetToIsoStringConverter dtConv
 ) : IEntityTypeConfiguration<Transfer> {
+
    public void Configure(EntityTypeBuilder<Transfer> builder) {
       builder.ToTable("Transfers");
 
-      // Key + concurrency
-      // -----------------------------
+      // key
       builder.HasKey(t => t.Id);
       builder.Property(t => t.Id).ValueGeneratedNever();
 
-      // Auditing timestamps
-      // -----------------------------
+      // audit fields
       builder.Property(t => t.CreatedAt)
          .HasConversion(dtConv)
          .IsRequired();
@@ -25,19 +24,17 @@ public sealed class ConfigTransfer(
       builder.Property(t => t.UpdatedAt)
          .HasConversion(dtConv)
          .IsRequired();
-
-      builder.Ignore("_clock");
-
       
-      // Cross-aggregate references (IDs only)
-      // -----------------------------
+      // account references
       builder.Property(t => t.FromAccountId)
          .IsRequired();
-
       builder.HasIndex(t => t.FromAccountId);
 
-      // Business properties
-      // -----------------------------
+      builder.Property(t => t.ToAccountId)
+         .IsRequired();
+      builder.HasIndex(t => t.ToAccountId);
+
+      // amount value object
       builder.OwnsOne(t => t.AmountVo, b => {
          b.Property(p => p.Amount)
             .HasColumnName("Amount")
@@ -49,24 +46,30 @@ public sealed class ConfigTransfer(
             .HasConversion<int>()
             .IsRequired();
       });
-      
+
+      // business fields
       builder.Property(t => t.Purpose)
-         .HasMaxLength(200)
+         .HasMaxLength(80)
          .IsRequired();
 
-      // Snapshots
-      builder.Property(t => t.ToName)
-         .HasMaxLength(200)
+      // transaction references
+      builder.Property(t => t.DebitTransactionId)
          .IsRequired();
-      
-      builder.Property(t => t.ToIbanVo)
-         .HasIbanConversion()
+      builder.HasIndex(t => t.DebitTransactionId);
+
+      builder.Property(t => t.CreditTransactionId)
          .IsRequired();
-      builder.HasIndex(a => a.ToIbanVo).IsUnique();
-      
-      // State
+      builder.HasIndex(t => t.CreditTransactionId);
+
+      // reversal relation
+      builder.Property(t => t.ReversedByTransferId)
+         .IsRequired(false);
+      builder.HasIndex(t => t.ReversedByTransferId)
+         .IsUnique();
+
+      // status and booking time
       builder.Property(t => t.Status)
-         .HasConversion<int>() // or string
+         .HasConversion<int>()
          .IsRequired();
 
       builder.Property(t => t.BookedAt)
@@ -74,16 +77,5 @@ public sealed class ConfigTransfer(
          .IsRequired();
 
       builder.HasIndex(t => t.BookedAt);
-      builder.HasIndex(t => t.Status);
-
-      // Child entities
-      builder.HasMany(t => t.Transactions)
-         .WithOne()
-         .HasForeignKey(x => x.TransferId)
-         .OnDelete(DeleteBehavior.Cascade);
-
-      builder.Navigation(t => t.Transactions)
-         .HasField("_transactions")
-         .UsePropertyAccessMode(PropertyAccessMode.Field);
    }
 }

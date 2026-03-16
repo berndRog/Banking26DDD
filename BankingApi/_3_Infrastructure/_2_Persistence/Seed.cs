@@ -332,6 +332,19 @@ public sealed class Seed(
    };
    #endregion
    
+   
+   public string transaction1dId = "0001d000-0000-0000-0000-000000000000";
+   public string transaction1cId = "0001c000-0000-0000-0000-000000000000";
+   public string transaction2dId = "0002d000-0000-0000-0000-000000000000";
+   public string transaction2cId = "0002c000-0000-0000-0000-000000000000";
+   public string transaction3dId = "0003d000-0000-0000-0000-000000000000";
+   public string transaction3cId = "0003c000-0000-0000-0000-000000000000";
+   public string transaction4dId = "0004d000-0000-0000-0000-000000000000";
+   public string transaction4cId = "0004c000-0000-0000-0000-000000000000";
+
+
+   
+   
    #region -------------- Test Transfers (Entities) ------------------------------------------
    public string transfer1Id = "00010000-0000-0000-0000-000000000000";
    public string transfer2Id = "00020000-0000-0000-0000-000000000000";
@@ -348,35 +361,45 @@ public sealed class Seed(
    public Transfer Transfer1() => CreateTransfer(
       id: transfer1Id,
       fromAccountId: Guid.Parse(account1Id), 
-      beneficiary: Beneficiary1(), // Account6.Id,
+      toAccountId: Guid.Parse(account6Id), 
       amountDecimal: 345.0m,
-      purpose: "Erika an Chris1"
+      purpose: "Erika an Chris1",
+      debitTransactionId: Guid.Parse(transaction1dId),
+      creditTransactionId: Guid.Parse(transaction1cId)
    );
 
    public Transfer Transfer2() => CreateTransfer(
       id: transfer2Id,
       fromAccountId: Guid.Parse(account1Id), 
-      beneficiary: Beneficiary2(), // Account7.Id,
+      toAccountId: Guid.Parse(account7Id),
       amountDecimal: 231.0m,
-      purpose: "Erika an Chris2"
+      purpose: "Erika an Chris2",
+      debitTransactionId: Guid.Parse(transaction2dId),
+      creditTransactionId: Guid.Parse(transaction2cId)
    );
 
    public Transfer Transfer3() => CreateTransfer(
       id: transfer3Id,
       fromAccountId: Guid.Parse(account2Id), 
-      beneficiary: Beneficiary3(), // Account4.Id,
+      toAccountId: Guid.Parse(account4Id),
+      purpose: "Erika an Arne",
       amountDecimal: 289.00m,
-      purpose: "Erika an Arne"
+      debitTransactionId: Guid.Parse(transaction3dId),
+      creditTransactionId: Guid.Parse(transaction3cId)
+      
    );
 
    public Transfer Transfer4() => CreateTransfer(
       id: transfer4Id,
       fromAccountId: Guid.Parse(account2Id), 
-      beneficiary: Beneficiary4(), // Account4.Id,
+      toAccountId: Guid.Parse(account4Id),
       amountDecimal: 125.00m,
-      purpose: "Erika an Benno"
+      purpose: "Erika an Benno",
+      debitTransactionId: Guid.Parse(transaction4dId),
+      creditTransactionId: Guid.Parse(transaction4cId)
    );
    
+   /*
    public Transfer Transfer5() => CreateTransfer(
       id: transfer5Id,
       fromAccountId: Guid.Parse(account3Id), 
@@ -432,11 +455,11 @@ public sealed class Seed(
       amountDecimal: 89.00m,
       purpose: "Benno an Erika2"
    );
-   
+   */
    public IReadOnlyList<Transfer> Transfers => [
       Transfer1(), Transfer2(), Transfer3(), Transfer4(), 
-      Transfer5(), Transfer6(), Transfer7(), Transfer8(), 
-      Transfer9(), Transfer10(), Transfer11()
+    //  Transfer5(), Transfer6(), Transfer7(), Transfer8(), 
+    //  Transfer9(), Transfer10(), Transfer11()
    ];
    #endregion
    
@@ -585,9 +608,11 @@ public sealed class Seed(
    private Transfer CreateTransfer(
       string id,
       Guid fromAccountId,
-      Beneficiary beneficiary,
+      Guid toAccountId,
+      string purpose,
       decimal amountDecimal,
-      string purpose
+      Guid debitTransactionId,
+      Guid creditTransactionId
    ) {
 
       var resultMoney = MoneyVo.Create(amountDecimal, Currency.EUR);
@@ -595,13 +620,14 @@ public sealed class Seed(
          throw new Exception($"Invalid amount in seed data: {amountDecimal}");
       var amountVo = resultMoney.Value;
 
-      var result = Transfer.Create(
+      var result = Transfer.CreateBooked(
          fromAccountId: fromAccountId,
-         amountVo: amountVo,
+         toAccountId: toAccountId,
          purpose: purpose,
-         toName: beneficiary.Name,
-         toIbanVo: beneficiary.IbanVo,
-         createdAt: clock.UtcNow,
+         amountVo: amountVo,
+         debitTransactionId: debitTransactionId,
+         creditTransactionId: creditTransactionId,
+         bookedAt: clock.UtcNow,
          id: id
       );
       return result.Value!;

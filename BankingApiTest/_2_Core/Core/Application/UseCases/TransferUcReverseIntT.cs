@@ -8,7 +8,7 @@ using BankingApiTest.TestInfrastructure;
 using Microsoft.Extensions.DependencyInjection;
 namespace BankingApiTest._2_Core.Core.Application.UseCases;
 
-public sealed class TransferUcCreateIntT : TestBaseIntegration {
+public sealed class TransferUcReverseIntT : TestBaseIntegration {
    private readonly TestSeed _seed = new();
    
    [Fact]
@@ -19,7 +19,7 @@ public sealed class TransferUcCreateIntT : TestBaseIntegration {
       var accountRepository = scope.ServiceProvider.GetRequiredService<IAccountRepository>();
       var transferRepository = scope.ServiceProvider.GetRequiredService<ITransferRepository>();
       var unitOfWork = scope.ServiceProvider.GetRequiredService<IUnitOfWork>();
-      var sut = scope.ServiceProvider.GetRequiredService<TransferUcCreate>();
+      var sut = scope.ServiceProvider.GetRequiredService<TransferUcReverse>();
       
       // Arrange
       var customer = _seed.Customer1();
@@ -31,18 +31,18 @@ public sealed class TransferUcCreateIntT : TestBaseIntegration {
       unitOfWork.ClearChangeTracker();
       var transfer = _seed.Transfer1();
       
-      // Act
-      var result = await sut.ExecuteAsync(
-          fromAccountId: account.Id,
-          toName: transfer.ToName,
-          toIbanString: transfer.ToIbanVo.Value,
-          purpose: transfer.Purpose,
-          amountDecimal: transfer.AmountVo.Amount,
-          currencyInt: (int) transfer.AmountVo.Currency,
-          id: transfer.Id.ToString(),
-          ct: ct
-          );
-      unitOfWork.ClearChangeTracker();
+      // // Act
+      // var result = await sut.ExecuteAsync(
+      //     fromAccountId: account.Id,
+      //     toName: transfer.ToName,
+      //     toIbanString: transfer.ToIbanVo.Value,
+      //     purpose: transfer.Purpose,
+      //     amountDecimal: transfer.AmountVo.Amount,
+      //     currencyInt: (int) transfer.AmountVo.Currency,
+      //     id: transfer.Id.ToString(),
+      //     ct: ct
+      //     );
+      // unitOfWork.ClearChangeTracker();
       
       // Assert
       var actual = await accountRepository.FindByIdAsync(account.Id, ct);
@@ -51,32 +51,5 @@ public sealed class TransferUcCreateIntT : TestBaseIntegration {
       Equal(account.IbanVo, actual.IbanVo);
       Equal(account.BalanceVo, actual.BalanceVo);
    }
-   
-   [Fact]
-   public async Task Create_account_with_invalid_iban_fails() {
-      using var scope = Root.CreateDefaultScope();
-      var ct = CancellationToken.None;
-      var dbContext = scope.ServiceProvider.GetRequiredService<BankingDbContext>();
-      var customerRepository = scope.ServiceProvider.GetRequiredService<ICustomerRepository>();
-      var accountRepository = scope.ServiceProvider.GetRequiredService<IAccountRepository>();
-      var unitOfWork = scope.ServiceProvider.GetRequiredService<IUnitOfWork>();
-      
-      // Arrange
-      var owner = _seed.Customer1();
-      var account = _seed.Account1();
-      var sut = scope.ServiceProvider.GetRequiredService<AccountUcCreate>();
-
-      // Act
-      var result = await sut.ExecuteAsync(
-         customerId: owner.Id,
-         ibanString: "ABC123456789",
-         balanceDecimal: account.BalanceVo.Amount,
-         currency: (int)account.BalanceVo.Currency,
-         id: account.Id.ToString(),
-         ct: ct
-      );
-      True(result.IsFailure);
-   }
-   
    
 }

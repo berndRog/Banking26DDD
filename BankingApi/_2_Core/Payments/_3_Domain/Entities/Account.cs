@@ -23,6 +23,11 @@ public sealed class Account : AggregateRoot {
    private readonly List<Beneficiary> _beneficiaries = new();
    public IReadOnlyCollection<Beneficiary> Beneficiaries => 
       _beneficiaries.AsReadOnly();
+   
+   // Child Entities: Account -> Beneficiaries [1] : [0..*]
+   private readonly List<Transaction> _transactions = new();
+   public IReadOnlyCollection<Transaction> Transactions => 
+      _transactions.AsReadOnly();
 
    //--- Ctors -----------------------------------------------------------------
    // EF Core ctor
@@ -74,53 +79,94 @@ public sealed class Account : AggregateRoot {
    }
 
    //--- Domain operations -----------------------------------------------------
-   // Credit = deposit money into THIS account.
-   // Amount must be positive and in the same currency as the balance.
-   public Result<Account> Credit(
-      MoneyVo amountVo, 
-      DateTimeOffset updatedAt
+   // Debit = withdraw money from THIS account (Lastschrift)
+   public Result<Transaction> PostDebit(
+      MoneyVo amountVo,
+      string purpose,
+      DateTimeOffset bookedAt,
+      string? id = null
    ) {
-      // invariant: only positive amounts
-      if (amountVo.Amount <= 0m)
-         return Result<Account>.Failure(AccountErrors.InvalidCreditAmount);
+      // account must be active
+      if (!IsActive)
+         return Result<Transaction>.Failure(AccountErrors.InactiveAccount);
 
-      // invariant: currency must match
-      if (amountVo.Currency != BalanceVo.Currency)
-         return Result<Account>.Failure(AccountErrors.CurrencyMismatch);
+      // amount must be positive
+      if (amountVo.Amount <= 0)
+         return Result<Transaction>.Failure(AccountErrors.InvalidDebitAmount);
 
-      // credit (Gutschrift)
-      BalanceVo = BalanceVo + amountVo;
-      Touch(updatedAt);
+      // currency must match account currency
+      if (BalanceVo.Currency != amountVo.Currency)
+         return Result<Transaction>.Failure(AccountErrors.CurrencyMismatch);
 
-      return Result<Account>.Success(this);
+      // sufficient balance required
+      if (BalanceVo.Amount < amountVo.Amount)
+         return Result<Transaction>.Failure(AccountErrors.InsufficientFunds);
+
+      // update balance (Lastschrift)
+      BalanceVo = BalanceVo - amountVo;
+      UpdatedAt = bookedAt;
+
+      // create debit transaction
+      var result = Transaction.CreateDebit(
+         Id,
+         purpose,
+         amountVo,
+         BalanceVo,
+         bookedAt,
+         id
+      );
+      if (result.IsFailure)
+         return Result<Transaction>.Failure(result.Error);
+      var transaction = result.Value;
+
+      // add transaction to the list
+      _transactions.Add(transaction);
+
+      return Result<Transaction>.Success(transaction);
    }
    
-
-   // Debit = withdraw money from THIS account.
-   // Amount must be positive and in the same currency as the balance.
-   // Requires sufficient funds.
-   public Result<Account> Debit(
+   // Crebit = add money to THIS account (Gutschrift)
+   public Result<Transaction> PostCredit(
       MoneyVo amountVo,
-      DateTimeOffset updatedAt
+      string purpose,
+      DateTimeOffset bookedAt,
+      string? id = null
    ) {
-      // invariant: only positive amounts
-      if (amountVo.Amount <= 0m)
-         return Result<Account>.Failure(AccountErrors.InvalidDebitAmount);
+      // account must be active
+      if (!IsActive)
+         return Result<Transaction>.Failure(AccountErrors.InactiveAccount);
 
-      // invariant: currency must match
-      if (amountVo.Currency != BalanceVo.Currency)
-         return Result<Account>.Failure(AccountErrors.CurrencyMismatch);
+      // amount must be positive
+      if (amountVo.Amount <= 0)
+         return Result<Transaction>.Failure(AccountErrors.InvalidCreditAmount);
 
-      // invariant: sufficient funds
-      if (BalanceVo < amountVo)
-         return Result<Account>.Failure(AccountErrors.InsufficientFunds);
+      // currency must match
+      if (BalanceVo.Currency != amountVo.Currency)
+         return Result<Transaction>.Failure(AccountErrors.CurrencyMismatch);
 
-      // debit (Lastschrift)
-      BalanceVo = BalanceVo - amountVo;
-      Touch(updatedAt);
+      // update balance
+      BalanceVo = BalanceVo + amountVo;
+      UpdatedAt = bookedAt;
 
-      return Result<Account>.Success(this);
+      // create credit transaction
+      var result = Transaction.CreateCredit(
+         Id,
+         purpose,
+         amountVo,
+         BalanceVo,
+         bookedAt,
+         id
+      );
+      if(result.IsFailure)
+         return Result<Transaction>.Failure(result.Error);
+      var transaction = result.Value;
+
+      // add transaction the list
+      _transactions.Add(transaction);
+
+      return Result<Transaction>.Success(transaction);
    }
+
 
    public bool HasSufficientFunds(MoneyVo amountVo) =>
       amountVo.Currency == BalanceVo.Currency &&
@@ -172,6 +218,39 @@ public sealed class Account : AggregateRoot {
       return Result<Guid>.Success(beneficiaryId);
    }
 }
+
+/*
+Didaktik und Lernziele
+   
+   In diesem Modell ist das Konto (Account) das zentrale Aggregate im Zahlungsverkehr.
+   
+   Ein Account verwaltet:
+   - seinen Kontostand (Balance)
+   - seine Buchungen (Transactions)
+   - seine Zahlungsempfänger (Beneficiaries)
+   
+   Alle Änderungen des Kontostands erfolgen ausschließlich über die fachlichen
+   Operationen Debit (Belastung) und Credit (Gutschrift). Dabei wird immer gleichzeitig
+   eine Transaction erzeugt. Dadurch bleiben Kontostand und Buchungshistorie konsistent.
+   
+   Eine Transaction beschreibt eine einzelne Buchung aus Sicht genau eines Kontos.
+   Sie enthält den Betrag, den Typ (Debit oder Credit), den Kontostand nach der
+   Buchung sowie Informationen über die Gegenpartei.
+   
+   Eine Überweisung zwischen zwei Konten erzeugt zwei Transactions:
+   - eine Debit-Transaction auf dem Senderkonto
+   - eine Credit-Transaction auf dem Empfängerkonto
+   
+   Der fachliche Zusammenhang dieser beiden Buchungen wird durch das Transfer-
+   Aggregate hergestellt. Dadurch können Geschäftsvorfälle eindeutig referenziert
+   und später beispielsweise durch eine Rückbuchung (Reversal) wieder abgewickelt
+   werden.
+   
+   Das Beispiel zeigt ein zentrales Prinzip von Domain Driven Design:
+   Aggregate schützen ihre eigenen Invarianten, während fachliche Prozesse
+   (z. B. eine Überweisung) mehrere Aggregate koordinieren können.
+ 
+ */
 
 // using BankingApi._2_Modules.Accounts._3_Domain.Errors;
 // using BankingApi._2_Modules.AccountsTransfers._3_Domain.ValueObjects;

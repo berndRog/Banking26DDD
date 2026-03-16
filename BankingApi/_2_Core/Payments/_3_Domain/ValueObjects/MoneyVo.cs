@@ -22,8 +22,8 @@ public sealed record class MoneyVo {
    public static Result<MoneyVo> Create(decimal amount, Currency currency) {
       amount = decimal.Round(amount, 2, MidpointRounding.ToEven);
 
-      if (amount < 0)
-         return Result<MoneyVo>.Failure(CommonErrors.InvalidMoneyAmount);
+      // if (amount < 0)
+      //    return Result<MoneyVo>.Failure(CommonErrors.InvalidMoneyAmount);
 
       return Result<MoneyVo>.Success(new MoneyVo(amount, currency));
    }

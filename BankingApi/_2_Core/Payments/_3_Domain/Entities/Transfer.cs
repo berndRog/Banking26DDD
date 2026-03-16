@@ -8,25 +8,29 @@ namespace BankingApi._2_Core.Payments._3_Domain.Entities;
 public sealed class Transfer : AggregateRoot {
    
    //--- Properties ------------------------------------------------------------
-   // Aggregate references (IDs only, no navigation properties)
+   // sender account
    public Guid FromAccountId { get; private set; }
 
-   // Snapshots for historical consistency, recipientName and IBan
-   // (e.g. if beneficiaries may be deleted)
-   public string ToName { get; private set; } = string.Empty; // beneficiary name at time of transfer
-   public IbanVo ToIbanVo { get; private set; } = default!;   // beneficiary IBAN at time of transfer
-
-   // Transfer amount as a domain value object.
+   // receiver account
+   public Guid ToAccountId { get; private set; }
+   
+   // purpose and booked amount
    public MoneyVo AmountVo { get; private set; } = default!;
    public string Purpose { get; private set; } = string.Empty;
-   
-   // State
-   public TransferStatus Status { get; private set; }
-   public DateTimeOffset BookedAt { get; private set; } = default!;
 
-   // Child entities Transfer <-> Transaction 1 : 1..n
-   private readonly List<Transaction> _transactions = new();
-   public IReadOnlyList<Transaction> Transactions => _transactions;
+   // references to the account transactions
+   public Guid DebitTransactionId { get; private set; }
+   public Guid CreditTransactionId { get; private set; }
+
+   // reversal relation
+   //public Guid? OriginalTransferId { get; private set; }
+   public Guid? ReversedByTransferId { get; private set; }
+
+   // current business state
+   public TransferStatus Status { get; private set; }
+
+   // booking timestamp
+   public DateTimeOffset BookedAt { get; private set; }
 
    //--- Ctors -----------------------------------------------------------------
    // EF Core ctor
@@ -36,102 +40,162 @@ public sealed class Transfer : AggregateRoot {
    private Transfer(
       Guid id,
       Guid fromAccountId,
-      string toName,
-      IbanVo toIbanVo,
+      Guid toAccountId,
       string purpose,
       MoneyVo amountVo,
-      TransferStatus status
-   ) : base()
-   {
+      Guid debitTransactionId,
+      Guid creditTransactionId,
+      DateTimeOffset bookedAt
+   ) : base() {
       Id = id;
       FromAccountId = fromAccountId;
-      ToName = toName;
-      ToIbanVo = toIbanVo;
-      Status = status;
+      ToAccountId = toAccountId;
       AmountVo = amountVo;
       Purpose = purpose;
+      DebitTransactionId = debitTransactionId;
+      CreditTransactionId = creditTransactionId;
+      BookedAt = bookedAt;
+      CreatedAt = bookedAt;
+      UpdatedAt = bookedAt;
+      Status = TransferStatus.Booked;
    }
 
    //--- Static Factories ------------------------------------------------------
-   // Create a new Transfer (status = Initiated).
-   public static Result<Transfer> Create(
+   public static Result<Transfer> CreateBooked(
       Guid fromAccountId,
-      string toName,
-      IbanVo toIbanVo,
+      Guid toAccountId,
       string purpose,
       MoneyVo amountVo,
-      DateTimeOffset createdAt,
-      string? id
+      Guid debitTransactionId,
+      Guid creditTransactionId,
+      DateTimeOffset bookedAt,
+      string? id = null
    ) {
-      // trim early
-      toName = toName.Trim();
-      purpose = purpose.Trim();
-      
-      // invariants
       if (fromAccountId == Guid.Empty)
          return Result<Transfer>.Failure(TransferErrors.FromAccountNotFound);
 
-      if (amountVo.Amount <= 0m)
-         return Result<Transfer>.Failure(TransferErrors.AmountMustBePositive);
-      
-      var resultId = Resolve(id, TransferErrors.InvalidId);
-      if (resultId.IsFailure)
-         return Result<Transfer>.Failure(resultId.Error);
+      if (toAccountId == Guid.Empty)
+         return Result<Transfer>.Failure(TransferErrors.ToAccountNotFound);
 
-      // create Transfer object
+      if (fromAccountId == toAccountId)
+         return Result<Transfer>.Failure(TransferErrors.SameAccountNotAllowed);
+
+      if (debitTransactionId == Guid.Empty || creditTransactionId == Guid.Empty)
+         return Result<Transfer>.Failure(TransferErrors.InvalidTransactionReference);
+
+      if (amountVo.Amount <= 0)
+         return Result<Transfer>.Failure(TransferErrors.InvalidAmount);
+
+      var idResult = Resolve(id, TransferErrors.InvalidId);
+      if (idResult.IsFailure)
+         return Result<Transfer>.Failure(idResult.Error);
+      var transferId = idResult.Value;
+      
       var transfer = new Transfer(
-         id: resultId.Value,
+         id: transferId,
          fromAccountId: fromAccountId,
-         toName: toName,
-         toIbanVo: toIbanVo,
+         toAccountId: toAccountId,
          purpose: purpose,
          amountVo: amountVo,
-
-         status: TransferStatus.Initiated
+         debitTransactionId: debitTransactionId,
+         creditTransactionId: creditTransactionId,
+         bookedAt: bookedAt
       );
-      
-      // sets CreatedAt and UpdatedAt
-      transfer.Initialize(createdAt); 
 
       return Result<Transfer>.Success(transfer);
    }
-
-   //--- Domain operations -----------------------------------------------------
-   // Books the transfer and creates exactly two transactions:
-   // - Debit  on FromAccountId
-   // - Credit on toAccountId
-   public Result SendMoney(
-      Guid toAccountId,
-      DateTimeOffset bookedAt
+   
+   public static Result<Transfer> CreateReversalFromOriginal(
+      Transfer originalTransfer,
+      string reversalPurpose,
+      Guid reversalDebitTransactionId,
+      Guid reversalCreditTransactionId,
+      DateTimeOffset bookedAt,
+      string? id = null
    ) {
-      if (toAccountId == Guid.Empty)
-         return Result.Failure(TransferErrors.ToAccountNotFound);
+      if (originalTransfer is null)
+         throw new ArgumentNullException(nameof(originalTransfer));
 
-      if (FromAccountId == toAccountId)
-         return Result.Failure(TransferErrors.SameAccountNotAllowed);
+      if (originalTransfer.Status == TransferStatus.Reversed)
+         return Result<Transfer>.Failure(TransferErrors.AlreadyReversed);
 
-      if (Status != TransferStatus.Initiated)
-         return Result.Failure(TransferErrors.OnlyInitiatedCanBeBooked);
+      if (originalTransfer.ReversedByTransferId.HasValue)
+         return Result<Transfer>.Failure(TransferErrors.AlreadyReversed);
+      
+      if (reversalDebitTransactionId == Guid.Empty || reversalCreditTransactionId == Guid.Empty)
+         return Result<Transfer>.Failure(TransferErrors.InvalidTransactionReference);
 
-      // local invariant: transactions must be empty before booking
-      _transactions.Clear();
+      var idResult = Resolve(id, TransferErrors.InvalidId);
+      if (idResult.IsFailure)
+         return Result<Transfer>.Failure(idResult.Error);
+      var transferId = idResult.Value;
+      
+      
+      var transfer = new Transfer(
+         id: transferId,
+         fromAccountId: originalTransfer.ToAccountId,
+         toAccountId: originalTransfer.FromAccountId,
+         purpose: reversalPurpose,
+         amountVo: originalTransfer.AmountVo,
+         debitTransactionId: reversalDebitTransactionId,
+         creditTransactionId: reversalCreditTransactionId,
+         bookedAt: bookedAt
+      );
+      
+      transfer.Status = TransferStatus.Reversed;
+      
+      return Result<Transfer>.Success(transfer);
+   }
 
-      // create debit and credit transactions
-      BookedAt = bookedAt;
+   public Result MarkAsReversed(Guid reversalTransferId, DateTimeOffset reversedAt) {
+      // if (reversalTransferId == Guid.Empty)
+      //    return Result.Failure(TransferErrors.InvalidReversalTransferId);
+      //
+      // if (Status == TransferStatus.Reversed)
+      //    return Result.Failure(TransferErrors.TransferAlreadyReversed);
+      //
+      // if (ReversedByTransferId.HasValue)
+      //    return Result.Failure(TransferErrors.TransferAlreadyReversed);
 
-      // IMPORTANT:
-      // Transactions should use Money too (not decimal).
-      // Adjust Transaction.CreateDebit/CreateCredit accordingly.
-      var transactionDebit = Transaction.CreateDebit(Id, FromAccountId, AmountVo, Purpose, BookedAt);
-      var transactionCredit = Transaction.CreateCredit(Id, toAccountId, AmountVo, Purpose, BookedAt);
-
-      _transactions.Add(transactionDebit);
-      _transactions.Add(transactionCredit);
-
-      // update state
-      Status = TransferStatus.Booked;
-      Touch(bookedAt); // updates UpdatedAt
+      ReversedByTransferId = reversalTransferId;
+      Status = TransferStatus.Reversed;
+      UpdatedAt = reversedAt;
 
       return Result.Success();
    }
 }
+
+/*
+Didaktik und Lernziele
+
+Das Transfer-Aggregat modelliert hier nicht mehr die eigentlichen Buchungen
+selbst, sondern den fachlichen Geschäftsvorfall einer Überweisung.
+
+Wichtige Idee:
+- Die konto-bezogenen Buchungen liegen in den Account-Aggregaten als Transactions.
+- Das Transfer-Aggregat speichert nur die Referenzen auf genau diese beiden
+  Buchungen:
+  - DebitTransactionId
+  - CreditTransactionId
+
+Damit werden zwei Sichten sauber getrennt:
+
+1. Konto-Sicht
+   Der Account verwaltet Saldo, Beneficiaries und Transactions.
+   Jede Buchung wird direkt am betroffenen Konto erfasst.
+
+2. Geschäftsvorfall-Sicht
+   Der Transfer beschreibt den übergeordneten Zahlungsvorgang und verbindet
+   die beiden zusammengehörigen Buchungen.
+
+Zusätzlich ermöglicht das Transfer-Aggregat eine saubere Modellierung von
+Rückbuchungen:
+- OriginalTransferId verweist auf den ursprünglichen Transfer.
+- ReversedByTransferId verweist auf die auslösende Rückbuchung.
+- Dadurch kann verhindert werden, dass dieselbe Überweisung mehrfach
+  rückgebucht wird.
+
+Didaktisch zeigt dieses Modell sehr gut:
+Aggregate müssen nicht alles selbst enthalten, sondern können auch als
+fachliche Klammer zwischen mehreren anderen Domänenobjekten dienen.
+*/

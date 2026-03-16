@@ -1,10 +1,9 @@
 using System.Runtime.CompilerServices;
 using BankingApi._2_Core.BuildingBlocks._3_Domain;
-using BankingApi._2_Core.Payments._1_Ports.Inbound;
 using BankingApi._2_Core.Payments._1_Ports.Outbound;
 using BankingApi._2_Core.Payments._2_Application.Dtos;
-using BankingApi._2_Core.Payments._2_Application.Errors;
 using BankingApi._2_Core.Payments._2_Application.Mappings;
+using BankingApi._2_Core.Payments._3_Domain.Errors;
 using BankingApi._2_Core.Payments._3_Domain.ValueObjects;
 using BankingApi._3_Infrastructure._2_Persistence.Database;
 using Microsoft.EntityFrameworkCore;
@@ -27,7 +26,7 @@ internal sealed class AccountReadModelEf(
          .SingleOrDefaultAsync(ct);
       
       return accountDto is null
-         ? Result<AccountDto>.Failure(AccountApplicationErrors.NotFound)
+         ? Result<AccountDto>.Failure(AccountErrors.NotFound)
          : Result<AccountDto>.Success(accountDto);
    }
 
@@ -48,7 +47,7 @@ internal sealed class AccountReadModelEf(
          .SingleOrDefaultAsync(ct);       // take single or default (null if not found)
       
       return accountDto is null
-         ? Result<AccountDto>.Failure(AccountApplicationErrors.NotFound)
+         ? Result<AccountDto>.Failure(AccountErrors.NotFound)
          : Result<AccountDto>.Success(accountDto);
    }
    
@@ -68,7 +67,7 @@ internal sealed class AccountReadModelEf(
       CancellationToken ctToken = default
    ) {
       if(customerId == Guid.Empty)
-         return Result<IEnumerable<AccountDto>>.Failure(AccountApplicationErrors.InValidOwnerId);
+         return Result<IEnumerable<AccountDto>>.Failure(AccountErrors.InvalidOwnerId);
       
       var accountDtos =  await dbContext.Accounts
          .AsNoTracking()
@@ -92,7 +91,7 @@ internal sealed class AccountReadModelEf(
          .SingleOrDefaultAsync(ct);
       
       return beneficiaryDto is null
-         ? Result<BeneficiaryDto>.Failure(BeneficiaryApplicationErrors.NotFound)
+         ? Result<BeneficiaryDto>.Failure(BeneficiaryErrors.NotFound)
          : Result<BeneficiaryDto>.Success(beneficiaryDto);
    }
 
@@ -105,7 +104,7 @@ internal sealed class AccountReadModelEf(
          .Any(a => a.Id == accountId);
       if (!accountExists)
          return Result<IEnumerable<BeneficiaryDto>>
-                  .Failure(BeneficiaryApplicationErrors.InValidAccountId);
+                  .Failure(BeneficiaryErrors.InValidAccountId);
       
       var beneficiaryDtos = await dbContext.Beneficiaries
          .AsNoTracking()
@@ -149,7 +148,7 @@ internal sealed class AccountReadModelEf(
          .SingleOrDefaultAsync(ct);
 
       return beneficiaryDto is null
-         ? Result<BeneficiaryDto>.Failure(BeneficiaryApplicationErrors.NotFound)
+         ? Result<BeneficiaryDto>.Failure(BeneficiaryErrors.NotFound)
          : Result<BeneficiaryDto>.Success(beneficiaryDto);
    }
 

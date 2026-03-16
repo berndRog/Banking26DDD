@@ -8,7 +8,6 @@ using BankingApi._2_Core.Employees._1_Ports.Outbound;
 using BankingApi._2_Core.Payments._1_Ports.Inbound;
 using BankingApi._2_Core.Payments._1_Ports.Outbound;
 using BankingApi._2_Core.Payments._2_Application.UseCases;
-using BankingApi._2_Modules.AccountsTransfers._2_Application.UseCases;
 using BankingApi._3_Infrastructure._2_Persistence;
 using BankingApi._3_Infrastructure._2_Persistence.Adapters;
 using BankingApi._3_Infrastructure._2_Persistence.Database;
@@ -77,8 +76,8 @@ public static class DiTestModules {
       
       // Customers UseCases
       services.AddScoped<ITransferUseCases, TransferUseCases>();
-      services.AddScoped<TransferUcCreate>();
       services.AddScoped<TransferUcSendMoney>();
+      services.AddScoped<TransferUcReverse>();
       //services.AddScoped<AccountUcBeneficiaryAdd>();
       //services.AddScoped<AccountUcBeneficiaryRemove>();
       

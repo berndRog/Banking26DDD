@@ -15,14 +15,7 @@ internal sealed class TransferRepositoryEf(
       CancellationToken ct = default
    ) => await transferDbContext.Transfers
       .FirstOrDefaultAsync(t => t.Id == transferId, ct);
-
-   public async Task<Transfer?> FindWithTransactionsByIdAsync(
-      Guid id, 
-      CancellationToken ct = default
-   ) => await transferDbContext.Transfers
-      .Include(t => t.Transactions)
-      .FirstOrDefaultAsync(t => t.Id == id, ct);
-
+   
    public void Add(Transfer transfer) 
       => transferDbContext.Add(transfer);
    public void AddRange(IEnumerable<Transfer> transfers) 

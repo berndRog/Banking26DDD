@@ -33,6 +33,16 @@ public sealed class AccountRepositoryEf(
       .Include(a => a.Beneficiaries)
       .FirstOrDefaultAsync(a => a.Id == id, ct);
 
+   public async Task<Account?> FindWithTransactionByIdAsync(
+      Guid id, 
+      CancellationToken ct = default
+   ) => await dbContext.Accounts
+      .Include(a => a.Transactions
+         .OrderByDescending(t => t.BookedAt)
+         .ThenByDescending(t => t.Id)   // if there are more then one transaction at the same time
+         .Take(100))
+      .FirstOrDefaultAsync(a => a.Id == id, ct);
+   
    // Checks if an account exists for the given customerId.
    public async Task<bool> ExistsByOwnerIdAsync(
       Guid customerId,

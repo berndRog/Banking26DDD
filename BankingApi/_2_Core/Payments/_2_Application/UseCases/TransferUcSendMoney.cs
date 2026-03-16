@@ -8,10 +8,11 @@ using BankingApi._2_Core.Payments._3_Domain.Entities;
 using BankingApi._2_Core.Payments._3_Domain.Enums;
 using BankingApi._2_Core.Payments._3_Domain.Errors;
 using BankingApi._2_Core.Payments._3_Domain.ValueObjects;
-namespace BankingApi._2_Modules.AccountsTransfers._2_Application.UseCases;
+
+namespace BankingApi._2_Core.Payments._2_Application.UseCases;
 
 public sealed class TransferUcSendMoney(
-   IAccountRepository accountsRepository,
+   IAccountRepository accountRepository,
    ITransferRepository transferRepository,
    IUnitOfWork unitOfWork,
    IClock clock,
@@ -21,100 +22,87 @@ public sealed class TransferUcSendMoney(
       SendMoneyDto dto,
       CancellationToken ct = default
    ) {
-      // 0) Idempotency fast-path
-      //var existing = await transferRepository.FindByIdempotencyKeyAsync(cmd.IdempotencyKey, ct);
-      //if (existing is not null)
-      //   return Result<Transfer>.Success(existing);
-
+      // validate amount
       var resultAmount = MoneyVo.Create(dto.AmountDecimal, (Currency)dto.CurrencyInt);
-      if(resultAmount.IsFailure)
+      if (resultAmount.IsFailure)
          return Result<TransferDto>.Failure(resultAmount.Error!);
-      var amountVo = resultAmount.Value;
-      
-      // 1) Load sender (needs beneficiaries)
-      var fromAccount = await accountsRepository.FindWithBeneficiariesByIdAsync(dto.FromAccountId, ct);
+      var amountVo = resultAmount.Value!;
+
+      // load sender account including beneficiaries
+      var fromAccount = await accountRepository.FindWithBeneficiariesByIdAsync(dto.FromAccountId, ct);
       if (fromAccount is null)
          return Result<TransferDto>.Failure(TransferErrors.FromAccountNotFound);
 
-      // 2) Resolve beneficiary -> receiver IBAN
-      var resultBeneficiary = fromAccount.FindBeneficiary(dto.BeneficiaryId);      
+      // resolve beneficiary from sender account
+      var resultBeneficiary = fromAccount.FindBeneficiary(dto.BeneficiaryId);
       if (resultBeneficiary.IsFailure)
          return Result<TransferDto>.Failure(resultBeneficiary.Error!);
-      var beneficiary = resultBeneficiary.Value;
-      var toIbanVo = beneficiary.IbanVo; 
+      var beneficiary = resultBeneficiary.Value!;
 
-      // 3) Resolve receiver account by IBAN (internal bank assumption)
-      var toAccount = await accountsRepository.FindByIbanAsync(toIbanVo, ct);
+      // resolve receiver account by beneficiary IBAN
+      var toAccount = await accountRepository.FindByIbanAsync(beneficiary.IbanVo, ct);
       if (toAccount is null)
          return Result<TransferDto>.Failure(TransferErrors.ToAccountNotFound);
+
       if (toAccount.Id == fromAccount.Id)
          return Result<TransferDto>.Failure(TransferErrors.SameAccountNotAllowed);
 
-      // 4) Domain: debit/credit (balances)
       var utcNow = clock.UtcNow;
-      
-      var debitResult = fromAccount.Debit(amountVo, utcNow);
-      if (debitResult.IsFailure)
-         return Result<TransferDto>.Failure(debitResult.Error!);
 
-      var creditResult = toAccount.Credit(amountVo, utcNow);
-      if (creditResult.IsFailure)
-         return Result<TransferDto>.Failure(creditResult.Error!);
+      // post debit on sender account
+      var resultDebit = fromAccount.PostDebit(
+         amountVo,
+         dto.Purpose,
+         utcNow
+      );
+      if (resultDebit.IsFailure)
+         return Result<TransferDto>.Failure(resultDebit.Error!);
+      var debitTransaction = resultDebit.Value!;
 
-      // 5) Create transfer + 2 transactions (child entities)
-      var result = Transfer.Create(
+      // post credit on receiver account
+      var resultCredit = toAccount.PostCredit(
+         amountVo,
+         dto.Purpose,
+         utcNow
+      );
+      if (resultCredit.IsFailure)
+         return Result<TransferDto>.Failure(resultCredit.Error!);
+      var creditTransaction = resultCredit.Value!;
+
+      // create transfer as business transaction
+      var transferResult = Transfer.CreateBooked(
          fromAccountId: fromAccount.Id,
-         toName: beneficiary.Name,
-         toIbanVo: beneficiary.IbanVo,
-         purpose: dto.Purpose,
+         toAccountId: toAccount.Id,
          amountVo: amountVo,
-         createdAt: utcNow,
+         purpose: dto.Purpose,
+         debitTransactionId: debitTransaction.Id,
+         creditTransactionId: creditTransaction.Id,
+         bookedAt: utcNow,
          id: dto.Id.ToString()
       );
-      if (result.IsFailure)
-         return Result<TransferDto>.Failure(result.Error!);
-      var transfer = result.Value!;
+      if (transferResult.IsFailure)
+         return Result<TransferDto>.Failure(transferResult.Error!);
 
-      transfer.SendMoney(toAccount.Id, utcNow); // creates 2 Transactions: Debit(from), Credit(to)
+      var transfer = transferResult.Value!;
+
+      // optional backward link from transaction to transfer
+      debitTransaction.AttachTransfer(transfer.Id);
+      creditTransaction.AttachTransfer(transfer.Id);
+
       transferRepository.Add(transfer);
-      
-      unitOfWork.LogChangeTracker("Before SaveChanges in SendMoney");
-      
 
-      // 6) Persist atomar (Outcome statt Exceptions)
-      var savedRows = await unitOfWork.SaveAllChangesAsync("Send money", ct);
+      unitOfWork.LogChangeTracker("Before SaveChanges in SendMoney");
+
+      var saveResult = await unitOfWork.SaveAllChangesAsync("Send money", ct);
 
       logger.LogInformation(
          "Transfer booked ({TransferId}) from ({From}) to ({To}) amount ({Amount})",
-         transfer.Id.To8(), fromAccount.Id.To8(), toAccount.Id.To8(), dto.AmountDecimal);
+         transfer.Id.To8(),
+         fromAccount.Id.To8(),
+         toAccount.Id.To8(),
+         amountVo.Amount
+      );
+
       return Result<TransferDto>.Success(transfer.ToTransferDto());
-
-         // if (outcome.FailureKind == SaveFailureKind.Concurrency)
-      //    return Result<Transfer>.Failure(TransferErrors.ConcurrencyConflict);
-
-      // if (outcome.FailureKind == SaveFailureKind.UniqueConstraint &&
-      //     outcome.UniqueViolation is not null &&
-      //     IsTransferIdempotencyViolation(outcome.UniqueViolation)) {
-      //    // race: anderer Request war schneller
-      //    var raced = await transferRepository.FindByIdempotencyKeyAsync(dto.IdempotencyKey, ct);
-      //    if (raced is not null)
-      //       return Result<Transfer>.Success(raced);
-      //
-      //    // UNIQUE aber nichts gefunden -> inkonsistent
-      //    throw outcome.Exception!;
-      // }
-
    }
-
-   // private static bool IsTransferIdempotencyViolation(UniqueViolationInfo info) {
-   //    // SQLite: kein Constraint-Name -> match über Table+Column aus der Message
-   //    if (info.ConstraintOrIndexName is null) {
-   //       return string.Equals(info.Table, "Transfers", StringComparison.OrdinalIgnoreCase)
-   //          && info.Columns.Any(c => string.Equals(c, "IdempotencyKey", StringComparison.OrdinalIgnoreCase));
-   //    }
-   //
-   //    // SQL Server/Postgres (wenn du den Index benannt hast)
-   //    return string.Equals(info.ConstraintOrIndexName, "UX_Transfers_IdempotencyKey",
-   //       StringComparison.OrdinalIgnoreCase);
-   // }
 }

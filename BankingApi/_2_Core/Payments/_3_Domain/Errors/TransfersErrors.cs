@@ -11,7 +11,17 @@ public static class TransferErrors {
       ErrorCode.BadRequest,
       Title: "Transfer: Invalid Id",
       Message: "The given identifier for the transfer is invalid.");
+   
+   public static readonly DomainErrors InvalidTransactionReference = new(
+      ErrorCode.BadRequest,
+      Title: "Transfer: Invalid TransactionReference",
+      Message: "The given identifier for the transactions are invalid.");
 
+   public static readonly DomainErrors InvalidRecipientName = new(
+      ErrorCode.BadRequest,
+      Title: "Transfer: Invalid Recipient Name",
+      Message: "The given name for the recipient is invalid.");
+   
    public static readonly DomainErrors RecipientIbanRequired = new(
       ErrorCode.BadRequest,
       Title: "Transfer: Recipient IBAN Required",
@@ -30,14 +40,20 @@ public static class TransferErrors {
    public static readonly DomainErrors SameAccountNotAllowed = new(
       ErrorCode.Conflict,
       Title: "Transfer: Invalid Accounts",
-      Message: "The Sende and Receiver Account must be different.");
+      Message: "The Sender and Receiver Account must be different.");
 
-   public static readonly DomainErrors IdempotencyKeyRequired = new(
-      ErrorCode.BadRequest,
-      Title: "Transfer: Idempotency Key Required",
-      Message: "The idempotency key is required.");
+   public static readonly DomainErrors OriginalTransferNotFound = new(
+      ErrorCode.NotFound,
+      Title: "Transfer: Original Transfer Not Found",
+      Message: "The original transfer for a reversal was not found.");
+   
+   public static readonly DomainErrors AlreadyReversed = new(
+      ErrorCode.NotFound,
+      Title: "Transfer: Is Already Reversed",
+      Message: "This transfer is already reversed.");
 
-   public static readonly DomainErrors AmountMustBePositive = new(
+   
+   public static readonly DomainErrors InvalidAmount = new(
       ErrorCode.BadRequest,
       Title: "Transfer: Invalid Amount",
       Message: "The transfer amount must be positive.");

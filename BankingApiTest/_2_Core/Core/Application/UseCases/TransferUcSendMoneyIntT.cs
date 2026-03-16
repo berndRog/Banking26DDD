@@ -5,7 +5,6 @@ using BankingApi._2_Core.Payments._2_Application.Dtos;
 using BankingApi._2_Core.Payments._2_Application.Mappings;
 using BankingApi._2_Core.Payments._2_Application.UseCases;
 using BankingApi._2_Core.Payments._3_Domain.Entities;
-using BankingApi._2_Modules.AccountsTransfers._2_Application.UseCases;
 using BankingApiTest.TestInfrastructure;
 using Microsoft.Extensions.DependencyInjection;
 namespace BankingApiTest._2_Core.Core.Application.UseCases;

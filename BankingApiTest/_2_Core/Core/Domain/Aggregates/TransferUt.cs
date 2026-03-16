@@ -27,15 +27,17 @@ public sealed class TransferUt {
    [Fact]
    public void CreateTransfer_valid_input_and_id_creates_transfer() {
       // Arrange
+
       // Act
-      var result = Transfer.Create(
-         fromAccountId: _fromAccount.Id,
-         amountVo: _transfer.AmountVo,
+      var result = Transfer.CreateBooked(
+         fromAccountId: _transfer.FromAccountId,
+         toAccountId: _transfer.ToAccountId, 
          purpose: _transfer.Purpose,
-         toName: _beneficiary.Name,
-         toIbanVo: _beneficiary.IbanVo,
-         createdAt: _clock.UtcNow,
-         id: _id
+         amountVo: _transfer.AmountVo,
+         debitTransactionId: _transfer.DebitTransactionId,
+         creditTransactionId: _transfer.CreditTransactionId,
+         bookedAt: _clock.UtcNow,
+         id: _transfer.Id.ToString()
       );
 
       // Assert
@@ -44,12 +46,13 @@ public sealed class TransferUt {
 
       var actual = result.Value!;
       IsType<Transfer>(actual);
-      Equal(Guid.Parse(_id), actual.Id);
-      Equal(_fromAccount.Id, actual.FromAccountId);
-      Equal(_transfer.AmountVo, actual.AmountVo);
+      Equal(_transfer.Id, actual.Id);
+      Equal(_transfer.FromAccountId, actual.FromAccountId);
+      Equal(_transfer.ToAccountId, actual.ToAccountId);
       Equal(_transfer.Purpose, actual.Purpose);
-      Equal(_beneficiary.Name, actual.ToName);
-      Equal(_beneficiary.IbanVo, actual.ToIbanVo);
+      Equal(_transfer.AmountVo, actual.AmountVo);
+      Equal(_transfer.DebitTransactionId, actual.DebitTransactionId);
+      Equal(_transfer.CreditTransactionId, actual.CreditTransactionId);
       Equal(TransferStatus.Initiated, actual.Status);
    }
 
@@ -57,13 +60,14 @@ public sealed class TransferUt {
    public void Create_without_id_generates_new_id() {
       // Arrange
       // Act
-      var result = Transfer.Create(
-         fromAccountId: _fromAccount.Id,
-         amountVo: _transfer.AmountVo,
+      var result = Transfer.CreateBooked(
+         fromAccountId: _transfer.FromAccountId,
+         toAccountId: _transfer.ToAccountId, 
          purpose: _transfer.Purpose,
-         toName: _beneficiary.Name,
-         toIbanVo: _beneficiary.IbanVo,
-         createdAt: _clock.UtcNow,
+         amountVo: _transfer.AmountVo,
+         debitTransactionId: _transfer.DebitTransactionId,
+         creditTransactionId: _transfer.CreditTransactionId,
+         bookedAt: _clock.UtcNow,
          id: null
       );
 
@@ -78,8 +82,6 @@ public sealed class TransferUt {
       Equal(_fromAccount.Id, actual.FromAccountId);
       Equal(_transfer.AmountVo, actual.AmountVo);
       Equal(_transfer.Purpose, actual.Purpose);
-      Equal(_beneficiary.Name, actual.ToName);
-      Equal(_beneficiary.IbanVo, actual.ToIbanVo);
       Equal(TransferStatus.Initiated, actual.Status);
    }
 
@@ -87,13 +89,14 @@ public sealed class TransferUt {
    public void Create_with_invalid_id_fails() {
       // Arrange
       // Act
-      var result = Transfer.Create(
-         fromAccountId: _fromAccount.Id,
-         amountVo: _transfer.AmountVo,
+      var result = Transfer.CreateBooked(
+         fromAccountId: _transfer.FromAccountId,
+         toAccountId: _transfer.ToAccountId, 
          purpose: _transfer.Purpose,
-         toName: _beneficiary.Name,
-         toIbanVo: _beneficiary.IbanVo,
-         createdAt: _clock.UtcNow,
+         amountVo: _transfer.AmountVo,
+         debitTransactionId: _transfer.DebitTransactionId,
+         creditTransactionId: _transfer.CreditTransactionId,
+         bookedAt: _clock.UtcNow,
          id: "is-not-a-guid"
       );
 
@@ -105,23 +108,25 @@ public sealed class TransferUt {
    [Fact]
    public void Create_is_deterministic_for_same_input_id() {
       // Act
-      var result1 = Transfer.Create(
-         fromAccountId: _fromAccount.Id,
-         amountVo: _transfer.AmountVo,
+      var result1 = Transfer.CreateBooked(
+         fromAccountId: _transfer.FromAccountId,
+         toAccountId: _transfer.ToAccountId, 
          purpose: _transfer.Purpose,
-         toName: _beneficiary.Name,
-         toIbanVo: _beneficiary.IbanVo,
-         createdAt: _clock.UtcNow,
-         id: _id
+         amountVo: _transfer.AmountVo,
+         debitTransactionId: _transfer.DebitTransactionId,
+         creditTransactionId: _transfer.CreditTransactionId,
+         bookedAt: _clock.UtcNow,
+         id: _transfer.Id.ToString()
       );
-      var result2 = Transfer.Create(
-         fromAccountId: _fromAccount.Id,
-         amountVo: _transfer.AmountVo,
+      var result2 = Transfer.CreateBooked(
+         fromAccountId: _transfer.FromAccountId,
+         toAccountId: _transfer.ToAccountId, 
          purpose: _transfer.Purpose,
-         toName: _beneficiary.Name,
-         toIbanVo: _beneficiary.IbanVo,
-         createdAt: _clock.UtcNow,
-         id: _id
+         amountVo: _transfer.AmountVo,
+         debitTransactionId: _transfer.DebitTransactionId,
+         creditTransactionId: _transfer.CreditTransactionId,
+         bookedAt: _clock.UtcNow,
+         id: _transfer.Id.ToString()
       );
       var transfer1 = result1.Value!;
       var transfer2 = result2.Value!;
@@ -133,47 +138,6 @@ public sealed class TransferUt {
       Equal(transfer1.FromAccountId, transfer2.FromAccountId);
       Equal(transfer1.AmountVo, transfer2.AmountVo);
       Equal(transfer1.Purpose, transfer2.Purpose);
-      Equal(transfer1.ToName, transfer2.ToName);
-      Equal(transfer1.ToIbanVo, transfer2.ToIbanVo);
       Equal(transfer1.Status, transfer2.Status);
    }
-   /*
-         #region --- Transactions ----------------------------------------------------------------
-         [Fact]
-         public void AddBeneficiaryUt() {
-            // Arrange
-            var account = _seed.Account1;
-            var beneficiary = _seed.Beneficiary1;
-
-            // Act
-            account.AddBeneficiary(
-               name: beneficiary.Name,
-               iban: beneficiary.Iban,
-               id: beneficiary.Id.ToString()
-            );
-
-            // Assert
-            var actual = account.Beneficiaries.FirstOrDefault(b => b.Id == beneficiary.Id);
-            NotNull(actual);
-            Equal(beneficiary, actual);
-         }
-         [Fact]
-         public void RemoveBeneficiaryUt() {
-            // Arrange
-            var account = _seed.Account1;
-            var beneficiary1 = _seed.Beneficiary1;
-            var beneficiary2 = _seed.Beneficiary2;
-            account.AddBeneficiary(beneficiary1.Name, beneficiary1.Iban, beneficiary1.Id.ToString());
-            account.AddBeneficiary(beneficiary2.Name, beneficiary2.Iban, beneficiary2.Id.ToString());
-
-            // Act
-            account.RemoveBeneficiary(beneficiary1.Id);
-
-            // Assert
-            var actual = account.Beneficiaries.FirstOrDefault(b => b.Id == beneficiary1.Id);
-            Null(actual);
-            // Equal(beneficiary, actual);
-         }
-         #endregion
-         */
 }

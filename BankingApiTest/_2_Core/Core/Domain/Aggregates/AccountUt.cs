@@ -179,4 +179,35 @@ public sealed class AccountUt {
    #endregion
    
    
+   #region --- Transactions ----------------------------------------------------------------
+   [Fact]
+   public void PostDebitUt() {
+      // Arrange
+      var fromAccount = _seed.Account1();
+      var toAccount = _seed.Account6();
+      var transfer = _seed.Transfer1();
+         
+      // Act
+      var transaction1 = fromAccount.PostDebit(
+         purpose: transfer.Purpose,
+         amountVo: transfer.AmountVo,
+         bookedAt: _clock.UtcNow,
+         id: transfer.DebitTransactionId.ToString()
+      );
+      
+      var transaction2 = toAccount.PostCredit(
+         purpose: transfer.Purpose,
+         amountVo: transfer.AmountVo,
+         bookedAt: _clock.UtcNow,
+         id: transfer.CreditTransactionId.ToString()
+      );
+      
+      // Assert
+      var actual = fromAccount.Transactions.FirstOrDefault(t => t.Id == transfer.CreditTransactionId);
+      NotNull(actual);
+      // Equal(beneficiary, actual);
+   }
+   #endregion
+
+   
 }

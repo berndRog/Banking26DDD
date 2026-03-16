@@ -1,29 +1,35 @@
+using BankingApi._2_Core.BuildingBlocks._3_Domain;
 using BankingApi._2_Core.BuildingBlocks._3_Domain.Entities;
 using BankingApi._2_Core.Payments._3_Domain.Enums;
+using BankingApi._2_Core.Payments._3_Domain.Errors;
 using BankingApi._2_Core.Payments._3_Domain.ValueObjects;
+
 namespace BankingApi._2_Core.Payments._3_Domain.Entities;
 
 public sealed class Transaction : Entity {
-   
+
    //--- Properties ------------------------------------------------------------
-   // Which account is affected by this booking
+   // owning account
    public Guid AccountId { get; private set; }
 
-   // Monetary value of the booking.
-   public MoneyVo Amount { get; private set; } = default!;
-
-   // Type of booking (Debit = money leaves account, Credit = money enters account)
+   // debit or credit from perspective of this account
    public TransactionType Type { get; private set; }
 
-   // Purpose text copied from transfer at booking time
-   // (snapshot for audit/history)
-   public string Purpose { get; private set; } = default!;
+   // payment reference / purpose
+   public string Purpose { get; private set; } = string.Empty;
+   
+   // booked amount
+   public MoneyVo AmountVo { get; private set; } = default!;
 
-   // Booking timestamp (same for debit & credit of a transfer)
+   // balance after this transaction
+   public MoneyVo BalanceAfterVo { get; private set; } = default!;
+
+   // booking timestamp
    public DateTimeOffset BookedAt { get; private set; }
-
-   // Parent aggregate reference Transfer <-> Transaction 1 : 1..n
-   public Guid TransferId { get; private set; }
+   
+   //
+   public Guid? TransferId { get; private set; }
+   
 
    //--- Ctors -----------------------------------------------------------------
    // EF Core ctor
@@ -32,136 +38,107 @@ public sealed class Transaction : Entity {
    // Domain ctor
    private Transaction(
       Guid id,
-      Guid transferId,
-      TransactionType type,
       Guid accountId,
-      MoneyVo amount,
+      TransactionType type,
+      MoneyVo amountVo,
+      MoneyVo balanceAfterVo,
       string purpose,
       DateTimeOffset bookedAt
    ) {
       Id = id;
-      TransferId = transferId;
-      Type = type;
       AccountId = accountId;
-      Amount = amount;
+      Type = type;
+      AmountVo = amountVo;
+      BalanceAfterVo = balanceAfterVo;
       Purpose = purpose;
       BookedAt = bookedAt;
    }
 
-   //--- Static Factories ------------------------------------------------------
-   // Creates a debit booking (Lastschrift).
-   // Amount must be positive.
-   public static Transaction CreateDebit(
-      Guid transferId,
+   public static Result<Transaction> CreateDebit(
       Guid accountId,
-      MoneyVo amount,
       string purpose,
-      DateTimeOffset bookedAt
+      MoneyVo amountVo,
+      MoneyVo balanceAfterVo,
+      DateTimeOffset bookedAt,
+      string? id = null
    ) {
-      if (amount.Amount <= 0m)
-         throw new InvalidOperationException("Debit transaction amount must be positive.");
-
-      return new Transaction(
-         id: Guid.NewGuid(),
-         transferId: transferId,
-         type: TransactionType.Debit,
+      var idResult = Entity.Resolve(id, TransactionErrors.InvalidId);
+      if (idResult.IsFailure)
+         return Result<Transaction>.Failure(idResult.Error);
+      var transactionId = idResult.Value;
+      
+      var transaction =  new Transaction(
+         id: transactionId,
          accountId: accountId,
-         amount: amount,
+         type: TransactionType.Debit,
          purpose: purpose,
+         amountVo: amountVo,
+         balanceAfterVo: balanceAfterVo,
          bookedAt: bookedAt
       );
+      
+      return Result<Transaction>.Success(transaction);
    }
 
-   // Creates a credit booking (Gutschrift).
-   // Amount must be positive.
-   public static Transaction CreateCredit(
-      Guid transferId,
+   public static Result<Transaction> CreateCredit(
       Guid accountId,
-      MoneyVo amount,
       string purpose,
-      DateTimeOffset bookedAt
+      MoneyVo amountVo,
+      MoneyVo balanceAfterVo,
+      DateTimeOffset bookedAt,
+      string? id = null
    ) {
-      if (amount.Amount <= 0m)
-         throw new InvalidOperationException("Credit transaction amount must be positive.");
-
-      return new Transaction(
-         id: Guid.NewGuid(),
-         transferId: transferId,
-         type: TransactionType.Credit,
+      
+      var idResult = Entity.Resolve(id, TransactionErrors.InvalidId);
+      if (idResult.IsFailure)
+         return Result<Transaction>.Failure(idResult.Error);
+      var transactionId = idResult.Value;
+      
+      var transaction = new Transaction(
+         id: transactionId,
          accountId: accountId,
-         amount: amount,
+         type: TransactionType.Credit,
          purpose: purpose,
-         bookedAt: bookedAt
+         amountVo: amountVo,
+         balanceAfterVo: balanceAfterVo,
+         bookedAt:bookedAt
       );
+      return Result<Transaction>.Success(transaction);
+   }
+   
+   internal void AttachTransfer(Guid transferId) {
+      TransferId = transferId;
    }
 }
-
-// using BankingApi._2_Modules.Accounts._3_Domain.Enums;
-// using BankingApi._4_BuildingBlocks._3_Domain.Entities;
-//
-// public sealed class Transaction: Entity<Guid> {
-//
-//    public TransactionType Type { get; private set; }
-//    // Which Accout is affected?
-//    public Guid AccountId { get; private set; }
-//    public decimal Amount { get; private set; } 
-//    public string Purpose { get; private set; } = default!;
-//    public DateTimeOffset BookedAt { get; private set; }
-//
-//    public Guid TransferId { get; private set; } 
-//    
-//    // EF Core ctor 
-//    private Transaction() { }
-//
-//    // Domain ctor
-//    private Transaction(
-//       Guid id, 
-//       Guid transferId,
-//       TransactionType type, 
-//       Guid accountId, 
-//       Decimal amount, 
-//       string purpose,
-//       DateTimeOffset bookedAt
-//    ) {
-//       Id = id;
-//       TransferId = transferId;
-//       Type = type;
-//       AccountId = accountId;
-//       Amount = amount;
-//       Purpose = purpose;
-//       BookedAt = bookedAt;
-//    }
-//
-//    //--- Factory methods -----------------------------------------------
-//    public static Transaction CreateDebit(
-//       Guid transferId,
-//       Guid accountId, 
-//       decimal amount, 
-//       string purpose,
-//       DateTimeOffset bookedAt
-//    ) => new(
-//       id: Guid.NewGuid(), 
-//       transferId: transferId,
-//       type: TransactionType.Debit, 
-//       accountId: accountId, 
-//       amount: amount,
-//       purpose: purpose,
-//       bookedAt: bookedAt
-//   );
-//
-//    public static Transaction CreateCredit(
-//       Guid transferId,
-//       Guid accountId, 
-//       decimal amount,
-//       string purpose,
-//       DateTimeOffset bookedAt
-//    ) => new(
-//       id: Guid.NewGuid(), 
-//       transferId: transferId,
-//       type: TransactionType.Credit, 
-//       accountId: accountId, 
-//       amount: amount, 
-//       purpose: purpose,
-//       bookedAt: bookedAt
-//    );
-// }
+/*
+ 
+ Didaktik und Lernziele
+   
+   In diesem Modell existieren zwei Aggregate im Payment-Kontext:
+   
+   1. Account
+      Das Account-Aggregate verwaltet den Kontostand und die komplette
+      Buchungshistorie eines Kontos. Jede Änderung des Kontostands erfolgt
+      ausschließlich über Debit oder Credit. Dabei wird gleichzeitig eine
+      Transaction erzeugt.
+   
+   2. Transfer
+      Das Transfer-Aggregate modelliert den fachlichen Geschäftsvorfall einer
+      Überweisung. Ein Transfer verbindet genau zwei Transactions:
+      - eine Debit-Transaction beim Senderkonto
+      - eine Credit-Transaction beim Empfängerkonto
+   
+      Der Transfer speichert nur Referenzen auf diese Buchungen. Dadurch bleibt
+      die Buchungshistorie im Account-Aggregate konsistent, während der Transfer
+      den übergeordneten Geschäftsvorgang beschreibt.
+   
+   Dieses Modell trennt zwei fachliche Perspektiven:
+   
+   - Konto-Perspektive: Transactions beschreiben, was auf einem Konto passiert.
+   - Geschäftsvorfall-Perspektive: Transfer beschreibt die Überweisung als
+     zusammenhängenden Zahlungsvorgang.
+   
+   Die Trennung ermöglicht außerdem eine saubere Modellierung von Rückbuchungen,
+   da eine Reversal-Überweisung eindeutig auf den ursprünglichen Transfer
+   referenzieren kann.
+ */

@@ -14,45 +14,6 @@ public interface IAccountContract {
       string? ibanString,
       CancellationToken ct
    ); 
-
-   // Retrieve a snapshot of the current account state
-   Task<AccountSnapshotDto?> GetSnapshotAsync(
-      Guid accountId,
-      CancellationToken ct
-   );
-
-   // Retrieve a beneficiary associated with an account
-   Task<BeneficiaryDto?> GetBeneficiaryAsync(
-      Guid accountId,
-      Guid beneficiaryId,
-      CancellationToken ct
-   );
-
-   // Resolve the internal account id using an IBAN
-   Task<Guid?> ResolveAccountIdByIbanAsync(
-      string iban,
-      CancellationToken ct
-   );
-
-   // Perform a debit transaction on an account
-   // Idempotency key prevents duplicate execution
-   Task<TransactionResultDto> DoDebitTransactionAsync(
-      Guid accountId,
-      decimal amount,
-      string reference,
-      string idempotencyKey,
-      CancellationToken ct
-   );
-
-   // Perform a credit transaction on an account
-   // Idempotency key prevents duplicate execution
-   Task<TransactionResultDto> DoCreditTransactionAsync(
-      Guid accountId,
-      decimal amount,
-      string reference,
-      string idempotencyKey,
-      CancellationToken ct
-   );
 }
 
 /*

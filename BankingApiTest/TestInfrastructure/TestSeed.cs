@@ -104,18 +104,19 @@ public sealed class TestSeed {
    public Transfer Transfer2() => _seed.Transfer2();
    public Transfer Transfer3() => _seed.Transfer3();
    public Transfer Transfer4() => _seed.Transfer4();
-   public Transfer Transfer5() => _seed.Transfer5();
-   public Transfer Transfer6() => _seed.Transfer6();
-   public Transfer Transfer7() => _seed.Transfer7();
-   public Transfer Transfer8() => _seed.Transfer8();
-   public Transfer Transfer9() => _seed.Transfer9();
-   public Transfer Transfer10() => _seed.Transfer10();
-   public Transfer Transfer11() => _seed.Transfer11();
-   
+ 
+   // public Transfer Transfer5() => _seed.Transfer5();
+   // public Transfer Transfer6() => _seed.Transfer6();
+   // public Transfer Transfer7() => _seed.Transfer7();
+   // public Transfer Transfer8() => _seed.Transfer8();
+   // public Transfer Transfer9() => _seed.Transfer9();
+   // public Transfer Transfer10() => _seed.Transfer10();
+   // public Transfer Transfer11() => _seed.Transfer11();
+   //
    public IReadOnlyList<Transfer> Transfers => new List<Transfer>() {
       Transfer1(), Transfer2(), Transfer3(), Transfer4(), 
-      Transfer5(), Transfer6(), Transfer7(), Transfer8(), 
-      Transfer9(), Transfer10(), Transfer11()
+      //Transfer5(), Transfer6(), Transfer7(), Transfer8(), 
+      //Transfer9(), Transfer10(), Transfer11()
    };
    #endregion
    

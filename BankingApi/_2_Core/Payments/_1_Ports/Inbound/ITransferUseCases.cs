@@ -4,21 +4,15 @@ using BankingApi._2_Core.Payments._3_Domain.Enums;
 namespace BankingApi._2_Core.Payments._1_Ports.Inbound;
 
 public interface ITransferUseCases {
-
-   // Create a new transfer
-   Task<Result<TransferDto>> CreateAsync(
-      Guid fromAccountId,
-      string toName,
-      string toIbanString,
-      string purpose,
-      decimal amountDecimal = 0m,
-      int currencyInt = (int) Currency.EUR, // default to EUR
-      string? id = null,
-      CancellationToken ct = default
-   );
-
+   
    Task<Result<TransferDto>> SendMoneyAsync(
       SendMoneyDto dto,
+      CancellationToken ct = default
+   );
+   
+   Task<Result<TransferDto>> ReverseMoneyAsync(
+      Guid transferId,
+      string purpose,
       CancellationToken ct = default
    );
 

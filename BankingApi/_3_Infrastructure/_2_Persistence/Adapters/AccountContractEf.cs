@@ -5,16 +5,16 @@ using BankingApi._2_Core.BuildingBlocks.Utils;
 using BankingApi._2_Core.Payments._1_Ports.Inbound;
 using BankingApi._2_Core.Payments._1_Ports.Outbound;
 using BankingApi._2_Core.Payments._2_Application.Dtos;
-using BankingApi._2_Core.Payments._2_Application.Errors;
 using BankingApi._2_Core.Payments._2_Application.Mappings;
 using BankingApi._2_Core.Payments._3_Domain.Entities;
 using BankingApi._2_Core.Payments._3_Domain.Enums;
+using BankingApi._2_Core.Payments._3_Domain.Errors;
 using BankingApi._2_Core.Payments._3_Domain.ValueObjects;
 [assembly: InternalsVisibleTo("BankingApiTest")]
 namespace BankingApi._3_Infrastructure._2_Persistence.Adapters;
 
 internal class AccountContractEf(
-   IAccountRepository repository,
+   IAccountRepository accountRepository,
    IUnitOfWork unitOfWork,
    IClock clock,
    ILogger<AccountContractEf> logger
@@ -28,9 +28,9 @@ internal class AccountContractEf(
    ) {
       
       // Check if owner already has an account (not required, but good to have for this use case)
-      var exists = await repository.ExistsByOwnerIdAsync(customerId, ct);
+      var exists = await accountRepository.ExistsByOwnerIdAsync(customerId, ct);
       if (exists)
-         return Result<AccountDto>.Failure(AccountApplicationErrors.OwnerAlreadyHasAccount);
+         return Result<AccountDto>.Failure(AccountErrors.OwnerAlreadyHasAccount);
       
       // Create IBAN (generate if not provided, validate if provided)
       if (string.IsNullOrEmpty(ibanString)) {
@@ -44,7 +44,7 @@ internal class AccountContractEf(
             ibanString = IbanGenerator.CreateGermanIban(ibanString);
          }
          catch (FormatException) {
-            return Result<AccountDto>.Failure(AccountApplicationErrors.InvalidIbanFormat);
+            return Result<AccountDto>.Failure(AccountErrors.InvalidIbanFormat);
          }
       }
       
@@ -69,7 +69,7 @@ internal class AccountContractEf(
       var account = resultAccount.Value;
       
       // Add to repository
-      repository.Add(account);
+      accountRepository.Add(account);
       
       // Persist
       var savedRows = await unitOfWork.SaveAllChangesAsync("Initial account", ct);
@@ -80,25 +80,4 @@ internal class AccountContractEf(
       return Result<AccountDto>.Success(account.ToAccountDto());
    }
    
-   public Task<AccountSnapshotDto?> GetSnapshotAsync(Guid accountId, CancellationToken ct) {
-      throw new NotImplementedException();
-   }
-
-   public Task<BeneficiaryDto?> GetBeneficiaryAsync(Guid accountId, Guid beneficiaryId, CancellationToken ct) {
-      throw new NotImplementedException();
-   }
-
-   public Task<Guid?> ResolveAccountIdByIbanAsync(string iban, CancellationToken ct) {
-      throw new NotImplementedException();
-   }
-
-   public Task<TransactionResultDto> DoDebitTransactionAsync(Guid accountId, decimal amount, string reference, string idempotencyKey,
-      CancellationToken ct) {
-      throw new NotImplementedException();
-   }
-
-   public Task<TransactionResultDto> DoCreditTransactionAsync(Guid accountId, decimal amount, string reference, string idempotencyKey,
-      CancellationToken ct) {
-      throw new NotImplementedException();
-   }
 }

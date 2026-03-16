@@ -23,7 +23,7 @@ public sealed class ConfigTransaction(
       builder.Property(x => x.AccountId)
          .IsRequired();
       
-      builder.OwnsOne(t => t.Amount, b => {
+      builder.OwnsOne(t => t.AmountVo, b => {
          b.Property(p => p.Amount)
             .HasColumnName("Amount")
             .HasColumnType("decimal(18,2)")
