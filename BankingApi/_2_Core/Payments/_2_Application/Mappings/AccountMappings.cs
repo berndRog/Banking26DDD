@@ -1,5 +1,5 @@
 using BankingApi._2_Core.Payments._2_Application.Dtos;
-using BankingApi._2_Core.Payments._3_Domain.Aggregates;
+using BankingApi._2_Core.Payments._3_Domain.Entities;
 namespace BankingApi._2_Core.Payments._2_Application.Mappings;
 
 public static class AccountMappings {

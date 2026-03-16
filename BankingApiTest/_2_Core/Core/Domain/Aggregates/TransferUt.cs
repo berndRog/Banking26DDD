@@ -1,5 +1,5 @@
 using BankingApi._2_Core.BuildingBlocks._1_Ports.Outbound;
-using BankingApi._2_Core.Payments._3_Domain.Aggregates;
+using BankingApi._2_Core.Payments._3_Domain.Entities;
 using BankingApi._2_Core.Payments._3_Domain.Enums;
 using BankingApiTest.TestInfrastructure;
 namespace BankingApiTest._2_Core.Core.Domain.Aggregates;
@@ -32,8 +32,8 @@ public sealed class TransferUt {
          fromAccountId: _fromAccount.Id,
          amountVo: _transfer.AmountVo,
          purpose: _transfer.Purpose,
-         recipientName: _beneficiary.Name,
-         recipientIbanVo: _beneficiary.IbanVo,
+         toName: _beneficiary.Name,
+         toIbanVo: _beneficiary.IbanVo,
          createdAt: _clock.UtcNow,
          id: _id
       );
@@ -48,8 +48,8 @@ public sealed class TransferUt {
       Equal(_fromAccount.Id, actual.FromAccountId);
       Equal(_transfer.AmountVo, actual.AmountVo);
       Equal(_transfer.Purpose, actual.Purpose);
-      Equal(_beneficiary.Name, actual.RecipientName);
-      Equal(_beneficiary.IbanVo, actual.RecipientIbanVo);
+      Equal(_beneficiary.Name, actual.ToName);
+      Equal(_beneficiary.IbanVo, actual.ToIbanVo);
       Equal(TransferStatus.Initiated, actual.Status);
    }
 
@@ -61,8 +61,8 @@ public sealed class TransferUt {
          fromAccountId: _fromAccount.Id,
          amountVo: _transfer.AmountVo,
          purpose: _transfer.Purpose,
-         recipientName: _beneficiary.Name,
-         recipientIbanVo: _beneficiary.IbanVo,
+         toName: _beneficiary.Name,
+         toIbanVo: _beneficiary.IbanVo,
          createdAt: _clock.UtcNow,
          id: null
       );
@@ -78,8 +78,8 @@ public sealed class TransferUt {
       Equal(_fromAccount.Id, actual.FromAccountId);
       Equal(_transfer.AmountVo, actual.AmountVo);
       Equal(_transfer.Purpose, actual.Purpose);
-      Equal(_beneficiary.Name, actual.RecipientName);
-      Equal(_beneficiary.IbanVo, actual.RecipientIbanVo);
+      Equal(_beneficiary.Name, actual.ToName);
+      Equal(_beneficiary.IbanVo, actual.ToIbanVo);
       Equal(TransferStatus.Initiated, actual.Status);
    }
 
@@ -91,8 +91,8 @@ public sealed class TransferUt {
          fromAccountId: _fromAccount.Id,
          amountVo: _transfer.AmountVo,
          purpose: _transfer.Purpose,
-         recipientName: _beneficiary.Name,
-         recipientIbanVo: _beneficiary.IbanVo,
+         toName: _beneficiary.Name,
+         toIbanVo: _beneficiary.IbanVo,
          createdAt: _clock.UtcNow,
          id: "is-not-a-guid"
       );
@@ -109,8 +109,8 @@ public sealed class TransferUt {
          fromAccountId: _fromAccount.Id,
          amountVo: _transfer.AmountVo,
          purpose: _transfer.Purpose,
-         recipientName: _beneficiary.Name,
-         recipientIbanVo: _beneficiary.IbanVo,
+         toName: _beneficiary.Name,
+         toIbanVo: _beneficiary.IbanVo,
          createdAt: _clock.UtcNow,
          id: _id
       );
@@ -118,8 +118,8 @@ public sealed class TransferUt {
          fromAccountId: _fromAccount.Id,
          amountVo: _transfer.AmountVo,
          purpose: _transfer.Purpose,
-         recipientName: _beneficiary.Name,
-         recipientIbanVo: _beneficiary.IbanVo,
+         toName: _beneficiary.Name,
+         toIbanVo: _beneficiary.IbanVo,
          createdAt: _clock.UtcNow,
          id: _id
       );
@@ -133,8 +133,8 @@ public sealed class TransferUt {
       Equal(transfer1.FromAccountId, transfer2.FromAccountId);
       Equal(transfer1.AmountVo, transfer2.AmountVo);
       Equal(transfer1.Purpose, transfer2.Purpose);
-      Equal(transfer1.RecipientName, transfer2.RecipientName);
-      Equal(transfer1.RecipientIbanVo, transfer2.RecipientIbanVo);
+      Equal(transfer1.ToName, transfer2.ToName);
+      Equal(transfer1.ToIbanVo, transfer2.ToIbanVo);
       Equal(transfer1.Status, transfer2.Status);
    }
    /*

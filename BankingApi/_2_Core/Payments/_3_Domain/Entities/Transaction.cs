@@ -1,47 +1,31 @@
 using BankingApi._2_Core.BuildingBlocks._3_Domain.Entities;
 using BankingApi._2_Core.Payments._3_Domain.Enums;
 using BankingApi._2_Core.Payments._3_Domain.ValueObjects;
-namespace BankingApi._2_Core.Payments._3_Domain.Aggregates;
+namespace BankingApi._2_Core.Payments._3_Domain.Entities;
 
 public sealed class Transaction : Entity {
-   // =========================================================
-   // Business data
-   // =========================================================
-   /// <summary>
-   /// Type of booking (Debit = money leaves account, Credit = money enters account)
-   /// </summary>
-   public TransactionType Type { get; private set; }
-
-   /// <summary>
-   /// Which account is affected by this booking
-   /// </summary>
+   
+   //--- Properties ------------------------------------------------------------
+   // Which account is affected by this booking
    public Guid AccountId { get; private set; }
 
-   /// <summary>
-   /// Monetary value of the booking.
-   /// Uses Money value object instead of decimal.
-   /// </summary>
+   // Monetary value of the booking.
    public MoneyVo Amount { get; private set; } = default!;
 
-   /// <summary>
-   /// Purpose text copied from transfer at booking time
-   /// (snapshot for audit/history)
-   /// </summary>
+   // Type of booking (Debit = money leaves account, Credit = money enters account)
+   public TransactionType Type { get; private set; }
+
+   // Purpose text copied from transfer at booking time
+   // (snapshot for audit/history)
    public string Purpose { get; private set; } = default!;
 
-   /// <summary>
-   /// Booking timestamp (same for debit & credit of a transfer)
-   /// </summary>
+   // Booking timestamp (same for debit & credit of a transfer)
    public DateTimeOffset BookedAt { get; private set; }
 
-   /// <summary>
-   /// Parent aggregate reference
-   /// </summary>
+   // Parent aggregate reference Transfer <-> Transaction 1 : 1..n
    public Guid TransferId { get; private set; }
 
-   // =========================================================
-   // Ctors
-   // =========================================================
+   //--- Ctors -----------------------------------------------------------------
    // EF Core ctor
    private Transaction() { }
 
@@ -64,13 +48,9 @@ public sealed class Transaction : Entity {
       BookedAt = bookedAt;
    }
 
-   // =========================================================
-   // Factory methods
-   // =========================================================
-   /// <summary>
-   /// Creates a debit booking (money leaves the account).
-   /// Amount must be positive.
-   /// </summary>
+   //--- Static Factories ------------------------------------------------------
+   // Creates a debit booking (Lastschrift).
+   // Amount must be positive.
    public static Transaction CreateDebit(
       Guid transferId,
       Guid accountId,
@@ -92,10 +72,8 @@ public sealed class Transaction : Entity {
       );
    }
 
-   /// <summary>
-   /// Creates a credit booking (money enters the account).
-   /// Amount must be positive.
-   /// </summary>
+   // Creates a credit booking (Gutschrift).
+   // Amount must be positive.
    public static Transaction CreateCredit(
       Guid transferId,
       Guid accountId,

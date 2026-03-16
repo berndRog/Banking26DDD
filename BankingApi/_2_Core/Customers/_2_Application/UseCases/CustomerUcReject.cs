@@ -3,6 +3,7 @@ using BankingApi._2_Core.BuildingBlocks._3_Domain;
 using BankingApi._2_Core.Customers._1_Ports.Outbound;
 using BankingApi._2_Core.Customers._2_Application.Errors;
 using BankingApi._2_Core.Customers._3_Domain.Errors;
+using BankingApi._2_Modules.Customers._3_Domain.Enums;
 namespace BankingApi._2_Core.Customers._2_Application.UseCases;
 
 /// <summary>
@@ -18,7 +19,7 @@ public sealed class CustomerUcReject(
 
    public async Task<Result> ExecuteAsync(
       Guid customerId,
-      string reason,
+      RejectCode rejectCode,
       CancellationToken ct
    ) {
       // 1) Authorization: must be an employee/admin with the required rights
@@ -28,7 +29,7 @@ public sealed class CustomerUcReject(
       // 2) Validate input
       if (customerId == Guid.Empty)
          return Result.Failure(CustomerErrors.InvalidId);
-      if (string.IsNullOrWhiteSpace(reason))
+      if (rejectCode == default)
          return Result.Failure(CustomerErrors.RejectionRequiresReason);
 
       // 3) Load aggregate
@@ -40,7 +41,7 @@ public sealed class CustomerUcReject(
       // 4) Domain change (audit + status transition)
       var utcNow = clock.UtcNow;
       var employeeId = ParseEmployeeId(identityGateway.Subject);
-      var result = customer.Reject(employeeId, reason, utcNow);
+      var result = customer.Reject(employeeId, rejectCode, utcNow);
       if (result.IsFailure)
          return Result.Failure(result.Error);
 

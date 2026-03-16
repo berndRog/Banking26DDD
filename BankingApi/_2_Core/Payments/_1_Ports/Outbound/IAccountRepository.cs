@@ -1,4 +1,4 @@
-using BankingApi._2_Core.Payments._3_Domain.Aggregates;
+using BankingApi._2_Core.Payments._3_Domain.Entities;
 using BankingApi._2_Core.Payments._3_Domain.ValueObjects;
 
 namespace BankingApi._2_Core.Payments._1_Ports.Outbound;
@@ -40,6 +40,7 @@ public interface IAccountRepository {
    
    // Add a new account aggregate to the persistence context
    void Add(Account account);
+   void AddRange(IEnumerable<Account> accounts);
 
    // Update an existing account aggregate in the persistence context
    void Update(Account account);
@@ -52,6 +53,7 @@ public interface IAccountRepository {
 
    // Add a beneficiary to the persistence context
    void Add(Beneficiary beneficiary);
+   void AddRange(IEnumerable<Beneficiary> beneficiaries);
 
    // Remove a beneficiary from the persistence context
    void Remove(Beneficiary beneficiary);

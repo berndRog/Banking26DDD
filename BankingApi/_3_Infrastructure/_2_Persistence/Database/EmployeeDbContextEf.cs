@@ -6,9 +6,15 @@ internal sealed class EmployeeDbContextEf(
    BankingDbContext db
 ) : IEmployeesDbContext {
 
-   public IQueryable<Employee> Employees => db.Set<Employee>();
+   public IQueryable<Employee> Employees 
+      => db.Set<Employee>();
+  
+   public void Add(Employee employee) 
+      => db.Set<Employee>().Add(employee);
+   public void AddRange(IEnumerable<Employee> employees) 
+      => db.Set<Employee>().AddRange(employees);
 
-   public void Add<T>(T entity) where T : class => db.Set<T>().Add(entity);
-   public void Remove<T>(T entity) where T : class => db.Set<T>().Remove(entity);
-
+   public void Update(Employee employee) 
+      => db.Set<Employee>().Update(employee);
+   
 }

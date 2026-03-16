@@ -1,5 +1,4 @@
-using BankingApi._2_Core.Payments._3_Domain.Aggregates;
-
+using BankingApi._2_Core.Payments._3_Domain.Entities;
 namespace BankingApi._2_Core.Payments._1_Ports.Outbound;
 
 // Persistence context abstraction for the Transfer part of the Payments context.
@@ -14,9 +13,7 @@ public interface ITransferDbContext {
 
    // Add a new entity to the persistence context
    void Add<T>(T entity) where T : class;
-
-   // Remove an entity from the persistence context
-   void Remove<T>(T entity) where T : class;
+   void AddRange<T>(IEnumerable<T> entities) where T : class;
 }
 
 /*

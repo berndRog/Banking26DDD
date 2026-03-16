@@ -46,7 +46,7 @@ public sealed class ConfigCustomer(
 
       // Status
       builder.Property(o => o.Status)
-         .HasConversion<int>()   // or .HasConversion<string>()
+         .HasConversion<int>()   
          .IsRequired();
 
       // Employee decisions / audit facts
@@ -58,8 +58,8 @@ public sealed class ConfigCustomer(
          .HasConversion(dtConvNul)
          .IsRequired(false);
 
-      builder.Property(o => o.RejectionReason)
-         .HasMaxLength(100)
+      builder.Property(o => o.RejectCode)
+         .HasConversion<int>()   
          .IsRequired(false);
 
       builder.Property(o => o.AuditedByEmployeeId)
@@ -110,7 +110,6 @@ public sealed class ConfigCustomer(
       builder.Navigation(o => o.AddressVo).IsRequired();
 
       // Optional indexes for admin filtering
-      builder.HasIndex(o => o.Status);
       builder.HasIndex(o => o.CreatedAt);
    }
 }

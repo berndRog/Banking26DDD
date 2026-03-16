@@ -2,7 +2,7 @@ using BankingApi._2_Core.BuildingBlocks._3_Domain;
 using BankingApi._2_Core.BuildingBlocks._3_Domain.Entities;
 using BankingApi._2_Core.Payments._3_Domain.Errors;
 using BankingApi._2_Core.Payments._3_Domain.ValueObjects;
-namespace BankingApi._2_Core.Payments._3_Domain.Aggregates;
+namespace BankingApi._2_Core.Payments._3_Domain.Entities;
 
 // Child entity of Account Aggregate
 public sealed class Beneficiary : Entity {

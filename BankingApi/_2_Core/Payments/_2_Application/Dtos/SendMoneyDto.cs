@@ -1,10 +1,11 @@
 namespace BankingApi._2_Core.Payments._2_Application.Dtos;
 
-public sealed record SendMoneyCmd(
-   string Id,
+public sealed record SendMoneyDto(
+   Guid Id,
    Guid FromAccountId,
    Guid BeneficiaryId,
-   decimal Amount,
    string Purpose,
+   decimal AmountDecimal,
+   int CurrencyInt,
    string IdempotencyKey
 );

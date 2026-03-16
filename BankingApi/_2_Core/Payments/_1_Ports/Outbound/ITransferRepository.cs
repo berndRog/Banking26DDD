@@ -1,5 +1,4 @@
-using BankingApi._2_Core.Payments._3_Domain.Aggregates;
-
+using BankingApi._2_Core.Payments._3_Domain.Entities;
 namespace BankingApi._2_Core.Payments._1_Ports.Outbound;
 
 // Repository port for accessing Transfer aggregates.
@@ -28,6 +27,20 @@ public interface ITransferRepository {
 
    // Add a new transfer aggregate to the persistence context
    void Add(Transfer transfer);
+   void AddRange(IEnumerable<Transfer> transfers);
+   
+   
+   
+   // Load a transaction by its identifier
+   Task<Transaction?> FindTransactionByIdAsync(
+      Guid transactionId,
+      CancellationToken ct = default
+   );
+   
+   // Add a new transaction to the persistence context
+   void Add(Transaction transaction);
+   void AddRange(IEnumerable<Transaction> transactions);
+   
 }
 
 /*

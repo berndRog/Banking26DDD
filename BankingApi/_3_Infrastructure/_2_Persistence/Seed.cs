@@ -3,7 +3,7 @@ using BankingApi._2_Core.BuildingBlocks._3_Domain.ValueObjects;
 using BankingApi._2_Core.Customers._3_Domain.Entities;
 using BankingApi._2_Core.Employees._3_Domain.Entities;
 using BankingApi._2_Core.Employees._3_Domain.Enums;
-using BankingApi._2_Core.Payments._3_Domain.Aggregates;
+using BankingApi._2_Core.Payments._3_Domain.Entities;
 using BankingApi._2_Core.Payments._3_Domain.Enums;
 using BankingApi._2_Core.Payments._3_Domain.ValueObjects;
 namespace BankingApi._3_Infrastructure._2_Persistence;
@@ -331,8 +331,7 @@ public sealed class Seed(
       Beneficiary9(), Beneficiary10(), Beneficiary11()
    };
    #endregion
-
-  
+   
    #region -------------- Test Transfers (Entities) ------------------------------------------
    public string transfer1Id = "00010000-0000-0000-0000-000000000000";
    public string transfer2Id = "00020000-0000-0000-0000-000000000000";
@@ -433,6 +432,12 @@ public sealed class Seed(
       amountDecimal: 89.00m,
       purpose: "Benno an Erika2"
    );
+   
+   public IReadOnlyList<Transfer> Transfers => [
+      Transfer1(), Transfer2(), Transfer3(), Transfer4(), 
+      Transfer5(), Transfer6(), Transfer7(), Transfer8(), 
+      Transfer9(), Transfer10(), Transfer11()
+   ];
    #endregion
    
    public void CreateTest() {
@@ -594,8 +599,8 @@ public sealed class Seed(
          fromAccountId: fromAccountId,
          amountVo: amountVo,
          purpose: purpose,
-         recipientName: beneficiary.Name,
-         recipientIbanVo: beneficiary.IbanVo,
+         toName: beneficiary.Name,
+         toIbanVo: beneficiary.IbanVo,
          createdAt: clock.UtcNow,
          id: id
       );

@@ -1,66 +1,65 @@
-// using System.Data.Common;
-// using BankingApi._2_Modules.AccountsTransfers._1_Ports.Outbound;
-// using BankingApi._2_Modules.AccountsTransfers._2_Application.Dtos;
-// using BankingApi._2_Modules.AccountsTransfers._2_Application.UseCases;
-// using BankingApi._2_Modules.AccountsTransfers._3_Domain.Aggregates;
-// using BankingApi._2_Modules.AccountsTransfers._4_Infrastructure.Repositories;
-// using BankingApi._2_Modules.Customers._3_Domain.Aggregates;
-// using BankingApi._3_Infrastructure.Database;
-// using BankingApi._4_BuildingBlocks._1_Ports.Inbound;
-// using BankingApi._4_BuildingBlocks._4_Infrastructure.Persistence;
-// using Microsoft.Data.Sqlite;
-// using Microsoft.EntityFrameworkCore;
-// namespace BankingApiTest.Modules.Customers.Infrastructure;
-//
-// public sealed class TransferUcSendMoneyIntT : TestBase, IAsyncLifetime {
-//
-//    private string? _dbPath;
-//    private DbConnection? _dbConnection;
-//    private DbContext? _dbContext;
-//    private Boolean _isInMemory = false;
-//    
-//    private IAccountsRepository _accountsRepository = null!;
-//    private ITransferRepository _transferRepository = null!;
-//    private IUnitOfWork _unitOfWork = null!;
-//    private TestSeed _seed = null!;
-//    private IClock _clock = null!;
-//    private AccountUcCreate _accountUcCreate = null!;
-//    private TransfersUcSendMoney _sut = null!;
-//    private CancellationToken _ct = default!;
-//
-//    public async Task InitializeAsync() {
-//       _ct = CancellationToken.None;
-//       _seed = new TestSeed();
-//       _clock = new FakeClock(new DateTime(2025, 01, 01));
-//       
-//       var (dbPath, dbConnection, dbContext) = await TestDatabase.CreateAsync(
-//          useInMemory: false, projectName: "BankingApiTest", _ct);
-//       _dbPath = dbPath;
-//       _dbConnection = dbConnection;
-//       _dbContext = dbContext;
-//       var bankingDbContext = _dbContext as BankingDbContext ?? 
-//          throw new InvalidOperationException("TransfersUcSendMoney: DbContext is not of type BankingDbContext");
-//       
-//       _accountsRepository = new AccountsRepository(bankingDbContext);
-//       _transferRepository = new TransferRepository(bankingDbContext);
-//       _unitOfWork = new UnitOfWork(bankingDbContext, _clock, CreateLogger<UnitOfWork>());
-//       
-//       _accountUcCreate = new AccountUcCreate(new FakeCustomerLookup(_seed),
-//          _accountsRepository, _unitOfWork, _clock, CreateLogger<AccountUcCreate>());
-//       
-//       // System under test
-//       _sut = new TransfersUcSendMoney(_accountsRepository, _transferRepository,
-//          _unitOfWork, _clock, CreateLogger<TransfersUcSendMoney>());
-//    }
-//
-//    public async Task DisposeAsync() {
-//       var (dbPath, dbConnection, dbContext) = await TestDatabase.Dispose(
-//          _isInMemory, _dbPath, _dbConnection, _dbContext);
-//       _dbPath = dbPath;
-//       _dbConnection = dbConnection;
-//       _dbContext = dbContext as BankingDbContext;
-//    }
-//    
+using BankingApi._2_Core.BuildingBlocks._1_Ports.Outbound;
+using BankingApi._2_Core.Customers._1_Ports.Outbound;
+using BankingApi._2_Core.Payments._1_Ports.Outbound;
+using BankingApi._2_Core.Payments._2_Application.Dtos;
+using BankingApi._2_Core.Payments._2_Application.Mappings;
+using BankingApi._2_Core.Payments._2_Application.UseCases;
+using BankingApi._2_Core.Payments._3_Domain.Entities;
+using BankingApi._2_Modules.AccountsTransfers._2_Application.UseCases;
+using BankingApiTest.TestInfrastructure;
+using Microsoft.Extensions.DependencyInjection;
+namespace BankingApiTest._2_Core.Core.Application.UseCases;
+
+public sealed class TransferUcSendMoneyIntT : TestBaseIntegration {
+
+   private readonly TestSeed _seed = new();
+
+   [Fact]
+   public async Task SendMoney_ok() {
+      using var scope = Root.CreateDefaultScope();
+      var ct = CancellationToken.None;
+      var customerRepository = scope.ServiceProvider.GetRequiredService<ICustomerRepository>();
+      var accountRepository = scope.ServiceProvider.GetRequiredService<IAccountRepository>();
+      var transferRepository = scope.ServiceProvider.GetRequiredService<ITransferRepository>();
+      var unitOfWork = scope.ServiceProvider.GetRequiredService<IUnitOfWork>();
+      var sut = scope.ServiceProvider.GetRequiredService<TransferUcSendMoney>();
+
+      // Arrange
+      var customer = _seed.Customer1();
+      // fill datbase with customer
+      customerRepository.Add(customer);
+      
+      var fromAccount = _seed.Account1();
+      var beneficiary = _seed.Beneficiary1();
+      fromAccount.AddBeneficiary(beneficiary, _seed.Clock.UtcNow);
+      accountRepository.Add(fromAccount);
+      
+      accountRepository.AddRange([_seed.Account2(), _seed.Account3(), 
+         _seed.Account4(), _seed.Account5(), _seed.Account6()]);
+      
+      await unitOfWork.SaveAllChangesAsync("Seeding data", ct);
+      unitOfWork.ClearChangeTracker();
+
+      var transfer = _seed.Transfer1();
+
+      var sendMoneyDto = new SendMoneyDto(
+         Id: transfer.Id,
+         FromAccountId: fromAccount.Id,
+         BeneficiaryId: beneficiary.Id,
+         Purpose: transfer.Purpose,
+         AmountDecimal: transfer.AmountVo.Amount,
+         CurrencyInt: (int)transfer.AmountVo.Currency,
+         IdempotencyKey: Guid.NewGuid().ToString()
+      );
+
+      // Act
+      var result = await sut.ExecuteAsync(
+         sendMoneyDto,
+         ct: ct
+      );
+      unitOfWork.ClearChangeTracker();
+   }
+}
 //    [Fact]
 //    public async Task SendMoney_with() {
 //       // Arrange

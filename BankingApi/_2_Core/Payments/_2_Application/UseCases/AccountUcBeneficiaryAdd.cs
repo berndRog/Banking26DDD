@@ -4,7 +4,7 @@ using BankingApi._2_Core.BuildingBlocks.Utils;
 using BankingApi._2_Core.Payments._1_Ports.Outbound;
 using BankingApi._2_Core.Payments._2_Application.Dtos;
 using BankingApi._2_Core.Payments._2_Application.Mappings;
-using BankingApi._2_Core.Payments._3_Domain.Aggregates;
+using BankingApi._2_Core.Payments._3_Domain.Entities;
 using BankingApi._2_Core.Payments._3_Domain.Errors;
 using BankingApi._2_Core.Payments._3_Domain.ValueObjects;
 namespace BankingApi._2_Core.Payments._2_Application.UseCases;

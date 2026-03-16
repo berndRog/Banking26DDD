@@ -5,7 +5,6 @@ using BankingApi._2_Core.Payments._1_Ports.Outbound;
 using BankingApi._2_Core.Payments._2_Application.Dtos;
 using BankingApi._2_Core.Payments._2_Application.Mappings;
 using BankingApi._2_Core.Payments._2_Application.UseCases;
-using BankingApi._2_Core.Payments._3_Domain.Aggregates;
 using BankingApi._3_Infrastructure._2_Persistence.Database;
 using BankingApi._3_Infrastructure._2_Persistence.Repositories;
 using BankingApiTest._3_Infrastructure;

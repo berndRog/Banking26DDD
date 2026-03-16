@@ -1,9 +1,9 @@
+using BankingApi._2_Core.BuildingBlocks._1_Ports.Outbound;
 using BankingApi._2_Core.Customers._1_Ports.Outbound;
 using BankingApi._2_Core.Customers._2_Application.Mappings;
 using BankingApi._2_Core.Customers._2_Application.UseCases;
 using BankingApi._2_Core.Payments._1_Ports.Outbound;
 using BankingApi._3_Infrastructure._2_Persistence.Database;
-using BankingApiTest._3_Infrastructure;
 using BankingApiTest.TestInfrastructure;
 using Microsoft.Extensions.DependencyInjection;
 namespace BankingApiTest._2_Core.Customers.Application;
@@ -16,9 +16,9 @@ public sealed class CustomerUcCreateIntT : TestBaseIntegration {
       var ct = TestContext.Current.CancellationToken;
       
       using var scope = Root.CreateDefaultScope();
-      var dbContext = scope.ServiceProvider.GetRequiredService<BankingDbContext>();
       var customerRepository = scope.ServiceProvider.GetRequiredService<ICustomerRepository>();
       var accountRepository = scope.ServiceProvider.GetRequiredService<IAccountRepository>();
+      var unitOfWork = scope.ServiceProvider.GetRequiredService<IUnitOfWork>();
       var sut = scope.ServiceProvider.GetRequiredService<CustomerUcCreate>();
 
       // Arrange
@@ -33,7 +33,7 @@ public sealed class CustomerUcCreateIntT : TestBaseIntegration {
          ibanString: account1.IbanVo.Value,
          ct
       );
-      dbContext.ChangeTracker.Clear();
+      unitOfWork.ClearChangeTracker();
 
       // Assert
       var actualCustomer = await customerRepository.FindByIdAsync(customer.Id, ct);
@@ -47,7 +47,7 @@ public sealed class CustomerUcCreateIntT : TestBaseIntegration {
       
       var actualAccounts = await accountRepository.SelelctByCustomerIdAsync(customer.Id, ct);
       NotNull(actualAccounts);
-      Equal(1, actualAccounts.Count());
+      Single(actualAccounts);
 
    }
 }

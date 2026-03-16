@@ -3,30 +3,32 @@ using BankingApi._2_Core.BuildingBlocks._3_Domain.Entities;
 using BankingApi._2_Core.Payments._3_Domain.Enums;
 using BankingApi._2_Core.Payments._3_Domain.Errors;
 using BankingApi._2_Core.Payments._3_Domain.ValueObjects;
-namespace BankingApi._2_Core.Payments._3_Domain.Aggregates;
+namespace BankingApi._2_Core.Payments._3_Domain.Entities;
 
 public sealed class Transfer : AggregateRoot {
-   private readonly List<Transaction> _transactions = new();
-
+   
+   //--- Properties ------------------------------------------------------------
    // Aggregate references (IDs only, no navigation properties)
    public Guid FromAccountId { get; private set; }
-   
+
+   // Snapshots for historical consistency, recipientName and IBan
+   // (e.g. if beneficiaries may be deleted)
+   public string ToName { get; private set; } = string.Empty; // beneficiary name at time of transfer
+   public IbanVo ToIbanVo { get; private set; } = default!;   // beneficiary IBAN at time of transfer
+
    // Transfer amount as a domain value object.
    public MoneyVo AmountVo { get; private set; } = default!;
    public string Purpose { get; private set; } = string.Empty;
-
-   // Snapshots for historical consistency
-   // (e.g. if beneficiaries are deleted)
-   public string RecipientName { get; private set; } = string.Empty; // beneficiary name at time of transfer
-   public IbanVo RecipientIbanVo { get; private set; } = default!;       // beneficiary IBAN at time of transfer
    
    // State
    public TransferStatus Status { get; private set; }
    public DateTimeOffset BookedAt { get; private set; } = default!;
 
-   // Child entities
+   // Child entities Transfer <-> Transaction 1 : 1..n
+   private readonly List<Transaction> _transactions = new();
    public IReadOnlyList<Transaction> Transactions => _transactions;
 
+   //--- Ctors -----------------------------------------------------------------
    // EF Core ctor
    private Transfer() : base() { }
 
@@ -34,45 +36,37 @@ public sealed class Transfer : AggregateRoot {
    private Transfer(
       Guid id,
       Guid fromAccountId,
-      MoneyVo amountVo,
+      string toName,
+      IbanVo toIbanVo,
       string purpose,
-      string recipientName,
-      IbanVo recipientIbanVo,
+      MoneyVo amountVo,
       TransferStatus status
    ) : base()
    {
       Id = id;
       FromAccountId = fromAccountId;
+      ToName = toName;
+      ToIbanVo = toIbanVo;
+      Status = status;
       AmountVo = amountVo;
       Purpose = purpose;
-      RecipientName = recipientName;
-      RecipientIbanVo = recipientIbanVo;
-      Status = status;
    }
 
-   // =========================================================
-   // Factory
-   // =========================================================
-   /// <summary>
-   /// Creates a new Transfer (status = Initiated).
-   /// 
-   /// Design rule:
-   /// - Domain takes Money (not decimal) to avoid primitive obsession.
-   /// - Build Money in the UseCase (Money.Create) before calling this factory.
-   /// </summary>
+   //--- Static Factories ------------------------------------------------------
+   // Create a new Transfer (status = Initiated).
    public static Result<Transfer> Create(
       Guid fromAccountId,
-      MoneyVo amountVo,
+      string toName,
+      IbanVo toIbanVo,
       string purpose,
-      string recipientName,
-      IbanVo recipientIbanVo,
+      MoneyVo amountVo,
       DateTimeOffset createdAt,
       string? id
    ) {
       // trim early
-      purpose = purpose?.Trim() ?? string.Empty;
-      recipientName = recipientName?.Trim() ?? string.Empty;
-
+      toName = toName.Trim();
+      purpose = purpose.Trim();
+      
       // invariants
       if (fromAccountId == Guid.Empty)
          return Result<Transfer>.Failure(TransferErrors.FromAccountNotFound);
@@ -88,10 +82,11 @@ public sealed class Transfer : AggregateRoot {
       var transfer = new Transfer(
          id: resultId.Value,
          fromAccountId: fromAccountId,
-         amountVo: amountVo,
+         toName: toName,
+         toIbanVo: toIbanVo,
          purpose: purpose,
-         recipientName: recipientName,
-         recipientIbanVo: recipientIbanVo,
+         amountVo: amountVo,
+
          status: TransferStatus.Initiated
       );
       
@@ -101,8 +96,7 @@ public sealed class Transfer : AggregateRoot {
       return Result<Transfer>.Success(transfer);
    }
 
-    // Domain operations
-   
+   //--- Domain operations -----------------------------------------------------
    // Books the transfer and creates exactly two transactions:
    // - Debit  on FromAccountId
    // - Credit on toAccountId

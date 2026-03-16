@@ -8,9 +8,16 @@ namespace BankingApi._3_Infrastructure._2_Persistence.Database;
 internal sealed class CustomerDbContextEf(
    BankingDbContext db
 ) : ICustomerDbContext {
-   public IQueryable<Customer> Customers => db.Set<Customer>();
+   
+   public IQueryable<Customer> Customers 
+      => db.Set<Customer>();
 
-   public void Add(Customer customer) => db.Set<Customer>().Add(customer);
-   public void Update(Customer customer) => db.Set<Customer>().Remove(customer);
+   public void Add(Customer customer) 
+      => db.Set<Customer>().Add(customer);
+   public void AddRange(IEnumerable<Customer> customers) 
+      => db.Set<Customer>().AddRange(customers);
+   
+   public void Update(Customer customer) 
+      => db.Set<Customer>().Remove(customer);
 
 }

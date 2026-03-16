@@ -1,4 +1,4 @@
-using BankingApi._2_Core.Payments._3_Domain.Aggregates;
+using BankingApi._2_Core.Payments._3_Domain.Entities;
 using BankingApi._3_Infrastructure._2_Persistence.Converters;
 using BankingApi._3_Infrastructure._2_Persistence.Database.Converter;
 using Microsoft.EntityFrameworkCore;
@@ -55,14 +55,14 @@ public sealed class ConfigTransfer(
          .IsRequired();
 
       // Snapshots
-      builder.Property(t => t.RecipientName)
+      builder.Property(t => t.ToName)
          .HasMaxLength(200)
          .IsRequired();
       
-      builder.Property(t => t.RecipientIbanVo)
+      builder.Property(t => t.ToIbanVo)
          .HasIbanConversion()
          .IsRequired();
-      builder.HasIndex(a => a.RecipientIbanVo).IsUnique();
+      builder.HasIndex(a => a.ToIbanVo).IsUnique();
       
       // State
       builder.Property(t => t.Status)

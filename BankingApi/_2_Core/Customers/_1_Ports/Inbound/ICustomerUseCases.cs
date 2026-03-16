@@ -1,5 +1,6 @@
 using BankingApi._2_Core.BuildingBlocks._3_Domain;
 using BankingApi._2_Core.Customers._2_Application.Dtos;
+using BankingApi._2_Modules.Customers._3_Domain.Enums;
 
 namespace BankingApi._2_Core.Customers._1_Ports.Inbound;
 
@@ -41,7 +42,7 @@ public interface ICustomerUseCases {
    // Employee action: reject a customer registration
    Task<Result> RejectAsync(
       Guid customerId,
-      string reason,
+      RejectCode rejectCode,
       CancellationToken ct = default
    );
 

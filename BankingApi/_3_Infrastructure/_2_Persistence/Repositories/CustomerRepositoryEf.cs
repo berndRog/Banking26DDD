@@ -9,30 +9,23 @@ namespace BankingApi._3_Infrastructure._2_Persistence.Repositories;
 internal class CustomerRepositoryEf(
    ICustomerDbContext customerDbContext
 ) : ICustomerRepository {
-
    public async Task<Customer?> FindByIdAsync(
-      Guid customerId, 
+      Guid customerId,
       CancellationToken ct
-   ) {
-      return await customerDbContext.Customers
+   ) => await customerDbContext.Customers
          .FirstOrDefaultAsync(o => o.Id == customerId, ct);
-   }
 
    public async Task<Customer?> FindByIdentitySubjectAsync(
       string subject,
       CancellationToken ct
-   ) {
-      return await customerDbContext.Customers
+   ) => await customerDbContext.Customers
          .FirstOrDefaultAsync(c => c.Subject == subject, ct);
-   }
-   
+
    public async Task<Customer?> FindByEmailAsync(
       EmailVo emailVo,
       CancellationToken ct
-   ) {
-      return await customerDbContext.Customers
+   ) => await customerDbContext.Customers
          .SingleOrDefaultAsync(c => c.EmailVo == emailVo, ct);
-   }
 
    public async Task<IEnumerable<Customer>> SelectByDisplayNameAsync(
       string displayName,
@@ -48,26 +41,24 @@ internal class CustomerRepositoryEf(
    }
 
    public async Task<bool> ExistsActiveAsync(
-      Guid customerId, 
+      Guid customerId,
       CancellationToken ct = default
-   ) {
-      return await customerDbContext.Customers
+   ) => await customerDbContext.Customers
          .AsTracking()
          .FirstOrDefaultAsync(o => o.Id == customerId, ct)
-         is { IsActive: true };
-   }
+      is { IsActive: true };
 
    public async Task<IEnumerable<Customer>> SelectAllAsync(
       CancellationToken ct = default
-   ) {
-      return await customerDbContext.Customers
+   ) => await customerDbContext.Customers
          .ToListAsync(ct);
-   }
-   public void Add(Customer customer) {
-      customerDbContext.Add(customer);
-   }
 
-   public void Update(Customer customer) {
-      customerDbContext.Update(customer);
-   }
+   public void Add(Customer customer)
+      => customerDbContext.Add(customer);
+
+   public void AddRange(IEnumerable<Customer> customers)
+      => customerDbContext.AddRange(customers);
+
+   public void Update(Customer customer)
+      => customerDbContext.Update(customer);
 }

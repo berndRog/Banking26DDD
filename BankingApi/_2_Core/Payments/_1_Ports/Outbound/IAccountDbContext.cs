@@ -1,4 +1,4 @@
-using BankingApi._2_Core.Payments._3_Domain.Aggregates;
+using BankingApi._2_Core.Payments._3_Domain.Entities;
 namespace BankingApi._2_Core.Payments._1_Ports.Outbound;
 
 // Persistence context abstraction for the Accounts part of the Payments context.
@@ -14,7 +14,8 @@ public interface IAccountDbContext {
 
    // Add a new entity to the persistence context
    void Add<T>(T entity) where T : class;
-
+   void AddRange<T>(IEnumerable<T> entities) where T : class;
+   
    // Update (mark as modified) an existing entity in the persistence context
    void Update<T>(T entity) where T : class;
 

@@ -8,6 +8,7 @@ using BankingApi._2_Core.Employees._1_Ports.Outbound;
 using BankingApi._2_Core.Payments._1_Ports.Inbound;
 using BankingApi._2_Core.Payments._1_Ports.Outbound;
 using BankingApi._2_Core.Payments._2_Application.UseCases;
+using BankingApi._2_Modules.AccountsTransfers._2_Application.UseCases;
 using BankingApi._3_Infrastructure._2_Persistence;
 using BankingApi._3_Infrastructure._2_Persistence.Adapters;
 using BankingApi._3_Infrastructure._2_Persistence.Database;
@@ -41,11 +42,13 @@ public static class DiTestModules {
       services.AddScoped<IEmployeesDbContext, EmployeeDbContextEf>();
       services.AddScoped<ICustomerDbContext, CustomerDbContextEf>();
       services.AddScoped<IAccountDbContext, AccountDbContextEf>();
+      services.AddScoped<ITransferDbContext, TransferDbContextEf>();
 
       // Contracts
       services.AddScoped<IEmployeeContract, EmployeeContractEf>();
       services.AddScoped<ICustomerContract, CustomerContractEf>();
       services.AddScoped<IAccountContract, AccountContractEf>();
+
       
       // Readmodels
       services.AddScoped<IEmployeeReadModel, EmployeeReadModelEf>();
@@ -56,8 +59,9 @@ public static class DiTestModules {
       services.AddScoped<IEmployeeRepository, EmployeeRepositoryEf>();
       services.AddScoped<ICustomerRepository, CustomerRepositoryEf>();
       services.AddScoped<IAccountRepository, AccountRepositoryEf>();
+      services.AddScoped<ITransferRepository, TransferRepositoryEf>();
 
-      // Customers UseCases
+      // Customer UseCases
       services.AddScoped<ICustomerUseCases, CustomerUseCases>();
       services.AddScoped<CustomerUcCreate>();
       services.AddScoped<CustomerUcCreateProvision>();
@@ -65,11 +69,18 @@ public static class DiTestModules {
       services.AddScoped<CustomerUcActivate>();
       services.AddScoped<CustomerUcDeactivate>();
       
-      // Customers UseCases
+      // Account UseCases
       services.AddScoped<IAccountUseCases, AccountUseCases>();
       services.AddScoped<AccountUcCreate>();
       services.AddScoped<AccountUcBeneficiaryAdd>();
       services.AddScoped<AccountUcBeneficiaryRemove>();
+      
+      // Customers UseCases
+      services.AddScoped<ITransferUseCases, TransferUseCases>();
+      services.AddScoped<TransferUcCreate>();
+      services.AddScoped<TransferUcSendMoney>();
+      //services.AddScoped<AccountUcBeneficiaryAdd>();
+      //services.AddScoped<AccountUcBeneficiaryRemove>();
       
       // Unit of Work
       services.AddScoped<IUnitOfWork, UnitOfWork>();

@@ -1,5 +1,4 @@
-using BankingApi._2_Core.Payments._3_Domain.Aggregates;
-
+using BankingApi._2_Core.Payments._3_Domain.Entities;
 namespace BankingApi._2_Core.Payments._1_Ports.Outbound;
 
 // Repository port for accessing Transaction entities.

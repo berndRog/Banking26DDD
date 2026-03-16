@@ -10,10 +10,11 @@ public interface IEmployeesDbContext {
    IQueryable<Employee> Employees { get; }
 
    // Add a new entity to the persistence context
-   void Add<T>(T entity) where T : class;
+   void Add(Employee employee);
+   void AddRange(IEnumerable<Employee> employees);
 
-   // Remove an entity from the persistence context
-   void Remove<T>(T entity) where T : class;
+   // Update an entity in the persistence context
+   void Update(Employee employee);
 }
 
 /*

@@ -4,7 +4,7 @@ using BankingApi._2_Core.BuildingBlocks.Utils;
 using BankingApi._2_Core.Payments._1_Ports.Outbound;
 using BankingApi._2_Core.Payments._2_Application.Dtos;
 using BankingApi._2_Core.Payments._2_Application.Mappings;
-using BankingApi._2_Core.Payments._3_Domain.Aggregates;
+using BankingApi._2_Core.Payments._3_Domain.Entities;
 using BankingApi._2_Core.Payments._3_Domain.Enums;
 using BankingApi._2_Core.Payments._3_Domain.Errors;
 using BankingApi._2_Core.Payments._3_Domain.ValueObjects;
@@ -19,12 +19,12 @@ public sealed class TransferUcCreate(
    
    public async Task<Result<TransferDto>> ExecuteAsync(
       Guid fromAccountId,
-      decimal amountDecimal,
-      int currencyInt,
-      string purpose,
-      string recipientName,
-      string recipientIbanString,
-      string? id,
+      string toName,
+      string toIbanString,
+      string purpose,      
+      decimal amountDecimal = 0m,
+      int currencyInt = (int) Currency.EUR, // default to EUR
+      string? id = null,
       CancellationToken ct = default
    ) {
       var resultMoney = MoneyVo.Create(amountDecimal, (Currency)currencyInt);
@@ -33,18 +33,18 @@ public sealed class TransferUcCreate(
       var amountVo = resultMoney.Value;
       
       // domain   
-      var resultIban = IbanVo.Create(recipientIbanString);
+      var resultIban = IbanVo.Create(toIbanString);
       if (resultIban.IsFailure)
          return Result<TransferDto>.Failure(AccountErrors.InvalidIban);
-      var recipientIbanVo = resultIban.Value;
+      var toIbanVo = resultIban.Value;
       
       // create enitity
       var result = Transfer.Create(
          fromAccountId: fromAccountId,
-         amountVo: amountVo,
+         toName: toName,
+         toIbanVo: toIbanVo, 
          purpose: purpose,
-         recipientName: recipientName,
-         recipientIbanVo: recipientIbanVo, 
+         amountVo: amountVo,
          createdAt: clock.UtcNow,
          id: id
       );

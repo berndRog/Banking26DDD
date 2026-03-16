@@ -4,6 +4,7 @@ using BankingApi._2_Core.BuildingBlocks._3_Domain.Errors;
 using BankingApi._2_Core.BuildingBlocks._3_Domain.ValueObjects;
 using BankingApi._2_Core.Customers._3_Domain.Enum;
 using BankingApi._2_Core.Customers._3_Domain.Errors;
+using BankingApi._2_Modules.Customers._3_Domain.Enums;
 namespace BankingApi._2_Core.Customers._3_Domain.Entities;
 
 public sealed class Customer : AggregateRoot {
@@ -29,7 +30,7 @@ public sealed class Customer : AggregateRoot {
    // Employee decisions (audit facts)
    public DateTimeOffset? ActivatedAt { get; private set; }
    public DateTimeOffset? RejectedAt { get; private set; }
-   public string? RejectionReason { get; private set; }
+   public RejectCode? RejectCode { get; private set; }
    public Guid? AuditedByEmployeeId { get; private set; }
 
    public DateTimeOffset? DeactivatedAt { get; private set; }
@@ -267,19 +268,17 @@ public sealed class Customer : AggregateRoot {
       AuditedByEmployeeId = activatedByEmployeeId;
 
       RejectedAt = null;
-      RejectionReason = null;
+      RejectCode = null;
 
       // create initial account for the owner (domain event, handled in application layer)
       Touch(activatedAt);
       return Result.Success();
    }
-
-   /// <summary>
-   /// Employee rejects the owner (e.g., KYC failed).
-   /// </summary>
+   
+   // Employee rejects the owner (e.g., KYC failed).
    public Result Reject(
       Guid rejectedByEmployeeId,
-      string reasonCode,
+      RejectCode rejectCode,
       DateTimeOffset rejectedAt
    ) {
       if (rejectedAt == default)
@@ -289,7 +288,7 @@ public sealed class Customer : AggregateRoot {
       // (employee, timestamp, status, reason code)
       if (rejectedByEmployeeId == Guid.Empty)
          return Result.Failure(CustomerErrors.AuditRequiresEmployee);
-      if (string.IsNullOrWhiteSpace(reasonCode))
+      if (rejectCode == default)
          return Result.Failure(CustomerErrors.RejectionRequiresReason);
       if (Status != CustomerStatus.Pending)
          return Result.Failure(CustomerErrors.NotPending);
@@ -297,15 +296,13 @@ public sealed class Customer : AggregateRoot {
       Status = CustomerStatus.Rejected;
       RejectedAt = rejectedAt;
       AuditedByEmployeeId = rejectedByEmployeeId;
-      RejectionReason = reasonCode.Trim();
+      RejectCode = rejectCode;
 
       Touch(rejectedAt);
       return Result.Success();
    }
 
-   /// <summary>
-   /// Employee deactivates the owner (end customer relationship).
-   /// </summary>
+   // Employee deactivates the customer (end customer relationship).
    public Result Deactivate(
       Guid deactivatedByEmployeeId,
       DateTimeOffset deactivatedAt
@@ -327,10 +324,8 @@ public sealed class Customer : AggregateRoot {
       Touch(deactivatedAt);
       return Result.Success();
    }
-
-   /// <summary>
-   /// Customer updates their profile
-   /// </summary>
+   
+   // Customer updates their profile
    public Result Update(
       string? lastname,
       string? companyName,
