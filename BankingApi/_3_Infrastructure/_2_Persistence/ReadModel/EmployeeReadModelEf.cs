@@ -2,10 +2,8 @@ using System.Runtime.CompilerServices;
 using BankingApi._2_Core.BuildingBlocks._1_Ports.Outbound;
 using BankingApi._2_Core.BuildingBlocks._3_Domain;
 using BankingApi._2_Core.BuildingBlocks._3_Domain.ValueObjects;
-using BankingApi._2_Core.Employees._1_Ports.Inbound;
 using BankingApi._2_Core.Employees._1_Ports.Outbound;
 using BankingApi._2_Core.Employees._2_Application.Dtos;
-using BankingApi._2_Core.Employees._2_Application.Errors;
 using BankingApi._2_Core.Employees._2_Application.Mappings;
 using BankingApi._2_Core.Employees._3_Domain.Errors;
 using Microsoft.EntityFrameworkCore;
@@ -37,7 +35,7 @@ sealed class EmployeeReadModelEf(
          .SingleOrDefaultAsync(ct);
 
       if (id == Guid.Empty)
-         return Result<Guid>.Failure(EmployeeApplicationErrors.NotProvisioned);
+         return Result<Guid>.Failure(EmployeeErrors.NotProvisioned);
 
       return Result<Guid>.Success(id);
    }
@@ -58,7 +56,7 @@ sealed class EmployeeReadModelEf(
          .SingleOrDefaultAsync(ct);
       
       return employeeDto is null
-         ? Result<EmployeeDto>.Failure(EmployeeApplicationErrors.NotProvisioned)   
+         ? Result<EmployeeDto>.Failure(EmployeeErrors.NotProvisioned)   
          : Result<EmployeeDto>.Success(employeeDto);
    }
    
@@ -93,7 +91,7 @@ sealed class EmployeeReadModelEf(
          .SingleOrDefaultAsync( ct);
       
       return employeeDto is null
-         ? Result<EmployeeDto>.Failure(EmployeeApplicationErrors.NotFound)
+         ? Result<EmployeeDto>.Failure(EmployeeErrors.NotFound)
          : Result<EmployeeDto>.Success(employeeDto);
    }
    

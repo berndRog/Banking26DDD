@@ -1,13 +1,11 @@
 using BankingApi._2_Core.BuildingBlocks._1_Ports.Outbound;
 using BankingApi._2_Core.BuildingBlocks._3_Domain;
 using BankingApi._2_Core.Customers._1_Ports.Outbound;
-using BankingApi._2_Core.Customers._2_Application.Errors;
 using BankingApi._2_Core.Customers._3_Domain.Enum;
 using BankingApi._2_Core.Customers._3_Domain.Errors;
 using BankingApi._2_Core.Employees._1_Ports.Inbound;
 using BankingApi._2_Core.Employees._3_Domain.Enums;
 using BankingApi._2_Core.Payments._1_Ports.Inbound;
-using BankingApi._2_Core.Payments._1_Ports.Outbound;
 namespace BankingApi._2_Core.Customers._2_Application.UseCases;
 
 /// <summary>
@@ -61,7 +59,7 @@ public sealed class CustomerUcActivate(
       // 5) Domain change (audit + status transition)
       // Customer can only be activated if currently in "Provisioned" status (not active yet)
       if(customer.Status != CustomerStatus.Pending)
-         return Result.Failure(CustomerApplicationErrors.InvalidStatusTransition);
+         return Result.Failure(CustomerErrors.InvalidStatusTransition);
       
       // Customer is not storing the accountId
       var utcNow = clock.UtcNow;

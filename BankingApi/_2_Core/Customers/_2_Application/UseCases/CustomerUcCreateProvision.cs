@@ -4,9 +4,9 @@ using BankingApi._2_Core.BuildingBlocks._3_Domain.Errors;
 using BankingApi._2_Core.BuildingBlocks._3_Domain.ValueObjects;
 using BankingApi._2_Core.Customers._1_Ports.Outbound;
 using BankingApi._2_Core.Customers._2_Application.Dtos;
-using BankingApi._2_Core.Customers._2_Application.Errors;
 using BankingApi._2_Core.Customers._2_Application.Mappings;
 using BankingApi._2_Core.Customers._3_Domain.Entities;
+using BankingApi._2_Core.Customers._3_Domain.Errors;
 using BankingApi._3_Infrastructure._4_Logging;
 namespace BankingApi._2_Core.Customers._2_Application.UseCases;
 
@@ -55,7 +55,7 @@ public class CustomerUcCreateProvision(
       // check uniqueness
       var existingWithEmail = await repository.FindByEmailAsync(emailVo, ct);
       if (existingWithEmail is not null)
-         return Result<CustomerProvisionDto>.Failure(CustomerApplicationErrors.EmailAlreadyInUse);
+         return Result<CustomerProvisionDto>.Failure(CustomerErrors.EmailAlreadyInUse);
       
       // 4) create aggregate
       var resultCustomer = Customer.CreateProvision(

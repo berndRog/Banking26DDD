@@ -18,4 +18,21 @@ public static class CustomerMappings {
       Id: customer.Id,
       WasCreated: wasCreated
    );
+
+   public static CustomerDetailsDto ToCustomerDetailsDto(this Customer customer) => new(
+      Id: customer.Id,
+      Firstname: customer.Firstname,
+      Lastname: customer.Lastname,
+      CompanyName: customer.CompanyName,
+      StatusInt: (int)customer.Status,
+      ActivatedAt: customer.ActivatedAt?.ToString("O"),
+      RejectedAt: customer.RejectedAt?.ToString("O"),
+      RejectCodeInt: (int)customer.RejectCode,
+      AuditedByEmployeeId: customer.AuditedByEmployeeId,
+      DeactivatedAt: customer.DeactivatedAt?.ToString("O"),
+      DeactivatedByEmployeeId: customer.DeactivatedByEmployeeId,
+      EmailString: customer.EmailVo.Value,
+      AddressVo: customer.AddressVo
+   );
+
 }

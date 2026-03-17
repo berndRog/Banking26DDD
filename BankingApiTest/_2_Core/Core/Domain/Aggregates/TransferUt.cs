@@ -53,7 +53,7 @@ public sealed class TransferUt {
       Equal(_transfer.AmountVo, actual.AmountVo);
       Equal(_transfer.DebitTransactionId, actual.DebitTransactionId);
       Equal(_transfer.CreditTransactionId, actual.CreditTransactionId);
-      Equal(TransferStatus.Initiated, actual.Status);
+      Equal(TransferStatus.Booked, actual.Status);
    }
 
    [Fact]
@@ -82,7 +82,7 @@ public sealed class TransferUt {
       Equal(_fromAccount.Id, actual.FromAccountId);
       Equal(_transfer.AmountVo, actual.AmountVo);
       Equal(_transfer.Purpose, actual.Purpose);
-      Equal(TransferStatus.Initiated, actual.Status);
+      Equal(TransferStatus.Booked, actual.Status);
    }
 
    [Fact]

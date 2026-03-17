@@ -188,14 +188,32 @@ public sealed class AccountUt {
       var transfer = _seed.Transfer1();
          
       // Act
-      var transaction1 = fromAccount.PostDebit(
+      var transaction = fromAccount.PostDebit(
          purpose: transfer.Purpose,
          amountVo: transfer.AmountVo,
          bookedAt: _clock.UtcNow,
          id: transfer.DebitTransactionId.ToString()
       );
       
-      var transaction2 = toAccount.PostCredit(
+      // Assert
+      var actualDebit = fromAccount.Transactions.FirstOrDefault(t => t.Id == transfer.DebitTransactionId);
+      NotNull(actualDebit);
+      Equal(transfer.DebitTransactionId, actualDebit.Id);
+      Equal(transfer.Purpose, actualDebit.Purpose);      
+      Equal(transfer.AmountVo, actualDebit.AmountVo);
+      Equal(transfer.BookedAt, actualDebit.BookedAt);
+      
+   }
+   
+   [Fact]
+   public void PostCreditUt() {
+      // Arrange
+      var fromAccount = _seed.Account1();
+      var toAccount = _seed.Account6();
+      var transfer = _seed.Transfer1();
+         
+      // Act
+      var transaction = toAccount.PostCredit(
          purpose: transfer.Purpose,
          amountVo: transfer.AmountVo,
          bookedAt: _clock.UtcNow,
@@ -203,17 +221,13 @@ public sealed class AccountUt {
       );
       
       // Assert
-      var actualDebit = fromAccount.Transactions.FirstOrDefault(t => t.Id == transfer.DebitTransactionId);
-      NotNull(actualDebit);
-            
-
       var actualCredit = toAccount.Transactions.FirstOrDefault(t => t.Id == transfer.CreditTransactionId);
       NotNull(actualCredit);
+      Equal(transfer.CreditTransactionId, actualCredit.Id);
+      Equal(transfer.Purpose, actualCredit.Purpose);      
+      Equal(transfer.AmountVo, actualCredit.AmountVo);
+      Equal(transfer.BookedAt, actualCredit.BookedAt);
 
-      
-      
-      
-      // Equal(beneficiary, actual);
    }
    #endregion
 

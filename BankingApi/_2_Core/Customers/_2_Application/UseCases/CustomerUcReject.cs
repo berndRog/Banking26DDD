@@ -1,7 +1,6 @@
 using BankingApi._2_Core.BuildingBlocks._1_Ports.Outbound;
 using BankingApi._2_Core.BuildingBlocks._3_Domain;
 using BankingApi._2_Core.Customers._1_Ports.Outbound;
-using BankingApi._2_Core.Customers._2_Application.Errors;
 using BankingApi._2_Core.Customers._3_Domain.Errors;
 using BankingApi._2_Modules.Customers._3_Domain.Enums;
 namespace BankingApi._2_Core.Customers._2_Application.UseCases;
@@ -24,7 +23,7 @@ public sealed class CustomerUcReject(
    ) {
       // 1) Authorization: must be an employee/admin with the required rights
       if (identityGateway.AdminRights == 0)
-         return Result.Failure(CustomerApplicationErrors.EmployeeRightsRequired);
+         return Result.Failure(CustomerErrors.EmployeeRightsRequired);
 
       // 2) Validate input
       if (customerId == Guid.Empty)

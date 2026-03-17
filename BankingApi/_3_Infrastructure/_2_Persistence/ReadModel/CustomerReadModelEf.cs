@@ -5,10 +5,10 @@ using BankingApi._2_Core.BuildingBlocks._3_Domain.ValueObjects;
 using BankingApi._2_Core.BuildingBlocks._4_Infrastructure.ReadModel;
 using BankingApi._2_Core.Customers._1_Ports.Outbound;
 using BankingApi._2_Core.Customers._2_Application.Dtos;
-using BankingApi._2_Core.Customers._2_Application.Errors;
 using BankingApi._2_Core.Customers._2_Application.Mappings;
 using BankingApi._2_Core.Customers._2_Application.ReadModel;
 using BankingApi._2_Core.Customers._3_Domain.Entities;
+using BankingApi._2_Core.Customers._3_Domain.Errors;
 using Microsoft.EntityFrameworkCore;
 [assembly: InternalsVisibleTo("BankingApiTest")]
 namespace BankingApi._3_Infrastructure._2_Persistence.ReadModel;
@@ -33,7 +33,7 @@ internal sealed class CustomerReadModelEf(
          .SingleOrDefaultAsync(ct);
       
       return customerDto is null
-         ? Result<CustomerDto>.Failure(CustomerApplicationErrors.NotProvisioned)   
+         ? Result<CustomerDto>.Failure(CustomerErrors.NotProvisioned)   
          : Result<CustomerDto>.Success(customerDto);
    }
    
@@ -48,7 +48,7 @@ internal sealed class CustomerReadModelEf(
          .SingleOrDefaultAsync(ct);
 
       return customerDto is null
-         ? Result<CustomerDto>.Failure(CustomerApplicationErrors.NotFound)
+         ? Result<CustomerDto>.Failure(CustomerErrors.NotFound)
          : Result<CustomerDto>.Success(customerDto);
    }
    
@@ -68,7 +68,7 @@ internal sealed class CustomerReadModelEf(
          .SingleOrDefaultAsync( ct);
       
       return customerDto is null
-         ? Result<CustomerDto>.Failure(CustomerApplicationErrors.NotFound)
+         ? Result<CustomerDto>.Failure(CustomerErrors.NotFound)
          : Result<CustomerDto>.Success(customerDto);
    }
    
@@ -88,7 +88,7 @@ internal sealed class CustomerReadModelEf(
       CancellationToken ct
    ) {
       if (filter is null) 
-         return Result<PagedResult<CustomerDto>>.Failure(CustomerApplicationErrors.FilterIsRequired);
+         return Result<PagedResult<CustomerDto>>.Failure(CustomerErrors.FilterIsRequired);
       
       // Normalize page defaults
       var pageNumber = page?.PageNumber > 0 ? page.PageNumber : 1;

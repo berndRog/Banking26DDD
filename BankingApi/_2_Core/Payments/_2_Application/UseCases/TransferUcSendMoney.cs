@@ -47,13 +47,14 @@ public sealed class TransferUcSendMoney(
       if (toAccount.Id == fromAccount.Id)
          return Result<TransferDto>.Failure(TransferErrors.SameAccountNotAllowed);
 
-      var utcNow = clock.UtcNow;
+      var bookedAt = clock.UtcNow;
 
       // post debit on sender account
       var resultDebit = fromAccount.PostDebit(
-         amountVo,
-         dto.Purpose,
-         utcNow
+         amountVo: amountVo,
+         purpose: dto.Purpose,
+         bookedAt: bookedAt,
+         id: dto.debitId
       );
       if (resultDebit.IsFailure)
          return Result<TransferDto>.Failure(resultDebit.Error!);
@@ -61,9 +62,10 @@ public sealed class TransferUcSendMoney(
 
       // post credit on receiver account
       var resultCredit = toAccount.PostCredit(
-         amountVo,
-         dto.Purpose,
-         utcNow
+         amountVo: amountVo,
+         purpose: dto.Purpose,
+         bookedAt: bookedAt,
+         id: dto.creditId
       );
       if (resultCredit.IsFailure)
          return Result<TransferDto>.Failure(resultCredit.Error!);
@@ -77,7 +79,7 @@ public sealed class TransferUcSendMoney(
          purpose: dto.Purpose,
          debitTransactionId: debitTransaction.Id,
          creditTransactionId: creditTransaction.Id,
-         bookedAt: utcNow,
+         bookedAt: bookedAt,
          id: dto.Id.ToString()
       );
       if (transferResult.IsFailure)

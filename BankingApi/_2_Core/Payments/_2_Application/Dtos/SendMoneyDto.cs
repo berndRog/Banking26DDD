@@ -7,5 +7,7 @@ public sealed record SendMoneyDto(
    string Purpose,
    decimal AmountDecimal,
    int CurrencyInt,
-   string IdempotencyKey
+   string IdempotencyKey,
+   string? debitId = null,
+   string? creditId = null
 );

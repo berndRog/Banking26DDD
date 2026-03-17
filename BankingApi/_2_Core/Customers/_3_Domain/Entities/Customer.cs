@@ -30,7 +30,7 @@ public sealed class Customer : AggregateRoot {
    // Employee decisions (audit facts)
    public DateTimeOffset? ActivatedAt { get; private set; }
    public DateTimeOffset? RejectedAt { get; private set; }
-   public RejectCode? RejectCode { get; private set; }
+   public RejectCode RejectCode { get; private set; }
    public Guid? AuditedByEmployeeId { get; private set; }
 
    public DateTimeOffset? DeactivatedAt { get; private set; }
@@ -268,7 +268,7 @@ public sealed class Customer : AggregateRoot {
       AuditedByEmployeeId = activatedByEmployeeId;
 
       RejectedAt = null;
-      RejectCode = null;
+      RejectCode = RejectCode.None;
 
       // create initial account for the owner (domain event, handled in application layer)
       Touch(activatedAt);

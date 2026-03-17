@@ -3,8 +3,8 @@ using BankingApi._2_Core.BuildingBlocks._3_Domain;
 using BankingApi._2_Core.BuildingBlocks._3_Domain.ValueObjects;
 using BankingApi._2_Core.Employees._1_Ports.Outbound;
 using BankingApi._2_Core.Employees._2_Application.Dtos;
-using BankingApi._2_Core.Employees._2_Application.Errors;
 using BankingApi._2_Core.Employees._2_Application.Mappings;
+using BankingApi._2_Core.Employees._3_Domain.Errors;
 namespace BankingApi._2_Core.Employees._2_Application.UseCases;
 
 public class EmployeeUcUpdateProfile(
@@ -27,7 +27,7 @@ public class EmployeeUcUpdateProfile(
       // must be provisioned
       var employee = await repository.FindByIdentitySubjectAsync(subject, ct);
       if (employee is null)
-         return Result<EmployeeDto>.Failure(EmployeeApplicationErrors.NotProvisioned);
+         return Result<EmployeeDto>.Failure(EmployeeErrors.NotProvisioned);
       
       // override email address (if changed) 
       var email = employee.EmailVo;
@@ -39,7 +39,7 @@ public class EmployeeUcUpdateProfile(
          // check uniqueness
          var existingByEmail = await repository.FindByEmailAsync(resultDtoEmail.Value, ct);
          if (existingByEmail is not null && existingByEmail.Id != employee.Id)
-            return Result<EmployeeDto>.Failure(EmployeeApplicationErrors.EmailAlreadyInUse);
+            return Result<EmployeeDto>.Failure(EmployeeErrors.EmailAlreadyInUse);
          // override previous email
          email = resultDtoEmail.Value;
       }

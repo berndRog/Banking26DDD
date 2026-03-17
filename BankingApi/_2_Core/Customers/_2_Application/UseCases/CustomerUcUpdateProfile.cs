@@ -3,7 +3,6 @@ using BankingApi._2_Core.BuildingBlocks._3_Domain;
 using BankingApi._2_Core.BuildingBlocks._3_Domain.ValueObjects;
 using BankingApi._2_Core.Customers._1_Ports.Outbound;
 using BankingApi._2_Core.Customers._2_Application.Dtos;
-using BankingApi._2_Core.Customers._2_Application.Errors;
 using BankingApi._2_Core.Customers._2_Application.Mappings;
 using BankingApi._2_Core.Customers._3_Domain.Errors;
 using BankingApi._3_Infrastructure._4_Logging;
@@ -30,12 +29,12 @@ public class CustomerUcUpdateProfile(
       // must be provisioned
       var customer = await repository.FindByIdentitySubjectAsync(subject, ct);
       if (customer is null)
-         return Result<CustomerDto>.Failure(CustomerApplicationErrors.NotProvisioned);
+         return Result<CustomerDto>.Failure(CustomerErrors.NotProvisioned);
 
       // optional: forbid employees/admins
       if (identityGateway.AdminRights != 0)
          return Result<CustomerDto>.Failure(
-            CustomerApplicationErrors.EmployeesCannotUpdateCustomerProfile);
+            CustomerErrors.EmployeesCannotUpdateCustomerProfile);
       if (customerDto.AddressVo is null)
          return Result<CustomerDto>.Failure(CustomerErrors.AddressIsRequired);
 
@@ -49,7 +48,7 @@ public class CustomerUcUpdateProfile(
          // check uniqueness
          var existingByEmail = await repository.FindByEmailAsync(resultDtoEmail.Value, ct);
          if (existingByEmail is not null && existingByEmail.Id != customer.Id)
-            return Result<CustomerDto>.Failure(CustomerApplicationErrors.EmailAlreadyInUse);
+            return Result<CustomerDto>.Failure(CustomerErrors.EmailAlreadyInUse);
          // override previous email
          email = resultDtoEmail.Value;
       }
