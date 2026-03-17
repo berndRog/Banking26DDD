@@ -3,12 +3,15 @@ using BankingApi._2_Core.Customers;
 using BankingApi._2_Core.Employees;
 using BankingApi._2_Core.Payments;
 using BankingApi._3_Infrastructure;
+using BankingApi._3_Infrastructure._2_Persistence;
 using BankingApi._3_Infrastructure._2_Persistence.Database;
 using Microsoft.AspNetCore.HttpLogging;
 namespace BankingApi;
 
 public class Program {
-   public static void Main(string[] args) {
+   
+   public static async Task Main(string[] args) {
+      
       var builder = WebApplication.CreateBuilder(args);
 
       builder.Services.AddHttpContextAccessor();
@@ -66,7 +69,7 @@ public class Program {
 
       var app = builder.Build();
 
-      //SeedData(app);
+      await SeedDataAsync(app);
 
       // Configure the HTTP request pipeline.
       if (app.Environment.IsDevelopment()) {
@@ -87,7 +90,7 @@ public class Program {
       app.Run();
    }
 
-   private static void SeedData(WebApplication app) {
+   private static async Task SeedDataAsync(WebApplication app) {
       // Seed the database in development
       if (app.Environment.IsDevelopment()) {
          using var scope = app.Services.CreateScope();
@@ -100,14 +103,40 @@ public class Program {
          db.Database.EnsureCreated();
       
          // Seed if empty
-         // if (!db.Employees.Any()) {
-         //    var seed = new Seed(clock);
-         //    db.Employees.AddRange(seed.Employee1, seed.Employee2);
-         //    db.Customers.AddRange(seed.Employees);
-         //    db.Accounts.AddRange(seed.Accounts);
-         //    db.Transfers.AddRange(seed.Transfers);
-         //    unitOfWork.SaveAllChangesAsync("");
-         // }
+         if (!db.Customers.Any()) {
+            var seed = new Seed(clock);
+            // var employees = seed.Employees;
+            // db.Employees.AddRange(employees);
+            // unitOfWork.LogChangeTracker("Seeding Employees");
+            //
+            // await unitOfWork.SaveAllChangesAsync("Seed Employees");
+            unitOfWork.ClearChangeTracker();
+            
+            db.Customers.AddRange(seed.Customers);
+            await unitOfWork.SaveAllChangesAsync("Seed Customers");
+            
+            
+            var accounts = seed.Accounts;
+            accounts[0].AddBeneficiary(seed.Beneficiary1(), clock.UtcNow);
+            accounts[0].AddBeneficiary(seed.Beneficiary2(), clock.UtcNow);
+            accounts[1].AddBeneficiary(seed.Beneficiary3(), clock.UtcNow);
+            accounts[1].AddBeneficiary(seed.Beneficiary4(), clock.UtcNow);
+            accounts[2].AddBeneficiary(seed.Beneficiary5(), clock.UtcNow);
+            accounts[2].AddBeneficiary(seed.Beneficiary6(), clock.UtcNow);
+            accounts[2].AddBeneficiary(seed.Beneficiary7(), clock.UtcNow);
+            accounts[3].AddBeneficiary(seed.Beneficiary8(), clock.UtcNow);
+            accounts[3].AddBeneficiary(seed.Beneficiary9(), clock.UtcNow);
+            accounts[4].AddBeneficiary(seed.Beneficiary10(), clock.UtcNow);
+            accounts[4].AddBeneficiary(seed.Beneficiary11(), clock.UtcNow);
+            db.Accounts.AddRange(accounts);
+            await unitOfWork.SaveAllChangesAsync("Seed Accounts");
+            
+            db.Transactions.AddRange(seed.Transactions);
+            await unitOfWork.SaveAllChangesAsync("Seed Transactions");
+            
+            db.Transfers.AddRange(seed.Transfers);
+            await unitOfWork.SaveAllChangesAsync("");
+         }
       }
    }
 }

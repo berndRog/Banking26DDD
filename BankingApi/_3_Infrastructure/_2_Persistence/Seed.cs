@@ -1,3 +1,4 @@
+using System.Collections.ObjectModel;
 using BankingApi._2_Core.BuildingBlocks._1_Ports.Outbound;
 using BankingApi._2_Core.BuildingBlocks._3_Domain.ValueObjects;
 using BankingApi._2_Core.Customers._3_Domain.Entities;
@@ -35,6 +36,9 @@ public sealed class Seed(
       personnelNumber: "Emp002",
       adminRights: (AdminRights)511
    );
+   public IReadOnlyList<Employee> Employees => new List<Employee>() {
+       Employee1(), Employee2()
+   };
    #endregion
 
    #region -------------- Test Addresses (Value Objects) -------------------------------------
@@ -332,7 +336,8 @@ public sealed class Seed(
    };
    #endregion
    
-   
+   #region -------------- Test Transactions (Entities) ---------------------------------------
+
    public string transaction1dId = "0001d000-0000-0000-0000-000000000000";
    public string transaction1cId = "0001c000-0000-0000-0000-000000000000";
    public string transaction2dId = "0002d000-0000-0000-0000-000000000000";
@@ -341,9 +346,185 @@ public sealed class Seed(
    public string transaction3cId = "0003c000-0000-0000-0000-000000000000";
    public string transaction4dId = "0004d000-0000-0000-0000-000000000000";
    public string transaction4cId = "0004c000-0000-0000-0000-000000000000";
-
-
+   public string transaction5dId = "0005d000-0000-0000-0000-000000000000";
+   public string transaction5cId = "0005c000-0000-0000-0000-000000000000";
+   public string transaction6dId = "0006d000-0000-0000-0000-000000000000";
+   public string transaction6cId = "0006c000-0000-0000-0000-000000000000";
+   public string transaction7dId = "0007d000-0000-0000-0000-000000000000";
+   public string transaction7cId = "0007c000-0000-0000-0000-000000000000";
+   public string transaction8dId = "0008d000-0000-0000-0000-000000000000";
+   public string transaction8cId = "0008c000-0000-0000-0000-000000000000";
+   public string transaction9dId = "0009d000-0000-0000-0000-000000000000";
+   public string transaction9cId = "0009c000-0000-0000-0000-000000000000";
+   public string transaction10dId = "0010d000-0000-0000-0000-000000000000";
+   public string transaction10cId = "0010c000-0000-0000-0000-000000000000";
+   public string transaction11dId = "0011d000-0000-0000-0000-000000000000";
+   public string transaction11cId = "0011c000-0000-0000-0000-000000000000";
    
+   public Transaction Transaction1d() => CreateDebitTransaction(
+      id: transaction1dId,
+      accountId: Guid.Parse(account1Id),
+      purpose: "Erika1 an Chris1",
+      amountDecimal: 345.0m,
+      balanceDecimal: Account1().BalanceVo.Amount
+   );
+   public Transaction Transaction1c() => CreateCreditTransaction(
+      id: transaction1cId,
+      accountId: Guid.Parse(account6Id),
+      purpose: "Erika1 an Chris1",
+      amountDecimal: 345.0m,
+      balanceDecimal: Account6().BalanceVo.Amount
+   );
+   public Transaction Transaction2d() => CreateDebitTransaction(
+      id: transaction2dId,
+      accountId: Guid.Parse(account1Id),
+      purpose: "Erika1 an Chris2",
+      amountDecimal: 231.0m,
+      balanceDecimal: Account1().BalanceVo.Amount
+   );
+   public Transaction Transaction2c() => CreateCreditTransaction(
+      id: transaction2cId,
+      accountId: Guid.Parse(account7Id),
+      purpose: "Erika1 an Chris2",
+      amountDecimal: 231.0m,
+      balanceDecimal: Account7().BalanceVo.Amount
+   );
+   public Transaction Transaction3d() => CreateDebitTransaction(
+      id: transaction3dId,
+      accountId: Guid.Parse(account2Id),
+      purpose: "Erika2 an Arne",
+      amountDecimal: 289.0m,
+      balanceDecimal: Account2().BalanceVo.Amount
+   );
+   public Transaction Transaction3c() => CreateCreditTransaction(
+      id: transaction3cId,
+      accountId: Guid.Parse(account4Id),
+      purpose: "Erika2 an Arne",
+      amountDecimal: 289.0m,
+      balanceDecimal: Account4().BalanceVo.Amount
+   );
+   public Transaction Transaction4d() => CreateDebitTransaction(
+      id: transaction4dId,
+      accountId: Guid.Parse(account2Id),
+      purpose: "Erika2 an Benno",
+      amountDecimal: 125.0m,
+      balanceDecimal: Account2().BalanceVo.Amount
+   );
+   public Transaction Transaction4c() => CreateCreditTransaction(
+      id: transaction4cId,
+      accountId: Guid.Parse(account5Id),
+      purpose: "Erika2 an Benno",
+      amountDecimal: 125.0m,
+      balanceDecimal: Account5().BalanceVo.Amount
+   );
+   public Transaction Transaction5d() => CreateDebitTransaction(
+      id: transaction5dId,
+      accountId: Guid.Parse(account3Id),
+      purpose: "Max an Arne",
+      amountDecimal: 167.0m,
+      balanceDecimal: Account3().BalanceVo.Amount
+   );
+   public Transaction Transaction5c() => CreateCreditTransaction(
+      id: transaction5cId,
+      accountId: Guid.Parse(account4Id),
+      purpose: "Max an Arne",
+      amountDecimal: 167.0m,
+      balanceDecimal: Account4().BalanceVo.Amount
+   );
+   public Transaction Transaction6d() => CreateDebitTransaction(
+      id: transaction6dId,
+      accountId: Guid.Parse(account3Id),
+      purpose: "Max an Benno",
+      amountDecimal: 289.0m,
+      balanceDecimal: Account3().BalanceVo.Amount
+   );
+   public Transaction Transaction6c() => CreateCreditTransaction(
+      id: transaction6cId,
+      accountId: Guid.Parse(account5Id),
+      purpose: "Max an Benno",
+      amountDecimal: 289.0m,
+      balanceDecimal: Account5().BalanceVo.Amount
+   );
+   public Transaction Transaction7d() => CreateDebitTransaction(
+      id: transaction7dId,
+      accountId: Guid.Parse(account3Id),
+      purpose: "Max an Dana",
+      amountDecimal: 312.0m,
+      balanceDecimal: Account3().BalanceVo.Amount
+   );
+   public Transaction Transaction7c() => CreateCreditTransaction(
+      id: transaction7cId,
+      accountId: Guid.Parse(account8Id),
+      purpose: "Max an Dana",
+      amountDecimal: 312.0m,
+      balanceDecimal: Account8().BalanceVo.Amount
+   );
+   public Transaction Transaction8d() => CreateDebitTransaction(
+      id: transaction8dId,
+      accountId: Guid.Parse(account4Id),
+      purpose: "Arne an Max",
+      amountDecimal: 278.0m,
+      balanceDecimal: Account4().BalanceVo.Amount
+   );
+   public Transaction Transaction8c() => CreateCreditTransaction(
+      id: transaction8cId,
+      accountId: Guid.Parse(account3Id),
+      purpose: "Arne an Max",
+      amountDecimal: 278.0m,
+      balanceDecimal: Account3().BalanceVo.Amount
+   );
+   public Transaction Transaction9d() => CreateDebitTransaction(
+      id: transaction9dId,
+      accountId: Guid.Parse(account4Id),
+      purpose: "Arne an Chris2",
+      amountDecimal: 356.0m,
+      balanceDecimal: Account4().BalanceVo.Amount
+   );
+   public Transaction Transaction9c() => CreateCreditTransaction(
+      id: transaction9cId,
+      accountId: Guid.Parse(account6Id),
+      purpose: "Arne an Chris2",
+      amountDecimal: 356.0m,
+      balanceDecimal: Account6().BalanceVo.Amount
+   );
+   public Transaction Transaction10d() => CreateDebitTransaction(
+      id: transaction10dId,
+      accountId: Guid.Parse(account5Id),
+      purpose: "Benno an Erika1",
+      amountDecimal: 412.0m,
+      balanceDecimal: Account5().BalanceVo.Amount
+   );
+   public Transaction Transaction10c() => CreateCreditTransaction(
+      id: transaction10cId,
+      accountId: Guid.Parse(account1Id),
+      purpose: "Benno an Erika1",
+      amountDecimal: 412.0m,
+      balanceDecimal: Account1().BalanceVo.Amount
+   );
+   public Transaction Transaction11d() => CreateDebitTransaction(
+      id: transaction11dId,
+      accountId: Guid.Parse(account5Id),
+      purpose: "Benno an Erika2",
+      amountDecimal: 89.0m,
+      balanceDecimal: Account5().BalanceVo.Amount
+   );
+   public Transaction Transaction11c() => CreateCreditTransaction(
+      id: transaction11cId,
+      accountId: Guid.Parse(account2Id),
+      purpose: "Benno an Erika2",
+      amountDecimal: 89.0m,
+      balanceDecimal: Account2().BalanceVo.Amount
+   );
+   
+   public IReadOnlyList<Transaction> Transactions => [
+      Transaction1d(), Transaction1c(), Transaction2d(), Transaction2c(),
+      Transaction3d(), Transaction3c(), Transaction4d(), Transaction4c(),
+      Transaction5d(), Transaction5c(), Transaction6d(), Transaction6c(),
+      Transaction7d(), Transaction7c(), Transaction8d(), Transaction8c(),
+      Transaction9d(), Transaction9c(), Transaction10d(), Transaction10c(), 
+      Transaction11d(),  Transaction11c()
+   ];
+   #endregion
    
    #region -------------- Test Transfers (Entities) ------------------------------------------
    public string transfer1Id = "00010000-0000-0000-0000-000000000000";
@@ -399,67 +580,80 @@ public sealed class Seed(
       creditTransactionId: Guid.Parse(transaction4cId)
    );
    
-   /*
    public Transfer Transfer5() => CreateTransfer(
       id: transfer5Id,
       fromAccountId: Guid.Parse(account3Id), 
-      beneficiary: Beneficiary5(), // Account5.Id,
+      toAccountId: Guid.Parse(account5Id),
       amountDecimal: 167.00m,
-      purpose: "Max an Arne"
+      purpose: "Max an Arne",
+      debitTransactionId: Guid.Parse(transaction5dId),
+      creditTransactionId: Guid.Parse(transaction5cId)
    );
    
    public Transfer Transfer6() => CreateTransfer(
       id: transfer6Id,
       fromAccountId: Guid.Parse(account3Id), 
-      beneficiary: Beneficiary6(), // Account4.Id,
+      toAccountId: Guid.Parse(account4Id),
       amountDecimal: 289.00m,
-      purpose: "Max an Benno"
+      purpose: "Max an Benno",
+      debitTransactionId: Guid.Parse(transaction6dId),
+      creditTransactionId: Guid.Parse(transaction6cId)
    );
    
    public Transfer Transfer7() => CreateTransfer(
       id: transfer7Id,
       fromAccountId: Guid.Parse(account3Id), 
-      beneficiary: Beneficiary7(), // Account5.Id,
+      toAccountId: Guid.Parse(account5Id),
       amountDecimal: 312.00m,
-      purpose: "Max an Dana"
+      purpose: "Max an Dana",
+      debitTransactionId: Guid.Parse(transaction7dId),
+      creditTransactionId: Guid.Parse(transaction7cId)
    );
    
    public Transfer Transfer8() => CreateTransfer(
       id: transfer8Id,
       fromAccountId: Guid.Parse(account4Id), 
-      beneficiary: Beneficiary8(), // Account5.Id,
+      toAccountId: Guid.Parse(account5Id),
       amountDecimal: 278.00m,
-      purpose: "Arne an Max"
+      purpose: "Arne an Max",
+      debitTransactionId: Guid.Parse(transaction8dId),
+      creditTransactionId: Guid.Parse(transaction8cId)
    );
    
    public Transfer Transfer9() => CreateTransfer(
       id: transfer9Id,
       fromAccountId: Guid.Parse(account4Id), 
-      beneficiary: Beneficiary9(), // Account6.Id,
+      toAccountId: Guid.Parse(account6Id),
       amountDecimal: 356.00m,
-      purpose: "Arne an Chris2"
+      purpose: "Arne an Chris2",
+      debitTransactionId: Guid.Parse(transaction9dId),
+      creditTransactionId: Guid.Parse(transaction9cId)
    );
    
    public Transfer Transfer10() => CreateTransfer(
       id: transfer10Id,
       fromAccountId: Guid.Parse(account5Id), 
-      beneficiary: Beneficiary10(), // Account1.Id,
+      toAccountId: Guid.Parse(account1Id),
       amountDecimal: 412.00m,
-      purpose: "Benno an Erika1"
+      purpose: "Benno an Erika1",
+      debitTransactionId: Guid.Parse(transaction10dId),
+      creditTransactionId: Guid.Parse(transaction10cId)
    );
    
    public Transfer Transfer11() => CreateTransfer(
       id: transfer11Id,
       fromAccountId: Guid.Parse(account5Id), 
-      beneficiary: Beneficiary11(), // Account2.Id,
+      toAccountId: Guid.Parse(account2Id),
       amountDecimal: 89.00m,
-      purpose: "Benno an Erika2"
+      purpose: "Benno an Erika2",
+      debitTransactionId: Guid.Parse(transaction11dId),
+      creditTransactionId: Guid.Parse(transaction11cId)
    );
-   */
+   
    public IReadOnlyList<Transfer> Transfers => [
       Transfer1(), Transfer2(), Transfer3(), Transfer4(), 
-    //  Transfer5(), Transfer6(), Transfer7(), Transfer8(), 
-    //  Transfer9(), Transfer10(), Transfer11()
+      Transfer5(), Transfer6(), Transfer7(), Transfer8(), 
+       Transfer9(), Transfer10(), Transfer11()
    ];
    #endregion
    
@@ -492,7 +686,6 @@ public sealed class Seed(
       var beneficiary9 = Beneficiary9();
       var beneficiary10 = Beneficiary10();
       var beneficiary11 = Beneficiary11();
-      
       
       account1.AddBeneficiary(beneficiary1, clock.UtcNow);
       account1.AddBeneficiary(beneficiary2, clock.UtcNow);
@@ -536,6 +729,7 @@ public sealed class Seed(
          subject: subject,
          personnelNumber: personnelNumber,
          adminRights: adminRights,
+         createdAt: clock.UtcNow,
          id: id
       );
       return result.Value!;
@@ -632,4 +826,67 @@ public sealed class Seed(
       );
       return result.Value!;
    }
+   
+   private Transaction CreateDebitTransaction(
+      string id,
+      Guid accountId,
+      string purpose,
+      decimal amountDecimal,
+      decimal balanceDecimal
+   ) {
+
+      var resultMoney = MoneyVo.Create(amountDecimal, Currency.EUR);
+      if (resultMoney.IsFailure)
+         throw new Exception($"Invalid amount in seed data: {amountDecimal}");
+      var amountVo = resultMoney.Value;
+
+      var resultBalance = MoneyVo.Create(balanceDecimal, Currency.EUR);
+      if (resultBalance.IsFailure)
+         throw new Exception($"Invalid amount in seed data: {amountDecimal}");
+      var balanceVo = resultBalance.Value;
+      
+      var balanceAfterVo = balanceVo - amountVo;
+      
+      var result = Transaction.CreateDebit(
+         accountId: accountId, 
+         purpose: purpose,
+         amountVo: amountVo,
+         balanceAfterVo: balanceAfterVo,
+         bookedAt: clock.UtcNow,
+         id: id
+      );
+      return result.Value!;
+   }
+   
+   private Transaction CreateCreditTransaction(
+      string id,
+      Guid accountId,
+      string purpose,
+      decimal amountDecimal,
+      decimal balanceDecimal
+   ) {
+
+      var resultMoney = MoneyVo.Create(amountDecimal, Currency.EUR);
+      if (resultMoney.IsFailure)
+         throw new Exception($"Invalid amount in seed data: {amountDecimal}");
+      var amountVo = resultMoney.Value;
+
+      var resultBalance = MoneyVo.Create(balanceDecimal, Currency.EUR);
+      if (resultBalance.IsFailure)
+         throw new Exception($"Invalid amount in seed data: {amountDecimal}");
+      var balanceVo = resultBalance.Value;
+      
+      var balanceAfterVo = balanceVo + amountVo;
+      
+      var result = Transaction.CreateCredit(
+         accountId: accountId, 
+         purpose: purpose,
+         amountVo: amountVo,
+         balanceAfterVo: balanceAfterVo,
+         bookedAt: clock.UtcNow,
+         id: id
+      );
+      return result.Value!;
+   }
+   
 }

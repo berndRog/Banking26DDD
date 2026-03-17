@@ -30,12 +30,11 @@ public sealed class TestSeed {
    #endregion
 
    #region -------------- Test Addresses (Value Objects) -------------------------------------
-   public AddressVo Address1
-      => AddressVo.Create("Hauptstr. 23", "29556", "Suderburg", "DE").GetValueOrThrow();
-   public AddressVo Address2
-      => AddressVo.Create("Bahnhofstr.10", "10115", "Berlin").GetValueOrThrow();
-   public AddressVo Address3
-      => AddressVo.Create("Schillerstr. 1", "30123", "Hannover", "DE").GetValueOrThrow();
+   public AddressVo Address1 => _seed.Address1;
+   public AddressVo Address2 => _seed.Address1;
+   public AddressVo Address3 => _seed.Address1;
+   public AddressVo Address4 => _seed.Address1;
+   public AddressVo Address5 => _seed.Address1;
    #endregion
 
    #region -------------- Test Customers (Enities) -------------------------------------------
@@ -99,24 +98,52 @@ public sealed class TestSeed {
    };
    #endregion
 
+   #region -------------- Test Transactions ---------------------------------------------------
+   public Transaction Transaction1d() => _seed.Transaction1d();
+   public Transaction Transaction1c() => _seed.Transaction1c();
+   public Transaction Transaction2d() => _seed.Transaction2d();
+   public Transaction Transaction2c() => _seed.Transaction2c();
+   public Transaction Transaction3d() => _seed.Transaction3d();
+   public Transaction Transaction3c() => _seed.Transaction3c();
+   public Transaction Transaction4d() => _seed.Transaction4d();
+   public Transaction Transaction4c() => _seed.Transaction4c();
+   public Transaction Transaction5d() => _seed.Transaction5d();
+   public Transaction Transaction5c() => _seed.Transaction5c();
+   public Transaction Transaction6d() => _seed.Transaction6d();
+   public Transaction Transaction6c() => _seed.Transaction6c();
+   public Transaction Transaction7d() => _seed.Transaction7d();
+   public Transaction Transaction7c() => _seed.Transaction7c();
+   public Transaction Transaction8d() => _seed.Transaction8d();
+   public Transaction Transaction8c() => _seed.Transaction8c();
+   public Transaction Transaction9d() => _seed.Transaction9d();
+   public Transaction Transaction9c() => _seed.Transaction9c();
+   public IReadOnlyList<Transaction> Transaction => new List<Transaction>() {
+      Transaction1d(), Transaction1c(), Transaction2d(), Transaction2c(),
+      Transaction3d(), Transaction3c(), Transaction4d(), Transaction4c(),
+      Transaction5d(), Transaction5c(), Transaction6d(), Transaction6c(),
+      Transaction7d(), Transaction7c(), Transaction8d(), Transaction8c(),
+      Transaction9d(), Transaction9c()
+     
+   };
+   #endregion
+   
    #region -------------- Test Transfers -----------------------------------------------------
    public Transfer Transfer1() => _seed.Transfer1();
    public Transfer Transfer2() => _seed.Transfer2();
    public Transfer Transfer3() => _seed.Transfer3();
    public Transfer Transfer4() => _seed.Transfer4();
- 
-   // public Transfer Transfer5() => _seed.Transfer5();
-   // public Transfer Transfer6() => _seed.Transfer6();
-   // public Transfer Transfer7() => _seed.Transfer7();
-   // public Transfer Transfer8() => _seed.Transfer8();
-   // public Transfer Transfer9() => _seed.Transfer9();
-   // public Transfer Transfer10() => _seed.Transfer10();
-   // public Transfer Transfer11() => _seed.Transfer11();
-   //
+   public Transfer Transfer5() => _seed.Transfer5();
+   public Transfer Transfer6() => _seed.Transfer6();
+   public Transfer Transfer7() => _seed.Transfer7();
+   public Transfer Transfer8() => _seed.Transfer8();
+   public Transfer Transfer9() => _seed.Transfer9();
+   public Transfer Transfer10() => _seed.Transfer10();
+   public Transfer Transfer11() => _seed.Transfer11();
+   
    public IReadOnlyList<Transfer> Transfers => new List<Transfer>() {
       Transfer1(), Transfer2(), Transfer3(), Transfer4(), 
-      //Transfer5(), Transfer6(), Transfer7(), Transfer8(), 
-      //Transfer9(), Transfer10(), Transfer11()
+      Transfer5(), Transfer6(), Transfer7(), Transfer8(), 
+      Transfer9(), Transfer10(), Transfer11()
    };
    #endregion
    

@@ -60,7 +60,7 @@ public sealed class ConfigCustomer(
 
       builder.Property(o => o.RejectCode)
          .HasConversion<int>()   
-         .IsRequired(false);
+         .IsRequired();
 
       builder.Property(o => o.AuditedByEmployeeId)
          .IsRequired(false);
