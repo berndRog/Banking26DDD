@@ -17,6 +17,12 @@ public sealed class ConfigAccount(
       builder.HasKey(a => a.Id);
       builder.Property(a => a.Id).ValueGeneratedNever();
 
+      builder.Property(a => a.Iban)
+         .HasMaxLength(34)
+         .IsRequired();
+      builder.HasIndex(a => a.Iban)
+         .IsUnique();
+      
       // audit fields
       builder.Property(a => a.CreatedAt)
          .HasConversion(dtConv)
@@ -34,12 +40,7 @@ public sealed class ConfigAccount(
          .HasConversion(dtConv)
          .IsRequired(false);
 
-      builder.Property(a => a.IbanVo)
-         .HasIbanConversion()
-         .IsRequired();
 
-      builder.HasIndex(a => a.IbanVo)
-         .IsUnique();
 
       builder.OwnsOne(a => a.BalanceVo, b => {
          b.Property(p => p.Amount)

@@ -1,3 +1,4 @@
+using BankingApi._2_Core.BuildingBlocks;
 using BankingApi._2_Core.BuildingBlocks._1_Ports.Outbound;
 using BankingApi._2_Core.BuildingBlocks._3_Domain;
 using BankingApi._2_Core.BuildingBlocks._3_Domain.Entities;
@@ -12,9 +13,8 @@ public sealed class Employee : AggregateRoot {
    // properties
    public string Firstname { get; private set; } = string.Empty;
    public string Lastname  { get; private set; } = string.Empty;
-   
-   public EmailVo EmailVo { get; private set; } = default!; 
-   public PhoneVo? PhoneVo { get; private set; } = null;
+   public string Email { get; private set; } = default!; 
+   public string? Phone { get; private set; } = null;
   
    public string  Subject { get; private set; } = default!; // IdentityAccessServer
    
@@ -39,8 +39,8 @@ public sealed class Employee : AggregateRoot {
       Guid id,
       string firstname,
       string lastname,
-      EmailVo emailVo,
-      PhoneVo? phoneVo,
+      string email,
+      string? phone,
       string subject,
       string personnelNumber,
       AdminRights adminRights,
@@ -49,8 +49,8 @@ public sealed class Employee : AggregateRoot {
       Id = id;
       Firstname = firstname;
       Lastname  = lastname;
-      EmailVo     = emailVo;
-      PhoneVo = phoneVo;
+      Email = email;
+      Phone = phone;
       Subject = subject;
       PersonnelNumber = personnelNumber;
       AdminRights = adminRights;
@@ -62,8 +62,8 @@ public sealed class Employee : AggregateRoot {
    public static Result<Employee> Create(
       string firstname,
       string lastname,
-      EmailVo emailVo,
-      PhoneVo? phone,
+      string email,
+      string? phone,
       string subject,
       string personnelNumber,
       AdminRights adminRights,
@@ -87,8 +87,20 @@ public sealed class Employee : AggregateRoot {
       if (lastname.Length is < 2 or > 80)
          return Result<Employee>.Failure(EmployeeErrors.InvalidFirstname);
 
+      var resultEmail = EmailCheck.Run(email);
+      if (resultEmail.IsFailure)
+         return Result<Employee>.Failure(resultEmail.Error);
+      email = resultEmail.Value;
+      
+      if (phone is not null) {
+         var resultPhone = PhoneCheck.Run(phone);
+         if (resultPhone.IsFailure)
+            return Result<Employee>.Failure(resultPhone.Error);
+         phone = resultPhone.Value;
+      }
+
       // check required subject (identity)
-      var resultSubject = IdentitySubject.Check(subject);
+      var resultSubject = SubjectCheck.Run(subject);
       if (resultSubject.IsFailure)
          return Result<Employee>.Failure(resultSubject.Error);
       
@@ -101,21 +113,21 @@ public sealed class Employee : AggregateRoot {
          return Result<Employee>.Failure(EmployeeErrors.CreatedAtIsRequired);
       
       // Resolve an entity id from an optional raw string.
-      var resultId = Entity.Resolve(id, EmployeeErrors.InvalidId);
+      var resultId = Resolve(id, EmployeeErrors.InvalidId);
       if (resultId.IsFailure)
          return Result<Employee>.Failure(resultId.Error);
-      var Id = resultId.Value;
+      var localId = resultId.Value;
 
       // Admin rights must only contain allowed flags
       if ((adminRights & ~AllowedRights) != 0)
          return Result<Employee>.Failure(EmployeeErrors.InvalidAdminRightsBitmask);
       
       var employee = new Employee(
-         id: Id, 
+         id: localId, 
          firstname: firstname,
          lastname: lastname,
-         emailVo: emailVo,
-         phoneVo: phone,
+         email: email,
+         phone: phone,
          subject: subject,
          personnelNumber: personnelNumber,
          adminRights: adminRights,
@@ -129,25 +141,28 @@ public sealed class Employee : AggregateRoot {
    }
 
    // ---------- Domain operations ----------
-   /// <summary>
-   /// Create an employee on first login (provisioning).
-   /// - Only identity facts are known for sure (subject, email, createdAt).
-   /// - Business profile data is still missing and must be completed by the employee.
-   /// </summary>
+   // Create an employee on first login (provisioning).
+   // - Only identity facts are known for sure (subject, email, createdAt).
+   // - Business profile data is still missing and must be completed by the employee.
    public static Result<Employee> CreateProvisioned(
       IClock clock,
-      string identitySubject,
-      EmailVo emailVo,
+      string subject,
+      string email,
       DateTimeOffset createdAt,
       AdminRights adminRights = AdminRights.ViewReports,
       string? id = null
    ) {
       
-      var resultSubject = IdentitySubject.Check(identitySubject);
+      var resultEmail = EmailCheck.Run(email);
+      if (resultEmail.IsFailure)
+         return Result<Employee>.Failure(resultEmail.Error);
+      email = resultEmail.Value;
+      
+      var resultSubject = SubjectCheck.Run(subject);
       if (resultSubject.IsFailure)
          return Result<Employee>.Failure(resultSubject.Error);
       
-      var resultId = Entity.Resolve(id, EmployeeErrors.InvalidId);
+      var resultId = Resolve(id, EmployeeErrors.InvalidId);
       if (resultId.IsFailure)
          return Result<Employee>.Failure(resultId.Error);
 
@@ -156,8 +171,8 @@ public sealed class Employee : AggregateRoot {
          id: resultId.Value,
          firstname: string.Empty,
          lastname: string.Empty,
-         emailVo: emailVo,
-         phoneVo: null,
+         email: email,
+         phone: null,
          subject: resultSubject.Value,
          personnelNumber: string.Empty, 
          adminRights: adminRights,
@@ -175,14 +190,12 @@ public sealed class Employee : AggregateRoot {
    // - Important: we accept 'now' from outside to keep tests deterministic and
    //   to avoid reliance on the internal clock after EF materialization.
    // --------------------------------------------------------------------------
-   /// <summary>
-   /// Employee completes or updates their profile after provisioning.
-   /// </summary>
+   // Employee completes or updates their profile after provisioning.
    public Result UpdateProfile(
       string firstname,
       string lastname,
-      EmailVo emailVo,
-      PhoneVo? phone,
+      string email,
+      string? phone,
       string personnelNumber,
       DateTimeOffset updatedAt
    ) {
@@ -209,8 +222,8 @@ public sealed class Employee : AggregateRoot {
       // Apply changes
       Firstname = firstname;
       Lastname  = lastname;
-      EmailVo = emailVo;
-      PhoneVo = phone;
+      Email = email;
+      Phone = phone;
       PersonnelNumber = personnelNumber;
       
       Touch(updatedAt);
@@ -218,17 +231,7 @@ public sealed class Employee : AggregateRoot {
    }
 
    
-   /// <summary>
-   /// Replaces the administrative rights of the employee.
-   ///
-   /// Semantics:
-   /// - The provided rights replace the previous rights completely
-   /// - Partial add/remove operations are intentionally not supported
-   ///
-   /// Returns:
-   /// - Success if the rights are valid and applied
-   /// - Failure if the bitmask contains unsupported flags
-   /// </summary>
+   // Replaces the administrative rights of the employee.
    public Result SetAdminRights(
       AdminRights adminRights, 
       DateTimeOffset updatedAt
@@ -242,16 +245,7 @@ public sealed class Employee : AggregateRoot {
       return Result.Success();
    }
 
-   /// <summary>
-   /// Deactivates the employee.
-   ///
-   /// Business rules:
-   /// - An employee can only be deactivated once
-   ///
-   /// Side effects:
-   /// - Sets IsActive to false
-   /// - Records the deactivation timestamp
-   /// </summary>
+   // Deactivates the employee.
    public Result Deactivate(
       DateTimeOffset deactivatedAt
    ) {

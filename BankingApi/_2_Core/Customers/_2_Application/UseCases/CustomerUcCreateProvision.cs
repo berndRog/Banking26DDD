@@ -1,3 +1,4 @@
+using BankingApi._2_Core.BuildingBlocks;
 using BankingApi._2_Core.BuildingBlocks._1_Ports.Outbound;
 using BankingApi._2_Core.BuildingBlocks._3_Domain;
 using BankingApi._2_Core.BuildingBlocks._3_Domain.Errors;
@@ -8,6 +9,7 @@ using BankingApi._2_Core.Customers._2_Application.Mappings;
 using BankingApi._2_Core.Customers._3_Domain.Entities;
 using BankingApi._2_Core.Customers._3_Domain.Errors;
 using BankingApi._3_Infrastructure._4_Logging;
+using WebApi._2_Core.BuildingBlocks._2_Application.Mappings;
 namespace BankingApi._2_Core.Customers._2_Application.UseCases;
 
 public class CustomerUcCreateProvision(
@@ -24,7 +26,7 @@ public class CustomerUcCreateProvision(
       ArgumentNullException.ThrowIfNull(customerDto);
 
       // 1) subject required
-      var resultSubject = IdentitySubject.Check(identityGateway.Subject);
+      var resultSubject = SubjectCheck.Run(identityGateway.Subject);
       if (resultSubject.IsFailure) 
          return Result<CustomerProvisionDto>.Failure(resultSubject.Error);
       var subject = resultSubject.Value;
@@ -47,31 +49,31 @@ public class CustomerUcCreateProvision(
       }
 
       // interpret preferred_username as initial email
-      var resultEmail = EmailVo.Create(username);
+      var resultEmail = EmailCheck.Run(username);
       if (resultEmail.IsFailure)
          return Result<CustomerProvisionDto>.Failure(resultEmail.Error);
-      var emailVo = resultEmail.Value;
+      var email = resultEmail.Value;
 
       // check uniqueness
-      var existingWithEmail = await repository.FindByEmailAsync(emailVo, ct);
+      var existingWithEmail = await repository.FindByEmailAsync(email, ct);
       if (existingWithEmail is not null)
          return Result<CustomerProvisionDto>.Failure(CustomerErrors.EmailAlreadyInUse);
       
       // 4) create aggregate
       var resultCustomer = Customer.CreateProvision(
-         identitySubject: subject,
+         subject: subject,
          firstname: customerDto.Firstname,
          lastname: customerDto.Lastname,
          companyName: customerDto.CompanyName,
-         emailVo: emailVo,
-         addressVo: customerDto.AddressVo,
+         email: email,
+         addressVo: customerDto.AddressDto.ToAddressVo(),
          createdAt: createdAt,
          id: customerDto.Id.ToString()
       );
       if (resultCustomer.IsFailure)
          return Result<CustomerProvisionDto>.Failure(resultCustomer.Error)
             .LogIfFailure(logger, "CustomerUcCreateProvision.DomainRejected", 
-               new { subject, email = emailVo, createdAt, customerDto.Id });
+               new { subject, email = email, createdAt, customerDto.Id });
 
       // 5) add to repository
       var customer = resultCustomer.Value;

@@ -1,4 +1,5 @@
 using System.Runtime.CompilerServices;
+using BankingApi._2_Core.BuildingBlocks;
 using BankingApi._2_Core.BuildingBlocks._1_Ports.Outbound;
 using BankingApi._2_Core.BuildingBlocks._3_Domain;
 using BankingApi._2_Core.Employees._1_Ports.Inbound;
@@ -23,7 +24,7 @@ internal class EmployeeContractEf(
 
       // Authorization: must be an employee/admin with the required rights
       // subject required
-      var subjectResult = IdentitySubject.Check(identityGateway.Subject);
+      var subjectResult = SubjectCheck.Run(identityGateway.Subject);
       if (subjectResult.IsFailure)
          return Result<EmployeeDto>.Failure(subjectResult.Error);
       var subject = subjectResult.Value;

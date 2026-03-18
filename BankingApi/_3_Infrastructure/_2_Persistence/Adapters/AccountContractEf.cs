@@ -23,7 +23,7 @@ internal class AccountContractEf(
    public async Task<Result<AccountDto>> OpenInitialAccountAsync(
       Guid customerId, 
       string? accoutIdString = null,
-      string? ibanString = null,
+      string? iban = null,
       CancellationToken ct = default!
    ) {
       
@@ -33,15 +33,15 @@ internal class AccountContractEf(
          return Result<AccountDto>.Failure(AccountErrors.OwnerAlreadyHasAccount);
       
       // Create IBAN (generate if not provided, validate if provided)
-      if (string.IsNullOrEmpty(ibanString)) {
+      if (string.IsNullOrEmpty(iban)) {
          // generate iban
-         ibanString = IbanGenerator.CreateGermanIban(); 
+         iban = IbanGenerator.CreateGermanIban(); 
       }
-      else if (ibanString.Contains("DEXX")) {
+      else if (iban.Contains("DEXX")) {
          // validate iban format DEXX 1234 1234 1234 1234 00
          // and generate valid check digits XX
          try {
-            ibanString = IbanGenerator.CreateGermanIban(ibanString);
+            iban = IbanGenerator.CreateGermanIban(iban);
          }
          catch (FormatException) {
             return Result<AccountDto>.Failure(AccountErrors.InvalidIbanFormat);
@@ -49,17 +49,17 @@ internal class AccountContractEf(
       }
       
       // Create Iban VO
-      var resultIban = IbanVo.Create(ibanString);
+      var resultIban = IbanCheck.Run(iban);
       if(resultIban.IsFailure)
          return Result<AccountDto>.Failure(resultIban.Error);
-      var iban = resultIban.Value;
+      iban = resultIban.Value;
       
       // Create initial account
       var balance = MoneyVo.Create(0m, Currency.EUR).Value; // initial balance is always 0 EUR
       
       var resultAccount = Account.Create(
          customerId: customerId,
-         ibanVo: iban,
+         iban: iban,
          balanceVo: balance,
          createdAt: clock.UtcNow,
          id: accoutIdString

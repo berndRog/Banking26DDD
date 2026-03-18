@@ -1,3 +1,4 @@
+using BankingApi._2_Core.BuildingBlocks;
 using BankingApi._2_Core.BuildingBlocks._1_Ports.Outbound;
 using BankingApi._2_Core.BuildingBlocks._3_Domain;
 using BankingApi._2_Core.BuildingBlocks._3_Domain.ValueObjects;
@@ -19,7 +20,7 @@ public class EmployeeUcUpdateProfile(
       CancellationToken ct
    ) {
       // subject from gateway
-      var subjectResult = IdentitySubject.Check(identityGateway.Subject);
+      var subjectResult = SubjectCheck.Run(identityGateway.Subject);
       if (subjectResult.IsFailure)
          return Result<EmployeeDto>.Failure(subjectResult.Error);
       var subject = subjectResult.Value;
@@ -30,10 +31,10 @@ public class EmployeeUcUpdateProfile(
          return Result<EmployeeDto>.Failure(EmployeeErrors.NotProvisioned);
       
       // override email address (if changed) 
-      var email = employee.EmailVo;
-      if (!string.Equals(email.Value, dto.EmailString, StringComparison.OrdinalIgnoreCase)) {
+      var email = employee.Email;
+      if (!string.Equals(email, dto.Email, StringComparison.OrdinalIgnoreCase)) {
          // create new email value object from dto.Email
-         var resultDtoEmail = EmailVo.Create(dto.EmailString);
+         var resultDtoEmail = EmailCheck.Run(dto.Email);
          if (resultDtoEmail.IsFailure)
             return Result<EmployeeDto>.Failure(resultDtoEmail.Error);
          // check uniqueness
@@ -44,9 +45,9 @@ public class EmployeeUcUpdateProfile(
          email = resultDtoEmail.Value;
       }
 
-      PhoneVo? phone = null;
-      if(string.IsNullOrWhiteSpace(dto.PhoneString) == false) {
-         var resultPhone = PhoneVo.Create(dto.PhoneString);
+      var phone = employee.Phone;
+      if(string.IsNullOrWhiteSpace(dto.Phone) == false) {
+         var resultPhone = PhoneCheck.Run(dto.Phone);
          if (resultPhone.IsFailure)
             return Result<EmployeeDto>.Failure(resultPhone.Error);
          phone = resultPhone.Value;
@@ -56,7 +57,7 @@ public class EmployeeUcUpdateProfile(
       var updateResult = employee.UpdateProfile(
          firstname: dto.Firstname,
          lastname: dto.Lastname,
-         emailVo: email,
+         email: email,
          phone: phone,
          personnelNumber: dto.PersonnelNumber,
          updatedAt: clock.UtcNow

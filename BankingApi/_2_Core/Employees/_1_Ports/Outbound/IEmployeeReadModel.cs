@@ -21,7 +21,7 @@ public interface IEmployeeReadModel {
    
    // Find employee by email address
    Task<Result<EmployeeDto>> FindByEmailAsync(
-      string emailString, 
+      string email, 
       CancellationToken ct = default
    );
    

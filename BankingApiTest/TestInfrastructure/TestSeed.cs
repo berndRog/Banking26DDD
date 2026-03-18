@@ -53,14 +53,14 @@ public sealed class TestSeed {
    #endregion
 
    #region -------------- Test Iban (Value Objects) ------------------------------------------
-   public IbanVo Iban1Vo => _seed.Iban1Vo;
-   public IbanVo Iban2Vo => _seed.Iban2Vo;
-   public IbanVo Iban3Vo => _seed.Iban3Vo;
-   public IbanVo Iban4Vo => _seed.Iban4Vo;
-   public IbanVo Iban5Vo => _seed.Iban5Vo;
-   public IbanVo Iban6Vo => _seed.Iban6Vo;
-   public IbanVo Iban7Vo => _seed.Iban7Vo;
-   public IbanVo Iban8Vo => _seed.Iban8Vo;
+   public string Iban1 => _seed.Iban1;
+   public string Iban2 => _seed.Iban2;
+   public string Iban3 => _seed.Iban3;
+   public string Iban4 => _seed.Iban4;
+   public string Iban5 => _seed.Iban5;
+   public string Iban6 => _seed.Iban6;
+   public string Iban7 => _seed.Iban7;
+   public string Iban8 => _seed.Iban8;
    #endregion
    
    #region -------------- Test Accounts ------------------------------------------------------
@@ -117,13 +117,17 @@ public sealed class TestSeed {
    public Transaction Transaction8c() => _seed.Transaction8c();
    public Transaction Transaction9d() => _seed.Transaction9d();
    public Transaction Transaction9c() => _seed.Transaction9c();
+   public Transaction Transaction10d() => _seed.Transaction10d();
+   public Transaction Transaction10c() => _seed.Transaction10c();
+   public Transaction Transaction11d() => _seed.Transaction11d();
+   public Transaction Transaction11c() => _seed.Transaction11c();
    public IReadOnlyList<Transaction> Transaction => new List<Transaction>() {
       Transaction1d(), Transaction1c(), Transaction2d(), Transaction2c(),
       Transaction3d(), Transaction3c(), Transaction4d(), Transaction4c(),
       Transaction5d(), Transaction5c(), Transaction6d(), Transaction6c(),
       Transaction7d(), Transaction7c(), Transaction8d(), Transaction8c(),
-      Transaction9d(), Transaction9c()
-     
+      Transaction9d(), Transaction9c(),  Transaction10d(), Transaction10c(),
+      Transaction11d(), Transaction11c()
    };
    #endregion
    
@@ -146,9 +150,4 @@ public sealed class TestSeed {
       Transfer9(), Transfer10(), Transfer11()
    };
    #endregion
-   
-   
-   
-
-   
 }

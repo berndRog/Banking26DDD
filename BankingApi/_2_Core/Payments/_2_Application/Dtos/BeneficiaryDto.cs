@@ -3,6 +3,6 @@
 public record BeneficiaryDto(
    Guid Id,
    string Name,
-   string IbanString,
+   string Iban,
    Guid AccountId
 );

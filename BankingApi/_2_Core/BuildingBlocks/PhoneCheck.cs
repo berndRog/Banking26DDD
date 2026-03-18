@@ -9,37 +9,13 @@ namespace BankingApi._2_Core.BuildingBlocks._3_Domain.ValueObjects;
 // - digits only (E.164 normalized)
 // - no spaces, separators or formatting characters
 // - country code mandatory (e.g. 4915112345678)
-//
-// Presentation form:
-// - human readable formatted version (e.g. +49 151 1234 5678)
-//
-// Design rule:
-// - Create(...)        = user input (normalization + validation + country rules)
-// - FromPersisted(...) = database value (cheap invariant check only)
-//
-// Motivation:
-// The canonical form guarantees stable comparisons, uniqueness checks,
-// indexing and reliable equality semantics independent from formatting.
-public sealed record class PhoneVo {
-   // Canonical stored representation.
-   public string Value { get; }
+public static class PhoneCheck {
 
-   // Private constructor enforces factory usage.
-   private PhoneVo(string value) => Value = value;
-
-   //--- Factory user input (strict) -------------------------------------------
-   public static Result<PhoneVo> Create(string? input) {
+   public static Result<string> Run(string? input) {
       var normalized = NormalizeFromInput(input);
       if (normalized.IsFailure)
-         return Result<PhoneVo>.Failure(normalized.Error);
-      return Result<PhoneVo>.Success(new PhoneVo(normalized.Value!));
-   }
-
-   //--- Factory database (trusted) --------------------------------------------
-   internal static PhoneVo FromPersisted(string value) {
-      if (!IsCanonical(value))
-         throw new InvalidOperationException($"Invalid phone in database: '{value}'");
-      return new PhoneVo(value);
+         return Result<string>.Failure(normalized.Error);
+      return Result<string>.Success(normalized.Value);
    }
 
    // NORMALIZATION (only used during Create)
@@ -115,10 +91,11 @@ public sealed record class PhoneVo {
    }
 
    // DISPLAY BEHAVIOR
-   public override string ToString()
-      => Value.StartsWith('+')
-         ? FormatInternational(Value)
-         : FormatLocal(Value);
+   public static string ToString(string value) {
+      return value.StartsWith('+')
+         ? FormatInternational(value)
+         : FormatLocal(value);
+   }
 
    private static string FormatInternational(string value) {
       var digits = value[1..];

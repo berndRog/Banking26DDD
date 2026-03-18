@@ -25,10 +25,10 @@ internal sealed class EmployeeRepositoryEf(
          .FirstOrDefaultAsync(c => c.Subject == subject, ct);
    
    public async Task<Employee?> FindByEmailAsync(
-      EmailVo emailVo,
+      string email,
       CancellationToken ct
    ) => await dbContext.Employees
-         .FirstOrDefaultAsync(c => c.EmailVo == emailVo, ct);
+         .FirstOrDefaultAsync(c => c.Email == email, ct);
    
    public async Task<Employee?> FindByPersonnelNumberAsync(
       string personnelNumber,

@@ -18,10 +18,10 @@ public sealed class AccountRepositoryEf(
 
    // Loads a single account by its IBAN (unique business key).
    public async Task<Account?> FindByIbanAsync(
-      IbanVo ibanVo,
+      string iban,
       CancellationToken ct = default
    ) => await dbContext.Accounts
-      .FirstOrDefaultAsync(a => a.IbanVo == ibanVo, ct);
+      .FirstOrDefaultAsync(a => a.Iban == iban, ct);
 
    // Loads a single account by Id and eager-loads the Beneficiaries navigation.
    // Note: Include must be applied before executing the query

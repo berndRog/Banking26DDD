@@ -51,7 +51,7 @@ public interface IAccountReadModel {
 
    // Find a beneficiary by IBAN
    Task<Result<BeneficiaryDto>> FindBeneficiaryByIbanAsync(
-      string ibanString,
+      string iban,
       CancellationToken ct = default
    );
 

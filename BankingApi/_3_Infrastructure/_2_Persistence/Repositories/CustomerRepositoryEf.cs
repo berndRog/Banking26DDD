@@ -22,10 +22,10 @@ internal class CustomerRepositoryEf(
          .FirstOrDefaultAsync(c => c.Subject == subject, ct);
 
    public async Task<Customer?> FindByEmailAsync(
-      EmailVo emailVo,
+      string email,
       CancellationToken ct
    ) => await customerDbContext.Customers
-         .SingleOrDefaultAsync(c => c.EmailVo == emailVo, ct);
+         .SingleOrDefaultAsync(c => c.Email == email, ct);
 
    public async Task<IEnumerable<Customer>> SelectByDisplayNameAsync(
       string displayName,

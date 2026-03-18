@@ -33,7 +33,7 @@ public sealed class AccountUcCreateIntT : TestBaseIntegration {
       // Act
       var result = await sut.ExecuteAsync(
          customerId: customer.Id,
-         ibanString: account.IbanVo.Value,
+         iban: account.Iban,
          balanceDecimal: account.BalanceVo.Amount,
          currency: (int)account.BalanceVo.Currency,
          id: account.Id.ToString(),
@@ -45,7 +45,7 @@ public sealed class AccountUcCreateIntT : TestBaseIntegration {
       var actual = await accountRepository.FindByIdAsync(account.Id, ct);
       NotNull(actual);
       Equal(account.Id, actual!.Id);
-      Equal(account.IbanVo, actual.IbanVo);
+      Equal(account.Iban, actual.Iban);
       Equal(account.BalanceVo, actual.BalanceVo);
    }
    
@@ -66,7 +66,7 @@ public sealed class AccountUcCreateIntT : TestBaseIntegration {
       // Act
       var result = await sut.ExecuteAsync(
          customerId: owner.Id,
-         ibanString: "ABC123456789",
+         iban: "ABC123456789",
          balanceDecimal: account.BalanceVo.Amount,
          currency: (int)account.BalanceVo.Currency,
          id: account.Id.ToString(),

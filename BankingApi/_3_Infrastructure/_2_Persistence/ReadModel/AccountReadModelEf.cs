@@ -31,18 +31,17 @@ internal sealed class AccountReadModelEf(
    }
 
    public async Task<Result<AccountDto>> FindByIbanAsync(
-      string ibanString,
+      string iban,
       CancellationToken ct
    ) {
-      
-      var resultIban = IbanVo.Create(ibanString);
+      var resultIban = IbanCheck.Run(iban);
       if (resultIban.IsFailure)
          return Result<AccountDto>.Failure(resultIban.Error);
-      var iban = resultIban.Value;
+      iban = resultIban.Value;
       
       var accountDto = await dbContext.Accounts
          .AsNoTracking()
-         .Where(a => a.IbanVo == iban)      // filter
+         .Where(a => a.Iban == iban)      // filter
          .Select(c => c.ToAccountDto())   // projection
          .SingleOrDefaultAsync(ct);       // take single or default (null if not found)
       
@@ -132,18 +131,17 @@ internal sealed class AccountReadModelEf(
    }
    
    public async Task<Result<BeneficiaryDto>> FindBeneficiaryByIbanAsync(
-      string ibanString,
+      string iban,
       CancellationToken ct = default
    ) {
-      var resultIban = IbanVo.Create(ibanString);
+      var resultIban = IbanCheck.Run(iban);
       if (resultIban.IsFailure)
          return Result<BeneficiaryDto>.Failure(resultIban.Error);
-
-      var iban = resultIban.Value;
+      iban = resultIban.Value;
 
       var beneficiaryDto = await dbContext.Beneficiaries
          .AsNoTracking()
-         .Where(b => b.IbanVo == iban)
+         .Where(b => b.Iban == iban)
          .Select(b => b.ToBeneficiaryDto())
          .SingleOrDefaultAsync(ct);
 

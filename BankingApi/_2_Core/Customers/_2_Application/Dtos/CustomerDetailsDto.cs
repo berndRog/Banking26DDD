@@ -1,4 +1,5 @@
 using BankingApi._2_Core.BuildingBlocks._3_Domain.ValueObjects;
+using WebApi._2_Core.BuildingBlocks._2_Application.Dtos;
 namespace BankingApi._2_Core.Customers._2_Application.Dtos;
 
 public sealed record CustomerDetailsDto(
@@ -6,6 +7,7 @@ public sealed record CustomerDetailsDto(
    string Firstname,
    string Lastname,
    string? CompanyName,
+   string Email,
    int StatusInt,                 // "Pending = 0 | Active = 1 | Rejected ? 2 | Deactivated = 3"
    string? ActivatedAt,           // Iso string
    string? RejectedAt,            // Iso string
@@ -13,6 +15,5 @@ public sealed record CustomerDetailsDto(
    Guid? AuditedByEmployeeId,
    string? DeactivatedAt,         // Iso string
    Guid? DeactivatedByEmployeeId,
-   string EmailString,
-   AddressVo AddressVo
+   AddressDto AddressDto
 );

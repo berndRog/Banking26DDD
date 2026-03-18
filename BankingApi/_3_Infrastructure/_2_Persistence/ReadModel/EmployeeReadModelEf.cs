@@ -1,4 +1,5 @@
 using System.Runtime.CompilerServices;
+using BankingApi._2_Core.BuildingBlocks;
 using BankingApi._2_Core.BuildingBlocks._1_Ports.Outbound;
 using BankingApi._2_Core.BuildingBlocks._3_Domain;
 using BankingApi._2_Core.BuildingBlocks._3_Domain.ValueObjects;
@@ -22,7 +23,7 @@ sealed class EmployeeReadModelEf(
    public async Task<Result<Guid>> FindMeProvisionedAsync(CancellationToken ct) {
 
       // subject required
-      var subjectResult = IdentitySubject.Check(identityGateway.Subject);
+      var subjectResult = SubjectCheck.Run(identityGateway.Subject);
       if (subjectResult.IsFailure)
          return Result<Guid>.Failure(subjectResult.Error);
       var subject = subjectResult.Value;
@@ -43,7 +44,7 @@ sealed class EmployeeReadModelEf(
    public async Task<Result<EmployeeDto>> FindMeAsync(CancellationToken ct) {
       
       // 1) Subject from Gateway
-      var subjectResult = IdentitySubject.Check(identityGateway.Subject);
+      var subjectResult = SubjectCheck.Run(identityGateway.Subject);
       if (subjectResult.IsFailure)
          return Result<EmployeeDto>.Failure(subjectResult.Error);
       var subject = subjectResult.Value;
@@ -76,17 +77,17 @@ sealed class EmployeeReadModelEf(
    }
    
    public async Task<Result<EmployeeDto>> FindByEmailAsync(
-      string emailString,
+      string email,
       CancellationToken ct
    ) {
-      var resultEmail = EmailVo.Create(emailString);
+      var resultEmail = EmailCheck.Run(email);
       if (resultEmail.IsFailure)
          return Result<EmployeeDto>.Failure(resultEmail.Error);
-      var email = resultEmail.Value;
+      email = resultEmail.Value;
       
       var employeeDto = await employeesDbContext.Employees
          .AsNoTracking()
-         .Where(c => c.EmailVo == email)   // filter by email
+         .Where(c => c.Email == email)   // filter by email
          .Select(c => c.ToEmployeeDto()) // projection
          .SingleOrDefaultAsync( ct);
       

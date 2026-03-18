@@ -35,8 +35,8 @@ public sealed class EmployeesController(
       var result = await ucCreate.ExecuteAsync(
          firstname: dto.Firstname,
          lastname: dto.Lastname,
-         emailString: dto.EmailString,
-         phoneString: dto.PhoneString,
+         emailString: dto.Email,
+         phoneString: dto.Phone,
          personnelNumber: dto.PersonnelNumber,
          subject: subject, // in real scenario, subject should come from auth token or be generated in use case
          adminRights:  (AdminRights) dto.AdminRights, 

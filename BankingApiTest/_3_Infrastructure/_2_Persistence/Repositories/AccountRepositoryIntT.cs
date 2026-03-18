@@ -35,7 +35,7 @@ public sealed class AccountRepositoryIntTests : TestBaseIntegration {
       Equal(customer.Id, actual.Id);
       Equal(customer.Firstname, actual.Firstname);
       Equal(customer.Lastname, actual.Lastname);
-      Equal(customer.EmailVo, actual.EmailVo);
+      Equal(customer.Email, actual.Email);
       Equal(customer.AddressVo, actual.AddressVo);
    }
    
@@ -57,7 +57,7 @@ public sealed class AccountRepositoryIntTests : TestBaseIntegration {
       dbContext.ChangeTracker.Clear();
 
       var customer = customers[2]; // Customer3
-      var emailVo = customer.EmailVo;
+      var emailVo = customer.Email;
 
       // Act
       var actual = await repository.FindByEmailAsync(emailVo, ct);
@@ -69,7 +69,7 @@ public sealed class AccountRepositoryIntTests : TestBaseIntegration {
       Equal(customer.Lastname, actual.Lastname);
       Equal(customer.CompanyName, actual.CompanyName);
       Equal(customer.AddressVo, actual.AddressVo);
-      Equal(customer.EmailVo, actual.EmailVo);
+      Equal(customer.Email, actual.Email);
       Equal(customer.AddressVo, actual.AddressVo);
    }
    

@@ -1,4 +1,5 @@
 using System.Runtime.CompilerServices;
+using BankingApi._2_Core.BuildingBlocks;
 using BankingApi._2_Core.BuildingBlocks._1_Ports.Outbound;
 using BankingApi._2_Core.BuildingBlocks._3_Domain;
 using BankingApi._2_Core.BuildingBlocks._3_Domain.ValueObjects;
@@ -9,6 +10,7 @@ using BankingApi._2_Core.Customers._3_Domain.Entities;
 using BankingApi._2_Core.Customers._3_Domain.Errors;
 using BankingApi._2_Core.Payments._1_Ports.Inbound;
 using BankingApi._3_Infrastructure._4_Logging;
+using WebApi._2_Core.BuildingBlocks._2_Application.Mappings;
 [assembly: InternalsVisibleTo("BankingApiTest")]
 namespace BankingApi._2_Core.Customers._2_Application.UseCases;
 
@@ -29,18 +31,18 @@ internal sealed class CustomerUcCreate(
       var firstname = customerDto.Firstname.Trim();
       var lastname = customerDto.Lastname.Trim();
       var companyName = customerDto.CompanyName?.Trim();
-      if (customerDto.AddressVo is null)
+      if (customerDto.AddressDto is null)
          return Result<CustomerDto>.Failure(CustomerErrors.AddressIsRequired);
       
       // 1) subject required
-      var resultSubject = IdentitySubject.Check(identityGateway.Subject);
+      var resultSubject = SubjectCheck.Run(identityGateway.Subject);
       if (resultSubject.IsFailure) 
          return Result<CustomerDto>.Failure(resultSubject.Error);
       var subject = resultSubject.Value;
       
       // create email value object (domain logic inside)
-      var emailString = customerDto.EmailString;
-      var resultEmail = EmailVo.Create(emailString);
+      var emailString = customerDto.Email;
+      var resultEmail = EmailCheck.Run(emailString);
       if (resultEmail.IsFailure)
          return Result<CustomerDto>.Failure(resultEmail.Error);
       var emailVo = resultEmail.Value;
@@ -55,11 +57,11 @@ internal sealed class CustomerUcCreate(
          firstname: firstname, 
          lastname: lastname,  
          companyName: companyName, 
-         emailVo: emailVo,
+         email: emailVo,
          subject: subject, 
          createdAt: clock.UtcNow,
          id: customerDto.Id.ToString(),
-         addressVo: customerDto.AddressVo
+         addressVo: customerDto.AddressDto.ToAddressVo()
       );
       
       if (result.IsFailure) 
@@ -83,7 +85,7 @@ internal sealed class CustomerUcCreate(
             .LogIfFailure(logger, "CustomerUcCreate.OpenInitialAccountFailed", new { customerId = customer.Id, ibanString });
      
       logger.LogInformation("CustomerUcCreate done OpenInitialAccount for CustomerId={id} with iban={iban}",
-         customer.Id, resultAccount.Value!.IbanString);  
+         customer.Id, resultAccount.Value!.Iban);  
       
       return Result<CustomerDto>.Success(customer.ToCustomerDto());
    }

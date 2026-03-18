@@ -1,3 +1,4 @@
+using BankingApi._2_Core.BuildingBlocks;
 using BankingApi._2_Core.BuildingBlocks._1_Ports.Outbound;
 using BankingApi._2_Core.BuildingBlocks._3_Domain.Errors;
 using BankingApi._2_Core.BuildingBlocks._3_Domain.ValueObjects;
@@ -11,28 +12,15 @@ namespace BankingApiTest._2_Core.Customers.Domain.Entities;
 public sealed class CustomerUt {
    private readonly TestSeed _seed = default!;
    private readonly IClock _clock = default!;
-
-   private readonly Guid _Id;
-   private readonly string _firstname;
-   private readonly string _lastname;
-   private readonly string _companyName;
-   private readonly EmailVo _emailVo;
-   private readonly string _subject;
-   private readonly string _id;
+   private readonly Customer _customer;
+   private readonly Customer _customer5;  // with CompanyName
    private readonly AddressVo _addressVo = default!;
 
    public CustomerUt() {
       _seed = new TestSeed();
       _clock = _seed.Clock;
-
-         
-      _id = "11111111-0000-0000-0000-000000000000";
-      _Id = Guid.Parse(_id);
-      _firstname = "Bernd";
-      _lastname = "Rogalla";
-      _companyName = "BR Software GmbH";
-      _subject = "81595782-6355-45d6-8052-880a70dae830";
-      _emailVo = EmailVo.Create("b.rogalla@mail.local").Value;
+      _customer = _seed.Customer1();
+      _customer5 = _seed.Customer5();
       _addressVo = _seed.Address1;
    }
 
@@ -50,61 +38,64 @@ public sealed class CustomerUt {
    public void CreatePerson_valid_input_and_id_creates_customer() {
       // Act
       var result = Customer.Create(
-         firstname: _firstname,
-         lastname: _lastname,
-         companyName: null,
-         subject: _subject,
-         emailVo: _emailVo,
-         addressVo: _addressVo,
-         createdAt: _clock.UtcNow,
-         id: _id
+         firstname: _customer.Firstname,
+         lastname: _customer.Lastname,
+         companyName: _customer.CompanyName,
+         subject: _customer.Subject,
+         email: _customer.Email,
+         addressVo: _customer.AddressVo,
+         createdAt: _customer.CreatedAt,
+         id: _customer.Id.ToString()
       );
 
       // Assert
       True(result.IsSuccess);
 
-      var customer = result.Value!;
-      IsType<Customer>(customer);
-      Equal(Guid.Parse(_id), customer.Id);
-      Equal(_firstname, customer.Firstname);
-      Equal(_lastname, customer.Lastname);
-      Equal(_subject, customer.Subject);
-      Equal(_emailVo, customer.EmailVo);
-      Equal(_addressVo, customer.AddressVo);
-      Null(customer.CompanyName);
-      Equal($"{_firstname} {_lastname}", customer.DisplayName);
-
-      Equal(CustomerStatus.Active, customer.Status);
-      True(customer.IsActive);
-      True(customer.IsProfileComplete);
+      var actual = result.Value!;
+      IsType<Customer>(actual);
+      Equal(_customer.Id, actual.Id);
+      Equal(_customer.Firstname, actual.Firstname);
+      Equal(_customer.Lastname, actual.Lastname);
+      Equal(_customer.CompanyName, actual.CompanyName);
+      Equal(_customer.DisplayName, actual.DisplayName);
+      Equal(_customer.Email, actual.Email);
+      Equal(_customer.Subject, actual.Subject);
+      Equal(_customer.Status, actual.Status);
+      Equal(_customer.AddressVo, actual.AddressVo);
+      True(actual.IsActive);
+      True(actual.IsProfileComplete);
    }
 
    [Fact]
    public void CreateCustomer_valid_input_and_without_id() {
       // Act
       var result = Customer.Create(
-         firstname: _firstname,
-         lastname: _lastname,
-         companyName: null,
-         subject: _subject,
-         emailVo: _emailVo,
-         addressVo: _addressVo,
-         createdAt: _clock.UtcNow,
+         firstname: _customer.Firstname,
+         lastname: _customer.Lastname,
+         companyName: _customer.CompanyName,
+         subject: _customer.Subject,
+         email: _customer.Email,
+         addressVo: _customer.AddressVo,
+         createdAt: _customer.CreatedAt,
          id: null // <== without id
       );
 
       // Assert
       True(result.IsSuccess);
 
-      var owner = result.Value!;
-      IsType<Customer>(owner);
-      NotEqual(Guid.Empty, owner.Id);
-      Equal(_firstname, owner.Firstname);
-      Equal(_lastname, owner.Lastname);
-      Equal(_emailVo, owner.EmailVo);
-      Equal(_subject, owner.Subject);
-      Null(owner.CompanyName);
-      Equal($"{_firstname} {_lastname}", owner.DisplayName);
+      var actual = result.Value!;
+      IsType<Customer>(actual);
+      Equal(_customer.Id, actual.Id);
+      Equal(_customer.Firstname, actual.Firstname);
+      Equal(_customer.Lastname, actual.Lastname);
+      Equal(_customer.CompanyName, actual.CompanyName);
+      Equal(_customer.Subject, actual.Subject);
+      Equal(_customer.Email, actual.Email);
+      Equal(_addressVo, actual.AddressVo);
+      Equal(_customer.DisplayName, actual.DisplayName);
+      Equal(_customer.Status, actual.Status);
+      True(actual.IsActive);
+      True(actual.IsProfileComplete);
    }
 
    [Theory]
@@ -114,13 +105,13 @@ public sealed class CustomerUt {
       // Act
       var result = Customer.Create(
          firstname: firstname,
-         lastname: _lastname,
-         companyName: null,
-         subject: _subject,
-         emailVo: _emailVo,
-         addressVo: _addressVo,
-         createdAt: _clock.UtcNow,
-         id: _id
+         lastname: _customer.Lastname,
+         companyName: _customer.CompanyName,
+         subject: _customer.Subject,
+         email: _customer.Email,
+         addressVo: _customer.AddressVo,
+         createdAt: _customer.CreatedAt,
+         id: _customer.Id.ToString()
       );
 
       // Assert
@@ -133,13 +124,13 @@ public sealed class CustomerUt {
    public void CreateCutsomer_invalid_firstname_length_fails(string firstname) {
       var result = Customer.Create(
          firstname: firstname,
-         lastname: _lastname,
-         companyName: null,
-         subject: _subject,
-         emailVo: _emailVo,
-         addressVo: _addressVo,
-         createdAt: _clock.UtcNow,
-         id: _id
+         lastname: _customer.Lastname,
+         companyName: _customer.CompanyName,
+         subject: _customer.Subject,
+         email: _customer.Email,
+         addressVo: _customer.AddressVo,
+         createdAt: _customer.CreatedAt,
+         id: _customer.Id.ToString()
       );
 
       True(result.IsFailure);
@@ -152,14 +143,14 @@ public sealed class CustomerUt {
    public void CreateCustomer_invalid_lastname_fails(string lastname) {
       // Act
       var result = Customer.Create(
-         firstname: _firstname,
+         firstname: _customer.Firstname,
          lastname: lastname,
-         companyName: null,
-         subject: _subject,
-         emailVo: _emailVo,
-         addressVo: _addressVo,
-         createdAt: _clock.UtcNow,
-         id: _id
+         companyName: _customer.CompanyName,
+         subject: _customer.Subject,
+         email: _customer.Email,
+         addressVo: _customer.AddressVo,
+         createdAt: _customer.CreatedAt,
+         id: _customer.Id.ToString()
       );
 
       // Assert
@@ -171,14 +162,14 @@ public sealed class CustomerUt {
    [MemberData(nameof(InvalidLengths))]
    public void CreateCustomer_invalid_lastname_length_fails(string lastname) {
       var result = Customer.Create(
-         firstname: _firstname,
+         firstname: _customer.Firstname,
          lastname: lastname,
-         companyName: null,
-         subject: _subject,
-         emailVo: _emailVo,
-         addressVo: _addressVo,
-         createdAt: _clock.UtcNow,
-         id: _id
+         companyName: _customer.CompanyName,
+         subject: _customer.Subject,
+         email: _customer.Email,
+         addressVo: _customer.AddressVo,
+         createdAt: _customer.CreatedAt,
+         id: _customer.Id.ToString()
       );
 
       True(result.IsFailure);
@@ -192,13 +183,13 @@ public sealed class CustomerUt {
 
       // Act
       var result = Customer.Create(
-         firstname: _firstname,
-         lastname: _lastname,
-         companyName: null,
-         subject: _subject,
-         emailVo: _emailVo,
-         addressVo: _addressVo,
-         createdAt: _clock.UtcNow,
+         firstname: _customer.Firstname,
+         lastname: _customer.Lastname,
+         companyName: _customer.CompanyName,
+         subject: _customer.Subject,
+         email: _customer.Email,
+         addressVo: _customer.AddressVo,
+         createdAt: _customer.CreatedAt,
          id: id
       );
 
@@ -208,15 +199,15 @@ public sealed class CustomerUt {
    }
    #endregion
 
-   #region--- EmailVo & AddressVo tests -----------------------------------------
+   #region--- EmailCheck & AddressVo tests -----------------------------------------
    [Theory]
    [InlineData("")]
    [InlineData("   ")]
    [InlineData("nonsense")]
    [InlineData("a.b.de")]
-   public void CreateCustomer_invalid_email_fails(string email) {
+   public void Invalid_email_fails(string email) {
       // Act
-      var result = EmailVo.Create(email);
+      var result = EmailCheck.Run(email);
       // Assert
       True(result.IsFailure);
       // depending on your VO implementation this might be EmailIsRequired or CommonErrors.InvalidEmail
@@ -227,7 +218,7 @@ public sealed class CustomerUt {
    [InlineData("")]
    [InlineData("   ")]
    [MemberData(nameof(InvalidLengths))]
-   public void CreateCustomer_with_address_invalid_street_fails(string street) {
+   public void Invalid_street_fails(string street) {
       // Act      
       var ResultAddress = AddressVo.Create(
          street: street,
@@ -249,7 +240,7 @@ public sealed class CustomerUt {
    [InlineData("   ")]
    [InlineData("A")]
    [InlineData("AAAAAAAAAAA")]
-   public void CreateCustomer_with_address_invalid_postal_code_fails(string postalCode) {
+   public void Invalid_postal_code_fails(string postalCode) {
       // Act      
       var ResultAddress = AddressVo.Create(
          street: _addressVo.Street,
@@ -270,7 +261,7 @@ public sealed class CustomerUt {
    [InlineData("")]
    [InlineData("   ")]
    [MemberData(nameof(InvalidLengths))]
-   public void CreateCustomer_with_address_invalid_city_fails(string city) {
+   public void Invalid_city_fails(string city) {
       // Act      
       var ResultAddress = AddressVo.Create(
          street: _addressVo.Street,
@@ -292,33 +283,33 @@ public sealed class CustomerUt {
    [Fact]
    public void CreateCompany_ok() {
       var result = Customer.Create(
-         firstname: _firstname,
-         lastname: _lastname,
-         companyName: _companyName,
-         subject: _subject,
-         emailVo: _emailVo,
-         addressVo: _addressVo,
-         createdAt: _clock.UtcNow,
-         id: _id
+         firstname: _customer5.Firstname,
+         lastname: _customer5.Lastname,
+         companyName: _customer5.CompanyName,
+         subject: _customer5.Subject,
+         email: _customer5.Email,
+         addressVo: _customer5.AddressVo,
+         createdAt: _customer5.CreatedAt,
+         id: _customer5.Id.ToString()
       );
 
       // Assert
       True(result.IsSuccess);
 
-      var customer = result.Value!;
-      IsType<Customer>(customer);
-      Equal(Guid.Parse(_id), customer.Id);
-      Equal(_firstname, customer.Firstname);
-      Equal(_lastname, customer.Lastname);
-      Equal(_companyName, customer.CompanyName);
-      Equal(_companyName, customer.DisplayName);
-      Equal(_subject, customer.Subject);
-      Equal(_emailVo, customer.EmailVo);
-      Equal(_addressVo, customer.AddressVo);
-      
-      Equal(CustomerStatus.Active, customer.Status);
-      True(customer.IsActive);
-      True(customer.IsProfileComplete);
+      var actual = result.Value!;
+      IsType<Customer>(actual);
+      IsType<Customer>(actual);
+      Equal(_customer5.Id, actual.Id);
+      Equal(_customer5.Firstname, actual.Firstname);
+      Equal(_customer5.Lastname, actual.Lastname);
+      Equal(_customer5.CompanyName, actual.CompanyName);
+      Equal(_customer5.DisplayName, actual.DisplayName);
+      Equal(_customer5.Email, actual.Email);
+      Equal(_customer5.Subject, actual.Subject);
+      Equal(_customer5.Status, actual.Status);
+      Equal(_customer5.AddressVo, actual.AddressVo);
+      True(actual.IsActive);
+      True(actual.IsProfileComplete);
    }
    
    
@@ -327,14 +318,14 @@ public sealed class CustomerUt {
    [InlineData("   ")]
    public void CreateCompany_invalid_companyName_length_ok(string companyName) {
       var result = Customer.Create(
-         firstname: _firstname,
-         lastname: _lastname,
+         firstname: _customer5.Firstname,
+         lastname: _customer5.Lastname,
          companyName: companyName,
-         subject: _subject,
-         emailVo: _emailVo,
-         addressVo: _addressVo,
-         createdAt: _clock.UtcNow,
-         id: null
+         subject: _customer5.Subject,
+         email: _customer5.Email,
+         addressVo: _customer5.AddressVo,
+         createdAt: _customer5.CreatedAt,
+         id: _customer5.Id.ToString()
       );
 
       True(result.IsSuccess);
@@ -344,14 +335,14 @@ public sealed class CustomerUt {
    [MemberData(nameof(InvalidLengths))]
    public void CreateCompany_invalid_companyName_length_fails(string companyName) {
       var result = Customer.Create(
-         firstname: _firstname,
-         lastname: _lastname,
+         firstname: _customer5.Firstname,
+         lastname: _customer5.Lastname,
          companyName: companyName,
-         subject: _subject,
-         emailVo: _emailVo,
-         addressVo: _addressVo,
-         createdAt: _clock.UtcNow,
-         id: null
+         subject: _customer5.Subject,
+         email: _customer5.Email,
+         addressVo: _customer5.AddressVo,
+         createdAt: _customer5.CreatedAt,
+         id: _customer5.Id.ToString()
       );
 
       True(result.IsFailure);
@@ -369,17 +360,17 @@ public sealed class CustomerUt {
       var firstname = customerRegister.Firstname;
       var lastname = customerRegister.Lastname;
       var companyName = customerRegister.CompanyName;
-      var emailVo = customerRegister.EmailVo;
+      var emailVo = customerRegister.Email;
       var addressVo = customerRegister.AddressVo;
       var createdAt = customerRegister.CreatedAt;
       
       // Act
       var result = Customer.CreateProvision(
-         identitySubject: subject,
+         subject: subject,
          firstname: firstname,
          lastname: lastname,
          companyName: companyName,
-         emailVo: emailVo,
+         email: emailVo,
          addressVo: addressVo,
          createdAt: createdAt,
          id: customerId.ToString()
@@ -394,7 +385,7 @@ public sealed class CustomerUt {
       Equal(lastname, customer.Lastname);
       Equal(companyName, customer.CompanyName);
       Equal(subject, customer.Subject);
-      Equal(emailVo, customer.EmailVo);
+      Equal(emailVo, customer.Email);
       Equal(addressVo, customer.AddressVo);
       Equal(createdAt, customer.CreatedAt);
       Equal(CustomerStatus.Pending, customer.Status);
@@ -407,16 +398,16 @@ public sealed class CustomerUt {
       // Arrange
       var customerRegister = _seed.CustomerRegister();
       var customerId = customerRegister.Id;
-      var emailVo = customerRegister.EmailVo;
+      var emailVo = customerRegister.Email;
       var createdAt = customerRegister.CreatedAt;
       
       // Act
       var result = Customer.CreateProvision(
-         identitySubject: "",
+         subject: "",
          firstname: customerRegister.Firstname,
          lastname: customerRegister.Lastname,
          companyName: customerRegister.CompanyName,
-         emailVo: emailVo,
+         email: emailVo,
          addressVo: customerRegister.AddressVo,
          createdAt: createdAt,
          id: customerId.ToString()

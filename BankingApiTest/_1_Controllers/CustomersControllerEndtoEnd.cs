@@ -9,6 +9,7 @@ using BankingApiTest.TestController;
 using BankingApiTest.TestInfrastructure;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
+using WebApi._2_Core.BuildingBlocks._2_Application.Mappings;
 namespace BankingApiTest._2_Modules.Employees.Application;
 
 public sealed class CustomersControllerEndtoEnd : TestBaseEndToEnd {
@@ -31,14 +32,14 @@ public sealed class CustomersControllerEndtoEnd : TestBaseEndToEnd {
          Firstname: customer1.Firstname,
          Lastname: customer1.Lastname,
          CompanyName: customer1.CompanyName,
-         EmailString: customer1.EmailVo.Value,
+         Email: customer1.Email,
          StatusInt: (int) customer1.Status,
-         AddressVo: customer1.AddressVo
+         AddressDto: customer1.AddressVo.ToAddressDto()
       );
       // Act
       Factory.TestSubject = "12345678-0000-0000-0000-000000000000";
       var account1Id = account1.Id.ToString();
-      var iban1 = account1.IbanVo.Value;
+      var iban1 = account1.Iban;
       
       var request = new HttpRequestMessage(
          method: HttpMethod.Post,
@@ -69,20 +70,20 @@ public sealed class CustomersControllerEndtoEnd : TestBaseEndToEnd {
          var dbContext = serviceProvider.GetRequiredService<BankingDbContext>();
 
          // IMPORTANT: use AsNoTracking to avoid tracking artifacts
-         var owner = await dbContext.Customers
+         var customer = await dbContext.Customers
             .AsNoTracking()
             .Where(o => o.Id == customerDto!.Id)
             .SingleOrDefaultAsync(ct);
 
-         NotNull(owner);
+         NotNull(customer);
 
          // Domain-level checks
-         Equal(requestDto.Firstname, owner.Firstname);
-         Equal(requestDto.Lastname, owner.Lastname);
-         Equal(requestDto.EmailString, owner.EmailVo.Value);
-         Equal(requestDto.StatusInt, (int)owner.Status);
-         Equal(Factory.TestSubject, owner.Subject);
-         Equal(requestDto.AddressVo, owner.AddressVo);
+         Equal(requestDto.Firstname, customer.Firstname);
+         Equal(requestDto.Lastname, customer.Lastname);
+         Equal(requestDto.Email, customer.Email);
+         Equal(requestDto.StatusInt, (int)customer.Status);
+         Equal(Factory.TestSubject, customer.Subject);
+         Equal(requestDto.AddressDto, customer.AddressVo.ToAddressDto());
          
          var accounts = await dbContext.Accounts
             .AsNoTracking()
@@ -141,8 +142,8 @@ public sealed class CustomersControllerEndtoEnd : TestBaseEndToEnd {
          Equal(provisionDto.Firstname, owner.Firstname);
          Equal(provisionDto.Lastname, owner.Lastname);
          Equal(provisionDto.CompanyName, owner.CompanyName);
-         Equal(provisionDto.AddressVo, owner.AddressVo);
-         Equal(Factory.TestUsername, owner.EmailVo.Value);
+         Equal(provisionDto.AddressDto, owner.AddressVo.ToAddressDto());
+         Equal(Factory.TestUsername, owner.Email);
          Equal(Factory.TestSubject, owner.Subject);
       });
    }
@@ -199,7 +200,7 @@ public sealed class CustomersControllerEndtoEnd : TestBaseEndToEnd {
       Equal(provisionDto.Firstname, getProfileOwnerDto.Firstname);
       Equal(provisionDto.Lastname, getProfileOwnerDto.Lastname);
       Equal(provisionDto.CompanyName, getProfileOwnerDto.CompanyName);
-      Equal(provisionDto.AddressVo, getProfileOwnerDto.AddressVo);
+      Equal(provisionDto.AddressDto, getProfileOwnerDto.AddressDto);
 
       // update profile with new data (except Id, Email and Status, which are not updatable in this scenario)
       var id = getProfileOwnerDto.Id;
@@ -214,7 +215,7 @@ public sealed class CustomersControllerEndtoEnd : TestBaseEndToEnd {
          Firstname = "Bernd",
          Lastname = "Rogalla",
          CompanyName = null,
-         AddressVo = addressVo
+         AddressDto = addressVo.ToAddressDto()
       };
 
       // build request manually
@@ -241,27 +242,27 @@ public sealed class CustomersControllerEndtoEnd : TestBaseEndToEnd {
       Equal(reqPostProfileOwnerDto.Firstname, resPostProfileOwnerDto.Firstname);
       Equal(reqPostProfileOwnerDto.Lastname, resPostProfileOwnerDto.Lastname);
       Equal(reqPostProfileOwnerDto.CompanyName, resPostProfileOwnerDto.CompanyName);
-      Equal(reqPostProfileOwnerDto.EmailString, resPostProfileOwnerDto.EmailString);
+      Equal(reqPostProfileOwnerDto.Email, resPostProfileOwnerDto.Email);
       Equal(reqPostProfileOwnerDto.StatusInt, resPostProfileOwnerDto.StatusInt);
-      Equal(reqPostProfileOwnerDto.AddressVo, resPostProfileOwnerDto.AddressVo);
+      Equal(reqPostProfileOwnerDto.AddressDto, resPostProfileOwnerDto.AddressDto);
       // Assert (DB) 
       await Factory.WithScopeAsync(async serviceProvider => {
          var dbContext = serviceProvider.GetRequiredService<BankingDbContext>();
 
          // IMPORTANT: use AsNoTracking to avoid tracking artifacts
-         var owner = await dbContext.Customers
+         var customer = await dbContext.Customers
             .AsNoTracking()
             .Where(o => o.Id == id)
             .SingleOrDefaultAsync(ct);
 
-         NotNull(owner);
+         NotNull(customer);
 
-         Equal(reqPostProfileOwnerDto.Id, owner.Id);
-         Equal(reqPostProfileOwnerDto.Firstname, owner.Firstname);
-         Equal(reqPostProfileOwnerDto.Lastname, owner.Lastname);
-         Equal(reqPostProfileOwnerDto.EmailString, owner.EmailVo.Value);
-         Equal(reqPostProfileOwnerDto.StatusInt, (int)owner.Status);
-         Equal(reqPostProfileOwnerDto.AddressVo, owner.AddressVo);
+         Equal(reqPostProfileOwnerDto.Id, customer.Id);
+         Equal(reqPostProfileOwnerDto.Firstname, customer.Firstname);
+         Equal(reqPostProfileOwnerDto.Lastname, customer.Lastname);
+         Equal(reqPostProfileOwnerDto.Email, customer.Email);
+         Equal(reqPostProfileOwnerDto.StatusInt, (int)customer.Status);
+         Equal(reqPostProfileOwnerDto.AddressDto, customer.AddressVo.ToAddressDto());
       });
    }
    #endregion
@@ -310,7 +311,7 @@ public sealed class CustomersControllerEndtoEnd : TestBaseEndToEnd {
       Equals(customer.Firstname, actualCustomerDto?.Firstname);
       Equals(customer.Lastname, actualCustomerDto?.Lastname);
       Equals(customer.CompanyName, actualCustomerDto?.CompanyName);
-      Equals(customer.EmailVo, actualCustomerDto?.EmailString);
+      Equals(customer.Email, actualCustomerDto?.Email);
       Equals((int)customer.Status, actualCustomerDto?.StatusInt);
       //Equal(Factory.TestSubject, owner.Subject);
       Equals(customer.AddressVo, actualCustomerDto);
@@ -331,7 +332,7 @@ public sealed class CustomersControllerEndtoEnd : TestBaseEndToEnd {
       });
 
       // Act
-      var email = customer1.EmailVo.Value;
+      var email = customer1.Email;
 
       var request = new HttpRequestMessage(
          method: HttpMethod.Get,
@@ -357,7 +358,7 @@ public sealed class CustomersControllerEndtoEnd : TestBaseEndToEnd {
       Equals(customer1.Firstname, actualCustomerDto?.Firstname);
       Equals(customer1.Lastname, actualCustomerDto?.Lastname);
       Equals(customer1.CompanyName, actualCustomerDto?.CompanyName);
-      Equals(customer1.EmailVo, actualCustomerDto?.EmailString);
+      Equals(customer1.Email, actualCustomerDto?.Email);
       Equals((int)customer1.Status, actualCustomerDto?.StatusInt);
       Equals(customer1.AddressVo, actualCustomerDto);
    }

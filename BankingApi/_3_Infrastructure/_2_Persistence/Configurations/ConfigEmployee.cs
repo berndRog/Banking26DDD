@@ -20,23 +20,22 @@ public sealed class ConfigEmployee(
       builder.HasKey(x => x.Id);
       builder.Property(x => x.Id).ValueGeneratedNever();
       
-      // Scalar properties
+      // Profile data
       builder.Property(x => x.Firstname)
-         .HasMaxLength(100).IsRequired();
+         .HasMaxLength(80)
+         .IsRequired();
       builder.Property(x => x.Lastname)
          .HasMaxLength(80)
          .IsRequired();
-      
-      // Email-VO als Property mapped via Extension
-      builder.Property(x => x.EmailVo)
-         .HasEmailConversion()
+      // Email   
+      builder.Property(x => x.Email)
+         .HasMaxLength(254)
          .IsRequired();
       // optional: unique index
-      builder.HasIndex(x => x.EmailVo).IsUnique();
-      
-      // Phone-VO als Property mapped via Extension
-      builder.Property(x => x.PhoneVo)
-         .HasNullablePhoneConversion() // is optional, so no IsRequired()
+      builder.HasIndex(x => x.Email).IsUnique();
+      // Phone
+      builder.Property(x => x.Phone)
+         .HasMaxLength(64) 
          .IsRequired(false);
       
       builder.Property(x => x.Subject)

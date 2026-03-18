@@ -21,7 +21,7 @@ public interface ICustomerReadModel {
 
    // Find customer by email address
    Task<Result<CustomerDto>> FindByEmailAsync(
-      string emailString,
+      string email,
       CancellationToken ct = default
    );
 

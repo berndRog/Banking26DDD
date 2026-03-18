@@ -22,7 +22,7 @@ public sealed class AccountUcCreate(
    
    public async Task<Result<AccountDto>> ExecuteAsync(
       Guid customerId,
-      string ibanString,
+      string iban,
       decimal balanceDecimal,
       int currency,
       string? id,
@@ -39,15 +39,15 @@ public sealed class AccountUcCreate(
       var balanceVo = resultMoney.Value;
       
       // domain   
-      var resultIban = IbanVo.Create(ibanString);
+      var resultIban = IbanCheck.Run(iban);
       if (resultIban.IsFailure)
          return Result<AccountDto>.Failure(AccountErrors.InvalidIban);
-      var ibanVo = resultIban.Value;
+      iban = resultIban.Value;
       
       // create enitity
       var result = Account.Create(
          customerId: customerId,
-         ibanVo: ibanVo, 
+         iban: iban, 
          balanceVo: balanceVo, 
          createdAt: clock.UtcNow,
          id: id

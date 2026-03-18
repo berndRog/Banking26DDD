@@ -2,7 +2,7 @@
 
 public record AccountDto(
    Guid Id,
-   string IbanString,
+   string Iban,
    decimal BalanceDecimal,
    int CurrencyInt,
    Guid CustomerId

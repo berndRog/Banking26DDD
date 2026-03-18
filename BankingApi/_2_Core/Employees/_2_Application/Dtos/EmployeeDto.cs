@@ -4,8 +4,8 @@ public sealed record EmployeeDto(
    Guid Id,
    string Firstname,
    string Lastname,
-   string EmailString,
-   string? PhoneString,
+   string Email,
+   string? Phone,
    string PersonnelNumber,
    bool IsActive,
    int AdminRights

@@ -48,7 +48,7 @@ public sealed class CustomerUcUpdateProfileIntT : TestBaseIntegration {
       Equal(customer.DisplayName, actual.DisplayName);
       Equal(customer.Subject, actual.Subject);
       Equal(CustomerStatus.Pending, actual.Status);
-      Equal(customer.EmailVo, actual.EmailVo);
+      Equal(customer.Email, actual.Email);
       Equal(customer.AddressVo, actual.AddressVo);
    }
 }

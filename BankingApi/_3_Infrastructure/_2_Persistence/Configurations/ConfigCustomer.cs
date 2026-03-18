@@ -38,7 +38,12 @@ public sealed class ConfigCustomer(
       builder.Property(o => o.CompanyName)
          .HasMaxLength(80)
          .IsRequired(false);
-
+      builder.Property(x => x.Email)
+         .HasMaxLength(254)
+         .IsRequired();
+      // optional: unique index
+      builder.HasIndex(x => x.Email).IsUnique();;
+      
       builder.Property(o => o.Subject)
          .HasMaxLength(200)
          .IsRequired();
@@ -76,13 +81,6 @@ public sealed class ConfigCustomer(
       builder.Ignore(o => o.DisplayName);
       builder.Ignore(o => o.IsActive);
       builder.Ignore(o => o.IsProfileComplete);
-      
-      // Email-VO als Property mapped via Extension
-      builder.Property(x => x.EmailVo)
-         .HasEmailConversion()
-         .IsRequired();
-      // optional: unique index
-      builder.HasIndex(x => x.EmailVo).IsUnique();;
       
       // Address (owned value object)
       builder.OwnsOne(o => o.AddressVo, a => {

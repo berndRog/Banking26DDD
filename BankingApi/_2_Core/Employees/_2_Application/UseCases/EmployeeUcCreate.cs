@@ -1,3 +1,4 @@
+using BankingApi._2_Core.BuildingBlocks;
 using BankingApi._2_Core.BuildingBlocks._1_Ports.Outbound;
 using BankingApi._2_Core.BuildingBlocks._3_Domain;
 using BankingApi._2_Core.BuildingBlocks._3_Domain.ValueObjects;
@@ -45,12 +46,12 @@ public sealed class EmployeeUcCreate(
       if (string.IsNullOrWhiteSpace(personnelNumber))
          return Result<Guid>.Failure(EmployeeErrors.PersonnelNumberIsRequired);
 
-      var resultEmail = EmailVo.Create(emailString);
+      var resultEmail = EmailCheck.Run(emailString);
       if (resultEmail.IsFailure)
          return Result<Guid>.Failure(resultEmail.Error);
       var email = resultEmail.Value;
       
-      var resultPhone = PhoneVo.Create(phoneString);
+      var resultPhone = PhoneCheck.Run(phoneString);
       if (resultPhone.IsFailure)
          return Result<Guid>.Failure(resultPhone.Error);
       var phone = resultPhone.Value;
@@ -66,7 +67,7 @@ public sealed class EmployeeUcCreate(
       var result = Employee.Create(
          firstname: firstname,
          lastname: lastname,
-         emailVo: email,
+         email: email,
          phone: phone,
          subject: subject,
          personnelNumber: personnelNumber,

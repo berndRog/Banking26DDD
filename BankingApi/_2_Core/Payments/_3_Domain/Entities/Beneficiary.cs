@@ -8,7 +8,7 @@ namespace BankingApi._2_Core.Payments._3_Domain.Entities;
 public sealed class Beneficiary : Entity {
    //--- Properties ------------------------------------------------------------
    public string Name { get; private set; } = string.Empty;
-   public IbanVo IbanVo { get; private set; } = default!;
+   public string Iban { get; private set; } = default!;
    public Guid AccountId { get; private set; }
 
    //--- Constructors -----------------------------------------------------------
@@ -20,13 +20,13 @@ public sealed class Beneficiary : Entity {
    private Beneficiary(
       Guid id,
       string name,
-      IbanVo ibanVo,
+      string iban,
       Guid accountId
    ) {
       Id = id;
       AccountId = accountId;
       Name = name;
-      IbanVo = ibanVo;
+      Iban = iban;
    }
 
    //--- Static Factory Methods ------------------------------------------------
@@ -34,7 +34,7 @@ public sealed class Beneficiary : Entity {
    public static Result<Beneficiary> Create(
       Guid accountId,
       string name,
-      IbanVo ibanVo,
+      string iban,
       string? id = null
    ) {
       // trim early
@@ -42,13 +42,23 @@ public sealed class Beneficiary : Entity {
 
       if (string.IsNullOrWhiteSpace(name))
          return Result<Beneficiary>.Failure(BeneficiaryErrors.InvalidName);
-
+      
+      var resultIban = IbanCheck.Run(iban);
+      if (resultIban.IsFailure)
+         return Result<Beneficiary>.Failure(resultIban.Error);
+      iban = resultIban.Value;
+      
       var idResult = Entity.Resolve(id, BeneficiaryErrors.InvalidId);
       if (idResult.IsFailure)
          return Result<Beneficiary>.Failure(idResult.Error);
       var beneficiaryId = idResult.Value;
 
-      var beneficiary = new Beneficiary(beneficiaryId, name, ibanVo, accountId);
+      var beneficiary = new Beneficiary(
+         beneficiaryId, 
+         name, 
+         iban, 
+         accountId
+      );
 
       return Result<Beneficiary>.Success(beneficiary);
    }

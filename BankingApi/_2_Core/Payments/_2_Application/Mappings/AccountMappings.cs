@@ -6,7 +6,7 @@ public static class AccountMappings {
 
    public static AccountDto ToAccountDto(this Account account) => new(
       Id: account.Id,
-      IbanString: account.IbanVo.Value,
+      Iban: account.Iban,
       BalanceDecimal: account.BalanceVo.Amount,
       CurrencyInt: (int)account.BalanceVo.Currency,
       CustomerId: account.CustomerId   
@@ -15,7 +15,7 @@ public static class AccountMappings {
    public static BeneficiaryDto ToBeneficiaryDto(this Beneficiary beneficiary) => new(
       Id: beneficiary.Id,
       Name: beneficiary.Name,
-      IbanString: beneficiary.IbanVo.Value,
+      Iban: beneficiary.Iban,
       AccountId: beneficiary.AccountId
    );
    

@@ -10,27 +10,12 @@ public sealed class EmployeeUt {
    private readonly TestSeed _seed = default!;
    private readonly IClock _clock = default!;
 
-   private readonly string _firstname;
-   private readonly string _lastname;
-   private readonly EmailVo _emailVo;
-   private readonly PhoneVo _phoneVo;
-   private readonly string _subject;
-   private readonly string _personnelNumber;
-   private readonly AdminRights _adminRights;
-   private readonly string _id;
+   private readonly Employee _employee;
 
    public EmployeeUt() {
       _seed = new TestSeed();
       _clock = _seed.Clock;
-      
-      _firstname = "Bernd";
-      _lastname = "Rogalla";
-      _emailVo = EmailVo.Create("b.rogalla@bankingapi.de").Value;
-      _phoneVo = PhoneVo.Create("+49 5826 123 4100").Value;
-      _subject = "00000000-0010-0000-0000-00000000000";
-      _personnelNumber = "EMP010";
-      _adminRights = (AdminRights) 511;
-      _id = "00000000-0010-0000-0000-000000000000";
+      _employee = _seed.Employee1();
    }
 
    public static IEnumerable<object[]> InvalidNameLengths() {
@@ -40,58 +25,59 @@ public sealed class EmployeeUt {
    
    [Fact]
    public void Create_valid_input_and_id_creates_employee() {
+
       // Act
       var result = Employee.Create(
-         firstname: _firstname,
-         lastname: _lastname,
-         emailVo: _emailVo,
-         phone: _phoneVo,
-         subject: _subject,
-         personnelNumber: _personnelNumber,
-         adminRights: (AdminRights) 511,
-         id: _id
+         firstname: _employee.Firstname,
+         lastname: _employee.Lastname,
+         email: _employee.Email,
+         phone: _employee.Phone,
+         subject: _employee.Subject,
+         personnelNumber: _employee.PersonnelNumber,
+         adminRights: _employee.AdminRights,
+         id: _employee.Id.ToString()
       );
-
-      string bits = Convert.ToString((int)_adminRights, 2).PadLeft(32, '0');
 
       // Assert
       True(result.IsSuccess);
-      var employee = result.Value!;
-      IsType<Employee>(employee);
-      Equal(Guid.Parse(_id), employee.Id);
-      Equal(_firstname, employee.Firstname);
-      Equal(_lastname, employee.Lastname);
-      Equal(_emailVo, employee.EmailVo);
-      Equal(_phoneVo, employee.PhoneVo);
-      Equal(_subject, employee.Subject);
-      Equal(_personnelNumber, employee.PersonnelNumber);
-      Equal(_adminRights, employee.AdminRights);
+      var actual = result.Value!;
+      IsType<Employee>(actual);
+      Equal(_employee.Id, actual.Id);
+      Equal(_employee.Firstname, actual.Firstname);
+      Equal(_employee.Lastname, actual.Lastname);
+      Equal(_employee.Email, actual.Email);
+      Equal(_employee.Phone, actual.Phone);
+      Equal(_employee.Subject, actual.Subject);
+      Equal(_employee.PersonnelNumber, actual.PersonnelNumber);
+      Equal(_employee.AdminRights, actual.AdminRights);
    }
 
    [Fact]
    public void Create_valid_input_and_without_id_creates_employee() {
       // Act
       var result = Employee.Create(
-         firstname: _firstname,
-         lastname: _lastname,
-         emailVo: _emailVo,
-         phone: _phoneVo,
-         subject: _subject,
-         personnelNumber: _personnelNumber,
-         adminRights: _adminRights,
+         firstname: _employee.Firstname,
+         lastname: _employee.Lastname,
+         email: _employee.Email,
+         phone: _employee.Phone,
+         subject: _employee.Subject,
+         personnelNumber: _employee.PersonnelNumber,
+         adminRights: _employee.AdminRights,
          id: null
       );
       
       // Assert
       True(result.IsSuccess);
-      var employee = result.Value!;
-      IsType<Employee>(employee);
-      Equal(_firstname, employee.Firstname);
-      Equal(_lastname, employee.Lastname);
-      Equal(_emailVo, employee.EmailVo);
-      Equal(_phoneVo, employee.PhoneVo);
-      Equal(_subject, employee.Subject);
-      Equal(_personnelNumber, employee.PersonnelNumber);
+      var actual = result.Value!;
+      IsType<Employee>(actual);
+      True(actual.Id != Guid.Empty);
+      Equal(_employee.Firstname, actual.Firstname);
+      Equal(_employee.Lastname, actual.Lastname);
+      Equal(_employee.Email, actual.Email);
+      Equal(_employee.Phone, actual.Phone);
+      Equal(_employee.Subject, actual.Subject);
+      Equal(_employee.PersonnelNumber, actual.PersonnelNumber);
+      Equal(_employee.AdminRights, actual.AdminRights);
    }
    
 /*

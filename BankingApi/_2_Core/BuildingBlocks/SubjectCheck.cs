@@ -1,12 +1,10 @@
+using BankingApi._2_Core.BuildingBlocks._3_Domain;
 using BankingApi._2_Core.BuildingBlocks._3_Domain.Errors;
-namespace BankingApi._2_Core.BuildingBlocks._3_Domain;
+namespace BankingApi._2_Core.BuildingBlocks;
 
-public static class IdentitySubject {
-   
-   // default system identity, without any IAM
-   public static string System() => "system";
-   
-   public static Result<string> Check(string input) {
+public static class SubjectCheck {
+
+   public static Result<string> Run(string input) {
       if (string.IsNullOrWhiteSpace(input))
          return Result<string>.Failure(CommonErrors.InvalidIdentitySubject);
       if (input.Length > 200)

@@ -1,4 +1,5 @@
 using System.Runtime.CompilerServices;
+using BankingApi._2_Core.BuildingBlocks;
 using BankingApi._2_Core.BuildingBlocks._1_Ports.Outbound;
 using BankingApi._2_Core.BuildingBlocks._3_Domain;
 using BankingApi._2_Core.BuildingBlocks._3_Domain.ValueObjects;
@@ -20,7 +21,7 @@ internal sealed class CustomerReadModelEf(
    
    public async Task<Result<CustomerDto>> FindMeAsync(CancellationToken ct) {
       // 1) Subject from Gateway
-      var subjectResult = IdentitySubject.Check(identityGateway.Subject);
+      var subjectResult = SubjectCheck.Run(identityGateway.Subject);
       if (subjectResult.IsFailure)
          return Result<CustomerDto>.Failure(subjectResult.Error);
       var subject = subjectResult.Value;
@@ -53,17 +54,17 @@ internal sealed class CustomerReadModelEf(
    }
    
    public async Task<Result<CustomerDto>> FindByEmailAsync(
-      string emailString,
+      string email,
       CancellationToken ct
    ) {
-      var resultEmail = EmailVo.Create(emailString);
+      var resultEmail = EmailCheck.Run(email);
       if (resultEmail.IsFailure)
          return Result<CustomerDto>.Failure(resultEmail.Error);
-      var email = resultEmail.Value;
+      email = resultEmail.Value;
       
       var customerDto = await customerDbContext.Customers
          .AsNoTracking()
-         .Where(c => c.EmailVo == email) // filter by email
+         .Where(c => c.Email == email) // filter by email
          .Select(c => c.ToCustomerDto())  // projection to CustomerDto
          .SingleOrDefaultAsync( ct);
       
@@ -102,7 +103,7 @@ internal sealed class CustomerReadModelEf(
       if (filter is not null) {
          if (!string.IsNullOrWhiteSpace(filter.Email)) {
             var email = filter.Email.Trim().ToUpperInvariant();
-            query = query.Where(c => c.EmailVo.Value.ToUpperInvariant() == email);
+            query = query.Where(c => c.Email == email);
          }
          if (!string.IsNullOrWhiteSpace(filter.Firstname)) {
             var fn = filter.Firstname.Trim().ToUpperInvariant();

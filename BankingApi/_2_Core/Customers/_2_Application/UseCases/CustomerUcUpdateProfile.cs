@@ -1,3 +1,4 @@
+using BankingApi._2_Core.BuildingBlocks;
 using BankingApi._2_Core.BuildingBlocks._1_Ports.Outbound;
 using BankingApi._2_Core.BuildingBlocks._3_Domain;
 using BankingApi._2_Core.BuildingBlocks._3_Domain.ValueObjects;
@@ -6,6 +7,7 @@ using BankingApi._2_Core.Customers._2_Application.Dtos;
 using BankingApi._2_Core.Customers._2_Application.Mappings;
 using BankingApi._2_Core.Customers._3_Domain.Errors;
 using BankingApi._3_Infrastructure._4_Logging;
+using WebApi._2_Core.BuildingBlocks._2_Application.Mappings;
 namespace BankingApi._2_Core.Customers._2_Application.UseCases;
 
 public class CustomerUcUpdateProfile(
@@ -21,7 +23,7 @@ public class CustomerUcUpdateProfile(
       CancellationToken ct
    ) {
       // subject from gateway
-      var subjectResult = IdentitySubject.Check(identityGateway.Subject);
+      var subjectResult = SubjectCheck.Run(identityGateway.Subject);
       if (subjectResult.IsFailure)
          return Result<CustomerDto>.Failure(subjectResult.Error);
       var subject = subjectResult.Value;
@@ -35,14 +37,14 @@ public class CustomerUcUpdateProfile(
       if (identityGateway.AdminRights != 0)
          return Result<CustomerDto>.Failure(
             CustomerErrors.EmployeesCannotUpdateCustomerProfile);
-      if (customerDto.AddressVo is null)
+      if (customerDto.AddressDto is null)
          return Result<CustomerDto>.Failure(CustomerErrors.AddressIsRequired);
 
       // override email address (if changed) 
-      var email = customer.EmailVo;
-      if (!string.Equals(email.Value, customerDto.EmailString, StringComparison.OrdinalIgnoreCase)) {
+      var email = customer.Email;
+      if (!string.Equals(email, customerDto.Email, StringComparison.OrdinalIgnoreCase)) {
          // create new email value object from dto.Email
-         var resultDtoEmail = EmailVo.Create(customerDto.EmailString);
+         var resultDtoEmail = EmailCheck.Run(customerDto.Email);
          if (resultDtoEmail.IsFailure)
             return Result<CustomerDto>.Failure(resultDtoEmail.Error);
          // check uniqueness
@@ -53,15 +55,15 @@ public class CustomerUcUpdateProfile(
          email = resultDtoEmail.Value;
       }
       
-      var dto = customerDto with { EmailString = email.Value }; // for logging only
+      var dto = customerDto with { Email = email }; // for logging only
 
       // domain update (now includes country)
       var updateResult = customer.UpdateProfile(
          firstname: customerDto.Firstname,
          lastname: customerDto.Lastname,
          companyName: customerDto.CompanyName,
-         emailVo: email,
-         addressVo: customerDto.AddressVo,
+         email: email,
+         addressVo: customerDto.AddressDto.ToAddressVo(),
          updatedAt: clock.UtcNow
       );
       if (updateResult.IsFailure)

@@ -22,7 +22,7 @@ public interface ICustomerRepository {
 
    // Load a customer by email value object
    Task<Customer?> FindByEmailAsync(
-      EmailVo emailVo,
+      string email,
       CancellationToken ct = default
    );
 

@@ -1,3 +1,4 @@
+using BankingApi._2_Core.BuildingBlocks;
 using BankingApi._2_Core.BuildingBlocks._1_Ports.Outbound;
 using BankingApi._2_Core.BuildingBlocks._3_Domain;
 using BankingApi._2_Core.BuildingBlocks._3_Domain.Errors;
@@ -22,7 +23,7 @@ public class EmployeeUcCreateProvision(
       CancellationToken ct
    ) {
       // 1) subject required
-      var result = IdentitySubject.Check(identityGateway.Subject);
+      var result = SubjectCheck.Run(identityGateway.Subject);
       if (result.IsFailure)
          return Result<EmployeeProvisionDto>.Failure(result.Error);
       var subject = result.Value;
@@ -48,7 +49,7 @@ public class EmployeeUcCreateProvision(
       }
 
       // interpret preferred_username as initial email
-      var resultEmail = EmailVo.Create(username);
+      var resultEmail = EmailCheck.Run(username);
       if (resultEmail.IsFailure)
          return Result<EmployeeProvisionDto>.Failure(resultEmail.Error);
       var email = resultEmail.Value;

@@ -1,4 +1,5 @@
 using System.Collections.ObjectModel;
+using BankingApi._2_Core.BuildingBlocks;
 using BankingApi._2_Core.BuildingBlocks._1_Ports.Outbound;
 using BankingApi._2_Core.BuildingBlocks._3_Domain.ValueObjects;
 using BankingApi._2_Core.Customers._3_Domain.Entities;
@@ -18,8 +19,8 @@ public sealed class Seed(
       id: "00000000-0001-0000-0000-000000000000",
       firstname: "Emil",
       lastname: "Engel",
-      emailString: "emil.engel@bankingapi.de",
-      phoneString: "+49 5826 123 4010",
+      email: "emil.engel@bankingapi.de",
+      phone: "+49 5826 123 4010",
       subject: "003946D9-9B67-4691-A91B-DB4A98929F5D",
       personnelNumber: "Emp001",
       adminRights: AdminRights.ViewEmployees | AdminRights.ManageEmployees |
@@ -30,8 +31,8 @@ public sealed class Seed(
       id: "00000000-0002-0000-0000-000000000000",
       firstname: "Frieda",
       lastname: "Fischer",
-      emailString: "frieda.fischer@bankingapi.de",
-      phoneString: "+49 5826 123 4020",
+      email: "frieda.fischer@bankingapi.de",
+      phone: "+49 5826 123 4020",
       subject: "009A7C8E-3F2B-4C5D-9E6F-7A8B9C0D1E2F",
       personnelNumber: "Emp002",
       adminRights: (AdminRights)511
@@ -79,7 +80,7 @@ public sealed class Seed(
       lastname: "Mustermann",
       companyName: null,
       subject: "a00090ad-d9df-486a-8757-4a649e26a54e",
-      emailString: "erika.mustermann@t-online.de",
+      email: "erika.mustermann@t-online.de",
       addressVo: Address1
    );
 
@@ -89,7 +90,7 @@ public sealed class Seed(
       lastname: "Mustermann",
       companyName: null,
       subject: "b0000640-161e-4228-9729-d6b142C2dfad",
-      emailString: "max.mustermann@gmail.com",
+      email: "max.mustermann@gmail.com",
       addressVo: Address2
    );
 
@@ -98,7 +99,7 @@ public sealed class Seed(
       firstname: "Arno",
       lastname: "Arndt",
       companyName: null,
-      emailString: "a.arndt@t-online.com",
+      email: "a.arndt@t-online.com",
       subject: "c0004e61-ba7a-4d2a-977f-766b42bb79a9",
       addressVo: Address3
    );
@@ -109,7 +110,7 @@ public sealed class Seed(
       lastname: "Bauer",
       companyName: null,
       subject: "d0024ab-43c5-4c64-872d-6ca05f66756b",
-      emailString: "b.bauer@gmail.com",
+      email: "b.bauer@gmail.com",
       addressVo: Address4
    );
 
@@ -119,7 +120,7 @@ public sealed class Seed(
       lastname: "Conrad",
       companyName: "Conrad Consulting GmbH",
       subject: "e00050fb-a381-4e3f-a44b-81ffa7610b72",
-      emailString: "c.conrad@gmx.de",
+      email: "c.conrad@gmx.de",
       addressVo: Address5
    );
 
@@ -129,7 +130,7 @@ public sealed class Seed(
       lastname: "Deppe",
       companyName: null,
       subject: "f0004f67-72a3-4449-af1f-803dcfaddb7f",
-      emailString: "d.deppe@icloud.com",
+      email: "d.deppe@icloud.com",
       addressVo: Address6
    );
    
@@ -138,7 +139,7 @@ public sealed class Seed(
       firstname: "Jane",
       lastname: "Doe",
       companyName: null,
-      emailString: "j.doe@mail.local",
+      email: "j.doe@mail.local",
       subject: "11111111-a224-492b-bb8f-b4bac23d7c88",
       addressVo: AddressReg
    );
@@ -149,22 +150,14 @@ public sealed class Seed(
    #endregion
 
    #region -------------- Test Iban (Value Objects) ------------------------------------------
-   public IbanVo Iban1Vo
-      => IbanVo.Create("DE10 1000 0000 0000 0000 42").GetValueOrThrow();
-   public IbanVo Iban2Vo
-      => IbanVo.Create("DE10 2000 0000 0000 0000 04").GetValueOrThrow();
-   public IbanVo Iban3Vo
-      => IbanVo.Create("DE20 1000 0000 0000 0000 56").GetValueOrThrow();
-   public IbanVo Iban4Vo
-      => IbanVo.Create("DE30 1000 0000 0000 0000 70").GetValueOrThrow();
-   public IbanVo Iban5Vo
-      => IbanVo.Create("DE40 1000 0000 0000 0000 84").GetValueOrThrow();
-   public IbanVo Iban6Vo
-      => IbanVo.Create("DE50 1000 0000 0000 0000 01").GetValueOrThrow();
-   public IbanVo Iban7Vo
-      => IbanVo.Create("DE50 2000 0000 0000 0000 60").GetValueOrThrow();
-   public IbanVo Iban8Vo
-      => IbanVo.Create("DE60 1000 0000 0000 0000 15").GetValueOrThrow();
+   public string Iban1 = "DE10 1000 0000 0000 0000 42";
+   public string Iban2 = "DE10 2000 0000 0000 0000 04";
+   public string Iban3 = "DE20 1000 0000 0000 0000 56";
+   public string Iban4 = "DE30 1000 0000 0000 0000 70";
+   public string Iban5 = "DE40 1000 0000 0000 0000 84";
+   public string Iban6 = "DE50 1000 0000 0000 0000 01";
+   public string Iban7 = "DE50 2000 0000 0000 0000 60";
+   public string Iban8 = "DE60 1000 0000 0000 0000 15";
    #endregion
 
    #region -------------- Test Accounts (Entities) -------------------------------------------
@@ -181,56 +174,56 @@ public sealed class Seed(
    public Account Account1() => CreateAccount(
       id: account1Id,
       customerId: Guid.Parse(customer1Id),
-      ibanVo: Iban1Vo,
+      iban: Iban1,
       balanceDecimal: 2100.0m
    );
 
    public Account Account2() => CreateAccount(
       id: account2Id,
       customerId: Guid.Parse(customer1Id),
-      ibanVo: Iban2Vo,
+      iban: Iban2,
       balanceDecimal: 2000.0m
    );
 
    public Account Account3() => CreateAccount(
       id: account3Id,
       customerId: Guid.Parse(customer2Id),
-      ibanVo: Iban3Vo,
+      iban: Iban3,
       balanceDecimal: 3000.0m
    );
 
    public Account Account4() => CreateAccount(
       id: account4Id,
       customerId: Guid.Parse(customer3Id),
-      ibanVo: Iban4Vo,
+      iban: Iban4,
       balanceDecimal: 2500.0m
    );
 
    public Account Account5() => CreateAccount(
       id: account5Id,
       customerId: Guid.Parse(customer4Id),
-      ibanVo: Iban5Vo,
+      iban: Iban5,
       balanceDecimal: 1900.0m
    );
 
    public Account Account6() => CreateAccount(
       id: account6Id,
       customerId: Guid.Parse(customer5Id),
-      ibanVo: Iban6Vo,
+      iban: Iban6,
       balanceDecimal: 3500.0m
    );
 
    public Account Account7() => CreateAccount(
       id: account7Id,
       customerId: Guid.Parse(customer5Id),
-      ibanVo: Iban7Vo,
+      iban: Iban7,
       balanceDecimal: 3100.0m
    );
 
    public Account Account8() => CreateAccount(
       id: account8Id,
       customerId: Guid.Parse(customer6Id),
-      ibanVo: Iban8Vo,
+      iban: Iban8,
       balanceDecimal: 4300.0m
    );
    public IReadOnlyList<Account> Accounts => [
@@ -256,77 +249,77 @@ public sealed class Seed(
       id: beneficiary1Id,
       accountId: Guid.Parse(account1Id), 
       name: Customer5().DisplayName,
-      ibanVo: Iban6Vo
+      iban: Iban6
    );
 
    public Beneficiary Beneficiary2() => CreateBeneficiary(
       id: beneficiary2Id,
       accountId: Guid.Parse(account1Id), 
       name: Customer5().DisplayName,
-      ibanVo: Iban7Vo
+      iban: Iban7
    );
 
    public Beneficiary Beneficiary3() => CreateBeneficiary(
       id: beneficiary3Id,
       accountId: Guid.Parse(account2Id), 
       name: Customer3().DisplayName,
-      ibanVo: Iban4Vo
+      iban: Iban4
    );
 
    public Beneficiary Beneficiary4() => CreateBeneficiary(
       id: beneficiary4Id,
       accountId: Guid.Parse(account2Id),
       name: Customer4().DisplayName,
-      ibanVo: Iban5Vo
+      iban: Iban5
    );
 
    public Beneficiary Beneficiary5() => CreateBeneficiary(
       id: beneficiary5Id,
       accountId: Guid.Empty,
       name: Customer3().DisplayName,
-      ibanVo: Iban4Vo
+      iban: Iban4
    );
 
    public Beneficiary Beneficiary6() => CreateBeneficiary(
       id: beneficiary6Id,
       accountId: Guid.Empty,
       name: Customer4().DisplayName,
-      ibanVo: Iban5Vo
+      iban: Iban5
    );
 
    public Beneficiary Beneficiary7() => CreateBeneficiary(
       id: beneficiary7Id,
       accountId: Guid.Empty,
       name: Customer6().DisplayName,
-      ibanVo: Iban8Vo
+      iban: Iban8
    );
 
    public Beneficiary Beneficiary8() => CreateBeneficiary(
       id: beneficiary8Id,
       accountId: Guid.Empty,
       name: Customer2().DisplayName,
-      ibanVo: Iban3Vo
+      iban: Iban3
    );
 
    public Beneficiary Beneficiary9() => CreateBeneficiary(
       id: beneficiary9Id,
       accountId: Guid.Empty,
       name: Customer6().DisplayName,
-      ibanVo: Iban6Vo
+      iban: Iban6
    );
 
    public Beneficiary Beneficiary10() => CreateBeneficiary(
       id: beneficiary10Id,
       accountId: Guid.Empty,
       name: Customer1().DisplayName,
-      ibanVo: Iban1Vo
+      iban: Iban1
    );
 
    public Beneficiary Beneficiary11() => CreateBeneficiary(
       id: beneficiary11Id,
       accountId: Guid.Empty,
       name: Customer1().DisplayName,
-      ibanVo: Iban2Vo
+      iban: Iban2
    );
 
    public IReadOnlyList<Beneficiary> Beneficiaries => new List<Beneficiary>() {
@@ -337,7 +330,6 @@ public sealed class Seed(
    #endregion
    
    #region -------------- Test Transactions (Entities) ---------------------------------------
-
    public string transaction1dId = "0001d000-0000-0000-0000-000000000000";
    public string transaction1cId = "0001c000-0000-0000-0000-000000000000";
    public string transaction2dId = "0002d000-0000-0000-0000-000000000000";
@@ -705,26 +697,26 @@ public sealed class Seed(
       string id,
       string firstname,
       string lastname,
-      string emailString,
-      string phoneString,
+      string email,
+      string phone,
       string subject,
       string personnelNumber,
       AdminRights adminRights
    ) {
-      var resultEmail = EmailVo.Create(emailString);
+      var resultEmail = EmailCheck.Run(email);
       if (resultEmail.IsFailure)
-         throw new Exception($"Invalid email in test seed: {emailString}");
-      var email = resultEmail.Value;
+         throw new Exception($"Invalid email in test seed: {email}");
+      email = resultEmail.Value;
 
-      var resultPhone = PhoneVo.Create(phoneString);
+      var resultPhone = PhoneCheck.Run(phone);
       if (resultPhone.IsFailure)
-         throw new Exception($"Invalid phone number in test seed: {phoneString}");
-      var phone = resultPhone.Value;
+         throw new Exception($"Invalid phone number in test seed: {phone}");
+      phone = resultPhone.Value;
 
       var result = Employee.Create(
          firstname: firstname,
          lastname: lastname,
-         emailVo: email,
+         email: email,
          phone: phone,
          subject: subject,
          personnelNumber: personnelNumber,
@@ -740,20 +732,20 @@ public sealed class Seed(
       string firstname,
       string lastname,
       string? companyName,
-      string emailString,
+      string email,
       string subject,
       AddressVo addressVo
    ) {
-      var resultEmail = EmailVo.Create(emailString);
+      var resultEmail = EmailCheck.Run(email);
       if (resultEmail.IsFailure)
-         throw new Exception($"Invalid email in test seed: {emailString}");
-      var emailVo = resultEmail.Value;
+         throw new Exception($"Invalid email in test seed: {email}");
+      email = resultEmail.Value;
 
       var result = Customer.Create(
          firstname: firstname,
          lastname: lastname,
          companyName: companyName,
-         emailVo: emailVo,
+         email: email,
          subject: subject,
          id: id,
          createdAt: clock.UtcNow,
@@ -766,9 +758,14 @@ public sealed class Seed(
    private Account CreateAccount(
       Guid customerId,
       string id,
-      IbanVo ibanVo,
+      string iban,
       decimal balanceDecimal
    ) {
+      var resultIban = IbanCheck.Run(iban);
+      if (resultIban.IsFailure)
+         throw new Exception($"Invalid iban in test seed: {iban}");
+      iban = resultIban.Value;
+      
       var resultBalance = MoneyVo.Create(balanceDecimal, Currency.EUR);
       if (resultBalance.IsFailure)
          throw new Exception($"Invalid balance in test seed: {balanceDecimal}");
@@ -776,7 +773,7 @@ public sealed class Seed(
 
       var result = Account.Create(
          customerId: customerId,
-         ibanVo: ibanVo,
+         iban: iban,
          balanceVo: balance,
          createdAt: clock.UtcNow,
          id: id
@@ -788,12 +785,17 @@ public sealed class Seed(
       string id,
       Guid accountId,
       string name,
-      IbanVo ibanVo
+      string iban
    ) {
+      var resultIban = IbanCheck.Run(iban);
+      if (resultIban.IsFailure)
+         throw new Exception($"Invalid iban in test seed: {iban}");
+      iban = resultIban.Value;
+      
       var result = Beneficiary.Create(
          accountId: accountId,
          name: name,
-         ibanVo: ibanVo,
+         iban: iban,
          id: id
       );
       return result.Value!;

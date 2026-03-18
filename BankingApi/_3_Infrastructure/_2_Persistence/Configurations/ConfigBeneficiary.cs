@@ -15,10 +15,8 @@ internal sealed class ConfigBeneficiary : IEntityTypeConfiguration<Beneficiary> 
       builder.HasKey(x => x.Id);
       builder.Property(x => x.Id)
          .ValueGeneratedNever();
-
-      // -----------------------------
+      
       // Domain properties
-      // -----------------------------
       builder.Property(x => x.AccountId)
          .IsRequired();
 
@@ -26,17 +24,15 @@ internal sealed class ConfigBeneficiary : IEntityTypeConfiguration<Beneficiary> 
          .HasMaxLength(200)
          .IsRequired();
 
-      builder.Property(a => a.IbanVo)
-         .HasIbanConversion()
+      builder.Property(a => a.Iban)
+         .HasMaxLength(34)
          .IsRequired();
       
-      // -----------------------------
       // Indexes
-      // -----------------------------
       builder.HasIndex(x => x.AccountId);
 
       // Prevent duplicate beneficiaries per account
-      builder.HasIndex(x => new { x.AccountId, Iban = x.IbanVo })
+      builder.HasIndex(x => new { x.AccountId, Iban = x.Iban })
          .IsUnique();
    }
 }

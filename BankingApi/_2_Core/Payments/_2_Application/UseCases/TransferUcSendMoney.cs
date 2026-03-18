@@ -40,7 +40,7 @@ public sealed class TransferUcSendMoney(
       var beneficiary = resultBeneficiary.Value!;
 
       // resolve receiver account by beneficiary IBAN
-      var toAccount = await accountRepository.FindByIbanAsync(beneficiary.IbanVo, ct);
+      var toAccount = await accountRepository.FindByIbanAsync(beneficiary.Iban, ct);
       if (toAccount is null)
          return Result<TransferDto>.Failure(TransferErrors.ToAccountNotFound);
 
