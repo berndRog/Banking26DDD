@@ -57,14 +57,15 @@ internal sealed class CustomerReadModelEf(
       string email,
       CancellationToken ct
    ) {
-      var resultEmail = EmailCheck.Run(email);
-      if (resultEmail.IsFailure)
-         return Result<CustomerDto>.Failure(resultEmail.Error);
-      email = resultEmail.Value;
+
+      var result = EmailVo.Create(email);
+      if (result.IsFailure)      
+         return Result<CustomerDto>.Failure(result.Error);
+      var emailVo = result.Value;
       
       var customerDto = await customerDbContext.Customers
          .AsNoTracking()
-         .Where(c => c.Email == email) // filter by email
+         .Where(c => c.EmailVo == emailVo) // filter by email
          .Select(c => c.ToCustomerDto())  // projection to CustomerDto
          .SingleOrDefaultAsync( ct);
       
@@ -99,11 +100,17 @@ internal sealed class CustomerReadModelEf(
       IQueryable<Customer> query = customerDbContext.Customers
          .AsNoTracking();
    
+      
       // Filters
       if (filter is not null) {
          if (!string.IsNullOrWhiteSpace(filter.Email)) {
-            var email = filter.Email.Trim().ToUpperInvariant();
-            query = query.Where(c => c.Email == email);
+            
+            var resultEmail = EmailVo.Create(filter.Email);
+            if (resultEmail.IsFailure)              
+               return Result<PagedResult<CustomerDto>>.Failure(resultEmail.Error);
+            var emailVo = resultEmail.Value;
+            
+            query = query.Where(c => c.EmailVo == emailVo);
          }
          if (!string.IsNullOrWhiteSpace(filter.Firstname)) {
             var fn = filter.Firstname.Trim().ToUpperInvariant();

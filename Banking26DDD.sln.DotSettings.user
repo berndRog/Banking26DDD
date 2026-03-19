@@ -44,13 +44,14 @@
 	<s:String x:Key="/Default/CodeInspection/ExcludedFiles/FilesAndFoldersToSkip2/=7020124F_002D9FFC_002D4AC3_002D8F3D_002DAAB8E0240759_002Ff_003AString_002Ecs_002Fl_003A_002E_002E_003F_002E_002E_003F_002E_002E_003F_002E_002E_003FLibrary_003FApplication_0020Support_003FJetBrains_003FRider2025_002E3_003Fresharper_002Dhost_003FSourcesCache_003F12774ab3e250374dede05eb62f84c044d472296deea7359943984fc33a3d9ea_003FString_002Ecs/@EntryIndexedValue">ForceIncluded</s:String>
 	<s:String x:Key="/Default/CodeInspection/ExcludedFiles/FilesAndFoldersToSkip2/=7020124F_002D9FFC_002D4AC3_002D8F3D_002DAAB8E0240759_002Ff_003AString_002EManipulation_002Ecs_002Fl_003A_002E_002E_003F_002E_002E_003F_002E_002E_003F_002E_002E_003FLibrary_003FApplication_0020Support_003FJetBrains_003FRider2025_002E3_003Fresharper_002Dhost_003FSourcesCache_003F195672332dabe555580baaf682491569dc3f825502d33d38978864d4679d_003FString_002EManipulation_002Ecs/@EntryIndexedValue">ForceIncluded</s:String>
 	<s:String x:Key="/Default/CodeInspection/ExcludedFiles/FilesAndFoldersToSkip2/=7020124F_002D9FFC_002D4AC3_002D8F3D_002DAAB8E0240759_002Ff_003ATestInvoker_002Ecs_002Fl_003A_002E_002E_003F_002E_002E_003F_002E_002E_003F_002E_002E_003FLibrary_003FApplication_0020Support_003FJetBrains_003FRider2025_002E3_003Fresharper_002Dhost_003FSourcesCache_003F5e14a4e27990972fa4ae94975603bd298aaf328ee083c03b10569ee4724d57_003FTestInvoker_002Ecs/@EntryIndexedValue">ForceIncluded</s:String>
+	<s:String x:Key="/Default/CodeInspection/ExcludedFiles/FilesAndFoldersToSkip2/=7020124F_002D9FFC_002D4AC3_002D8F3D_002DAAB8E0240759_002Ff_003ATestRunner_002Ecs_002Fl_003A_002E_002E_003F_002E_002E_003F_002E_002E_003F_002E_002E_003FLibrary_003FApplication_0020Support_003FJetBrains_003FRider2025_002E3_003Fresharper_002Dhost_003FSourcesCache_003Fb2bf10fa1a078c781bb4d6954d449e2aa1b7e5b37e2f0b59db9787f0b5ff56_003FTestRunner_002Ecs/@EntryIndexedValue">ForceIncluded</s:String>
 	<s:String x:Key="/Default/CodeInspection/ExcludedFiles/FilesAndFoldersToSkip2/=7020124F_002D9FFC_002D4AC3_002D8F3D_002DAAB8E0240759_002Ff_003AThrowHelper_002Ecs_002Fl_003A_002E_002E_003F_002E_002E_003F_002E_002E_003F_002E_002E_003FLibrary_003FApplication_0020Support_003FJetBrains_003FRider2025_002E3_003Fresharper_002Dhost_003FSourcesCache_003F5c21b9149ef32e1f68396d6e6fc7311324c9829ed40328c33f6d5f859a757_003FThrowHelper_002Ecs/@EntryIndexedValue">ForceIncluded</s:String>
 	<s:String x:Key="/Default/CodeInspection/ExcludedFiles/FilesAndFoldersToSkip2/=7020124F_002D9FFC_002D4AC3_002D8F3D_002DAAB8E0240759_002Ff_003ATypeAsserts_002Ecs_002Fl_003A_002E_002E_003F_002E_002E_003F_002E_002E_003F_002E_002E_003FLibrary_003FApplication_0020Support_003FJetBrains_003FRider2025_002E3_003Fresharper_002Dhost_003FSourcesCache_003F9435178c16cbd6e794334579142d3cbf1e650d771fefe869cc6571b65e7efc_003FTypeAsserts_002Ecs/@EntryIndexedValue">ForceIncluded</s:String>
 	<s:String x:Key="/Default/CodeInspection/ExcludedFiles/FilesAndFoldersToSkip2/=7020124F_002D9FFC_002D4AC3_002D8F3D_002DAAB8E0240759_002Ff_003AType_002ECoreCLR_002Ecs_002Fl_003A_002E_002E_003F_002E_002E_003F_002E_002E_003F_002E_002E_003FLibrary_003FApplication_0020Support_003FJetBrains_003FRider2025_002E3_003Fresharper_002Dhost_003FSourcesCache_003Fb061aaf98b918c12617020e731cdcfc2f21d44bbc4feda81d94234c7a9ba9f77_003FType_002ECoreCLR_002Ecs/@EntryIndexedValue">ForceIncluded</s:String>
 	<s:String x:Key="/Default/CodeInspection/ExcludedFiles/FilesAndFoldersToSkip2/=7020124F_002D9FFC_002D4AC3_002D8F3D_002DAAB8E0240759_002Ff_003AType_002Ecs_002Fl_003A_002E_002E_003F_002E_002E_003F_002E_002E_003F_002E_002E_003FLibrary_003FApplication_0020Support_003FJetBrains_003FRider2025_002E3_003Fresharper_002Dhost_003FSourcesCache_003Fc8e1fdc05a12d089e6bbbd80d61a4e689eae3c3c3bfe1c6cb3498c54b27a5577_003FType_002Ecs/@EntryIndexedValue">ForceIncluded</s:String>
 	<s:String x:Key="/Default/CodeInspection/ExcludedFiles/FilesAndFoldersToSkip2/=7020124F_002D9FFC_002D4AC3_002D8F3D_002DAAB8E0240759_002Ff_003AValueTask_002Ecs_002Fl_003A_002E_002E_003F_002E_002E_003F_002E_002E_003F_002E_002E_003FLibrary_003FApplication_0020Support_003FJetBrains_003FRider2025_002E3_003Fresharper_002Dhost_003FSourcesCache_003Fc6af16cde689ee7920c565b9c5df245662d24471bf8eef27a08b99542f4188f3_003FValueTask_002Ecs/@EntryIndexedValue">ForceIncluded</s:String>
 	<s:String x:Key="/Default/CodeInspection/ExcludedFiles/FilesAndFoldersToSkip2/=7020124F_002D9FFC_002D4AC3_002D8F3D_002DAAB8E0240759_002Ff_003AVirtualDispatchHelpers_002Ecs_002Fl_003A_002E_002E_003F_002E_002E_003F_002E_002E_003F_002E_002E_003FLibrary_003FApplication_0020Support_003FJetBrains_003FRider2025_002E3_003Fresharper_002Dhost_003FSourcesCache_003F6d719a294f20c84cf43e36625958e579b98a7a5b8b104e0e68ffd66241bea_003FVirtualDispatchHelpers_002Ecs/@EntryIndexedValue">ForceIncluded</s:String>
-	<s:String x:Key="/Default/Environment/UnitTesting/UnitTestSessionStore/Sessions/=bfbbe04a_002D84b7_002D4c51_002D8cd5_002D5ab4067b767e/@EntryIndexedValue">&lt;SessionState ContinuousTestingMode="0" IsActive="True" Name="All tests from AccountUcCreateIntT.cs" xmlns="urn:schemas-jetbrains-com:jetbrains-ut-session"&gt;
+	<s:String x:Key="/Default/Environment/UnitTesting/UnitTestSessionStore/Sessions/=bfbbe04a_002D84b7_002D4c51_002D8cd5_002D5ab4067b767e/@EntryIndexedValue">&lt;SessionState ContinuousTestingMode="0" Name="All tests from AccountUcCreateIntT.cs" xmlns="urn:schemas-jetbrains-com:jetbrains-ut-session"&gt;
   &lt;Or&gt;
     &lt;ProjectFile&gt;8F031B4C-A09C-4100-8434-F2F7C9EA42DE/d:_2_Modules/d:Core/d:Application/d:UseCases/f:AccountUcCreateIntT.cs&lt;/ProjectFile&gt;
     &lt;ProjectFile&gt;8F031B4C-A09C-4100-8434-F2F7C9EA42DE/d:_1_Controllers/f:CustomersControllerEndtoEnd.cs&lt;/ProjectFile&gt;
@@ -63,22 +64,34 @@
       &lt;TestId&gt;xUnit::8F031B4C-A09C-4100-8434-F2F7C9EA42DE::net10.0::BankingApiTest._2_Core.Core.Application.UseCases.TransferUcCreateIntT.Create_account_ok&lt;/TestId&gt;
       &lt;TestId&gt;xUnit::8F031B4C-A09C-4100-8434-F2F7C9EA42DE::net10.0::BankingApiTest._2_Core.Core.Application.UseCases.TransferUcCreateIntT.Create_transfer_ok&lt;/TestId&gt;
       &lt;TestId&gt;xUnit::8F031B4C-A09C-4100-8434-F2F7C9EA42DE::net10.0::BankingApiTest._2_Core.Core.Application.UseCases.TransferUcSendMoneyIntT.SendMoney_ok&lt;/TestId&gt;
+      &lt;TestId&gt;xUnit::8F031B4C-A09C-4100-8434-F2F7C9EA42DE::net10.0::BankingApiTest.TestController._2_Core.Core.Payments.IbanGeneratorUt.CreateIbanUt&lt;/TestId&gt;
     &lt;/TestAncestor&gt;
     &lt;ProjectFolder&gt;8F031B4C-A09C-4100-8434-F2F7C9EA42DE/d:_3_Infrastructure/d:_2_Persistence/d:Repositories&lt;/ProjectFolder&gt;
     &lt;ProjectFile&gt;8F031B4C-A09C-4100-8434-F2F7C9EA42DE/d:_1_Controllers/f:AccountsControllerEndtoEnd.cs&lt;/ProjectFile&gt;
   &lt;/Or&gt;
 &lt;/SessionState&gt;</s:String>
-	<s:String x:Key="/Default/Environment/UnitTesting/UnitTestSessionStore/Sessions/=e0b6f067_002D3936_002D40ab_002Da53e_002D7b79bae5d766/@EntryIndexedValue">&lt;SessionState ContinuousTestingMode="0" Name="SendMoney_ok" xmlns="urn:schemas-jetbrains-com:jetbrains-ut-session"&gt;
+	<s:String x:Key="/Default/Environment/UnitTesting/UnitTestSessionStore/Sessions/=e0b6f067_002D3936_002D40ab_002Da53e_002D7b79bae5d766/@EntryIndexedValue">&lt;SessionState ContinuousTestingMode="0" IsActive="True" Name="SendMoney_ok" xmlns="urn:schemas-jetbrains-com:jetbrains-ut-session"&gt;
   &lt;Or&gt;
     &lt;TestAncestor&gt;
       &lt;TestId&gt;xUnit::8F031B4C-A09C-4100-8434-F2F7C9EA42DE::net10.0::BankingApiTest._2_Core.Core.Application.UseCases.TransferUcSendMoneyIntT.SendMoney_ok&lt;/TestId&gt;
       &lt;TestId&gt;xUnit::8F031B4C-A09C-4100-8434-F2F7C9EA42DE::net10.0::BankingApiTest._2_Core.Core.Domain.Aggregates.AccountUt.PostDebitUt&lt;/TestId&gt;
       &lt;TestId&gt;xUnit::8F031B4C-A09C-4100-8434-F2F7C9EA42DE::net10.0::BankingApiTest._2_Core.Core.Domain.Aggregates.AccountUt&lt;/TestId&gt;
+      &lt;TestId&gt;xUnit::8F031B4C-A09C-4100-8434-F2F7C9EA42DE::net10.0::BankingApiTest.TestController._2_Core.Core.Payments.IbanGeneratorUt.CreateIbanUt&lt;/TestId&gt;
+      &lt;TestId&gt;xUnit::8F031B4C-A09C-4100-8434-F2F7C9EA42DE::net10.0::BankingApiTest.TestController._2_Core.Core.Payments.IbanGeneratorUt.IbanBuildUt&lt;/TestId&gt;
+      &lt;TestId&gt;xUnit::8F031B4C-A09C-4100-8434-F2F7C9EA42DE::net10.0::BankingApiTest.TestController._2_Core.Core.Payments.IbanGeneratorUt.IbanBuildFromBbanUt&lt;/TestId&gt;
+      &lt;TestId&gt;xUnit::8F031B4C-A09C-4100-8434-F2F7C9EA42DE::net10.0::BankingApiTest.TestController._2_Core.Core.Payments.IbanGeneratorUt.IbanFillTemplateUt&lt;/TestId&gt;
+      &lt;TestId&gt;xUnit::8F031B4C-A09C-4100-8434-F2F7C9EA42DE::net10.0::BankingApiTest._2_Core.Customers.Domain.Entities.EmailCheckUt.Invalid_email_fails&lt;/TestId&gt;
+      &lt;TestId&gt;xUnit::8F031B4C-A09C-4100-8434-F2F7C9EA42DE::net10.0::BankingApiTest._2_Core.Customers.Domain.Entities.AddressUt.EqualsUt&lt;/TestId&gt;
+      &lt;TestId&gt;xUnit::8F031B4C-A09C-4100-8434-F2F7C9EA42DE::net10.0::BankingApiTest._2_Core.Customers.Domain.Entities.AddressVoUt&lt;/TestId&gt;
     &lt;/TestAncestor&gt;
     &lt;ProjectFolder&gt;8F031B4C-A09C-4100-8434-F2F7C9EA42DE/d:_1_Controllers&lt;/ProjectFolder&gt;
     &lt;ProjectFolder&gt;8F031B4C-A09C-4100-8434-F2F7C9EA42DE/d:_2_Core/d:Customers/d:Application&lt;/ProjectFolder&gt;
     &lt;ProjectFolder&gt;8F031B4C-A09C-4100-8434-F2F7C9EA42DE/d:_2_Core/d:Customers/d:Domain&lt;/ProjectFolder&gt;
     &lt;ProjectFolder&gt;8F031B4C-A09C-4100-8434-F2F7C9EA42DE/d:_2_Core/d:Core/d:Domain&lt;/ProjectFolder&gt;
+    &lt;ProjectFile&gt;8F031B4C-A09C-4100-8434-F2F7C9EA42DE/d:_2_Core/d:BuildingBlocks/d:_3_Domain/d:ValueObjects/f:AddressUt.cs&lt;/ProjectFile&gt;
+    &lt;ProjectFile&gt;8F031B4C-A09C-4100-8434-F2F7C9EA42DE/d:_2_Core/d:Employees/d:Domain/d:Aggregates/f:EmployeeUt.cs&lt;/ProjectFile&gt;
+    &lt;ProjectFile&gt;8F031B4C-A09C-4100-8434-F2F7C9EA42DE/d:_3_Infrastructure/d:_2_Persistence/d:Repositories/f:CustomerRepositoryIntT.cs&lt;/ProjectFile&gt;
+    &lt;ProjectFile&gt;8F031B4C-A09C-4100-8434-F2F7C9EA42DE/d:_2_Core/d:BuildingBlocks/d:_3_Domain/d:ValueObjects/f:EmailVoUt.cs&lt;/ProjectFile&gt;
   &lt;/Or&gt;
 &lt;/SessionState&gt;</s:String>
 	

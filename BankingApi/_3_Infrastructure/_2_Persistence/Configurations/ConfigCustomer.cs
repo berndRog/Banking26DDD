@@ -1,3 +1,4 @@
+using BankingApi._2_Core.BuildingBlocks._3_Domain.ValueObjects;
 using BankingApi._2_Core.Customers._3_Domain.Entities;
 using BankingApi._3_Infrastructure._2_Persistence.Converters;
 using BankingApi._3_Infrastructure._2_Persistence.Database.Converter;
@@ -38,12 +39,15 @@ public sealed class ConfigCustomer(
       builder.Property(o => o.CompanyName)
          .HasMaxLength(80)
          .IsRequired(false);
-      builder.Property(x => x.Email)
-         .HasMaxLength(254)
-         .IsRequired();
-      // optional: unique index
-      builder.HasIndex(x => x.Email).IsUnique();;
-      
+
+      // Value Object EmailVo mit Conversion
+      builder.Property(c => c.EmailVo)
+         .HasConversion(vo => vo.Value, s => EmailVo.FromPersisted(s))
+         .IsRequired()
+         .HasColumnName("Email") 
+         .HasMaxLength(254);
+      builder.HasIndex(c => c.EmailVo).IsUnique();
+
       builder.Property(o => o.Subject)
          .HasMaxLength(200)
          .IsRequired();
@@ -82,6 +86,7 @@ public sealed class ConfigCustomer(
       builder.Ignore(o => o.IsActive);
       builder.Ignore(o => o.IsProfileComplete);
       
+
       // Address (owned value object)
       builder.OwnsOne(o => o.AddressVo, a => {
          

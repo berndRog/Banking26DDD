@@ -42,7 +42,7 @@ public sealed class CustomerUt {
          lastname: _customer.Lastname,
          companyName: _customer.CompanyName,
          subject: _customer.Subject,
-         email: _customer.Email,
+         emailVo: _customer.EmailVo,
          addressVo: _customer.AddressVo,
          createdAt: _customer.CreatedAt,
          id: _customer.Id.ToString()
@@ -58,7 +58,7 @@ public sealed class CustomerUt {
       Equal(_customer.Lastname, actual.Lastname);
       Equal(_customer.CompanyName, actual.CompanyName);
       Equal(_customer.DisplayName, actual.DisplayName);
-      Equal(_customer.Email, actual.Email);
+      Equal(_customer.EmailVo, actual.EmailVo);
       Equal(_customer.Subject, actual.Subject);
       Equal(_customer.Status, actual.Status);
       Equal(_customer.AddressVo, actual.AddressVo);
@@ -74,7 +74,7 @@ public sealed class CustomerUt {
          lastname: _customer.Lastname,
          companyName: _customer.CompanyName,
          subject: _customer.Subject,
-         email: _customer.Email,
+         emailVo: _customer.EmailVo,
          addressVo: _customer.AddressVo,
          createdAt: _customer.CreatedAt,
          id: null // <== without id
@@ -85,12 +85,12 @@ public sealed class CustomerUt {
 
       var actual = result.Value!;
       IsType<Customer>(actual);
-      Equal(_customer.Id, actual.Id);
+      False( actual.Id == Guid.Empty);
       Equal(_customer.Firstname, actual.Firstname);
       Equal(_customer.Lastname, actual.Lastname);
       Equal(_customer.CompanyName, actual.CompanyName);
       Equal(_customer.Subject, actual.Subject);
-      Equal(_customer.Email, actual.Email);
+      Equal(_customer.EmailVo, actual.EmailVo);
       Equal(_addressVo, actual.AddressVo);
       Equal(_customer.DisplayName, actual.DisplayName);
       Equal(_customer.Status, actual.Status);
@@ -108,7 +108,7 @@ public sealed class CustomerUt {
          lastname: _customer.Lastname,
          companyName: _customer.CompanyName,
          subject: _customer.Subject,
-         email: _customer.Email,
+         emailVo: _customer.EmailVo,
          addressVo: _customer.AddressVo,
          createdAt: _customer.CreatedAt,
          id: _customer.Id.ToString()
@@ -127,7 +127,7 @@ public sealed class CustomerUt {
          lastname: _customer.Lastname,
          companyName: _customer.CompanyName,
          subject: _customer.Subject,
-         email: _customer.Email,
+         emailVo: _customer.EmailVo,
          addressVo: _customer.AddressVo,
          createdAt: _customer.CreatedAt,
          id: _customer.Id.ToString()
@@ -147,7 +147,7 @@ public sealed class CustomerUt {
          lastname: lastname,
          companyName: _customer.CompanyName,
          subject: _customer.Subject,
-         email: _customer.Email,
+         emailVo: _customer.EmailVo,
          addressVo: _customer.AddressVo,
          createdAt: _customer.CreatedAt,
          id: _customer.Id.ToString()
@@ -166,7 +166,7 @@ public sealed class CustomerUt {
          lastname: lastname,
          companyName: _customer.CompanyName,
          subject: _customer.Subject,
-         email: _customer.Email,
+         emailVo: _customer.EmailVo,
          addressVo: _customer.AddressVo,
          createdAt: _customer.CreatedAt,
          id: _customer.Id.ToString()
@@ -187,7 +187,7 @@ public sealed class CustomerUt {
          lastname: _customer.Lastname,
          companyName: _customer.CompanyName,
          subject: _customer.Subject,
-         email: _customer.Email,
+         emailVo: _customer.EmailVo,
          addressVo: _customer.AddressVo,
          createdAt: _customer.CreatedAt,
          id: id
@@ -199,86 +199,6 @@ public sealed class CustomerUt {
    }
    #endregion
 
-   #region--- EmailCheck & AddressVo tests -----------------------------------------
-   [Theory]
-   [InlineData("")]
-   [InlineData("   ")]
-   [InlineData("nonsense")]
-   [InlineData("a.b.de")]
-   public void Invalid_email_fails(string email) {
-      // Act
-      var result = EmailCheck.Run(email);
-      // Assert
-      True(result.IsFailure);
-      // depending on your VO implementation this might be EmailIsRequired or CommonErrors.InvalidEmail
-      // We assert failure is enough for teaching; refine if you want strict error matching.
-   }
-
-   [Theory]
-   [InlineData("")]
-   [InlineData("   ")]
-   [MemberData(nameof(InvalidLengths))]
-   public void Invalid_street_fails(string street) {
-      // Act      
-      var ResultAddress = AddressVo.Create(
-         street: street,
-         postalCode: _addressVo.PostalCode,
-         city: _addressVo.City,
-         country: _addressVo.Country
-      );
-
-      // Assert
-      True(ResultAddress.IsFailure);
-      if (string.IsNullOrWhiteSpace(street))
-         Equivalent(CommonErrors.StreetIsRequired, ResultAddress.Error);
-      else
-         Equal(CommonErrors.InvalidStreet, ResultAddress.Error);
-   }
-
-   [Theory]
-   [InlineData("")]
-   [InlineData("   ")]
-   [InlineData("A")]
-   [InlineData("AAAAAAAAAAA")]
-   public void Invalid_postal_code_fails(string postalCode) {
-      // Act      
-      var ResultAddress = AddressVo.Create(
-         street: _addressVo.Street,
-         postalCode: postalCode,
-         city: _addressVo.City,
-         country: _addressVo.Country
-      );
-
-      // Assert
-      True(ResultAddress.IsFailure);
-      if (string.IsNullOrWhiteSpace(postalCode))
-         Equivalent(CommonErrors.PostalCodeIsRequired, ResultAddress.Error);
-      else
-         Equal(CommonErrors.InvalidPostalCode, ResultAddress.Error);
-   }
-
-   [Theory]
-   [InlineData("")]
-   [InlineData("   ")]
-   [MemberData(nameof(InvalidLengths))]
-   public void Invalid_city_fails(string city) {
-      // Act      
-      var ResultAddress = AddressVo.Create(
-         street: _addressVo.Street,
-         postalCode: _addressVo.PostalCode,
-         city: city,
-         country: _addressVo.Country
-      );
-
-      // Assert
-      True(ResultAddress.IsFailure);
-      if (string.IsNullOrWhiteSpace(city))
-         Equivalent(CommonErrors.CityIsRequired, ResultAddress.Error);
-      else
-         Equal(CommonErrors.InvalidCity, ResultAddress.Error);
-   }
-   #endregion
-
    #region --- CreateCompany tests --------------------------------------------------
    [Fact]
    public void CreateCompany_ok() {
@@ -287,7 +207,7 @@ public sealed class CustomerUt {
          lastname: _customer5.Lastname,
          companyName: _customer5.CompanyName,
          subject: _customer5.Subject,
-         email: _customer5.Email,
+         emailVo: _customer5.EmailVo,
          addressVo: _customer5.AddressVo,
          createdAt: _customer5.CreatedAt,
          id: _customer5.Id.ToString()
@@ -304,7 +224,7 @@ public sealed class CustomerUt {
       Equal(_customer5.Lastname, actual.Lastname);
       Equal(_customer5.CompanyName, actual.CompanyName);
       Equal(_customer5.DisplayName, actual.DisplayName);
-      Equal(_customer5.Email, actual.Email);
+      Equal(_customer5.EmailVo, actual.EmailVo);
       Equal(_customer5.Subject, actual.Subject);
       Equal(_customer5.Status, actual.Status);
       Equal(_customer5.AddressVo, actual.AddressVo);
@@ -322,7 +242,7 @@ public sealed class CustomerUt {
          lastname: _customer5.Lastname,
          companyName: companyName,
          subject: _customer5.Subject,
-         email: _customer5.Email,
+         emailVo: _customer5.EmailVo,
          addressVo: _customer5.AddressVo,
          createdAt: _customer5.CreatedAt,
          id: _customer5.Id.ToString()
@@ -339,7 +259,7 @@ public sealed class CustomerUt {
          lastname: _customer5.Lastname,
          companyName: companyName,
          subject: _customer5.Subject,
-         email: _customer5.Email,
+         emailVo: _customer5.EmailVo,
          addressVo: _customer5.AddressVo,
          createdAt: _customer5.CreatedAt,
          id: _customer5.Id.ToString()
@@ -357,21 +277,13 @@ public sealed class CustomerUt {
       var customerRegister = _seed.CustomerRegister();
       var customerId = customerRegister.Id;
       var subject = customerRegister.Subject;
-      var firstname = customerRegister.Firstname;
-      var lastname = customerRegister.Lastname;
-      var companyName = customerRegister.CompanyName;
-      var emailVo = customerRegister.Email;
-      var addressVo = customerRegister.AddressVo;
+      var emailVo = customerRegister.EmailVo;
       var createdAt = customerRegister.CreatedAt;
       
       // Act
       var result = Customer.CreateProvision(
          subject: subject,
-         firstname: firstname,
-         lastname: lastname,
-         companyName: companyName,
-         email: emailVo,
-         addressVo: addressVo,
+         emailVo: emailVo,
          createdAt: createdAt,
          id: customerId.ToString()
       );
@@ -381,41 +293,13 @@ public sealed class CustomerUt {
       var customer = result.Value!;
 
       Equal(customerId, customer.Id);
-      Equal(firstname, customer.Firstname);
-      Equal(lastname, customer.Lastname);
-      Equal(companyName, customer.CompanyName);
       Equal(subject, customer.Subject);
-      Equal(emailVo, customer.Email);
-      Equal(addressVo, customer.AddressVo);
+      Equal(emailVo, customer.EmailVo);
       Equal(createdAt, customer.CreatedAt);
       Equal(CustomerStatus.Pending, customer.Status);
-      True(customer.IsProfileComplete);
-      False(customer.IsActive);
    }
 
-   [Fact]
-   public void CreateProvisioned_createdAt_default_fails() {
-      // Arrange
-      var customerRegister = _seed.CustomerRegister();
-      var customerId = customerRegister.Id;
-      var emailVo = customerRegister.Email;
-      var createdAt = customerRegister.CreatedAt;
-      
-      // Act
-      var result = Customer.CreateProvision(
-         subject: "",
-         firstname: customerRegister.Firstname,
-         lastname: customerRegister.Lastname,
-         companyName: customerRegister.CompanyName,
-         email: emailVo,
-         addressVo: customerRegister.AddressVo,
-         createdAt: createdAt,
-         id: customerId.ToString()
-      );
-
-      // Assert
-      True(result.IsFailure);
-   }
+  
    #endregion
 /*
    #region --- UpdateProfile tests ---------------------------

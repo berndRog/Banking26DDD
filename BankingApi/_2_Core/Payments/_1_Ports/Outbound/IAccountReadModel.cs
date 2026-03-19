@@ -1,5 +1,6 @@
 using BankingApi._2_Core.BuildingBlocks._3_Domain;
 using BankingApi._2_Core.Payments._2_Application.Dtos;
+using BankingApi._2_Core.Payments._3_Domain.ValueObjects;
 namespace BankingApi._2_Core.Payments._1_Ports.Outbound;
 
 // Read model interface for querying account and beneficiary data.
@@ -16,7 +17,7 @@ public interface IAccountReadModel {
 
    // Find account using an IBAN
    Task<Result<AccountDto>> FindByIbanAsync(
-      string ibanString,
+      string iban,
       CancellationToken ct
    );
 

@@ -41,18 +41,22 @@ public class CustomerUcUpdateProfile(
          return Result<CustomerDto>.Failure(CustomerErrors.AddressIsRequired);
 
       // override email address (if changed) 
-      var email = customer.Email;
-      if (!string.Equals(email, customerDto.Email, StringComparison.OrdinalIgnoreCase)) {
+      var email = customer.EmailVo.Value;
+      var resultDtoEmail = EmailVo.Create(customerDto.Email);
+      if (resultDtoEmail.IsFailure)
+         return Result<CustomerDto>.Failure(resultDtoEmail.Error);
+      var emailVoDto = resultDtoEmail.Value;
+      var emailDto = emailVoDto.Value;
+      
+      if (!string.Equals(email, emailDto, StringComparison.OrdinalIgnoreCase)) {
          // create new email value object from dto.Email
-         var resultDtoEmail = EmailCheck.Run(customerDto.Email);
-         if (resultDtoEmail.IsFailure)
-            return Result<CustomerDto>.Failure(resultDtoEmail.Error);
+    
          // check uniqueness
-         var existingByEmail = await repository.FindByEmailAsync(resultDtoEmail.Value, ct);
+         var existingByEmail = await repository.FindByEmailAsync(emailVoDto, ct);
          if (existingByEmail is not null && existingByEmail.Id != customer.Id)
             return Result<CustomerDto>.Failure(CustomerErrors.EmailAlreadyInUse);
          // override previous email
-         email = resultDtoEmail.Value;
+         email = emailVoDto.Value;
       }
       
       var dto = customerDto with { Email = email }; // for logging only
@@ -62,7 +66,7 @@ public class CustomerUcUpdateProfile(
          firstname: customerDto.Firstname,
          lastname: customerDto.Lastname,
          companyName: customerDto.CompanyName,
-         email: email,
+         emailVo: emailVoDto,
          addressVo: customerDto.AddressDto.ToAddressVo(),
          updatedAt: clock.UtcNow
       );

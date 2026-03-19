@@ -1,5 +1,6 @@
 using System.Runtime.CompilerServices;
 using BankingApi._2_Core.BuildingBlocks._3_Domain;
+using BankingApi._2_Core.Payments;
 using BankingApi._2_Core.Payments._1_Ports.Outbound;
 using BankingApi._2_Core.Payments._2_Application.Dtos;
 using BankingApi._2_Core.Payments._2_Application.Mappings;
@@ -34,14 +35,14 @@ internal sealed class AccountReadModelEf(
       string iban,
       CancellationToken ct
    ) {
-      var resultIban = IbanCheck.Run(iban);
-      if (resultIban.IsFailure)
-         return Result<AccountDto>.Failure(resultIban.Error);
-      iban = resultIban.Value;
+      var result = IbanVo.Create(iban);
+      if (result.IsFailure)         
+         throw new ApplicationException(result.Error.Message);
+      var ibanVo = result.Value;
       
       var accountDto = await dbContext.Accounts
          .AsNoTracking()
-         .Where(a => a.Iban == iban)      // filter
+         .Where(a => a.IbanVo == ibanVo)      // filter
          .Select(c => c.ToAccountDto())   // projection
          .SingleOrDefaultAsync(ct);       // take single or default (null if not found)
       
@@ -134,14 +135,14 @@ internal sealed class AccountReadModelEf(
       string iban,
       CancellationToken ct = default
    ) {
-      var resultIban = IbanCheck.Run(iban);
-      if (resultIban.IsFailure)
-         return Result<BeneficiaryDto>.Failure(resultIban.Error);
-      iban = resultIban.Value;
-
+      var result = IbanVo.Create(iban);
+      if (result.IsFailure)         
+         throw new ApplicationException(result.Error.Message);
+      var ibanVo = result.Value;
+      
       var beneficiaryDto = await dbContext.Beneficiaries
          .AsNoTracking()
-         .Where(b => b.Iban == iban)
+         .Where(b => b.IbanVo == ibanVo)
          .Select(b => b.ToBeneficiaryDto())
          .SingleOrDefaultAsync(ct);
 

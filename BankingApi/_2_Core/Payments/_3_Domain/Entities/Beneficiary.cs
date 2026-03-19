@@ -6,9 +6,10 @@ namespace BankingApi._2_Core.Payments._3_Domain.Entities;
 
 // Child entity of Account Aggregate
 public sealed class Beneficiary : Entity {
+   
    //--- Properties ------------------------------------------------------------
    public string Name { get; private set; } = string.Empty;
-   public string Iban { get; private set; } = default!;
+   public IbanVo IbanVo { get; private set; } = default!;
    public Guid AccountId { get; private set; }
 
    //--- Constructors -----------------------------------------------------------
@@ -20,13 +21,13 @@ public sealed class Beneficiary : Entity {
    private Beneficiary(
       Guid id,
       string name,
-      string iban,
+      IbanVo ibanVo,
       Guid accountId
    ) {
       Id = id;
       AccountId = accountId;
       Name = name;
-      Iban = iban;
+      IbanVo = ibanVo;
    }
 
    //--- Static Factory Methods ------------------------------------------------
@@ -34,7 +35,7 @@ public sealed class Beneficiary : Entity {
    public static Result<Beneficiary> Create(
       Guid accountId,
       string name,
-      string iban,
+      IbanVo ibanVo,
       string? id = null
    ) {
       // trim early
@@ -42,11 +43,6 @@ public sealed class Beneficiary : Entity {
 
       if (string.IsNullOrWhiteSpace(name))
          return Result<Beneficiary>.Failure(BeneficiaryErrors.InvalidName);
-      
-      var resultIban = IbanCheck.Run(iban);
-      if (resultIban.IsFailure)
-         return Result<Beneficiary>.Failure(resultIban.Error);
-      iban = resultIban.Value;
       
       var idResult = Entity.Resolve(id, BeneficiaryErrors.InvalidId);
       if (idResult.IsFailure)
@@ -56,7 +52,7 @@ public sealed class Beneficiary : Entity {
       var beneficiary = new Beneficiary(
          beneficiaryId, 
          name, 
-         iban, 
+         ibanVo, 
          accountId
       );
 

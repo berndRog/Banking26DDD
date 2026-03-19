@@ -24,7 +24,7 @@ public interface IEmployeeRepository {
 
    // Load employee by email value object
    Task<Employee?> FindByEmailAsync(
-      string email,
+      EmailVo emailVo,
       CancellationToken ct = default
    );
 

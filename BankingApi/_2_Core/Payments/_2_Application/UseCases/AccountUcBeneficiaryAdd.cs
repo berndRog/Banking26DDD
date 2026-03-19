@@ -28,7 +28,7 @@ public sealed class AccountUcBeneficiaryAdd(
       
       // Domain logic
       // create IbanVo
-      var resultIban = IbanCheck.Run(beneficiaryDto.Iban);
+      var resultIban = IbanVo.Create(beneficiaryDto.Iban);
       if (resultIban.IsFailure) 
          return Result<BeneficiaryDto>.Failure(BeneficiaryErrors.InvalidIban);
       var ibanVo = resultIban.Value;
@@ -37,7 +37,7 @@ public sealed class AccountUcBeneficiaryAdd(
       var resultBeneficiary = Beneficiary.Create(
          accountId: accountId,
          name: beneficiaryDto.Name,
-         iban: ibanVo,
+         ibanVo: ibanVo,
          id: beneficiaryDto.Id.ToString()
       );
       if (resultBeneficiary.IsFailure)

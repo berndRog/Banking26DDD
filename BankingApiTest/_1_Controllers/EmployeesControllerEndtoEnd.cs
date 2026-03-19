@@ -5,6 +5,7 @@ using BankingApi._2_Core.BuildingBlocks._3_Domain.ValueObjects;
 using BankingApi._2_Core.Customers._2_Application.Dtos;
 using BankingApi._2_Core.Employees._2_Application.Dtos;
 using BankingApi._3_Infrastructure._2_Persistence.Database;
+using BankingApiTest._2_Core.BuildingBlocks;
 using BankingApiTest._3_Infrastructure._3_Security;
 using BankingApiTest.TestController;
 using BankingApiTest.TestInfrastructure;
@@ -33,8 +34,8 @@ public sealed class EmployeesControllerEndToEnd : TestBaseEndToEnd {
          IsActive: true,
          AdminRights: 511
       );
-      var expectedEmail = EmailCheck.Run(requestDto.Email).Value;
-      var expectdPhone = PhoneCheck.Run(requestDto.Phone).Value; 
+      var expectedEmail = EmailVo.Create(requestDto.Email).Value;
+      var expectdPhone = PhoneVo.Create(requestDto.Phone).Value; 
       
       // Act
       var subject = "12345678-0000-0000-0000-000000000000"; // in real scenario, subject should come from auth token or be generated in use case
@@ -73,8 +74,8 @@ public sealed class EmployeesControllerEndToEnd : TestBaseEndToEnd {
          // Domain-level checks
          Equal(requestDto.Firstname, employee.Firstname);
          Equal(requestDto.Lastname, employee.Lastname);
-         Equal(expectedEmail, employee.Email);
-         Equal(expectdPhone, employee.Phone);
+         Equal(requestDto.Email, employee.EmailVo.Value);
+         Equal(requestDto.Phone, employee.PhoneVo.Value);
          Equal(subject, employee.Subject);
          Equal(requestDto.PersonnelNumber, employee.PersonnelNumber);
          Equal(requestDto.IsActive, employee.IsActive);
@@ -121,7 +122,7 @@ public sealed class EmployeesControllerEndToEnd : TestBaseEndToEnd {
 
         NotNull(employee);
         
-        Equal(Factory.TestUsername, employee.Email);
+        Equal(Factory.TestUsername, employee.EmailVo.Value);
         Equal(Factory.TestSubject, employee.Subject);
 
      });
@@ -179,8 +180,8 @@ public sealed class EmployeesControllerEndToEnd : TestBaseEndToEnd {
          PersonnelNumber = "EMP-12345",
          IsActive = true,
       };
-      var expectedEmail = EmailCheck.Run(reqPostProfileOwnerDto.Email).Value;
-      var expectdPhone = PhoneCheck.Run(reqPostProfileOwnerDto.Phone).Value;
+      var expectedEmail = EmailVo.Create(reqPostProfileOwnerDto.Email).Value;
+      var expectdPhone = PhoneVo.Create(reqPostProfileOwnerDto.Phone).Value;
 
       // build request manually
       request = new HttpRequestMessage(
@@ -201,13 +202,13 @@ public sealed class EmployeesControllerEndToEnd : TestBaseEndToEnd {
          await responsePutProfile.Content.ReadFromJsonAsync<EmployeeDto>(ct);
       NotNull(resPostProfileEmployeeDto);
 
-      var actualEmail = EmailCheck.Run(resPostProfileEmployeeDto.Email).Value;
-      var actualPhone = PhoneCheck.Run(resPostProfileEmployeeDto.Phone).Value;
+      var actualEmail = EmailVo.Create(resPostProfileEmployeeDto.Email).Value.Value;
+      var actualPhone = PhoneVo.Create(resPostProfileEmployeeDto.Phone).Value.Value;
       Equal(reqPostProfileOwnerDto.Id, resPostProfileEmployeeDto.Id);
       Equal(reqPostProfileOwnerDto.Firstname, resPostProfileEmployeeDto.Firstname);
       Equal(reqPostProfileOwnerDto.Lastname, resPostProfileEmployeeDto.Lastname);
-      Equal(expectedEmail, actualEmail);
-      Equal(expectdPhone, actualPhone);
+      Equal(reqPostProfileOwnerDto.Email, actualEmail);
+      Equal(reqPostProfileOwnerDto.Phone, actualPhone);
       Equal(reqPostProfileOwnerDto.PersonnelNumber, resPostProfileEmployeeDto.PersonnelNumber);
       Equal(reqPostProfileOwnerDto.IsActive, resPostProfileEmployeeDto.IsActive);
       
@@ -226,8 +227,8 @@ public sealed class EmployeesControllerEndToEnd : TestBaseEndToEnd {
          Equal(reqPostProfileOwnerDto.Id, employee.Id);
          Equal(reqPostProfileOwnerDto.Firstname, employee.Firstname);
          Equal(reqPostProfileOwnerDto.Lastname, employee.Lastname);
-         Equal(expectedEmail, employee.Email);
-         Equal(expectdPhone, employee.Phone);
+         Equal(reqPostProfileOwnerDto.Email, employee.EmailVo.Value);
+         Equal(reqPostProfileOwnerDto.Phone, employee.PhoneVo.Value);
          Equal(reqPostProfileOwnerDto.PersonnelNumber, employee.PersonnelNumber);
          Equal(reqPostProfileOwnerDto.IsActive, employee.IsActive);  
       });
@@ -271,14 +272,14 @@ public sealed class EmployeesControllerEndToEnd : TestBaseEndToEnd {
          await response.Content.ReadFromJsonAsync<EmployeeDto>(ct);
       NotNull(actualEmployeeDto);
       
-      var actualEmail = EmailCheck.Run(actualEmployeeDto?.Email).Value;
-      var actualPhone = PhoneCheck.Run(actualEmployeeDto?.Phone).Value;
+      var actualEmailVo = EmailVo.Create(actualEmployeeDto?.Email).Value;
+      var actualPhoneVo = PhoneVo.Create(actualEmployeeDto?.Phone).Value;
       
       Equals(employee.Id, actualEmployeeDto?.Id);
       Equals(employee.Firstname, actualEmployeeDto?.Firstname);
       Equals(employee.Lastname, actualEmployeeDto?.Lastname);
-      Equals(employee.Email, actualEmployeeDto?.Email);
-      Equals(employee.Phone, actualPhone);
+      Equals(employee.EmailVo, actualEmailVo);
+      Equals(employee.PhoneVo, actualPhoneVo);
       Equals(employee.PersonnelNumber, actualEmployeeDto?.PersonnelNumber);
       Equals(employee.IsActive, actualEmployeeDto?.IsActive);
    }
@@ -298,7 +299,7 @@ public sealed class EmployeesControllerEndToEnd : TestBaseEndToEnd {
       });
 
       // Act
-      var email = employee.Email;
+      var email = employee.EmailVo;
       
       var request = new HttpRequestMessage(
          method: HttpMethod.Get,
@@ -320,14 +321,14 @@ public sealed class EmployeesControllerEndToEnd : TestBaseEndToEnd {
       var actualEmployeeDto = 
          await response.Content.ReadFromJsonAsync<EmployeeDto>(ct);
 
-      var actualEmail = EmailCheck.Run(actualEmployeeDto?.Email).Value;
-      var actualPhone = PhoneCheck.Run(actualEmployeeDto?.Phone).Value;
+      var actualEmailVo = EmailVo.Create(actualEmployeeDto?.Email).Value;
+      var actualPhoneVo = PhoneVo.Create(actualEmployeeDto?.Phone).Value;
       
       Equals(employee.Id, actualEmployeeDto?.Id);
       Equals(employee.Firstname, actualEmployeeDto?.Firstname);
       Equals(employee.Lastname, actualEmployeeDto?.Lastname);
-      Equals(employee.Email, actualEmail);
-      Equals(employee.Phone, actualPhone);
+      Equals(employee.EmailVo, actualEmailVo);
+      Equals(employee.PhoneVo, actualPhoneVo);
       Equals(employee.PersonnelNumber, actualEmployeeDto?.PersonnelNumber);
       Equals(employee.IsActive, actualEmployeeDto?.IsActive);
  

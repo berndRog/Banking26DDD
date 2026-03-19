@@ -30,11 +30,12 @@ public sealed class EmployeeUt {
       var result = Employee.Create(
          firstname: _employee.Firstname,
          lastname: _employee.Lastname,
-         email: _employee.Email,
-         phone: _employee.Phone,
+         emailVo: _employee.EmailVo,
+         phoneVo: _employee.PhoneVo,
          subject: _employee.Subject,
          personnelNumber: _employee.PersonnelNumber,
          adminRights: _employee.AdminRights,
+         createdAt: _employee.CreatedAt,
          id: _employee.Id.ToString()
       );
 
@@ -45,8 +46,8 @@ public sealed class EmployeeUt {
       Equal(_employee.Id, actual.Id);
       Equal(_employee.Firstname, actual.Firstname);
       Equal(_employee.Lastname, actual.Lastname);
-      Equal(_employee.Email, actual.Email);
-      Equal(_employee.Phone, actual.Phone);
+      Equal(_employee.EmailVo, actual.EmailVo);
+      Equal(_employee.PhoneVo, actual.PhoneVo);
       Equal(_employee.Subject, actual.Subject);
       Equal(_employee.PersonnelNumber, actual.PersonnelNumber);
       Equal(_employee.AdminRights, actual.AdminRights);
@@ -58,11 +59,12 @@ public sealed class EmployeeUt {
       var result = Employee.Create(
          firstname: _employee.Firstname,
          lastname: _employee.Lastname,
-         email: _employee.Email,
-         phone: _employee.Phone,
+         emailVo: _employee.EmailVo,
+         phoneVo: _employee.PhoneVo,
          subject: _employee.Subject,
          personnelNumber: _employee.PersonnelNumber,
          adminRights: _employee.AdminRights,
+         createdAt: _employee.CreatedAt,
          id: null
       );
       
@@ -73,8 +75,8 @@ public sealed class EmployeeUt {
       True(actual.Id != Guid.Empty);
       Equal(_employee.Firstname, actual.Firstname);
       Equal(_employee.Lastname, actual.Lastname);
-      Equal(_employee.Email, actual.Email);
-      Equal(_employee.Phone, actual.Phone);
+      Equal(_employee.EmailVo, actual.EmailVo);
+      Equal(_employee.PhoneVo, actual.PhoneVo);
       Equal(_employee.Subject, actual.Subject);
       Equal(_employee.PersonnelNumber, actual.PersonnelNumber);
       Equal(_employee.AdminRights, actual.AdminRights);

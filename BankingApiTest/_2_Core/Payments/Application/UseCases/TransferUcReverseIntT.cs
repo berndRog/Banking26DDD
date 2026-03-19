@@ -48,7 +48,7 @@ public sealed class TransferUcReverseIntT : TestBaseIntegration {
       var actual = await accountRepository.FindByIdAsync(account.Id, ct);
       NotNull(actual);
       Equal(account.Id, actual!.Id);
-      Equal(account.Iban, actual.Iban);
+      Equal(account.IbanVo, actual.IbanVo);
       Equal(account.BalanceVo, actual.BalanceVo);
    }
    

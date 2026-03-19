@@ -32,20 +32,20 @@ public sealed class CustomersControllerEndtoEnd : TestBaseEndToEnd {
          Firstname: customer1.Firstname,
          Lastname: customer1.Lastname,
          CompanyName: customer1.CompanyName,
-         Email: customer1.Email,
+         Email: customer1.EmailVo.Value,
          StatusInt: (int) customer1.Status,
          AddressDto: customer1.AddressVo.ToAddressDto()
       );
       // Act
       Factory.TestSubject = "12345678-0000-0000-0000-000000000000";
       var account1Id = account1.Id.ToString();
-      var iban1 = account1.Iban;
+      var ibanVo1 = account1.IbanVo;
       
       var request = new HttpRequestMessage(
          method: HttpMethod.Post,
          requestUri:"/bankingapi/v1/customers?"+
          $"accountId={Uri.EscapeDataString(account1Id)}&"+
-         $"iban={Uri.EscapeDataString(iban1)}"
+         $"iban={Uri.EscapeDataString(ibanVo1.Value)}"
       );
       //request.Headers.Add(TestAuthHandler.Header, "Employee");
       request.Content = JsonContent.Create(requestDto);
@@ -80,7 +80,7 @@ public sealed class CustomersControllerEndtoEnd : TestBaseEndToEnd {
          // Domain-level checks
          Equal(requestDto.Firstname, customer.Firstname);
          Equal(requestDto.Lastname, customer.Lastname);
-         Equal(requestDto.Email, customer.Email);
+         Equal(requestDto.Email, customer.EmailVo.Value);
          Equal(requestDto.StatusInt, (int)customer.Status);
          Equal(Factory.TestSubject, customer.Subject);
          Equal(requestDto.AddressDto, customer.AddressVo.ToAddressDto());
@@ -143,7 +143,7 @@ public sealed class CustomersControllerEndtoEnd : TestBaseEndToEnd {
          Equal(provisionDto.Lastname, owner.Lastname);
          Equal(provisionDto.CompanyName, owner.CompanyName);
          Equal(provisionDto.AddressDto, owner.AddressVo.ToAddressDto());
-         Equal(Factory.TestUsername, owner.Email);
+         Equal(Factory.TestUsername, owner.EmailVo.Value);
          Equal(Factory.TestSubject, owner.Subject);
       });
    }
@@ -260,7 +260,7 @@ public sealed class CustomersControllerEndtoEnd : TestBaseEndToEnd {
          Equal(reqPostProfileOwnerDto.Id, customer.Id);
          Equal(reqPostProfileOwnerDto.Firstname, customer.Firstname);
          Equal(reqPostProfileOwnerDto.Lastname, customer.Lastname);
-         Equal(reqPostProfileOwnerDto.Email, customer.Email);
+         Equal(reqPostProfileOwnerDto.Email, customer.EmailVo.Value);
          Equal(reqPostProfileOwnerDto.StatusInt, (int)customer.Status);
          Equal(reqPostProfileOwnerDto.AddressDto, customer.AddressVo.ToAddressDto());
       });
@@ -311,7 +311,7 @@ public sealed class CustomersControllerEndtoEnd : TestBaseEndToEnd {
       Equals(customer.Firstname, actualCustomerDto?.Firstname);
       Equals(customer.Lastname, actualCustomerDto?.Lastname);
       Equals(customer.CompanyName, actualCustomerDto?.CompanyName);
-      Equals(customer.Email, actualCustomerDto?.Email);
+      Equals(customer.EmailVo, actualCustomerDto?.Email);
       Equals((int)customer.Status, actualCustomerDto?.StatusInt);
       //Equal(Factory.TestSubject, owner.Subject);
       Equals(customer.AddressVo, actualCustomerDto);
@@ -332,7 +332,7 @@ public sealed class CustomersControllerEndtoEnd : TestBaseEndToEnd {
       });
 
       // Act
-      var email = customer1.Email;
+      var email = customer1.EmailVo;
 
       var request = new HttpRequestMessage(
          method: HttpMethod.Get,
@@ -358,7 +358,7 @@ public sealed class CustomersControllerEndtoEnd : TestBaseEndToEnd {
       Equals(customer1.Firstname, actualCustomerDto?.Firstname);
       Equals(customer1.Lastname, actualCustomerDto?.Lastname);
       Equals(customer1.CompanyName, actualCustomerDto?.CompanyName);
-      Equals(customer1.Email, actualCustomerDto?.Email);
+      Equals(customer1.EmailVo, actualCustomerDto?.Email);
       Equals((int)customer1.Status, actualCustomerDto?.StatusInt);
       Equals(customer1.AddressVo, actualCustomerDto);
    }

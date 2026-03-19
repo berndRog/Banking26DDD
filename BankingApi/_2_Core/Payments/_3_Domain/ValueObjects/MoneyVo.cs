@@ -1,25 +1,35 @@
+using System.ComponentModel.DataAnnotations.Schema;
 using BankingApi._2_Core.BuildingBlocks._3_Domain;
 using BankingApi._2_Core.BuildingBlocks._3_Domain.Errors;
 using BankingApi._2_Core.Payments._3_Domain.Enums;
 namespace BankingApi._2_Core.Payments._3_Domain.ValueObjects;
 
 // Simple Money value object (amount + currency)
-public sealed record class MoneyVo {
+[ComplexType]
+public sealed record MoneyVo {
+   //--- Properties ------------------------------------------------------------
    // Monetary amount (always rounded to 2 decimals)
-   public decimal Amount { get; }
+   public decimal Amount { get; private init; }
+   public Currency Currency { get; private init; }
 
-   // Currency of the amount
-   public Currency Currency { get; }
-
-   // Private ctor – use factory methods
-   private MoneyVo(decimal amount, Currency currency) {
+   //--- Constructors ----------------------------------------------------------
+   // EF Core ctor  
+   private MoneyVo() {  Amount = default!; Currency = default!; }
+   
+   // Domain ctor
+   private MoneyVo(
+      decimal amount, 
+      Currency currency
+   ) {
       Amount = amount;
       Currency = currency;
    }
 
-   // FACTORY – USER INPUT
-   // Create from external input (validation + rounding)
-   public static Result<MoneyVo> Create(decimal amount, Currency currency) {
+   //--- Static Factories ------------------------------------------------------
+   public static Result<MoneyVo> Create(
+      decimal amount, 
+      Currency currency
+   ) {
       amount = decimal.Round(amount, 2, MidpointRounding.ToEven);
 
       // if (amount < 0)
@@ -27,8 +37,7 @@ public sealed record class MoneyVo {
 
       return Result<MoneyVo>.Success(new MoneyVo(amount, currency));
    }
-
-   // FACTORY – DATABASE
+   
    // Rehydrate from persisted database value
    internal static MoneyVo FromPersisted(decimal amount, Currency currency) {
       amount = decimal.Round(amount, 2, MidpointRounding.ToEven);

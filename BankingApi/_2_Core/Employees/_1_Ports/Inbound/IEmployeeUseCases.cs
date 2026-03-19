@@ -11,15 +11,8 @@ public interface IEmployeeUseCases {
 
    // Create a new employee aggregate
    // Validates input and persists the new employee
-   Task<Result<Guid>> CreateAsync(
-      string firstname,
-      string lastname,
-      string email,
-      string phoneString,
-      string subject,
-      string personnelNumber,
-      AdminRights adminRights,
-      string? id = null,
+   Task<Result<EmployeeDto>> CreateAsync(
+      EmployeeDto employeeDto,
       CancellationToken ct = default
    );
 

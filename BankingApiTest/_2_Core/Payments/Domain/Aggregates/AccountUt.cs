@@ -1,5 +1,6 @@
 using BankingApi._2_Core.BuildingBlocks._1_Ports.Outbound;
 using BankingApi._2_Core.Customers._3_Domain.Entities;
+using BankingApi._2_Core.Payments;
 using BankingApi._2_Core.Payments._3_Domain.Entities;
 using BankingApi._2_Core.Payments._3_Domain.ValueObjects;
 using BankingApiTest.TestInfrastructure;
@@ -25,7 +26,7 @@ public sealed class AccountUt {
       // Act
       var result = Account.Create(
          customerId: _customer.Id,
-         iban: _account.Iban,
+         ibanVo: _account.IbanVo,
          balanceVo: _account.BalanceVo,
          createdAt: _account.CreatedAt,
          id: _account.Id.ToString()
@@ -39,7 +40,7 @@ public sealed class AccountUt {
       IsType<Account>(actual);
       NotEqual(Guid.Empty, actual.Id);
       Equal(_account.Id, actual.Id);
-      Equal(_account.Iban, actual.Iban);
+      Equal(_account.IbanVo, actual.IbanVo);
       Equal(_account.BalanceVo, actual.BalanceVo);
       Equal(_customer.Id, actual.CustomerId);
    }
@@ -49,7 +50,7 @@ public sealed class AccountUt {
       // Act
       var result = Account.Create(
          customerId: _customer.Id,
-         iban: _account.Iban,
+         ibanVo: _account.IbanVo,
          balanceVo: _account.BalanceVo,
          createdAt: _account.CreatedAt,
          id: null
@@ -61,7 +62,7 @@ public sealed class AccountUt {
 
       var actual = result.Value!;
       NotEqual(Guid.Empty, actual.Id);
-      Equal(_account.Iban, actual.Iban);
+      Equal(_account.IbanVo, actual.IbanVo);
       Equal(_account.BalanceVo, actual.BalanceVo);
       Equal(_customer.Id, actual.CustomerId);
    }
@@ -71,7 +72,7 @@ public sealed class AccountUt {
       // Act
       var result = Account.Create(
          customerId: _customer.Id,
-         iban: _account.Iban,
+         ibanVo: _account.IbanVo,
          balanceVo: _account.BalanceVo,
          createdAt: _account.CreatedAt,
          id: "not-a-guid"
@@ -100,7 +101,7 @@ public sealed class AccountUt {
       // Act
       var result = Account.Create(
          customerId: _customer.Id,
-         iban: _account.Iban,
+         ibanVo: _account.IbanVo,
          balanceVo: _account.BalanceVo,
          createdAt: _account.CreatedAt,
          id: _account.Id.ToString()
@@ -114,7 +115,7 @@ public sealed class AccountUt {
       // Act
       var result1 = Account.Create(
          customerId: _customer.Id,
-         iban: _account.Iban,
+         ibanVo: _account.IbanVo,
          balanceVo: _account.BalanceVo,
          createdAt: _account.CreatedAt,
          id: _account.Id.ToString()
@@ -122,7 +123,7 @@ public sealed class AccountUt {
 
       var result2 = Account.Create(
          customerId: _customer.Id,
-         iban: _account.Iban,
+         ibanVo: _account.IbanVo,
          balanceVo: _account.BalanceVo,
          createdAt: _account.CreatedAt,
          id: _account.Id.ToString()
@@ -131,7 +132,7 @@ public sealed class AccountUt {
       True(result1.IsSuccess);
       True(result2.IsSuccess);
       Equal(result1.Value!.Id, result2.Value!.Id);
-      Equal(result1.Value!.Iban, result2.Value!.Iban);
+      Equal(result1.Value!.IbanVo, result2.Value!.IbanVo);
       Equal(result1.Value!.CustomerId, result2.Value!.CustomerId);
       Equal(result1.Value!.BalanceVo, result2.Value!.BalanceVo);
    }

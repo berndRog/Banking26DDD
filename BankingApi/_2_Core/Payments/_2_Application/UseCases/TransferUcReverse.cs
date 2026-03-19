@@ -37,8 +37,8 @@ public sealed class TransferUcReverse(
          return Result<TransferDto>.Failure(TransferErrors.FromAccountNotFound);
       
 
-      var toIbanVo = fromAccount.Iban;
-      var beneficiary = fromAccount.Beneficiaries.FirstOrDefault(b => b.Iban == toIbanVo);
+      var toIbanVo = fromAccount.IbanVo;
+      var beneficiary = fromAccount.Beneficiaries.FirstOrDefault(b => b.IbanVo == toIbanVo);
       var toName = beneficiary?.Name;
       
       var now = clock.UtcNow;

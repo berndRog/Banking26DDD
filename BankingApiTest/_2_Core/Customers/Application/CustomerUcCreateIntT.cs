@@ -30,7 +30,7 @@ public sealed class CustomerUcCreateIntT : TestBaseIntegration {
       await sut.ExecuteAsync(
          customerDto: customerDto,
          accountIdString: account1.Id.ToString(),
-         ibanString: account1.Iban,
+         ibanString: account1.IbanVo.Value,
          ct
       );
       unitOfWork.ClearChangeTracker();
@@ -41,7 +41,7 @@ public sealed class CustomerUcCreateIntT : TestBaseIntegration {
       Equal(customer.Id, actualCustomer.Id);
       Equal(customer.Firstname, actualCustomer.Firstname);
       Equal(customer.Lastname, actualCustomer.Lastname);
-      Equal(customer.Email, actualCustomer.Email);
+      Equal(customer.EmailVo, actualCustomer.EmailVo);
       Equal(customer.Subject, actualCustomer.Subject);
       Equal(customer.AddressVo, actualCustomer.AddressVo);
       

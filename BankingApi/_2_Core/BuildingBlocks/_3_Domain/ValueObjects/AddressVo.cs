@@ -1,31 +1,29 @@
-using System.Text.Json.Serialization;
+using System.ComponentModel.DataAnnotations.Schema;
 using BankingApi._2_Core.BuildingBlocks._3_Domain.Errors;
 namespace BankingApi._2_Core.BuildingBlocks._3_Domain.ValueObjects;
 
 // Address is a value object without identity.
 // It is immutable and fully replaced on change.
+[ComplexType]
 public sealed record AddressVo {
+   
    // Properties
-   public string Street     { get; }
-   public string PostalCode { get; }
-   public string City       { get; }
-   public string? Country   { get; }
-
-   [JsonConstructor]
-   public AddressVo(
+   public string Street     { get; private init; } = string.Empty;
+   public string PostalCode { get; private init; } = string.Empty;
+   public string City       { get; private init; } = string.Empty;
+   public string? Country   { get; private init; } 
+   
+   // private Ctor
+   private AddressVo(
       string street,
       string postalCode,
       string city,
       string? country = null
    ) {
-      var normalized = Normalize(street, postalCode, city, country, out var error);
-      if (error is not null)
-         throw new ArgumentException(error.Message, nameof(street));
-
-      Street = normalized.Street;
-      PostalCode = normalized.PostalCode;
-      City = normalized.City;
-      Country = normalized.Country;
+      Street = street;
+      PostalCode = postalCode;
+      City = city;
+      Country = country;
    }
 
    //--- Static factory method -------------------------------------------------
@@ -35,63 +33,30 @@ public sealed record AddressVo {
       string city,
       string? country = null
    ) {
-      var normalized = Normalize(street, postalCode, city, country, out var error);
-      if (error is not null)
-         return Result<AddressVo>.Failure(error);
-
-      return Result<AddressVo>.Success(new AddressVo(
-         street: normalized.Street,
-         postalCode: normalized.PostalCode,
-         city: normalized.City,
-         country: normalized.Country
-      ));
-   }
-
-   private static (string Street, string PostalCode, string City, string? Country) Normalize(
-      string street,
-      string postalCode,
-      string city,
-      string? country,
-      out DomainErrors? error
-   ) {
-      street = street?.Trim() ?? string.Empty;
-      postalCode = postalCode?.Trim() ?? string.Empty;
-      city = city?.Trim() ?? string.Empty;
+      // Normalize input early
+      street = street.Trim();
+      postalCode = postalCode.Trim();
+      city = city.Trim();
       country = country?.Trim();
+      
+      if (string.IsNullOrWhiteSpace(street))
+         return Result<AddressVo>.Failure(CommonErrors.StreetIsRequired);
+      if (street.Length is < 2 or > 80)
+         return Result<AddressVo>.Failure(CommonErrors.InvalidStreet);
+      
+      if (string.IsNullOrWhiteSpace(postalCode))
+         return Result<AddressVo>.Failure(CommonErrors.PostalCodeIsRequired);
+      if (postalCode.Length is < 2 or > 10)
+         return Result<AddressVo>.Failure(CommonErrors.InvalidPostalCode);
 
-      if (string.IsNullOrWhiteSpace(street)) {
-         error = CommonErrors.StreetIsRequired;
-         return default;
-      }
-      if (street.Length is < 2 or > 80) {
-         error = CommonErrors.InvalidStreet;
-         return default;
-      }
+      if (string.IsNullOrWhiteSpace(city))
+         return Result<AddressVo>.Failure(CommonErrors.CityIsRequired);
+      if (city.Length is < 2 or > 80)
+         return Result<AddressVo>.Failure(CommonErrors.InvalidCity);
 
-      if (string.IsNullOrWhiteSpace(postalCode)) {
-         error = CommonErrors.PostalCodeIsRequired;
-         return default;
-      }
-      if (postalCode.Length is < 2 or > 10) {
-         error = CommonErrors.InvalidPostalCode;
-         return default;
-      }
-
-      if (string.IsNullOrWhiteSpace(city)) {
-         error = CommonErrors.CityIsRequired;
-         return default;
-      }
-      if (city.Length is < 2 or > 80) {
-         error = CommonErrors.InvalidCity;
-         return default;
-      }
-
-      if (country?.Length is < 2 or > 80) {
-         error = CommonErrors.InvalidCountry;
-         return default;
-      }
-
-      error = null;
-      return (street, postalCode, city, country);
+      if (country?.Length is < 2 or > 80)
+         return Result<AddressVo>.Failure(CommonErrors.InvalidCountry);
+      
+      return Result<AddressVo>.Success(new AddressVo(street, postalCode, city, country));
    }
 }

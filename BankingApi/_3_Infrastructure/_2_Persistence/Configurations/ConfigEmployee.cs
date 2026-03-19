@@ -1,5 +1,5 @@
+using BankingApi._2_Core.BuildingBlocks._3_Domain.ValueObjects;
 using BankingApi._2_Core.Employees._3_Domain.Entities;
-using BankingApi._3_Infrastructure._2_Persistence.Converters;
 using BankingApi._3_Infrastructure._2_Persistence.Database.Converter;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
@@ -27,16 +27,6 @@ public sealed class ConfigEmployee(
       builder.Property(x => x.Lastname)
          .HasMaxLength(80)
          .IsRequired();
-      // Email   
-      builder.Property(x => x.Email)
-         .HasMaxLength(254)
-         .IsRequired();
-      // optional: unique index
-      builder.HasIndex(x => x.Email).IsUnique();
-      // Phone
-      builder.Property(x => x.Phone)
-         .HasMaxLength(64) 
-         .IsRequired(false);
       
       builder.Property(x => x.Subject)
          .HasMaxLength(200)
@@ -64,7 +54,19 @@ public sealed class ConfigEmployee(
       builder.Property(x => x.DeactivatedAt)
          .HasConversion(_dtConvNul)
          .IsRequired(false);
-      // Helpful index for "active employees"
-      builder.HasIndex(x => x.DeactivatedAt);
+      
+      builder.Property(e => e.EmailVo)
+         .HasConversion(vo => vo.Value, s => EmailVo.FromPersisted(s))
+         .IsRequired()
+         .HasColumnName("Email") // Die Spalte heißt "Email"
+         .HasMaxLength(254);
+      builder.HasIndex(c => c.EmailVo).IsUnique();
+      
+      // Phone
+      builder.Property(e => e.PhoneVo)
+         .HasConversion(vo => vo.Value, s => PhoneVo.FromPersisted(s))
+         .IsRequired()
+         .HasColumnName("Phone") // Die Spalte heißt "Email"
+         .HasMaxLength(64);
    }
 }

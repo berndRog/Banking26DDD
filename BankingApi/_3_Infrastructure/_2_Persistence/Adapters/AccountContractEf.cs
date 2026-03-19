@@ -2,6 +2,7 @@ using System.Runtime.CompilerServices;
 using BankingApi._2_Core.BuildingBlocks._1_Ports.Outbound;
 using BankingApi._2_Core.BuildingBlocks._3_Domain;
 using BankingApi._2_Core.BuildingBlocks.Utils;
+using BankingApi._2_Core.Payments;
 using BankingApi._2_Core.Payments._1_Ports.Inbound;
 using BankingApi._2_Core.Payments._1_Ports.Outbound;
 using BankingApi._2_Core.Payments._2_Application.Dtos;
@@ -10,6 +11,7 @@ using BankingApi._2_Core.Payments._3_Domain.Entities;
 using BankingApi._2_Core.Payments._3_Domain.Enums;
 using BankingApi._2_Core.Payments._3_Domain.Errors;
 using BankingApi._2_Core.Payments._3_Domain.ValueObjects;
+using IbanGenerator = BankingApi._2_Core.BuildingBlocks.Utils.IbanGenerator;
 [assembly: InternalsVisibleTo("BankingApiTest")]
 namespace BankingApi._3_Infrastructure._2_Persistence.Adapters;
 
@@ -49,17 +51,17 @@ internal class AccountContractEf(
       }
       
       // Create Iban VO
-      var resultIban = IbanCheck.Run(iban);
+      var resultIban = IbanVo.Create(iban);
       if(resultIban.IsFailure)
          return Result<AccountDto>.Failure(resultIban.Error);
-      iban = resultIban.Value;
+      var ibanVo = resultIban.Value;
       
       // Create initial account
       var balance = MoneyVo.Create(0m, Currency.EUR).Value; // initial balance is always 0 EUR
       
       var resultAccount = Account.Create(
          customerId: customerId,
-         iban: iban,
+         ibanVo: ibanVo,
          balanceVo: balance,
          createdAt: clock.UtcNow,
          id: accoutIdString

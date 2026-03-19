@@ -5,7 +5,7 @@ public sealed record EmployeeDto(
    string Firstname,
    string Lastname,
    string Email,
-   string? Phone,
+   string Phone,
    string PersonnelNumber,
    bool IsActive,
    int AdminRights

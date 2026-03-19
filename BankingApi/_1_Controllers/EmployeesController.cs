@@ -31,17 +31,9 @@ public sealed class EmployeesController(
       CancellationToken ct
    ) {
       const string context = $"{nameof(CustomersController)}.{nameof(CreateEmployeeAsync)}";
-      
+
       var result = await ucCreate.ExecuteAsync(
-         firstname: dto.Firstname,
-         lastname: dto.Lastname,
-         emailString: dto.Email,
-         phoneString: dto.Phone,
-         personnelNumber: dto.PersonnelNumber,
-         subject: subject, // in real scenario, subject should come from auth token or be generated in use case
-         adminRights:  (AdminRights) dto.AdminRights, 
-         isActive: dto.IsActive,
-         id: dto.Id.ToString(),
+         employeeDto: dto,
          ct: ct
       );
       

@@ -5,6 +5,7 @@ using BankingApi._2_Core.BuildingBlocks._3_Domain.ValueObjects;
 using BankingApi._2_Core.Customers._3_Domain.Entities;
 using BankingApi._2_Core.Employees._3_Domain.Entities;
 using BankingApi._2_Core.Employees._3_Domain.Enums;
+using BankingApi._2_Core.Payments;
 using BankingApi._2_Core.Payments._3_Domain.Entities;
 using BankingApi._2_Core.Payments._3_Domain.Enums;
 using BankingApi._2_Core.Payments._3_Domain.ValueObjects;
@@ -60,6 +61,7 @@ public sealed class Seed(
    
    public AddressVo Address6
       => AddressVo.Create("Am Markt 14", "04109", "Leipzig", "DE").GetValueOrThrow();
+  
    public AddressVo AddressReg
       => AddressVo.Create("Allertalweg. 2", "29227", "Celle", "DE").GetValueOrThrow();
    #endregion
@@ -703,21 +705,21 @@ public sealed class Seed(
       string personnelNumber,
       AdminRights adminRights
    ) {
-      var resultEmail = EmailCheck.Run(email);
+      var resultEmail = EmailVo.Create(email);
       if (resultEmail.IsFailure)
          throw new Exception($"Invalid email in test seed: {email}");
-      email = resultEmail.Value;
+      var emailVo = resultEmail.Value;
 
-      var resultPhone = PhoneCheck.Run(phone);
+      var resultPhone = PhoneVo.Create(phone);
       if (resultPhone.IsFailure)
          throw new Exception($"Invalid phone number in test seed: {phone}");
-      phone = resultPhone.Value;
+      var phoneVo = resultPhone.Value;
 
       var result = Employee.Create(
          firstname: firstname,
          lastname: lastname,
-         email: email,
-         phone: phone,
+         emailVo: emailVo,
+         phoneVo: phoneVo,
          subject: subject,
          personnelNumber: personnelNumber,
          adminRights: adminRights,
@@ -736,16 +738,16 @@ public sealed class Seed(
       string subject,
       AddressVo addressVo
    ) {
-      var resultEmail = EmailCheck.Run(email);
+      var resultEmail = EmailVo.Create(email);
       if (resultEmail.IsFailure)
          throw new Exception($"Invalid email in test seed: {email}");
-      email = resultEmail.Value;
+      var emailVo = resultEmail.Value;
 
       var result = Customer.Create(
          firstname: firstname,
          lastname: lastname,
          companyName: companyName,
-         email: email,
+         emailVo: emailVo,
          subject: subject,
          id: id,
          createdAt: clock.UtcNow,
@@ -761,10 +763,10 @@ public sealed class Seed(
       string iban,
       decimal balanceDecimal
    ) {
-      var resultIban = IbanCheck.Run(iban);
+      var resultIban = IbanVo.Create(iban);
       if (resultIban.IsFailure)
          throw new Exception($"Invalid iban in test seed: {iban}");
-      iban = resultIban.Value;
+      var ibanVo = resultIban.Value;
       
       var resultBalance = MoneyVo.Create(balanceDecimal, Currency.EUR);
       if (resultBalance.IsFailure)
@@ -773,7 +775,7 @@ public sealed class Seed(
 
       var result = Account.Create(
          customerId: customerId,
-         iban: iban,
+         ibanVo: ibanVo,
          balanceVo: balance,
          createdAt: clock.UtcNow,
          id: id
@@ -787,15 +789,16 @@ public sealed class Seed(
       string name,
       string iban
    ) {
-      var resultIban = IbanCheck.Run(iban);
+
+      var resultIban = IbanVo.Create(name);
       if (resultIban.IsFailure)
          throw new Exception($"Invalid iban in test seed: {iban}");
-      iban = resultIban.Value;
+      var ibanVo = resultIban.Value;
       
       var result = Beneficiary.Create(
          accountId: accountId,
          name: name,
-         iban: iban,
+         ibanVo: ibanVo,
          id: id
       );
       return result.Value!;

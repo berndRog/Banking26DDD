@@ -16,7 +16,7 @@ public interface IAccountRepository {
 
    // Load an account using an IBAN value object
    Task<Account?> FindByIbanAsync(
-      string iban,
+      IbanVo ibanVo,
       CancellationToken ct = default
    );
 

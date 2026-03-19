@@ -11,7 +11,7 @@ public static class CustomerMappings {
       Lastname:    customer.Lastname,
       CompanyName: customer.CompanyName,
       StatusInt: (int) customer.Status,
-      Email: customer.Email,
+      Email: customer.EmailVo.Value,
       AddressDto: customer.AddressVo.ToAddressDto()
    );
    
@@ -32,7 +32,7 @@ public static class CustomerMappings {
       AuditedByEmployeeId: customer.AuditedByEmployeeId,
       DeactivatedAt: customer.DeactivatedAt?.ToString("O"),
       DeactivatedByEmployeeId: customer.DeactivatedByEmployeeId,
-      Email: customer.Email,
+      Email: customer.EmailVo.Value,
       AddressDto: customer.AddressVo.ToAddressDto()
    );
 

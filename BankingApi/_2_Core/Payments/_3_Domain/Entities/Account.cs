@@ -8,7 +8,7 @@ public sealed class Account : AggregateRoot {
    
    //--- Properties ------------------------------------------------------------
    // IBAN as a domain value object.
-   public string Iban { get; private set; } = default!;
+   public IbanVo IbanVo { get; private set; } = default!;
    
    // Account balance as a domain value object.
    public MoneyVo BalanceVo { get; private set; } = default!;
@@ -37,12 +37,12 @@ public sealed class Account : AggregateRoot {
    private Account(
       Guid id,
       Guid customerId,
-      string iban,
+      IbanVo ibanVo,
       MoneyVo balanceVo
    ) : base() {
       Id = id;
       CustomerId = customerId;
-      Iban = iban;
+      IbanVo = ibanVo;
       BalanceVo = balanceVo;
    }
 
@@ -50,7 +50,7 @@ public sealed class Account : AggregateRoot {
    // Static factory method to create a new account for an existing cutomer.
    public static Result<Account> Create(
       Guid customerId,
-      string? iban,
+      IbanVo ibanVo,
       MoneyVo balanceVo,
       DateTimeOffset createdAt,
       string? id = null
@@ -58,20 +58,7 @@ public sealed class Account : AggregateRoot {
       // invariant: customerId must be valid
       if (customerId == Guid.Empty)
          return Result<Account>.Failure(AccountErrors.InvalidOwnerId);
-
-      string validIban = ""; 
-      if (string.IsNullOrEmpty(iban)) {
-         // Create a ne valid Iban for DE   
-         
-      }
-      else if (iban.Contains("XX")) {
-         
-      }
-      else {
-         var resultIban = IbanCheck.Run(iban);
-         if (resultIban.IsFailure) return Result<Account>.Failure(resultIban.Error);
-         iban = resultIban.Value;
-      }
+      
       
       var idResult = Entity.Resolve(id, AccountErrors.InvalidId);
       if (idResult.IsFailure)
@@ -82,7 +69,7 @@ public sealed class Account : AggregateRoot {
       var account = new Account(
          id: accountId, 
          customerId: customerId, 
-         iban: validIban, 
+         ibanVo: ibanVo, 
          balanceVo: balanceVo
       );
       
@@ -194,7 +181,7 @@ public sealed class Account : AggregateRoot {
       DateTimeOffset updatedAt
    ) {
       // check for duplicate IBANs
-      if (_beneficiaries.Any(b => b.Iban.Equals(beneficiary.Iban)))
+      if (_beneficiaries.Any(b => b.IbanVo.Equals(beneficiary.IbanVo)))
          return Result<Beneficiary>.Failure(BeneficiaryErrors.IbanAlreadyRegistred);
       
       // add to collection

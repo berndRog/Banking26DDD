@@ -49,31 +49,27 @@ public class CustomerUcCreateProvision(
       }
 
       // interpret preferred_username as initial email
-      var resultEmail = EmailCheck.Run(username);
+      var resultEmail = EmailVo.Create(username);
       if (resultEmail.IsFailure)
          return Result<CustomerProvisionDto>.Failure(resultEmail.Error);
-      var email = resultEmail.Value;
+      var emailVo = resultEmail.Value;
 
       // check uniqueness
-      var existingWithEmail = await repository.FindByEmailAsync(email, ct);
+      var existingWithEmail = await repository.FindByEmailAsync(emailVo, ct);
       if (existingWithEmail is not null)
          return Result<CustomerProvisionDto>.Failure(CustomerErrors.EmailAlreadyInUse);
       
       // 4) create aggregate
       var resultCustomer = Customer.CreateProvision(
          subject: subject,
-         firstname: customerDto.Firstname,
-         lastname: customerDto.Lastname,
-         companyName: customerDto.CompanyName,
-         email: email,
-         addressVo: customerDto.AddressDto.ToAddressVo(),
+         emailVo: emailVo,
          createdAt: createdAt,
          id: customerDto.Id.ToString()
       );
       if (resultCustomer.IsFailure)
          return Result<CustomerProvisionDto>.Failure(resultCustomer.Error)
             .LogIfFailure(logger, "CustomerUcCreateProvision.DomainRejected", 
-               new { subject, email = email, createdAt, customerDto.Id });
+               new { subject, emailVo, createdAt, customerDto.Id });
 
       // 5) add to repository
       var customer = resultCustomer.Value;

@@ -30,7 +30,7 @@ public sealed class CustomerRepositoryIntT : TestBaseIntegration {
       Equal(customer.Id, actual.Id);
       Equal(customer.Firstname, actual.Firstname);
       Equal(customer.Lastname, actual.Lastname);
-      Equal(customer.Email, actual.Email);
+      Equal(customer.EmailVo, actual.EmailVo);
       Equal(customer.AddressVo, actual.AddressVo);
    }
 
@@ -63,7 +63,7 @@ public sealed class CustomerRepositoryIntT : TestBaseIntegration {
       Equal(customer.Id, actual.Id);
       Equal(customer.Firstname, actual.Firstname);
       Equal(customer.Lastname, actual.Lastname);
-      Equal(customer.Email, actual.Email);
+      Equal(customer.EmailVo, actual.EmailVo);
       Equal(customer.AddressVo, actual.AddressVo);
    }
 
@@ -107,7 +107,7 @@ public sealed class CustomerRepositoryIntT : TestBaseIntegration {
       dbContext.ChangeTracker.Clear();
 
       var customer = customers[2]; // Customer3
-      var emailVo = customer.Email;
+      var emailVo = customer.EmailVo;
 
       // Act
       var actual = await repository.FindByEmailAsync(emailVo, ct);
@@ -119,7 +119,7 @@ public sealed class CustomerRepositoryIntT : TestBaseIntegration {
       Equal(customer.Lastname, actual.Lastname);
       Equal(customer.CompanyName, actual.CompanyName);
       Equal(customer.AddressVo, actual.AddressVo);
-      Equal(customer.Email, actual.Email);
+      Equal(customer.EmailVo, actual.EmailVo);
       Equal(customer.AddressVo, actual.AddressVo);
    }
    

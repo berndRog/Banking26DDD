@@ -15,7 +15,6 @@ public class EmployeeUcCreateProvision(
    IIdentityGateway identityGateway,
    IEmployeeRepository repository,
    IUnitOfWork unitOfWork,
-   IClock clock,
    ILogger<EmployeeUcCreateProvision> logger
 ) {
    public async Task<Result<EmployeeProvisionDto>> ExecuteAsync(
@@ -49,19 +48,19 @@ public class EmployeeUcCreateProvision(
       }
 
       // interpret preferred_username as initial email
-      var resultEmail = EmailCheck.Run(username);
+      var resultEmail = EmailVo.Create(username);
       if (resultEmail.IsFailure)
          return Result<EmployeeProvisionDto>.Failure(resultEmail.Error);
-      var email = resultEmail.Value;
+      var emailVo = resultEmail.Value;
 
       // check uniqueness
-      var existingWithEmail = await repository.FindByEmailAsync(email, ct);
+      var existingWithEmail = await repository.FindByEmailAsync(emailVo, ct);
       if (existingWithEmail is not null)
          return Result<EmployeeProvisionDto>.Failure(EmployeeErrors.EmailAlreadyInUse);
 
       // 4) create aggregate
       var resultEmployee = 
-         Employee.CreateProvisioned(clock, subject, email, createdAt, adminRights, id);
+         Employee.CreateProvision(subject, emailVo, createdAt, adminRights, id);
       if (resultEmployee.IsFailure)
          return Result<EmployeeProvisionDto>.Failure(resultEmployee.Error);
 

@@ -41,7 +41,7 @@ public sealed class AccountsControllerEndToEnd : TestBaseEndToEnd {
       // Act
       var requestAccountDto = new AccountDto(
          Id: account2.Id,
-         Iban: account2.Iban,
+         Iban: account2.IbanVo.Value,
          BalanceDecimal: account2.BalanceVo.Amount,
          CurrencyInt: (int)account2.BalanceVo.Currency, // "EUR",
          CustomerId: account2.CustomerId
@@ -60,7 +60,7 @@ public sealed class AccountsControllerEndToEnd : TestBaseEndToEnd {
          await responsePostAccount.Content.ReadFromJsonAsync<AccountDto>(ct); 
       NotNull(account2Dto);
       Equal(account2.Id, account2Dto.Id);
-      Equal(account2.Iban, account2Dto.Iban);
+      Equal(account2.IbanVo.Value, account2Dto.Iban);
       Equal(account2.BalanceVo.Amount, account2Dto.BalanceDecimal);
       Equal((int)account2.BalanceVo.Currency, account2Dto.CurrencyInt);
       Equal(account2.CustomerId, account2Dto.CustomerId);
@@ -85,7 +85,7 @@ public sealed class AccountsControllerEndToEnd : TestBaseEndToEnd {
          
          var actualAccount2 = accounts[1];
          Equal(account2.Id, actualAccount2.Id);
-         Equal(account2.Iban, actualAccount2.Iban);
+         Equal(account2.IbanVo, actualAccount2.IbanVo);
          Equal(account2.BalanceVo.Amount, actualAccount2.BalanceVo.Amount);
          Equal(account2.BalanceVo.Currency, actualAccount2.BalanceVo.Currency);
          Equal(account2.CustomerId, actualAccount2.CustomerId);
@@ -127,7 +127,7 @@ public sealed class AccountsControllerEndToEnd : TestBaseEndToEnd {
       NotNull(accountDto);
       
       Equal(account2.Id, accountDto.Id);
-      Equal(account2.Iban, accountDto.Iban);
+      Equal(account2.IbanVo.Value, accountDto.Iban);
       
       // Assert (HTTP)
       True(
@@ -146,7 +146,7 @@ public sealed class AccountsControllerEndToEnd : TestBaseEndToEnd {
             .FirstOrDefaultAsync(a => a.Id == accountId, ct);
          
          Equal(account2.Id, actualAccount?.Id);
-         Equal(account2.Iban, actualAccount?.Iban);
+         Equal(account2.IbanVo, actualAccount?.IbanVo);
          Equal(account2.BalanceVo.Amount, actualAccount?.BalanceVo.Amount);
          Equal(account2.BalanceVo.Currency, actualAccount?.BalanceVo.Currency);
          Equal(account2.CustomerId, actualAccount?.CustomerId);
@@ -177,7 +177,7 @@ public sealed class AccountsControllerEndToEnd : TestBaseEndToEnd {
       // Act
       var request = new HttpRequestMessage(
          method: HttpMethod.Get,
-         requestUri: $"/bankingapi/v1/accounts/iban/{account2.Iban}"
+         requestUri: $"/bankingapi/v1/accounts/iban/{account2.IbanVo}"
       );
       request.Headers.Add(TestAuthHandler.Header, "Customer");
 
@@ -187,7 +187,7 @@ public sealed class AccountsControllerEndToEnd : TestBaseEndToEnd {
       NotNull(accountDto);
       
       Equal(account2.Id, accountDto.Id);
-      Equal(account2.Iban, accountDto.Iban);
+      Equal(account2.IbanVo.Value, accountDto.Iban);
       
       // Assert (HTTP)
       True(
@@ -203,10 +203,10 @@ public sealed class AccountsControllerEndToEnd : TestBaseEndToEnd {
          // Domain-level checks
          var actualAccount = await dbContext.Accounts
             .AsNoTracking()
-            .FirstOrDefaultAsync(a => a.Iban == account2.Iban, ct);
+            .FirstOrDefaultAsync(a => a.IbanVo == account2.IbanVo, ct);
          
          Equal(account2.Id, actualAccount?.Id);
-         Equal(account2.Iban, actualAccount?.Iban);
+         Equal(account2.IbanVo, actualAccount?.IbanVo);
          Equal(account2.BalanceVo, actualAccount?.BalanceVo);
          Equal(account2.CustomerId, actualAccount?.CustomerId);
       });

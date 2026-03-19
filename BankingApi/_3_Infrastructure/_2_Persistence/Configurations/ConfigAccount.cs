@@ -1,4 +1,5 @@
 using BankingApi._2_Core.Payments._3_Domain.Entities;
+using BankingApi._2_Core.Payments._3_Domain.ValueObjects;
 using BankingApi._3_Infrastructure._2_Persistence.Converters;
 using BankingApi._3_Infrastructure._2_Persistence.Database.Converter;
 using Microsoft.EntityFrameworkCore;
@@ -16,12 +17,6 @@ public sealed class ConfigAccount(
       // key
       builder.HasKey(a => a.Id);
       builder.Property(a => a.Id).ValueGeneratedNever();
-
-      builder.Property(a => a.Iban)
-         .HasMaxLength(34)
-         .IsRequired();
-      builder.HasIndex(a => a.Iban)
-         .IsUnique();
       
       // audit fields
       builder.Property(a => a.CreatedAt)
@@ -40,7 +35,18 @@ public sealed class ConfigAccount(
          .HasConversion(dtConv)
          .IsRequired(false);
 
-
+      builder.Property(a => a.IbanVo)
+         .HasMaxLength(34)
+         .IsRequired();
+      builder.HasIndex(a => a.IbanVo)
+         .IsUnique();
+      
+      builder.Property(a => a.IbanVo)
+         .HasConversion(vo => vo.Value, s => IbanVo.FromPersisted(s))
+         .IsRequired()
+         .HasColumnName("Iban") 
+         .HasMaxLength(50);
+      builder.HasIndex(c => c.IbanVo).IsUnique();
 
       builder.OwnsOne(a => a.BalanceVo, b => {
          b.Property(p => p.Amount)

@@ -10,11 +10,6 @@ using BankingApi._2_Core.Employees._3_Domain.Errors;
 using Microsoft.EntityFrameworkCore;
 [assembly: InternalsVisibleTo("BankingApiTest")]
 namespace BankingApi._3_Infrastructure._2_Persistence.ReadModel;
-
-interface IInterface {
-   
-}
-
 sealed class EmployeeReadModelEf(
    IEmployeesDbContext employeesDbContext,
    IIdentityGateway identityGateway
@@ -80,14 +75,14 @@ sealed class EmployeeReadModelEf(
       string email,
       CancellationToken ct
    ) {
-      var resultEmail = EmailCheck.Run(email);
+      var resultEmail = EmailVo.Create(email);
       if (resultEmail.IsFailure)
          return Result<EmployeeDto>.Failure(resultEmail.Error);
-      email = resultEmail.Value;
+      var emailVo = resultEmail.Value;
       
       var employeeDto = await employeesDbContext.Employees
          .AsNoTracking()
-         .Where(c => c.Email == email)   // filter by email
+         .Where(c => c.EmailVo == emailVo)   // filter by email
          .Select(c => c.ToEmployeeDto()) // projection
          .SingleOrDefaultAsync( ct);
       

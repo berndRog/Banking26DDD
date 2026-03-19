@@ -28,36 +28,32 @@ internal sealed class CustomerUcCreate(
       string? ibanString = null,
       CancellationToken ct = default
    ) {
-      var firstname = customerDto.Firstname.Trim();
-      var lastname = customerDto.Lastname.Trim();
-      var companyName = customerDto.CompanyName?.Trim();
       if (customerDto.AddressDto is null)
          return Result<CustomerDto>.Failure(CustomerErrors.AddressIsRequired);
       
-      // 1) subject required
+      // subject required
       var resultSubject = SubjectCheck.Run(identityGateway.Subject);
       if (resultSubject.IsFailure) 
          return Result<CustomerDto>.Failure(resultSubject.Error);
       var subject = resultSubject.Value;
       
       // create email value object (domain logic inside)
-      var emailString = customerDto.Email;
-      var resultEmail = EmailCheck.Run(emailString);
-      if (resultEmail.IsFailure)
-         return Result<CustomerDto>.Failure(resultEmail.Error);
-      var emailVo = resultEmail.Value;
+      var resultDtoEmail = EmailVo.Create(customerDto.Email);
+      if (resultDtoEmail.IsFailure)
+         return Result<CustomerDto>.Failure(resultDtoEmail.Error);
+      var emailDtoVo = resultDtoEmail.Value;
       
       // check email uniqueness
-      if (await repository.FindByEmailAsync(emailVo, ct) != null) {
+      if (await repository.FindByEmailAsync(emailDtoVo, ct) != null) {
          return Result<CustomerDto>.Failure(CustomerErrors.EmailMustBeUnique);
       }
       
       // create aggregate (domain logic inside)
       var result = Customer.Create(
-         firstname: firstname, 
-         lastname: lastname,  
-         companyName: companyName, 
-         email: emailVo,
+         firstname: customerDto.Firstname, 
+         lastname: customerDto.Lastname,  
+         companyName: customerDto.CompanyName, 
+         emailVo: emailDtoVo,
          subject: subject, 
          createdAt: clock.UtcNow,
          id: customerDto.Id.ToString(),

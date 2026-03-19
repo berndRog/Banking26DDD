@@ -37,12 +37,8 @@ public sealed class CustomerUcCreateProvisionIntT : TestBaseIntegration {
       NotNull(actual);
 
       Equal(customerId, actual.Id);
-      Equal(customer.Firstname, actual.Firstname);
-      Equal(customer.Lastname, actual.Lastname);
-      Equal(customer.CompanyName, actual.CompanyName);
-      Equal(customer.AddressVo, actual.AddressVo);
       Equal(identity.Subject, actual.Subject);
-      Equal(identity.Username, actual.Email);
+      Equal(identity.Username, actual.EmailVo.Value);
       Equal(identity.CreatedAt, actual.CreatedAt);
    }
 

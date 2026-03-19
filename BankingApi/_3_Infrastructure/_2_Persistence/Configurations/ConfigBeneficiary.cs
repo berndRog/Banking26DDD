@@ -1,4 +1,5 @@
 using BankingApi._2_Core.Payments._3_Domain.Entities;
+using BankingApi._2_Core.Payments._3_Domain.ValueObjects;
 using BankingApi._3_Infrastructure._2_Persistence.Converters;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
@@ -21,19 +22,23 @@ internal sealed class ConfigBeneficiary : IEntityTypeConfiguration<Beneficiary> 
          .IsRequired();
 
       builder.Property(x => x.Name)
-         .HasMaxLength(200)
+         .HasMaxLength(160)
          .IsRequired();
 
-      builder.Property(a => a.Iban)
-         .HasMaxLength(34)
-         .IsRequired();
+      builder.Property(a => a.IbanVo)
+         .HasConversion(vo => vo.Value, s => IbanVo.FromPersisted(s))
+         .IsRequired()
+         .HasColumnName("Iban") 
+         .HasMaxLength(50);
+      builder.HasIndex(c => c.IbanVo).IsUnique();
+
       
       // Indexes
       builder.HasIndex(x => x.AccountId);
 
       // Prevent duplicate beneficiaries per account
-      builder.HasIndex(x => new { x.AccountId, Iban = x.Iban })
-         .IsUnique();
+      // builder.HasIndex(x => new { x.AccountId, Iban = x.Iban })
+      //    .IsUnique();
    }
 }
 

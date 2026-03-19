@@ -16,7 +16,7 @@ public class EmployeeUcUpdateProfile(
    ILogger<EmployeeUcUpdateProfile> logger
 ) {
    public async Task<Result<EmployeeDto>> ExecuteAsync(
-      EmployeeDto dto,
+      EmployeeDto employeeDto,
       CancellationToken ct
    ) {
       // subject from gateway
@@ -29,37 +29,36 @@ public class EmployeeUcUpdateProfile(
       var employee = await repository.FindByIdentitySubjectAsync(subject, ct);
       if (employee is null)
          return Result<EmployeeDto>.Failure(EmployeeErrors.NotProvisioned);
-      
+
       // override email address (if changed) 
-      var email = employee.Email;
-      if (!string.Equals(email, dto.Email, StringComparison.OrdinalIgnoreCase)) {
-         // create new email value object from dto.Email
-         var resultDtoEmail = EmailCheck.Run(dto.Email);
-         if (resultDtoEmail.IsFailure)
-            return Result<EmployeeDto>.Failure(resultDtoEmail.Error);
+      var email = employee.EmailVo.Value;
+      var resultDtoEmail = EmailVo.Create(employeeDto.Email);
+      if (resultDtoEmail.IsFailure)
+         return Result<EmployeeDto>.Failure(resultDtoEmail.Error);
+      var emailVoDto = resultDtoEmail.Value;
+      var emailDto = emailVoDto.Value;
+
+      if (!string.Equals(email, emailDto, StringComparison.OrdinalIgnoreCase)) {
          // check uniqueness
-         var existingByEmail = await repository.FindByEmailAsync(resultDtoEmail.Value, ct);
+         var existingByEmail = await repository.FindByEmailAsync(emailVoDto, ct);
          if (existingByEmail is not null && existingByEmail.Id != employee.Id)
             return Result<EmployeeDto>.Failure(EmployeeErrors.EmailAlreadyInUse);
          // override previous email
-         email = resultDtoEmail.Value;
+         email = emailDto;
       }
 
-      var phone = employee.Phone;
-      if(string.IsNullOrWhiteSpace(dto.Phone) == false) {
-         var resultPhone = PhoneCheck.Run(dto.Phone);
-         if (resultPhone.IsFailure)
-            return Result<EmployeeDto>.Failure(resultPhone.Error);
-         phone = resultPhone.Value;
-      }
-      
+      var resultPhone = PhoneVo.Create(employeeDto.Phone);
+      if (resultPhone.IsFailure)
+         return Result<EmployeeDto>.Failure(resultPhone.Error);
+      var phoneVo = resultPhone.Value;
+
       // domain update (now includes country)
       var updateResult = employee.UpdateProfile(
-         firstname: dto.Firstname,
-         lastname: dto.Lastname,
-         email: email,
-         phone: phone,
-         personnelNumber: dto.PersonnelNumber,
+         firstname: employeeDto.Firstname,
+         lastname: employeeDto.Lastname,
+         emailVo: emailVoDto,
+         phoneVo: phoneVo,
+         personnelNumber: employeeDto.PersonnelNumber,
          updatedAt: clock.UtcNow
       );
       if (updateResult.IsFailure)

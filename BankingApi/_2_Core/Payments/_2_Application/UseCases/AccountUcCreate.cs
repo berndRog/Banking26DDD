@@ -39,15 +39,15 @@ public sealed class AccountUcCreate(
       var balanceVo = resultMoney.Value;
       
       // domain   
-      var resultIban = IbanCheck.Run(iban);
+      var resultIban = IbanVo.Create(iban);
       if (resultIban.IsFailure)
          return Result<AccountDto>.Failure(AccountErrors.InvalidIban);
-      iban = resultIban.Value;
+      var ibanVo = resultIban.Value;
       
       // create enitity
       var result = Account.Create(
          customerId: customerId,
-         iban: iban, 
+         ibanVo: ibanVo, 
          balanceVo: balanceVo, 
          createdAt: clock.UtcNow,
          id: id

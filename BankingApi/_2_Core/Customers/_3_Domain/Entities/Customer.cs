@@ -18,17 +18,19 @@ public sealed class Customer : AggregateRoot {
    public string Firstname { get; private set; } = string.Empty;
    public string Lastname { get; private set; } = string.Empty;
    public string? CompanyName { get; private set; }
-   public string Email { get; private set; } = default!;
-   
+     
    // Display name used in UIs and documents (derived, not persisted)
    public string DisplayName => CompanyName ?? $"{Firstname} {Lastname}";
 
-   // Subject identifier from the identity provider (OIDC / OAuth)
-   public string Subject { get; private set; } = default!;
+   // Value Objects EmailVo
+   public EmailVo EmailVo { get; private set; } = default!;
 
    // Status (business lifecycle)
    public CustomerStatus Status { get; private set; } = CustomerStatus.Pending;
 
+   // Value Object AddressVo
+   public AddressVo AddressVo { get; private set; } = default!; 
+   
    // Employee decisions (audit facts)
    public DateTimeOffset? ActivatedAt { get; private set; }
    public DateTimeOffset? RejectedAt { get; private set; }
@@ -37,16 +39,16 @@ public sealed class Customer : AggregateRoot {
 
    public DateTimeOffset? DeactivatedAt { get; private set; }
    public Guid? DeactivatedByEmployeeId { get; private set; }
-
-   // Value Objects
-   public AddressVo AddressVo { get; private set; } = default!;
-
+   
+   // Subject identifier from the identity provider (OIDC / OAuth)
+   public string Subject { get; private set; } = default!;
+   
    // Derived state (read convenience, not persisted)
    public bool IsProfileComplete =>
       !string.IsNullOrWhiteSpace(Firstname) &&
       !string.IsNullOrWhiteSpace(Lastname) &&
       !string.IsNullOrWhiteSpace(Subject) &&
-      !string.IsNullOrWhiteSpace(Email) &&
+      !string.IsNullOrWhiteSpace(EmailVo.Value) &&
       !string.IsNullOrWhiteSpace(AddressVo.Street) &&
       !string.IsNullOrWhiteSpace(AddressVo.PostalCode) &&
       !string.IsNullOrWhiteSpace(AddressVo.City);
@@ -61,20 +63,21 @@ public sealed class Customer : AggregateRoot {
    }
 
    // Domain constructor (used by factories)
+   [System.Diagnostics.CodeAnalysis.SetsRequiredMembers]
    private Customer(
       Guid id,
       string firstname,
       string lastname,
       string? companyName,
       string subject,
-      string email,
+      EmailVo emailVo,
       AddressVo addressVo
    ) {
       Id = id;
       Firstname = firstname;
       Lastname = lastname;
       CompanyName = companyName;
-      Email = email;
+      EmailVo = emailVo;
       Subject = subject;
       AddressVo = addressVo;
    }
@@ -86,7 +89,7 @@ public sealed class Customer : AggregateRoot {
       string lastname,
       string? companyName,
       string subject,
-      string email,
+      EmailVo emailVo,
       AddressVo addressVo,
       DateTimeOffset createdAt = default!,
       string? id = null
@@ -95,7 +98,6 @@ public sealed class Customer : AggregateRoot {
       firstname = firstname.Trim();
       lastname = lastname.Trim();
       companyName = companyName?.Trim();
-      email = email.Trim();
 
       // Validate basic fields
       if (string.IsNullOrWhiteSpace(firstname))
@@ -110,12 +112,7 @@ public sealed class Customer : AggregateRoot {
 
       if (!string.IsNullOrWhiteSpace(companyName) && companyName.Length is < 2 or > 80)
          return Result<Customer>.Failure(CustomerErrors.InvalidCompanyName);
-
-      var resultEmail = EmailCheck.Run(email);
-      if (resultEmail.IsFailure)
-         return Result<Customer>.Failure(resultEmail.Error);
-      email = resultEmail.Value;
-
+      
       var resultSubject = SubjectCheck.Run(subject);
       if (resultSubject.IsFailure)
          return Result<Customer>.Failure(resultSubject.Error);
@@ -132,7 +129,7 @@ public sealed class Customer : AggregateRoot {
          lastname: lastname,
          companyName: companyName,
          subject: resultSubject.Value,
-         email: email,
+         emailVo: emailVo,
          addressVo: addressVo
       );
 
@@ -149,52 +146,31 @@ public sealed class Customer : AggregateRoot {
    // Create an owner on first login (provisioning).
    public static Result<Customer> CreateProvision(
       string subject,
-      string firstname,
-      string lastname,
-      string? companyName,
-      string email,
-      AddressVo addressVo,
+      EmailVo emailVo,
       DateTimeOffset createdAt = default!,
       string? id = null
    ) {
-      firstname = firstname.Trim();
-      lastname = lastname.Trim();
-      companyName = companyName?.Trim();
-
-      if (createdAt == default)
-         return Result<Customer>.Failure(CustomerErrors.CreatedAtIsRequired);
-      if (string.IsNullOrWhiteSpace(firstname))
-         return Result<Customer>.Failure(CustomerErrors.FirstnameIsRequired);
-      if (firstname.Length is < 2 or > 80)
-         return Result<Customer>.Failure(CustomerErrors.InvalidFirstname);
-
-      if (string.IsNullOrWhiteSpace(lastname))
-         return Result<Customer>.Failure(CustomerErrors.LastnameIsRequired);
-      if (lastname.Length is < 2 or > 80)
-         return Result<Customer>.Failure(CustomerErrors.InvalidLastname);
-
-      if (!string.IsNullOrWhiteSpace(companyName) && companyName.Length is < 2 or > 80)
-         return Result<Customer>.Failure(CustomerErrors.InvalidCompanyName);
       
-      var resultEmail = EmailCheck.Run(email);
-      if (resultEmail.IsFailure)
-         return Result<Customer>.Failure(resultEmail.Error);
-      email = resultEmail.Value;
-      
-
       var resultId = Resolve(id, CustomerErrors.InvalidId);
       if (resultId.IsFailure)
          return Result<Customer>.Failure(resultId.Error);
       var customerId = resultId.Value;
 
+      var addressVo = AddressVo.Create(
+         street: "unknown",
+         postalCode: "unknown",
+         city: "unknown",
+         country: null
+      ).Value;
+      
       // Provisioned customer starts with identity data plus required business profile data.
       var customer = new Customer(
          id: customerId,
-         firstname: firstname,
-         lastname: lastname,
-         companyName: companyName,
+         firstname: "unknown",
+         lastname: "unknown",
+         companyName: null,
          subject: subject,
-         email: email,
+         emailVo: emailVo,
          addressVo: addressVo
       );
 
@@ -212,7 +188,7 @@ public sealed class Customer : AggregateRoot {
       string firstname,
       string lastname,
       string? companyName,
-      string email,
+      EmailVo emailVo,
       AddressVo addressVo,
       DateTimeOffset updatedAt
    ) {
@@ -241,7 +217,7 @@ public sealed class Customer : AggregateRoot {
       Firstname = firstname;
       Lastname = lastname;
       CompanyName = companyName;
-      Email = email;
+      EmailVo = emailVo;
       AddressVo = addressVo;
 
       // SELF-SERVICE: if profile is complete, we auto-activate the owner without employee involvement.
@@ -337,7 +313,7 @@ public sealed class Customer : AggregateRoot {
    public Result Update(
       string? lastname,
       string? companyName,
-      string? email,
+      EmailVo? emailVo,
       AddressVo? addressVo,
       DateTimeOffset updatedAt
    ) {
@@ -355,10 +331,15 @@ public sealed class Customer : AggregateRoot {
       if (!string.IsNullOrWhiteSpace(companyName) && companyName.Length is < 2 or > 80)
          return Result.Failure(CustomerErrors.InvalidCompanyName);
 
+      // var resultEmail = EmailVo.Create(email);
+      // if (resultEmail.IsFailure)
+      //    return Result.Failure(resultEmail.Error);
+      // var emailVo = resultEmail.Value;
+      
       // Apply changes
       if (lastname is not null) Lastname = lastname;
       if (companyName is not null) CompanyName = companyName;
-      if (email is not null) Email = email;
+      if (emailVo is not null) EmailVo = emailVo;
       if (addressVo is not null) AddressVo = addressVo;
 
       Touch(updatedAt);

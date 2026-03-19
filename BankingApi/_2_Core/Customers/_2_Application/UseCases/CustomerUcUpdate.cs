@@ -28,7 +28,7 @@ public sealed class CustomerUcUpdateEmail(
       var resultEmail = customer.Update(
          lastname: customer.Lastname,
          companyName: customer.CompanyName,
-         email: customer.Email, 
+         emailVo: customer.EmailVo, 
          addressVo: customer.AddressVo,
          updatedAt: clock.UtcNow
       );

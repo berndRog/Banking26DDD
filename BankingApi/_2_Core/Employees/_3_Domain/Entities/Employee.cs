@@ -13,8 +13,8 @@ public sealed class Employee : AggregateRoot {
    // properties
    public string Firstname { get; private set; } = string.Empty;
    public string Lastname  { get; private set; } = string.Empty;
-   public string Email { get; private set; } = default!; 
-   public string? Phone { get; private set; } = null;
+   public EmailVo EmailVo { get; private set; } = default!;
+   public PhoneVo PhoneVo { get; private set; } = default!;
   
    public string  Subject { get; private set; } = default!; // IdentityAccessServer
    
@@ -39,8 +39,8 @@ public sealed class Employee : AggregateRoot {
       Guid id,
       string firstname,
       string lastname,
-      string email,
-      string? phone,
+      EmailVo emailVo,
+      PhoneVo phoneVo,
       string subject,
       string personnelNumber,
       AdminRights adminRights,
@@ -49,8 +49,8 @@ public sealed class Employee : AggregateRoot {
       Id = id;
       Firstname = firstname;
       Lastname  = lastname;
-      Email = email;
-      Phone = phone;
+      EmailVo = emailVo;
+      PhoneVo = phoneVo;
       Subject = subject;
       PersonnelNumber = personnelNumber;
       AdminRights = adminRights;
@@ -62,8 +62,8 @@ public sealed class Employee : AggregateRoot {
    public static Result<Employee> Create(
       string firstname,
       string lastname,
-      string email,
-      string? phone,
+      EmailVo emailVo,
+      PhoneVo phoneVo,
       string subject,
       string personnelNumber,
       AdminRights adminRights,
@@ -86,19 +86,7 @@ public sealed class Employee : AggregateRoot {
          return Result<Employee>.Failure(EmployeeErrors.LastnameIsRequired);
       if (lastname.Length is < 2 or > 80)
          return Result<Employee>.Failure(EmployeeErrors.InvalidFirstname);
-
-      var resultEmail = EmailCheck.Run(email);
-      if (resultEmail.IsFailure)
-         return Result<Employee>.Failure(resultEmail.Error);
-      email = resultEmail.Value;
       
-      if (phone is not null) {
-         var resultPhone = PhoneCheck.Run(phone);
-         if (resultPhone.IsFailure)
-            return Result<Employee>.Failure(resultPhone.Error);
-         phone = resultPhone.Value;
-      }
-
       // check required subject (identity)
       var resultSubject = SubjectCheck.Run(subject);
       if (resultSubject.IsFailure)
@@ -126,8 +114,8 @@ public sealed class Employee : AggregateRoot {
          id: localId, 
          firstname: firstname,
          lastname: lastname,
-         email: email,
-         phone: phone,
+         emailVo: emailVo,
+         phoneVo: phoneVo,
          subject: subject,
          personnelNumber: personnelNumber,
          adminRights: adminRights,
@@ -144,19 +132,15 @@ public sealed class Employee : AggregateRoot {
    // Create an employee on first login (provisioning).
    // - Only identity facts are known for sure (subject, email, createdAt).
    // - Business profile data is still missing and must be completed by the employee.
-   public static Result<Employee> CreateProvisioned(
-      IClock clock,
+   public static Result<Employee> CreateProvision(
       string subject,
-      string email,
+      EmailVo emailVo,
       DateTimeOffset createdAt,
       AdminRights adminRights = AdminRights.ViewReports,
       string? id = null
    ) {
       
-      var resultEmail = EmailCheck.Run(email);
-      if (resultEmail.IsFailure)
-         return Result<Employee>.Failure(resultEmail.Error);
-      email = resultEmail.Value;
+      var phoneVo = PhoneVo.Create("0111 2222 3333").Value;
       
       var resultSubject = SubjectCheck.Run(subject);
       if (resultSubject.IsFailure)
@@ -169,14 +153,14 @@ public sealed class Employee : AggregateRoot {
       // Provisioned owner starts with empty profile fields
       var employee = new Employee(
          id: resultId.Value,
-         firstname: string.Empty,
-         lastname: string.Empty,
-         email: email,
-         phone: null,
+         firstname: "unknown",
+         lastname: "unknown",
+         emailVo: emailVo,
+         phoneVo: phoneVo,
          subject: resultSubject.Value,
-         personnelNumber: string.Empty, 
+         personnelNumber: "unknown", 
          adminRights: adminRights,
-         isActive: true
+         isActive: false
       );
       
       // Provisioning should reflect identity creation time (not "now")
@@ -194,8 +178,8 @@ public sealed class Employee : AggregateRoot {
    public Result UpdateProfile(
       string firstname,
       string lastname,
-      string email,
-      string? phone,
+      EmailVo emailVo,
+      PhoneVo phoneVo,
       string personnelNumber,
       DateTimeOffset updatedAt
    ) {
@@ -222,8 +206,8 @@ public sealed class Employee : AggregateRoot {
       // Apply changes
       Firstname = firstname;
       Lastname  = lastname;
-      Email = email;
-      Phone = phone;
+      EmailVo = emailVo;
+      PhoneVo = phoneVo;
       PersonnelNumber = personnelNumber;
       
       Touch(updatedAt);

@@ -2,7 +2,7 @@ using System.Text;
 using BankingApi._2_Core.BuildingBlocks._3_Domain;
 using BankingApi._2_Core.BuildingBlocks._3_Domain.Enums;
 using BankingApi._2_Core.BuildingBlocks._3_Domain.Errors;
-namespace BankingApi._2_Core.Payments._3_Domain.ValueObjects;
+namespace BankingApiTest._2_Core;
 
 
 // IBAN value object (DE/AT/CH).
