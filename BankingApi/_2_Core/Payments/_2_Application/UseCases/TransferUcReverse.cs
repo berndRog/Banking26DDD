@@ -16,16 +16,18 @@ public sealed class TransferUcReverse(
 ) {
 
    public async Task<Result<TransferDto>> ExecuteAsync(
+      Guid accountId,
       Guid transferId,
       string purpose,
       CancellationToken ct = default
    ) {
 
       // load original transfer
-      var originalTransfer = await transferRepository.FindByIdAsync(transferId, ct);
+      var originalTransfer = await transferRepository.FindByIdAsync(accountId, transferId, ct);
       if (originalTransfer is null)
          return Result<TransferDto>.Failure(TransferErrors.OriginalTransferNotFound);
 
+      
       // load accounts
       // Reverse means: "from is now to" and  "to is now from"
       var toAccount = 
@@ -33,21 +35,25 @@ public sealed class TransferUcReverse(
       var fromAccount = 
          await accountRepository.FindByIdAsync(originalTransfer.ToAccountId, ct);
 
-      if (fromAccount is null || toAccount is null)
+      if (fromAccount is null)
          return Result<TransferDto>.Failure(TransferErrors.FromAccountNotFound);
+      if (toAccount is null)
+         return Result<TransferDto>.Failure(TransferErrors.ToAccountNotFound);
       
+      if(fromAccount.Id == accountId)
+         return Result<TransferDto>.Failure(TransferErrors.FromAccountIdMismatch);
 
       var toIbanVo = fromAccount.IbanVo;
       var beneficiary = fromAccount.Beneficiaries.FirstOrDefault(b => b.IbanVo == toIbanVo);
       var toName = beneficiary?.Name;
       
-      var now = clock.UtcNow;
+      var bookedAt = clock.UtcNow;
 
       // reverse booking: receiver -> sender
       var resultDebit = toAccount.PostDebit(
          amountVo: originalTransfer.AmountVo,
          purpose,
-         now
+         bookedAt
       );
       if (resultDebit.IsFailure)
          return Result<TransferDto>.Failure(resultDebit.Error!);
@@ -56,7 +62,7 @@ public sealed class TransferUcReverse(
       var resultCredit = fromAccount.PostCredit(
          amountVo: originalTransfer.AmountVo,
          purpose,
-         now
+         bookedAt
       );
       if (resultCredit.IsFailure)
          return Result<TransferDto>.Failure(resultCredit.Error!);
@@ -68,7 +74,7 @@ public sealed class TransferUcReverse(
          purpose,
          debit.Id,
          credit.Id,
-         now
+         bookedAt
       );
 
       if (reversalResult.IsFailure)
@@ -77,7 +83,7 @@ public sealed class TransferUcReverse(
       var reversalTransfer = reversalResult.Value!;
 
       // link original transfer to reversal
-      var markResult = originalTransfer.MarkAsReversed(reversalTransfer.Id, now);
+      var markResult = originalTransfer.MarkAsReversed(reversalTransfer.Id, bookedAt);
       if (markResult.IsFailure)
          return Result<TransferDto>.Failure(markResult.Error!);
 

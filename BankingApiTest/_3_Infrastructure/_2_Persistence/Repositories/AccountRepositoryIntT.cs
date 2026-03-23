@@ -147,11 +147,11 @@ public sealed class AccountRepositoryIntTests : TestBaseIntegration {
       Equal(account1.IbanVo, actual.IbanVo);
       Equal(account1.BalanceVo, actual.BalanceVo);
       Equal(account1.CustomerId, actual.CustomerId);
-      Equal(1,actual.Beneficiaries.Count);
+      Single(actual.Beneficiaries);
       var actualBeneficiary = actual.Beneficiaries.ToList()[0];
-      Equal(expectedBeneficiary.Id, actualBeneficiary.Id);
-      Equal(expectedBeneficiary.Name, actualBeneficiary.Name);
-      Equal(expectedBeneficiary.IbanVo, actualBeneficiary.IbanVo);   
+      Equal(expectedBeneficiary?.Id, actualBeneficiary?.Id);
+      Equal(expectedBeneficiary?.Name, actualBeneficiary?.Name);
+      Equal(expectedBeneficiary?.IbanVo, actualBeneficiary?.IbanVo);   
    }
    #endregion
 

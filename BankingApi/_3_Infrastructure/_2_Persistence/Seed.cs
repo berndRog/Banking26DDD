@@ -515,11 +515,11 @@ public sealed class Seed(
          transactionCreditId: transaction1cId,
          transferId: transfer1Id.ToString()
       );
-/*
+
       SendMoney( // Transfer 2: Account 1 --> Account 7
          fromAccount: accounts[0],
          toAccount: accounts[7],
-         amount: 231.0m,
+         amount: MoneyVo.Create(231.0m,Currency.EUR).GetValueOrThrow(),
          purpose: "Erika 1 an Chris2",
          bookedAt: bookedAt,
          transactionDebitId: transaction2dId,
@@ -531,7 +531,7 @@ public sealed class Seed(
       SendMoney( // Transfer 3: Account 2 --> Account 4
          fromAccount: accounts[1],
          toAccount: accounts[3],
-         amount: 289.0m,
+         amount: MoneyVo.Create(289.0m, Currency.EUR).GetValueOrThrow(),
          purpose: "Erika 2 an Arne",
          bookedAt: bookedAt,
          transactionDebitId: transaction3dId,
@@ -542,7 +542,7 @@ public sealed class Seed(
       SendMoney( // Transfer 4: Account 2 --> Account 5
          fromAccount: accounts[1],
          toAccount: accounts[4],
-         amount: 125.0m,
+         amount: MoneyVo.Create(125.0m, Currency.EUR).GetValueOrThrow(),
          purpose: "Erika 2 an Benno",
          bookedAt: bookedAt,
          transactionDebitId: transaction4dId,
@@ -554,7 +554,7 @@ public sealed class Seed(
       SendMoney( // Transfer 5: Account 3 --> Account 4
          fromAccount: accounts[2],
          toAccount: accounts[3],
-         amount: 167.0m,
+         amount: MoneyVo.Create(167.0m,  Currency.EUR).GetValueOrThrow(),
          purpose: "Max an Arne",
          bookedAt: bookedAt,
          transactionDebitId: transaction5dId,
@@ -565,7 +565,7 @@ public sealed class Seed(
       SendMoney( // Transfer 6: Account 3 --> Account 5
          fromAccount: accounts[2],
          toAccount: accounts[4],
-         amount: 167.0m,
+         amount: MoneyVo.Create(167.0m, Currency.EUR).GetValueOrThrow(),
          purpose: "Max an Benno",
          bookedAt: bookedAt,
          transactionDebitId: transaction6dId,
@@ -576,14 +576,14 @@ public sealed class Seed(
       SendMoney( // Transfer 7: Account 3 --> Account 5
          fromAccount: accounts[2],
          toAccount: accounts[4],
-         amount: 312.0m,
+         amount: MoneyVo.Create(312.0m, Currency.EUR).GetValueOrThrow(),
          purpose: "Max an Dana",
          bookedAt: bookedAt,
          transactionDebitId: transaction7dId,
          transactionCreditId: transaction7cId,
          transferId: transfer7Id.ToString()
       );
-
+/*
       // Arne ... 
       SendMoney( // Transfer 8: Account 4 --> Account 3
          fromAccount: accounts[3],

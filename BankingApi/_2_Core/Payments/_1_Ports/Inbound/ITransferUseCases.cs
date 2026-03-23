@@ -11,6 +11,7 @@ public interface ITransferUseCases {
    );
    
    Task<Result<TransferDto>> ReverseMoneyAsync(
+      Guid fromAccountId,
       Guid transferId,
       string purpose,
       CancellationToken ct = default

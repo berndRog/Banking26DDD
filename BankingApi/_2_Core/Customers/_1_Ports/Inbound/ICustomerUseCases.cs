@@ -10,7 +10,7 @@ namespace BankingApi._2_Core.Customers._1_Ports.Inbound;
 public interface ICustomerUseCases {
 
    // Create a fully initialized customer
-   // Optionally also create the first account
+   // And also create the first account
    Task<Result<CustomerDto>> CreateAsync(
       CustomerDto customerDto,
       string? accountIdString,

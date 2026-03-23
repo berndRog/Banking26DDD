@@ -47,6 +47,13 @@ public static class TransferErrors {
       ErrorCode.Conflict,
       Title: "Transfer: Invalid Accounts",
       Message: "The Sender and Receiver Account must be different.");
+   
+   public static readonly DomainErrors FromAccountIdMismatch = new(
+      ErrorCode.Conflict,
+      Title: "Transfer: Sender Account ID Mismatch",
+      Message: "The provided sender account ID does not match the transfer's source account."
+   );
+
 
    public static readonly DomainErrors OriginalTransferNotFound = new(
       ErrorCode.NotFound,

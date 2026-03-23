@@ -26,16 +26,17 @@ public sealed class TransferRepositoryIntT : TestBaseIntegration {
       unitOfWork.ClearChangeTracker();
 
       var transfer = transfers[0]; // Customer1
-      var id = transfer.Id;
-
+      var transferId = transfer.Id;
+      var accountId = transfer.FromAccountId;
+      
       // Act
-      var actual = await repository.FindByIdAsync(id, ct);
+      var actual = await repository.FindByIdAsync(accountId, transferId, ct);
 
       // Assert
       NotNull(actual);
-      Equal(id, actual.Id);
       Equal(transfer.Id, actual.Id);
       Equal(transfer.FromAccountId, actual.FromAccountId);
+      Equal(transfer.ToAccountId, actual.ToAccountId);
       Equal(transfer.AmountVo, actual.AmountVo);
       Equal(transfer.Purpose, actual.Purpose);
       

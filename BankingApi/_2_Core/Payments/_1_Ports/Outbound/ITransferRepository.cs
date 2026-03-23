@@ -8,7 +8,8 @@ public interface ITransferRepository {
 
    // Load a transfer by its identifier
    Task<Transfer?> FindByIdAsync(
-      Guid id,
+      Guid accountId,
+      Guid transferId,
       CancellationToken ct = default
    );
 

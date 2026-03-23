@@ -14,10 +14,11 @@ public class TransferUseCases(
    ) => transferUcSendMoney.ExecuteAsync(dto, ct);
 
    public Task<Result<TransferDto>> ReverseMoneyAsync(
+      Guid fromAccountId,
       Guid transferId, 
       string purpose,
       CancellationToken ct = default
-   ) => transferUcReverse.ExecuteAsync(transferId, purpose, ct);
+   ) => transferUcReverse.ExecuteAsync(fromAccountId, transferId, purpose, ct);
 
    
 }

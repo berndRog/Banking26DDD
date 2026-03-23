@@ -73,24 +73,17 @@ internal sealed class AccountReadModelEf(
       // 2. Consistent with the Beneficiary logic: 
       // We check if the "Parent" (Customer) exists to avoid returning a 
       // "false empty" list if the ID is simply wrong.
-      var result = await dbContext.Customers
-         .AsNoTracking()
-         .Where(c => c.Id == customerId)
-         .Select(c => new {
-            // Project the accounts belonging to this customer
-            Accounts = dbContext.Accounts
-               .Where(a => a.CustomerId == c.Id)
-               .Select(a => a.ToAccountDto())
-               .ToList()
-         })
-         .SingleOrDefaultAsync(ct);
-
+      var accountDtos = await dbContext.Accounts
+         .Where(a => a.CustomerId == customerId)
+         .Select(a => a.ToAccountDto())
+         .ToListAsync(ct);
+      
       // 3. Case: Customer not found in the database
-      if (result == null)
+      if (accountDtos.Count == 0)
          return Result<IEnumerable<AccountDto>>.Failure(AccountErrors.CustomerNotFound);
 
       // 4. Case: Customer exists, returning their accounts (can be an empty list [])
-      return Result<IEnumerable<AccountDto>>.Success(result.Accounts);
+      return Result<IEnumerable<AccountDto>>.Success(accountDtos);
    }
    #endregion
    

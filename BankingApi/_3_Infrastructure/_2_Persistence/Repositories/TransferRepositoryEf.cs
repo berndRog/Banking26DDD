@@ -11,13 +11,16 @@ internal sealed class TransferRepositoryEf(
 ) : ITransferRepository {
    
    public async Task<Transfer?> FindByIdAsync(
+      Guid accountId,
       Guid transferId,
       CancellationToken ct = default
    ) => await transferDbContext.Transfers
-      .FirstOrDefaultAsync(t => t.Id == transferId, ct);
-   
+         .Where(t => t.FromAccountId == accountId && t.Id == transferId )   
+         .SingleOrDefaultAsync(ct);
+
    public void Add(Transfer transfer) 
       => transferDbContext.Add(transfer);
+   
    public void AddRange(IEnumerable<Transfer> transfers) 
       => transferDbContext.AddRange(transfers);
    
