@@ -27,7 +27,7 @@ public interface ICustomerRepository {
    );
 
    // Load all customers with SQL like displayName
-   Task<IEnumerable<Customer>> SelectByDisplayNameAsync(
+   Task<IReadOnlyList<Customer>> SelectByDisplayNameAsync(
       string displayName,
       CancellationToken ct = default
    );
@@ -39,7 +39,7 @@ public interface ICustomerRepository {
    );
 
    // Select all customers
-   Task<IEnumerable<Customer>> SelectAllAsync(
+   Task<IReadOnlyList<Customer>> SelectAllAsync(
       CancellationToken ct = default
    );
    

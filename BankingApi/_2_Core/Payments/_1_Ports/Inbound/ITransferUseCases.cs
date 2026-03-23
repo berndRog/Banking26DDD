@@ -6,7 +6,7 @@ namespace BankingApi._2_Core.Payments._1_Ports.Inbound;
 public interface ITransferUseCases {
    
    Task<Result<TransferDto>> SendMoneyAsync(
-      SendMoneyDto dto,
+      SendMoneyDto sendMoneyDto,
       CancellationToken ct = default
    );
    

@@ -52,13 +52,31 @@ public sealed class TransferUcSendMoneyIntT : TestBaseIntegration {
          debitId: transfer.DebitTransactionId.ToString(),
          creditId: transfer.CreditTransactionId.ToString()
       );
-
+      
       // Act
       var result = await sut.ExecuteAsync(
          sendMoneyDto,
          ct: ct
       );
       unitOfWork.ClearChangeTracker();
+      
+      // Assert
+      True(result.IsSuccess);
+      var transferDto = result.Value;
+      var toAccountId = transferDto.ToAccountId;
+      var debitId = transferDto.DebitTransactionId;
+      var creditId = transferDto.CreditTransactionId;
+
+      var actualTransfer = await transferRepository.FindByIdAsync(fromAccount.Id, transfer.Id, ct);
+
+      var actualFromAccount =
+         await accountRepository.FindAccountByIdWithTransactionByIdAsync(fromAccount.Id, debitId, ct);
+      var actualToAccount =
+         await accountRepository.FindAccountByIdWithTransactionByIdAsync(toAccountId, creditId, ct);
+       
+
+      
+      
    }
 }
 //    [Fact]

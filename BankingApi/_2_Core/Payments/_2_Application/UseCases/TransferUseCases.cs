@@ -9,9 +9,9 @@ public class TransferUseCases(
 ) : ITransferUseCases {
    
    public Task<Result<TransferDto>> SendMoneyAsync(
-      SendMoneyDto dto, 
+      SendMoneyDto sendMoneyDto, 
       CancellationToken ct = default
-   ) => transferUcSendMoney.ExecuteAsync(dto, ct);
+   ) => transferUcSendMoney.ExecuteAsync(sendMoneyDto, ct);
 
    public Task<Result<TransferDto>> ReverseMoneyAsync(
       Guid fromAccountId,

@@ -33,7 +33,7 @@ public interface IAccountRepository {
    );
 
    // Load all accounts for a customer
-   Task<IEnumerable<Account>> SelelctByCustomerIdAsync(
+   Task<IReadOnlyList<Account>> SelelctByCustomerIdAsync(
       Guid customerId,
       CancellationToken ct = default
    );

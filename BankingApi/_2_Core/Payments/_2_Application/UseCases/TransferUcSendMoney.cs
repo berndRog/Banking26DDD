@@ -8,6 +8,7 @@ using BankingApi._2_Core.Payments._3_Domain.Entities;
 using BankingApi._2_Core.Payments._3_Domain.Enums;
 using BankingApi._2_Core.Payments._3_Domain.Errors;
 using BankingApi._2_Core.Payments._3_Domain.ValueObjects;
+
 namespace BankingApi._2_Core.Payments._2_Application.UseCases;
 
 public sealed class TransferUcSendMoney(
@@ -21,38 +22,53 @@ public sealed class TransferUcSendMoney(
       SendMoneyDto dto,
       CancellationToken ct = default
    ) {
-      // validate amount
+      // 1) Validate input -----------------------------------------------------
+      // Read the raw amount from the request DTO.
       var amount = dto.Amount;
+
+      // Guard clause: a transfer amount must be greater than zero.
       if (amount <= 0)
          return Result<TransferDto>.Failure(TransferErrors.InvalidAmount);
-      
+
+      // Convert the primitive amount into a validated Money value object.
       var resultVo = MoneyVo.Create(amount, Currency.EUR);
-      if(resultVo.IsFailure)
+      if (resultVo.IsFailure)
          return Result<TransferDto>.Failure(resultVo.Error);
+
       var amountVo = resultVo.Value;
-      
-      // load sender account including beneficiaries
-      var fromAccount = await accountRepository.FindAccountByIdWithBeneficiariesAsync(dto.FromAccountId, ct);
+
+      // 2) Load required domain objects ---------------------------------------
+      // Load the sender account together with its beneficiaries.
+      // The selected beneficiary must belong to this sender account.
+      var fromAccount = await accountRepository.FindAccountByIdWithBeneficiariesAsync(
+         dto.FromAccountId,
+         ct
+      );
       if (fromAccount is null)
          return Result<TransferDto>.Failure(TransferErrors.FromAccountNotFound);
 
-      // resolve beneficiary from sender account
+      // Resolve the beneficiary from the sender account.
+      // This ensures that money can only be sent to a registered recipient.
       var resultBeneficiary = fromAccount.FindBeneficiary(dto.BeneficiaryId);
       if (resultBeneficiary.IsFailure)
          return Result<TransferDto>.Failure(resultBeneficiary.Error!);
+
       var beneficiary = resultBeneficiary.Value!;
 
-      // resolve receiver account by beneficiary IBAN
+      // Resolve the receiver account via the beneficiary's IBAN.
       var toAccount = await accountRepository.FindByIbanAsync(beneficiary.IbanVo, ct);
       if (toAccount is null)
          return Result<TransferDto>.Failure(TransferErrors.ToAccountNotFound);
 
+      // Prevent transfers from an account to itself.
       if (toAccount.Id == fromAccount.Id)
          return Result<TransferDto>.Failure(TransferErrors.SameAccountNotAllowed);
 
+      // Use the injected clock to avoid direct dependency on system time.
       var bookedAt = clock.UtcNow;
 
-      // post debit on sender account
+      // 3) Execute domain logic -----------------------------------------------
+      // Post the debit transaction on the sender account.
       var resultDebit = fromAccount.PostDebit(
          amountVo: amountVo,
          purpose: dto.Purpose,
@@ -61,9 +77,10 @@ public sealed class TransferUcSendMoney(
       );
       if (resultDebit.IsFailure)
          return Result<TransferDto>.Failure(resultDebit.Error!);
+
       var debitTransaction = resultDebit.Value!;
 
-      // post credit on receiver account
+      // Post the credit transaction on the receiver account.
       var resultCredit = toAccount.PostCredit(
          amountVo: amountVo,
          purpose: dto.Purpose,
@@ -72,9 +89,11 @@ public sealed class TransferUcSendMoney(
       );
       if (resultCredit.IsFailure)
          return Result<TransferDto>.Failure(resultCredit.Error!);
+
       var creditTransaction = resultCredit.Value!;
 
-      // create transfer as business transaction
+      // Create the transfer entity that represents the complete business operation.
+      // It links sender account, receiver account, debit booking, and credit booking.
       var transferResult = Transfer.CreateBooked(
          fromAccountId: fromAccount.Id,
          toAccountId: toAccount.Id,
@@ -87,19 +106,28 @@ public sealed class TransferUcSendMoney(
       );
       if (transferResult.IsFailure)
          return Result<TransferDto>.Failure(transferResult.Error!);
-
       var transfer = transferResult.Value!;
 
-      // optional backward link from transaction to transfer
+      // Add backward references from both transactions to the transfer.
+      // This supports later navigation from a booking entry to the transfer.
       debitTransaction.AttachTransfer(transfer.Id);
       creditTransaction.AttachTransfer(transfer.Id);
 
+      // Register the transfer on the sender account aggregate.
+      fromAccount.AddTransfer(
+         transfer: transfer,
+         updatedAt: bookedAt
+      );
+
+      // 4) Persist changes ----------------------------------------------------
+      // Add the transfer to the repository so it becomes part of persistence.
       transferRepository.Add(transfer);
 
-      unitOfWork.LogChangeTracker("Before SaveChanges in SendMoney");
+      // Persist all accumulated changes in a single unit of work.
+      await unitOfWork.SaveAllChangesAsync("Send money", ct);
 
-      var saveResult = await unitOfWork.SaveAllChangesAsync("Send money", ct);
-
+      // 5) Log and return result ----------------------------------------------
+      // Write a log entry for diagnostics and traceability.
       logger.LogInformation(
          "Transfer booked ({TransferId}) from ({From}) to ({To}) amount ({Amount})",
          transfer.Id.To8(),
@@ -108,6 +136,36 @@ public sealed class TransferUcSendMoney(
          amount
       );
 
+      // Return the mapped DTO to the caller.
       return Result<TransferDto>.Success(transfer.ToTransferDto());
    }
 }
+
+/*
+Didaktik:
+Diese Version des Use Case ist bewusst in klar erkennbare Phasen gegliedert.
+Dadurch wird sichtbar, dass ein Application Use Case typischerweise nicht „alles selbst macht“,
+sondern einen Ablauf strukturiert. Die fünf Schritte sind hier:
+1. Eingabe validieren
+2. benötigte Domain-Objekte laden
+3. fachliche Operationen ausführen
+4. Änderungen persistent machen
+5. Ergebnis zurückgeben
+
+Das ist didaktisch wertvoll, weil Studierende so leichter erkennen, welche Verantwortung
+in welcher Schicht liegt. Der Use Case ist also kein Ersatz für die Domain, sondern ein
+Koordinator des Geschäftsablaufs. Die eigentlichen fachlichen Entscheidungen liegen weiterhin
+in Methoden wie PostDebit, PostCredit oder Transfer.CreateBooked.
+
+Lernziele:
+- Studierende verstehen die typische Struktur eines Use Case in der Application-Schicht.
+- Sie lernen, dass ein Anwendungsfall in logisch getrennte Phasen zerlegt werden kann.
+- Sie erkennen den Unterschied zwischen Orchestrierung und fachlicher Regelprüfung.
+- Sie sehen, wie Primitive aus einem DTO zuerst in Domain Value Objects überführt werden.
+- Sie verstehen, wie Repositories, Unit of Work, Logger und Clock gemeinsam
+  in einem Anwendungsfall zusammenwirken.
+- Sie lernen, warum Result<T> für erwartbare fachliche Fehler oft besser geeignet ist
+  als Exceptions mit Try/Catch.
+- Sie erkennen, dass gute Code-Struktur nicht nur technisch, sondern auch didaktisch
+  für Wartbarkeit, Lesbarkeit und Vermittlung wichtig ist.
+*/

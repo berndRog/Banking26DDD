@@ -74,7 +74,7 @@ internal sealed class CustomerReadModelEf(
          : Result<CustomerDto>.Success(customerDto);
    }
    
-   public async Task<Result<IEnumerable<CustomerDto>>> SelectByDisplayNameAsync(
+   public async Task<Result<IReadOnlyList<CustomerDto>>> SelectByDisplayNameAsync(
       string displayName,
       CancellationToken ct = default
    ) {
@@ -86,17 +86,17 @@ internal sealed class CustomerReadModelEf(
                pattern))
          .Select(c => c.ToCustomerDto())
          .ToListAsync(ct);
-      return Result<IEnumerable<CustomerDto>>.Success(customerDtos);
+      return Result<IReadOnlyList<CustomerDto>>.Success(customerDtos);
    }
    
-   public async Task<Result<IEnumerable<CustomerDto>>> SelectAllAsync(
+   public async Task<Result<IReadOnlyList<CustomerDto>>> SelectAllAsync(
       CancellationToken ct
    ) {
       var customerDtos = await customerDbContext.Customers
          .AsNoTracking()
          .Select(c => c.ToCustomerDto()) // project to CustomerDto (map)
          .ToListAsync(ct);
-      return Result<IEnumerable<CustomerDto>>.Success(customerDtos);
+      return Result<IReadOnlyList<CustomerDto>>.Success(customerDtos);
    }
    
    public async Task<Result<PagedResult<CustomerDto>>> FilterAsync(

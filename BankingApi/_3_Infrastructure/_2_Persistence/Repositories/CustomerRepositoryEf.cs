@@ -27,7 +27,7 @@ internal class CustomerRepositoryEf(
    ) => await customerDbContext.Customers
          .SingleOrDefaultAsync(c => c.EmailVo == emailVo, ct);
 
-   public async Task<IEnumerable<Customer>> SelectByDisplayNameAsync(
+   public async Task<IReadOnlyList<Customer>> SelectByDisplayNameAsync(
       string displayName,
       CancellationToken ct = default
    ) {
@@ -48,7 +48,7 @@ internal class CustomerRepositoryEf(
          .FirstOrDefaultAsync(o => o.Id == customerId, ct)
       is { IsActive: true };
 
-   public async Task<IEnumerable<Customer>> SelectAllAsync(
+   public async Task<IReadOnlyList<Customer>> SelectAllAsync(
       CancellationToken ct = default
    ) => await customerDbContext.Customers
          .ToListAsync(ct);

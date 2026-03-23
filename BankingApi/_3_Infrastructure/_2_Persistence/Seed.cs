@@ -583,12 +583,12 @@ public sealed class Seed(
          transactionCreditId: transaction7cId,
          transferId: transfer7Id.ToString()
       );
-/*
+      
       // Arne ... 
       SendMoney( // Transfer 8: Account 4 --> Account 3
          fromAccount: accounts[3],
          toAccount: accounts[2],
-         amount: 278.0m,
+         amount: MoneyVo.Create(278.0m, Currency.EUR).GetValueOrThrow(),
          purpose: "Arne an Max",
          bookedAt: bookedAt,
          transactionDebitId: transaction8dId,
@@ -599,7 +599,7 @@ public sealed class Seed(
       SendMoney( // Transfer 9: Account 4 --> Account 6
          fromAccount: accounts[3],
          toAccount: accounts[5],
-         amount: 356.0m,
+         amount: MoneyVo.Create(356.0m, Currency.EUR).GetValueOrThrow(),
          purpose: "Arne an Chris 2",
          bookedAt: bookedAt,
          transactionDebitId: transaction9dId,
@@ -611,7 +611,7 @@ public sealed class Seed(
       SendMoney( // Transfer 10: Account 5 --> Account 1
          fromAccount: accounts[4],
          toAccount: accounts[0],
-         amount: 412.0m,
+         amount: MoneyVo.Create(412.0m, Currency.EUR).GetValueOrThrow(),
          purpose: "Benno an Erika 1",
          bookedAt: bookedAt,
          transactionDebitId: transaction10dId,
@@ -622,14 +622,14 @@ public sealed class Seed(
       SendMoney( // Transfer 11: Account 5 --> Account 2
          fromAccount: accounts[4],
          toAccount: accounts[1],
-         amount: 89.0m,
+         amount: MoneyVo.Create(89.0m, Currency.EUR).GetValueOrThrow(),
          purpose: "Benno an Erika 2",
          bookedAt: bookedAt,
          transactionDebitId: transaction11dId,
          transactionCreditId: transaction11cId,
          transferId: transfer11Id.ToString()
       );
-*/
+      
       return accounts;
    }
 

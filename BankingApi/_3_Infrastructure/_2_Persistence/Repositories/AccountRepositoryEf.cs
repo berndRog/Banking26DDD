@@ -32,7 +32,7 @@ public sealed class AccountRepositoryEf(
       .AnyAsync(a => a.CustomerId == customerId, ct);
 
    // Retrieves all accounts associated with a customer ID.
-   public async Task<IEnumerable<Account>> SelelctByCustomerIdAsync(
+   public async Task<IReadOnlyList<Account>> SelelctByCustomerIdAsync(
       Guid customerId,
       CancellationToken ct = default
    ) => await dbContext.Accounts

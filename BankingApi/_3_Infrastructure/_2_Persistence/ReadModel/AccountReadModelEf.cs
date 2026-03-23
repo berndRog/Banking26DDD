@@ -52,23 +52,23 @@ internal sealed class AccountReadModelEf(
          : Result<AccountDto>.Success(accountDto);
    }
 
-   public async Task<Result<IEnumerable<AccountDto>>> SelectAsync(
+   public async Task<Result<IReadOnlyList<AccountDto>>> SelectAsync(
       CancellationToken ctToken = default
    ) {
       var accountDtos = await dbContext.Accounts
          .AsNoTracking()
          .Select(a => a.ToAccountDto())
          .ToListAsync(ctToken);
-      return Result<IEnumerable<AccountDto>>.Success(accountDtos);
+      return Result<IReadOnlyList<AccountDto>>.Success(accountDtos);
    }
 
-   public async Task<Result<IEnumerable<AccountDto>>> SelectByCustomerIdAsync(
+   public async Task<Result<IReadOnlyList<AccountDto>>> SelectByCustomerIdAsync(
       Guid customerId,
       CancellationToken ct = default
    ) {
       // 1. Basic validation for the GUID
       if (customerId == Guid.Empty)
-         return Result<IEnumerable<AccountDto>>.Failure(AccountErrors.InvalidCustomerId);
+         return Result<IReadOnlyList<AccountDto>>.Failure(AccountErrors.InvalidCustomerId);
 
       // 2. Consistent with the Beneficiary logic: 
       // We check if the "Parent" (Customer) exists to avoid returning a 
@@ -80,10 +80,10 @@ internal sealed class AccountReadModelEf(
       
       // 3. Case: Customer not found in the database
       if (accountDtos.Count == 0)
-         return Result<IEnumerable<AccountDto>>.Failure(AccountErrors.CustomerNotFound);
+         return Result<IReadOnlyList<AccountDto>>.Failure(AccountErrors.CustomerNotFound);
 
       // 4. Case: Customer exists, returning their accounts (can be an empty list [])
-      return Result<IEnumerable<AccountDto>>.Success(accountDtos);
+      return Result<IReadOnlyList<AccountDto>>.Success(accountDtos);
    }
    #endregion
    
@@ -104,15 +104,13 @@ internal sealed class AccountReadModelEf(
       // 2. If no record matches both IDs, we return a NotFound failure.
       // This covers both cases: either the AccountId is wrong or the BeneficiaryId is wrong.
       if (beneficiaryDto is null)
-      {
          return Result<BeneficiaryDto>.Failure(BeneficiaryErrors.NotFound);
-      }
 
       // 3. Return success with the projected data.
       return Result<BeneficiaryDto>.Success(beneficiaryDto);
    }
 
-   public async Task<Result<IEnumerable<BeneficiaryDto>>> SelectBeneficiariesByAccountIdAsync(
+   public async Task<Result<IReadOnlyList<BeneficiaryDto>>> SelectBeneficiariesByAccountIdAsync(
       Guid accountId,
       CancellationToken ct = default
    ) {
@@ -131,17 +129,17 @@ internal sealed class AccountReadModelEf(
       // 2. Case: The AccountId does not exist in the database.
       // We return a failure because the requested context (the Account) is invalid.
       if (result == null) {
-         return Result<IEnumerable<BeneficiaryDto>>
+         return Result<IReadOnlyList<BeneficiaryDto>>
             .Failure(BeneficiaryErrors.InValidAccountId);
       }
 
       // 3. Case: The Account exists, but may have zero beneficiaries.
       // We return Success with an empty list [] because an account with 
       // no beneficiaries is a valid state, not an error.
-      return Result<IEnumerable<BeneficiaryDto>>.Success(result.Beneficiaries);
+      return Result<IReadOnlyList<BeneficiaryDto>>.Success(result.Beneficiaries);
    }
 
-   public async Task<Result<IEnumerable<BeneficiaryDto>>> SelectBeneficiariesByNameAsync(
+   public async Task<Result<IReadOnlyList<BeneficiaryDto>>> SelectBeneficiariesByNameAsync(
       Guid accountId,
       string name,
       CancellationToken ct = default
@@ -165,12 +163,12 @@ internal sealed class AccountReadModelEf(
 
       // 3. Case: Account does not exist (Invalid ID provided)
       if (result == null) {
-         return Result<IEnumerable<BeneficiaryDto>>
+         return Result<IReadOnlyList<BeneficiaryDto>>
             .Failure(BeneficiaryErrors.InValidAccountId);
       }
 
       // 4. Case: Account exists, but search may yield an empty list []
-      return Result<IEnumerable<BeneficiaryDto>>.Success(result.FilteredBeneficiaries);
+      return Result<IReadOnlyList<BeneficiaryDto>>.Success(result.FilteredBeneficiaries);
    }
    #endregion
 }
