@@ -1,6 +1,5 @@
 using System.ComponentModel.DataAnnotations.Schema;
 using BankingApi._2_Core.BuildingBlocks._3_Domain;
-using BankingApi._2_Core.BuildingBlocks._3_Domain.Errors;
 using BankingApi._2_Core.Payments._3_Domain.Enums;
 namespace BankingApi._2_Core.Payments._3_Domain.ValueObjects;
 
@@ -31,23 +30,13 @@ public sealed record MoneyVo {
       Currency currency
    ) {
       amount = decimal.Round(amount, 2, MidpointRounding.ToEven);
-
-      // if (amount < 0)
-      //    return Result<MoneyVo>.Failure(CommonErrors.InvalidMoneyAmount);
-
       return Result<MoneyVo>.Success(new MoneyVo(amount, currency));
    }
    
    // Rehydrate from persisted database value
-   internal static MoneyVo FromPersisted(decimal amount, Currency currency) {
-      amount = decimal.Round(amount, 2, MidpointRounding.ToEven);
-
-      // defensive check (DB should already contain valid values)
-      if (amount < -1_000_000_000_000m || amount > 1_000_000_000_000m)
-         throw new InvalidOperationException($"Invalid Money in database: {amount}");
-
-      return new MoneyVo(amount, currency);
-   }
+   internal static MoneyVo FromPersisted(decimal amount, Currency currency) 
+      => new MoneyVo(amount, currency);
+   
 
    // DOMAIN HELPERS
    public bool IsZero => Amount == 0m;

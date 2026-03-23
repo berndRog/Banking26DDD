@@ -8,6 +8,7 @@ namespace BankingApi._2_Core.Payments._1_Ports.Outbound;
 // Implemented in the Infrastructure layer (e.g. EF Core).
 public interface IAccountRepository {
 
+   //---- Aggregate root: Account ----------------------------------------------    
    // Load an account aggregate by identifier
    Task<Account?> FindByIdAsync(
       Guid id,
@@ -19,20 +20,14 @@ public interface IAccountRepository {
       IbanVo ibanVo,
       CancellationToken ct = default
    );
-
-   // Load an account including its beneficiaries
-   Task<Account?> FindWithBeneficiariesByIdAsync(
-      Guid id,
-      CancellationToken ct = default
-   );
    
-   Task<Account?> FindWithTransactionByIdAsync(
-      Guid id,
-      CancellationToken ct = default
-   );
+   // Task<Account?> FindWithTransactionByIdAsync(
+   //    Guid id,
+   //    CancellationToken ct = default
+   // );
    
    // Check whether a customer already owns an account
-   Task<bool> ExistsByOwnerIdAsync(
+   Task<bool> ExistsByCustomerIdAsync(
       Guid customerId,
       CancellationToken ct = default
    );
@@ -50,18 +45,46 @@ public interface IAccountRepository {
    // Update an existing account aggregate in the persistence context
    void Update(Account account);
 
-   // Load an account that contains a specific beneficiary
-   Task<Beneficiary?> FindBeneficiaryByIdAsync(
-      Guid id,
+   //---- Child Entity: Beneficiary --------------------------------------------      
+   // Loads the Account Aggregate Root and all its Beneficiary child entities.
+   Task<Account?> FindAccountByIdWithBeneficiariesAsync(
+      Guid accountId,
+      CancellationToken ct = default
+   );
+   
+   // Loads the Account root and attach the specific Beneficiary we want to modify.ficiary
+   Task<Account?> FindAccountByWithBeneficiaryByIdAsync (
+      Guid accountId,
+      Guid beneficiaryId,
       CancellationToken ct = default
    );
 
-   // Add a beneficiary to the persistence context
+   // Add Beneficiary as added in the tracker
    void Add(Beneficiary beneficiary);
    void AddRange(IEnumerable<Beneficiary> beneficiaries);
 
    // Remove a beneficiary from the persistence context
    void Remove(Beneficiary beneficiary);
+   
+   
+   //---- Child Entity: Transaction --------------------------------------------
+   // Load a transaction by its identifier
+   Task<Account?> FindAccountByIdWithTransactionsAsync(
+      Guid AccountId,
+      CancellationToken ct = default
+   );
+
+   // Load a transaction by its identifier
+   Task<Account?> FindAccountByIdWithTransactionByIdAsync(
+      Guid AccountId,
+      Guid transactionId,
+      CancellationToken ct = default
+   );
+   
+   // Add a new transaction to the persistence context
+   void Add(Transaction transaction);
+   void AddRange(IEnumerable<Transaction> transactions);
+
 }
 
 /*

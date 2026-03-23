@@ -34,7 +34,7 @@ public sealed class AccountUcCreateIntT : TestBaseIntegration {
       var result = await sut.ExecuteAsync(
          customerId: customer.Id,
          iban: account.IbanVo.Value,
-         balanceDecimal: account.BalanceVo.Amount,
+         balance: account.BalanceVo.Amount,
          currency: (int)account.BalanceVo.Currency,
          id: account.Id.ToString(),
          ct: ct
@@ -67,7 +67,7 @@ public sealed class AccountUcCreateIntT : TestBaseIntegration {
       var result = await sut.ExecuteAsync(
          customerId: owner.Id,
          iban: "ABC123456789",
-         balanceDecimal: account.BalanceVo.Amount,
+         balance: account.BalanceVo.Amount,
          currency: (int)account.BalanceVo.Currency,
          id: account.Id.ToString(),
          ct: ct

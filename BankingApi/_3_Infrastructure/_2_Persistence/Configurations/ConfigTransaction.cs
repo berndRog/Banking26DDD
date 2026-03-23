@@ -8,7 +8,6 @@ namespace BankingApi._3_Infrastructure._2_Persistence.Configurations;
 public sealed class ConfigTransaction(
    DateTimeOffsetToIsoStringConverter dtConv
 ) : IEntityTypeConfiguration<Transaction> {
-
    public void Configure(EntityTypeBuilder<Transaction> builder) {
       builder.ToTable("Transactions");
 
@@ -35,28 +34,41 @@ public sealed class ConfigTransaction(
          .IsRequired();
 
       // amount value object
-      builder.OwnsOne(t => t.AmountVo, b => {
-         b.Property(p => p.Amount)
+      // builder.OwnsOne(t => t.AmountVo, b => {
+      //    b.Property(p => p.Amount)
+      //       .HasColumnName("Amount")
+      //       .HasColumnType("decimal(18,2)")
+      //       .IsRequired();
+      //
+      //    b.Property(p => p.Currency)
+      //       .HasColumnName("Currency")
+      //       .HasConversion<int>()
+      //       .IsRequired();
+      // });
+
+      builder.ComplexProperty(x => x.AmountVo, money => {
+         money.Property(x => x.Amount)
             .HasColumnName("Amount")
-            .HasColumnType("decimal(18,2)")
+            .HasPrecision(18, 2)
             .IsRequired();
 
-         b.Property(p => p.Currency)
-            .HasColumnName("Currency")
-            .HasConversion<int>()
+         money.Property(x => x.Currency)
+            .HasColumnName("AmountCurrency")
+            .HasConversion<string>()
+            .HasMaxLength(3)
             .IsRequired();
       });
 
-      // balance after booking
-      builder.OwnsOne(t => t.BalanceAfterVo, b => {
-         b.Property(p => p.Amount)
-            .HasColumnName("BalanceAfterAmount")
-            .HasColumnType("decimal(18,2)")
+      builder.ComplexProperty(x => x.BalanceAfterVo, money => {
+         money.Property(x => x.Amount)
+            .HasColumnName("BalanceAfter")
+            .HasPrecision(18, 2)
             .IsRequired();
 
-         b.Property(p => p.Currency)
+         money.Property(x => x.Currency)
             .HasColumnName("BalanceAfterCurrency")
-            .HasConversion<int>()
+            .HasConversion<string>()
+            .HasMaxLength(3)
             .IsRequired();
       });
 

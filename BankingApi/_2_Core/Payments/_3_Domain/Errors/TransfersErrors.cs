@@ -7,10 +7,16 @@ namespace BankingApi._2_Core.Payments._3_Domain.Errors;
 /// A transfer represents a business operation initiated by a user.
 /// </summary>
 public static class TransferErrors {
+   
    public static readonly DomainErrors InvalidId = new(
       ErrorCode.BadRequest,
       Title: "Transfer: Invalid Id",
       Message: "The given identifier for the transfer is invalid.");
+   
+   public static readonly DomainErrors NotFound = new(
+      ErrorCode.NotFound,
+      Title: "Transfer: Not found",
+      Message: "No transfer with the given id exists.");
    
    public static readonly DomainErrors InvalidTransactionReference = new(
       ErrorCode.BadRequest,

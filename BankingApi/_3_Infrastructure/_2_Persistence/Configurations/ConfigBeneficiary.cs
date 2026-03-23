@@ -30,8 +30,7 @@ internal sealed class ConfigBeneficiary : IEntityTypeConfiguration<Beneficiary> 
          .IsRequired()
          .HasColumnName("Iban") 
          .HasMaxLength(50);
-      builder.HasIndex(c => c.IbanVo).IsUnique();
-
+      builder.HasIndex(c => c.IbanVo);
       
       // Indexes
       builder.HasIndex(x => x.AccountId);

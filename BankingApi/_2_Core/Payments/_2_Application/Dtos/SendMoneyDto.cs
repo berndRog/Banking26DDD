@@ -5,8 +5,8 @@ public sealed record SendMoneyDto(
    Guid FromAccountId,
    Guid BeneficiaryId,
    string Purpose,
-   decimal AmountDecimal,
-   int CurrencyInt,
+   decimal Amount,
+   int Currency,
    string IdempotencyKey,
    string? debitId = null,
    string? creditId = null

@@ -23,18 +23,6 @@ public interface ITransferRepository {
    void Add(Transfer transfer);
    void AddRange(IEnumerable<Transfer> transfers);
    
-   
-   
-   // Load a transaction by its identifier
-   Task<Transaction?> FindTransactionByIdAsync(
-      Guid transactionId,
-      CancellationToken ct = default
-   );
-   
-   // Add a new transaction to the persistence context
-   void Add(Transaction transaction);
-   void AddRange(IEnumerable<Transaction> transactions);
-   
 }
 
 /*

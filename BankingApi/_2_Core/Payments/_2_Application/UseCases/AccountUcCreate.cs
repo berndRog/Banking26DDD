@@ -23,7 +23,7 @@ public sealed class AccountUcCreate(
    public async Task<Result<AccountDto>> ExecuteAsync(
       Guid customerId,
       string iban,
-      decimal balanceDecimal,
+      decimal balance,
       int currency,
       string? id,
       CancellationToken ct = default
@@ -33,10 +33,7 @@ public sealed class AccountUcCreate(
          return Result<AccountDto>.Failure(AccountErrors.OwnerIdNotFoundOrInactive);
       
       // invariant: initial balance must be >= 0
-      var resultMoney = MoneyVo.Create(balanceDecimal, (Currency)currency);
-      if (resultMoney.IsFailure)
-         return Result<AccountDto>.Failure(resultMoney.Error);
-      var balanceVo = resultMoney.Value;
+
       
       // domain   
       var resultIban = IbanVo.Create(iban);
@@ -48,7 +45,7 @@ public sealed class AccountUcCreate(
       var result = Account.Create(
          customerId: customerId,
          ibanVo: ibanVo, 
-         balanceVo: balanceVo, 
+         balance: balance, 
          createdAt: clock.UtcNow,
          id: id
       );

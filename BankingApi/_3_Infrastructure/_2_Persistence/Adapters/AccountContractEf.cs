@@ -30,7 +30,7 @@ internal class AccountContractEf(
    ) {
       
       // Check if owner already has an account (not required, but good to have for this use case)
-      var exists = await accountRepository.ExistsByOwnerIdAsync(customerId, ct);
+      var exists = await accountRepository.ExistsByCustomerIdAsync(customerId, ct);
       if (exists)
          return Result<AccountDto>.Failure(AccountErrors.OwnerAlreadyHasAccount);
       
@@ -57,12 +57,12 @@ internal class AccountContractEf(
       var ibanVo = resultIban.Value;
       
       // Create initial account
-      var balance = MoneyVo.Create(0m, Currency.EUR).Value; // initial balance is always 0 EUR
+      var balance = 0m; // initial balance is always 0 EUR
       
       var resultAccount = Account.Create(
          customerId: customerId,
          ibanVo: ibanVo,
-         balanceVo: balance,
+         balance: balance,
          createdAt: clock.UtcNow,
          id: accoutIdString
       );

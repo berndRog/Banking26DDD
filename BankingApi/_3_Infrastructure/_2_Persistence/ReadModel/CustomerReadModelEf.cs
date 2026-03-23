@@ -74,6 +74,21 @@ internal sealed class CustomerReadModelEf(
          : Result<CustomerDto>.Success(customerDto);
    }
    
+   public async Task<Result<IEnumerable<CustomerDto>>> SelectByDisplayNameAsync(
+      string displayName,
+      CancellationToken ct = default
+   ) {
+      var pattern = $"%{displayName}%";
+      var customerDtos = await customerDbContext.Customers
+         .Where(c =>
+            EF.Functions.Like(
+               c.CompanyName ?? c.Firstname + " " + c.Lastname,
+               pattern))
+         .Select(c => c.ToCustomerDto())
+         .ToListAsync(ct);
+      return Result<IEnumerable<CustomerDto>>.Success(customerDtos);
+   }
+   
    public async Task<Result<IEnumerable<CustomerDto>>> SelectAllAsync(
       CancellationToken ct
    ) {

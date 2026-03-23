@@ -20,7 +20,7 @@ public static class AccountErrors {
          Title: "Account: Invalid IBAN",
          Message: "The provided IBAN is invalid.");
 
-   public static readonly DomainErrors InvalidOwnerId =
+   public static readonly DomainErrors InvalidCustomerId =
       new(ErrorCode.BadRequest,
          Title: "Account: Invalid CustomerId",
          Message: "The given CustomerId is not valid.");
@@ -61,6 +61,14 @@ public static class AccountErrors {
          Title: "Account: Not found",
          Message: "No account with the given id exists."
       );
+   public static readonly DomainErrors CustomerNotFound =
+      new(
+         ErrorCode.NotFound,
+         Title: "Account: Customer Not found",
+         Message: "No customer with the given id exists."
+      );
+
+   
    
    public static readonly DomainErrors OwnerAlreadyHasAccount =
       new(

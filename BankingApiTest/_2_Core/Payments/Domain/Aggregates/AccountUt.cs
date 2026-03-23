@@ -1,8 +1,6 @@
 using BankingApi._2_Core.BuildingBlocks._1_Ports.Outbound;
 using BankingApi._2_Core.Customers._3_Domain.Entities;
-using BankingApi._2_Core.Payments;
 using BankingApi._2_Core.Payments._3_Domain.Entities;
-using BankingApi._2_Core.Payments._3_Domain.ValueObjects;
 using BankingApiTest.TestInfrastructure;
 namespace BankingApiTest._2_Core.Core.Domain.Aggregates;
 
@@ -27,7 +25,7 @@ public sealed class AccountUt {
       var result = Account.Create(
          customerId: _customer.Id,
          ibanVo: _account.IbanVo,
-         balanceVo: _account.BalanceVo,
+         balance: _account.BalanceVo.Amount,
          createdAt: _account.CreatedAt,
          id: _account.Id.ToString()
       );
@@ -51,7 +49,7 @@ public sealed class AccountUt {
       var result = Account.Create(
          customerId: _customer.Id,
          ibanVo: _account.IbanVo,
-         balanceVo: _account.BalanceVo,
+         balance: _account.BalanceVo.Amount,
          createdAt: _account.CreatedAt,
          id: null
       );
@@ -73,7 +71,7 @@ public sealed class AccountUt {
       var result = Account.Create(
          customerId: _customer.Id,
          ibanVo: _account.IbanVo,
-         balanceVo: _account.BalanceVo,
+         balance: _account.BalanceVo.Amount,
          createdAt: _account.CreatedAt,
          id: "not-a-guid"
       );
@@ -97,14 +95,14 @@ public sealed class AccountUt {
    }
 
    [Fact]
-   public void Create_with_empty_customerId_is_failure() {
+   public void Create_with_notallowed_customerId_is_failure() {
       // Act
       var result = Account.Create(
          customerId: _customer.Id,
          ibanVo: _account.IbanVo,
-         balanceVo: _account.BalanceVo,
+         balance: _account.BalanceVo.Amount,
          createdAt: _account.CreatedAt,
-         id: _account.Id.ToString()
+         id: "not.allowed"
       );
       // Assert
       True(result.IsFailure);
@@ -116,7 +114,7 @@ public sealed class AccountUt {
       var result1 = Account.Create(
          customerId: _customer.Id,
          ibanVo: _account.IbanVo,
-         balanceVo: _account.BalanceVo,
+         balance: _account.BalanceVo.Amount,
          createdAt: _account.CreatedAt,
          id: _account.Id.ToString()
       );
@@ -124,7 +122,7 @@ public sealed class AccountUt {
       var result2 = Account.Create(
          customerId: _customer.Id,
          ibanVo: _account.IbanVo,
-         balanceVo: _account.BalanceVo,
+         balance: _account.BalanceVo.Amount,
          createdAt: _account.CreatedAt,
          id: _account.Id.ToString()
       );

@@ -42,8 +42,8 @@ public sealed class AccountsControllerEndToEnd : TestBaseEndToEnd {
       var requestAccountDto = new AccountDto(
          Id: account2.Id,
          Iban: account2.IbanVo.Value,
-         BalanceDecimal: account2.BalanceVo.Amount,
-         CurrencyInt: (int)account2.BalanceVo.Currency, // "EUR",
+         Balance: account2.BalanceVo.Amount,
+         Currency: (int)account2.BalanceVo.Currency, // "EUR",
          CustomerId: account2.CustomerId
       );
       //  [HttpPost("customers/{customerId:guid}/accounts")]
@@ -61,8 +61,8 @@ public sealed class AccountsControllerEndToEnd : TestBaseEndToEnd {
       NotNull(account2Dto);
       Equal(account2.Id, account2Dto.Id);
       Equal(account2.IbanVo.Value, account2Dto.Iban);
-      Equal(account2.BalanceVo.Amount, account2Dto.BalanceDecimal);
-      Equal((int)account2.BalanceVo.Currency, account2Dto.CurrencyInt);
+      Equal(account2.BalanceVo.Amount, account2Dto.Balance);
+      Equal((int)account2.BalanceVo.Currency, account2Dto.Currency);
       Equal(account2.CustomerId, account2Dto.CustomerId);
 
       // Assert (HTTP)

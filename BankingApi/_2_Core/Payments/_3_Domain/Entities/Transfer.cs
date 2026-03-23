@@ -86,6 +86,7 @@ public sealed class Transfer : AggregateRoot {
       if (amountVo.Amount <= 0)
          return Result<Transfer>.Failure(TransferErrors.InvalidAmount);
 
+      
       var idResult = Resolve(id, TransferErrors.InvalidId);
       if (idResult.IsFailure)
          return Result<Transfer>.Failure(idResult.Error);

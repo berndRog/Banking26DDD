@@ -8,7 +8,6 @@ using BankingApi._2_Core.Payments._3_Domain.Entities;
 using BankingApi._2_Core.Payments._3_Domain.Enums;
 using BankingApi._2_Core.Payments._3_Domain.Errors;
 using BankingApi._2_Core.Payments._3_Domain.ValueObjects;
-
 namespace BankingApi._2_Core.Payments._2_Application.UseCases;
 
 public sealed class TransferUcSendMoney(
@@ -23,13 +22,17 @@ public sealed class TransferUcSendMoney(
       CancellationToken ct = default
    ) {
       // validate amount
-      var resultAmount = MoneyVo.Create(dto.AmountDecimal, (Currency)dto.CurrencyInt);
-      if (resultAmount.IsFailure)
-         return Result<TransferDto>.Failure(resultAmount.Error!);
-      var amountVo = resultAmount.Value!;
-
+      var amount = dto.Amount;
+      if (amount <= 0)
+         return Result<TransferDto>.Failure(TransferErrors.InvalidAmount);
+      
+      var resultVo = MoneyVo.Create(amount, Currency.EUR);
+      if(resultVo.IsFailure)
+         return Result<TransferDto>.Failure(resultVo.Error);
+      var amountVo = resultVo.Value;
+      
       // load sender account including beneficiaries
-      var fromAccount = await accountRepository.FindWithBeneficiariesByIdAsync(dto.FromAccountId, ct);
+      var fromAccount = await accountRepository.FindAccountByIdWithBeneficiariesAsync(dto.FromAccountId, ct);
       if (fromAccount is null)
          return Result<TransferDto>.Failure(TransferErrors.FromAccountNotFound);
 
@@ -102,7 +105,7 @@ public sealed class TransferUcSendMoney(
          transfer.Id.To8(),
          fromAccount.Id.To8(),
          toAccount.Id.To8(),
-         amountVo.Amount
+         amount
       );
 
       return Result<TransferDto>.Success(transfer.ToTransferDto());

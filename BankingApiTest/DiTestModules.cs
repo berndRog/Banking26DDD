@@ -74,12 +74,10 @@ public static class DiTestModules {
       services.AddScoped<AccountUcBeneficiaryAdd>();
       services.AddScoped<AccountUcBeneficiaryRemove>();
       
-      // Customers UseCases
+      // Transfer UseCases
       services.AddScoped<ITransferUseCases, TransferUseCases>();
       services.AddScoped<TransferUcSendMoney>();
       services.AddScoped<TransferUcReverse>();
-      //services.AddScoped<AccountUcBeneficiaryAdd>();
-      //services.AddScoped<AccountUcBeneficiaryRemove>();
       
       // Unit of Work
       services.AddScoped<IUnitOfWork, UnitOfWork>();

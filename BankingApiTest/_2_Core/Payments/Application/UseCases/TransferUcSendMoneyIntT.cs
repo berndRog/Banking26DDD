@@ -46,8 +46,8 @@ public sealed class TransferUcSendMoneyIntT : TestBaseIntegration {
          FromAccountId: fromAccount.Id,
          BeneficiaryId: beneficiary.Id,
          Purpose: transfer.Purpose,
-         AmountDecimal: transfer.AmountVo.Amount,
-         CurrencyInt: (int)transfer.AmountVo.Currency,
+         Amount: transfer.AmountVo.Amount,
+         Currency: (int)transfer.AmountVo.Currency,
          IdempotencyKey: Guid.NewGuid().ToString(),
          debitId: transfer.DebitTransactionId.ToString(),
          creditId: transfer.CreditTransactionId.ToString()

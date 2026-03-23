@@ -29,6 +29,12 @@ public interface ICustomerReadModel {
    Task<Result<IEnumerable<CustomerDto>>> SelectAllAsync(
       CancellationToken ct
    );
+   
+   // Load all customers with SQL like displayName
+   Task<Result<IEnumerable<CustomerDto>>> SelectByDisplayNameAsync(
+      string displayName,
+      CancellationToken ct = default
+   );
 
    // Optional filtering / paging query
    // Task<Result<PagedResult<CustomerDto>>> FilterAsync(

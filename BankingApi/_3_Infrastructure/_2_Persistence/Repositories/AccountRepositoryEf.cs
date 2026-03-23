@@ -9,47 +9,29 @@ namespace BankingApi._3_Infrastructure._2_Persistence.Repositories;
 public sealed class AccountRepositoryEf(
    IAccountDbContext dbContext
 ) : IAccountRepository {
-   // Loads a single account by its primary key (Id).
+   #region --- Aggregate root: Account ------------------------------------------------------
+   // Loads a single account by its primary key (Id) without navigation properties.
    public async Task<Account?> FindByIdAsync(
       Guid id,
       CancellationToken ct = default
    ) => await dbContext.Accounts
       .FirstOrDefaultAsync(a => a.Id == id, ct);
 
-   // Loads a single account by its IBAN (unique business key).
+   // Loads a single account by its unique IBAN Value Object.
    public async Task<Account?> FindByIbanAsync(
       IbanVo ibanVo,
       CancellationToken ct = default
    ) => await dbContext.Accounts
       .FirstOrDefaultAsync(a => a.IbanVo == ibanVo, ct);
 
-   // Loads a single account by Id and eager-loads the Beneficiaries navigation.
-   // Note: Include must be applied before executing the query
-   // (e.g., before FirstOrDefaultAsync).
-   public async Task<Account?> FindWithBeneficiariesByIdAsync(
-      Guid id,
-      CancellationToken ct = default
-   ) => await dbContext.Accounts
-      .Include(a => a.Beneficiaries)
-      .FirstOrDefaultAsync(a => a.Id == id, ct);
-
-   public async Task<Account?> FindWithTransactionByIdAsync(
-      Guid id, 
-      CancellationToken ct = default
-   ) => await dbContext.Accounts
-      .Include(a => a.Transactions
-         .OrderByDescending(t => t.BookedAt)
-         .ThenByDescending(t => t.Id)   // if there are more then one transaction at the same time
-         .Take(100))
-      .FirstOrDefaultAsync(a => a.Id == id, ct);
-   
-   // Checks if an account exists for the given customerId.
-   public async Task<bool> ExistsByOwnerIdAsync(
+   // Efficiently checks if at least one account exists for a specific customer.
+   public async Task<bool> ExistsByCustomerIdAsync(
       Guid customerId,
-      CancellationToken ct
+      CancellationToken ct = default
    ) => await dbContext.Accounts
       .AnyAsync(a => a.CustomerId == customerId, ct);
 
+   // Retrieves all accounts associated with a customer ID.
    public async Task<IEnumerable<Account>> SelelctByCustomerIdAsync(
       Guid customerId,
       CancellationToken ct = default
@@ -57,23 +39,36 @@ public sealed class AccountRepositoryEf(
       .Where(a => a.CustomerId == customerId)
       .ToListAsync(ct);
 
-
-   // Adds a new account to the context so it will be inserted on SaveChanges.
+   // Mark Account entity as added in the tracker
    public void Add(Account account)
       => dbContext.Add(account);
 
+   // Mark multiple Account as added to the tracker
    public void AddRange(IEnumerable<Account> accounts)
       => dbContext.AddRange(accounts);
 
-   // Updates an existing account.
+   // Mark Account as modified in the tracker
    public void Update(Account account)
       => dbContext.Update(account);
+   #endregion
 
-   public async Task<Beneficiary?> FindBeneficiaryByIdAsync(
-      Guid id, 
+   #region --- Child entity: Benficiary -----------------------------------------------------
+   // Loads the Account Aggregate Root and all its Beneficiary child entities.
+   public async Task<Account?> FindAccountByIdWithBeneficiariesAsync(
+      Guid accountId,
       CancellationToken ct = default
-   ) => await dbContext.Beneficiaries
-         .FirstOrDefaultAsync(b => b.Id == id, ct);
+   ) => await dbContext.Accounts
+      .Include(a => a.Beneficiaries)
+      .FirstOrDefaultAsync(a => a.Id == accountId, ct);
+
+   // Loads the Account root and attach the specific Beneficiary we want to modify.
+   public async Task<Account?> FindAccountByWithBeneficiaryByIdAsync(
+      Guid accountId,
+      Guid beneficiaryId,
+      CancellationToken ct = default
+   ) => await dbContext.Accounts
+      .Include(a => a.Beneficiaries.Where(b => b.Id == beneficiaryId))
+      .FirstOrDefaultAsync(a => a.Id == accountId, ct);
 
    public void Add(Beneficiary beneficiary)
       => dbContext.Add(beneficiary);
@@ -83,4 +78,30 @@ public sealed class AccountRepositoryEf(
 
    public void Remove(Beneficiary beneficiary)
       => dbContext.Remove(beneficiary);
+   #endregion
+
+   #region --- Child entity: Transaction ----------------------------------------------------
+   public async Task<Account?> FindAccountByIdWithTransactionByIdAsync(
+      Guid accountId,
+      Guid transactionId,
+      CancellationToken ct = default
+   ) => await dbContext.Accounts
+      .Where(a => a.Id == accountId)
+      .Include(a => a.Transactions.Where(b => b.Id == transactionId))
+      .SingleOrDefaultAsync(ct);
+
+   public async Task<Account?> FindAccountByIdWithTransactionsAsync(
+      Guid accountId,
+      CancellationToken ct = default
+   ) => await dbContext.Accounts
+      .Where(a => a.Id == accountId)
+      .Include(a => a.Transactions)
+      .SingleOrDefaultAsync(ct);
+
+   public void Add(Transaction transaction)
+      => dbContext.Add(transaction);
+
+   public void AddRange(IEnumerable<Transaction> transactions)
+      => dbContext.AddRange(transactions);
+   #endregion
 }

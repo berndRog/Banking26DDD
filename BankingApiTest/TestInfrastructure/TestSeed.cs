@@ -99,55 +99,58 @@ public sealed class TestSeed {
    #endregion
 
    #region -------------- Test Transactions ---------------------------------------------------
+   public string Transaction1dId => _seed.transaction1dId;
+   public string Transaction1cId => _seed.transaction1cId;
+   public string Transaction2dId => _seed.transaction2dId;
+   public string Transaction2cId => _seed.transaction2cId;
+   public string Transaction3dId => _seed.transaction3dId;
+   public string Transaction3cId => _seed.transaction3cId;
+   public string Transaction4dId => _seed.transaction4dId;
+   public string Transaction4cId => _seed.transaction4cId;
+   public string Transaction5dId => _seed.transaction5cId;
+   public string Transaction5cId => _seed.transaction5cId;
+   public string Transaction6dId => _seed.transaction6dId;
+   public string Transaction6cId => _seed.transaction6cId;
+   public string Transaction7dId => _seed.transaction7cId;
+   public string Transaction7cId => _seed.transaction7cId;
+   public string Transaction8dId => _seed.transaction8dId;
+   public string Transaction8cId => _seed.transaction8cId;
+   public string Transaction9dId => _seed.transaction9dId;
+   public string Transaction9cId => _seed.transaction9cId;
+   public string Transaction10dId => _seed.transaction10dId;
+   public string Transaction10cId => _seed.transaction10cId;
+   public string Transaction11dId => _seed.transaction11dId;
+   public string Transaction11cId => _seed.transaction11cId;
+   
    public Transaction Transaction1d() => _seed.Transaction1d();
    public Transaction Transaction1c() => _seed.Transaction1c();
    public Transaction Transaction2d() => _seed.Transaction2d();
-   public Transaction Transaction2c() => _seed.Transaction2c();
-   public Transaction Transaction3d() => _seed.Transaction3d();
-   public Transaction Transaction3c() => _seed.Transaction3c();
-   public Transaction Transaction4d() => _seed.Transaction4d();
-   public Transaction Transaction4c() => _seed.Transaction4c();
-   public Transaction Transaction5d() => _seed.Transaction5d();
-   public Transaction Transaction5c() => _seed.Transaction5c();
-   public Transaction Transaction6d() => _seed.Transaction6d();
-   public Transaction Transaction6c() => _seed.Transaction6c();
-   public Transaction Transaction7d() => _seed.Transaction7d();
-   public Transaction Transaction7c() => _seed.Transaction7c();
-   public Transaction Transaction8d() => _seed.Transaction8d();
-   public Transaction Transaction8c() => _seed.Transaction8c();
-   public Transaction Transaction9d() => _seed.Transaction9d();
-   public Transaction Transaction9c() => _seed.Transaction9c();
-   public Transaction Transaction10d() => _seed.Transaction10d();
-   public Transaction Transaction10c() => _seed.Transaction10c();
-   public Transaction Transaction11d() => _seed.Transaction11d();
-   public Transaction Transaction11c() => _seed.Transaction11c();
-   public IReadOnlyList<Transaction> Transaction => new List<Transaction>() {
-      Transaction1d(), Transaction1c(), Transaction2d(), Transaction2c(),
-      Transaction3d(), Transaction3c(), Transaction4d(), Transaction4c(),
-      Transaction5d(), Transaction5c(), Transaction6d(), Transaction6c(),
-      Transaction7d(), Transaction7c(), Transaction8d(), Transaction8c(),
-      Transaction9d(), Transaction9c(),  Transaction10d(), Transaction10c(),
-      Transaction11d(), Transaction11c()
-   };
+   public Transaction Transaction2c() => _seed.Transaction2d();
+   public IReadOnlyList<Transaction> Transaction => _seed.Transactions;
    #endregion
    
    #region -------------- Test Transfers -----------------------------------------------------
+   public string Transfer1Id => _seed.transfer1Id;
+   public string Transfer2Id => _seed.transfer2Id;
+   public string Transfer3Id => _seed.transfer3Id;
+   public string Transfer4Id => _seed.transfer4Id;
+   public string Transfer5Id => _seed.transfer5Id;
+   public string Transfer6Id => _seed.transfer6Id;
+   public string Transfer7Id => _seed.transfer7Id;
+   public string Transfer8Id => _seed.transfer8Id;
+   public string Transfer9Id => _seed.transfer9Id;
+   public string Transfer10Id => _seed.transfer10Id;
+   public string Transfer11Id => _seed.transfer11Id;
+   
    public Transfer Transfer1() => _seed.Transfer1();
    public Transfer Transfer2() => _seed.Transfer2();
-   public Transfer Transfer3() => _seed.Transfer3();
-   public Transfer Transfer4() => _seed.Transfer4();
-   public Transfer Transfer5() => _seed.Transfer5();
-   public Transfer Transfer6() => _seed.Transfer6();
-   public Transfer Transfer7() => _seed.Transfer7();
-   public Transfer Transfer8() => _seed.Transfer8();
-   public Transfer Transfer9() => _seed.Transfer9();
-   public Transfer Transfer10() => _seed.Transfer10();
-   public Transfer Transfer11() => _seed.Transfer11();
-   
-   public IReadOnlyList<Transfer> Transfers => new List<Transfer>() {
-      Transfer1(), Transfer2(), Transfer3(), Transfer4(), 
-      Transfer5(), Transfer6(), Transfer7(), Transfer8(), 
-      Transfer9(), Transfer10(), Transfer11()
-   };
+
+   public IReadOnlyList<Transfer> Transfers => _seed.Transfers;
    #endregion
+   
+   public List<Account> AddBeneficiariesToAccounts() 
+      =>  _seed.AddBeneficiariesToAccounts();
+   
+   public List<Account> AddBeneficiariesAndTransactionsAndTransfersToAccounts() 
+      =>  _seed.AddBeneficiariesAndTransactionAndTransfersToAccounts();
 }

@@ -20,29 +20,7 @@ internal sealed class TransferRepositoryEf(
       => transferDbContext.Add(transfer);
    public void AddRange(IEnumerable<Transfer> transfers) 
       => transferDbContext.AddRange(transfers);
-
-   public Task<Transaction?> FindTransactionByIdAsync(
-      Guid transactionId, 
-      CancellationToken ct = default
-   ) => transferDbContext.Transactions
-      .FirstOrDefaultAsync(t => t.Id == transactionId, ct);
-
-   public async Task<IReadOnlyList<Transfer>> SelectTransactionsByAccountIdAsync(
-      Guid accountId,
-      CancellationToken ct = default
-   ) {
-      return await transferDbContext.Transfers
-         .Where(t => t.FromAccountId == accountId)
-         .OrderByDescending(t => t.BookedAt)
-         .ToListAsync(ct);
-   }
    
-   public void Add(Transaction transaction) 
-      => transferDbContext.Add(transaction);
-
-   public void AddRange(IEnumerable<Transaction> transactions) 
-      => transferDbContext.AddRange(transactions);
-
    
    // public async Task<bool> ExistsReversalForAsync(
    //    Guid originalTransferId,

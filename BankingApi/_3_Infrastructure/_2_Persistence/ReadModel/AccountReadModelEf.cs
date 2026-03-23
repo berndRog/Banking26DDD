@@ -15,6 +15,7 @@ internal sealed class AccountReadModelEf(
    BankingDbContext dbContext
 ) : IAccountReadModel {
    
+   #region --- Aggregate root: Account ------------------------------------------------------
    public async Task<Result<AccountDto>> FindByIdAsync(
       Guid Id,
       CancellationToken ct
@@ -22,10 +23,10 @@ internal sealed class AccountReadModelEf(
       // the DB is doing the work: filter by Id, project to DTO, no tracking (read-only)
       var accountDto = await dbContext.Accounts
          .AsNoTracking()
-         .Where(a => a.Id == Id)          // filter
-         .Select(c => c.ToAccountDto())   // projection
+         .Where(a => a.Id == Id) // filter
+         .Select(c => c.ToAccountDto()) // projection
          .SingleOrDefaultAsync(ct);
-      
+
       return accountDto is null
          ? Result<AccountDto>.Failure(AccountErrors.NotFound)
          : Result<AccountDto>.Success(accountDto);
@@ -36,22 +37,21 @@ internal sealed class AccountReadModelEf(
       CancellationToken ct
    ) {
       var result = IbanVo.Create(iban);
-      if (result.IsFailure)         
+      if (result.IsFailure)
          throw new ApplicationException(result.Error.Message);
       var ibanVo = result.Value;
-      
+
       var accountDto = await dbContext.Accounts
          .AsNoTracking()
-         .Where(a => a.IbanVo == ibanVo)      // filter
-         .Select(c => c.ToAccountDto())   // projection
-         .SingleOrDefaultAsync(ct);       // take single or default (null if not found)
-      
+         .Where(a => a.IbanVo == ibanVo) // filter
+         .Select(c => c.ToAccountDto()) // projection
+         .SingleOrDefaultAsync(ct); // take single or default (null if not found)
+
       return accountDto is null
          ? Result<AccountDto>.Failure(AccountErrors.NotFound)
          : Result<AccountDto>.Success(accountDto);
    }
-   
-   
+
    public async Task<Result<IEnumerable<AccountDto>>> SelectAsync(
       CancellationToken ctToken = default
    ) {
@@ -61,149 +61,178 @@ internal sealed class AccountReadModelEf(
          .ToListAsync(ctToken);
       return Result<IEnumerable<AccountDto>>.Success(accountDtos);
    }
-   
-   public async Task<Result<IEnumerable<AccountDto>>> SelectByOwnerIdAsync(
-      Guid customerId,
-      CancellationToken ctToken = default
-   ) {
-      if(customerId == Guid.Empty)
-         return Result<IEnumerable<AccountDto>>.Failure(AccountErrors.InvalidOwnerId);
-      
-      var accountDtos =  await dbContext.Accounts
-         .AsNoTracking()
-         .Where(a => a.CustomerId == customerId)
-         .Select(a => a.ToAccountDto())
-         .ToListAsync(ctToken);
-      
-      return Result<IEnumerable<AccountDto>>.Success(accountDtos);
-      
-   }
 
-   public async Task<Result<BeneficiaryDto>> FindBeneficiaryByIdAsync(
-      Guid Id, 
+   public async Task<Result<IEnumerable<AccountDto>>> SelectByCustomerIdAsync(
+      Guid customerId,
       CancellationToken ct = default
    ) {
-      // the DB is doing the work: filter by Id, project to DTO, no tracking (read-only)
+      // 1. Basic validation for the GUID
+      if (customerId == Guid.Empty)
+         return Result<IEnumerable<AccountDto>>.Failure(AccountErrors.InvalidCustomerId);
+
+      // 2. Consistent with the Beneficiary logic: 
+      // We check if the "Parent" (Customer) exists to avoid returning a 
+      // "false empty" list if the ID is simply wrong.
+      var result = await dbContext.Customers
+         .AsNoTracking()
+         .Where(c => c.Id == customerId)
+         .Select(c => new {
+            // Project the accounts belonging to this customer
+            Accounts = dbContext.Accounts
+               .Where(a => a.CustomerId == c.Id)
+               .Select(a => a.ToAccountDto())
+               .ToList()
+         })
+         .SingleOrDefaultAsync(ct);
+
+      // 3. Case: Customer not found in the database
+      if (result == null)
+         return Result<IEnumerable<AccountDto>>.Failure(AccountErrors.CustomerNotFound);
+
+      // 4. Case: Customer exists, returning their accounts (can be an empty list [])
+      return Result<IEnumerable<AccountDto>>.Success(result.Accounts);
+   }
+   #endregion
+   
+   #region --- Aggregate root: Account ------------------------------------------------------
+   public async Task<Result<BeneficiaryDto>> FindBeneficiaryByIdAsync(
+      Guid accountId,
+      Guid beneficiaryId,
+      CancellationToken ct = default
+   ) {
+      // 1. Fetch the specific beneficiary ensuring it belongs to the provided AccountId.
+      // We use AsNoTracking for read-only performance and project directly to a DTO.
       var beneficiaryDto = await dbContext.Beneficiaries
          .AsNoTracking()
-         .Where(a => a.Id == Id)             // filter
-         .Select(c => c.ToBeneficiaryDto())   // projection
+         .Where(b => b.AccountId == accountId && b.Id == beneficiaryId)
+         .Select(b => b.ToBeneficiaryDto())
          .SingleOrDefaultAsync(ct);
-      
-      return beneficiaryDto is null
-         ? Result<BeneficiaryDto>.Failure(BeneficiaryErrors.NotFound)
-         : Result<BeneficiaryDto>.Success(beneficiaryDto);
+
+      // 2. If no record matches both IDs, we return a NotFound failure.
+      // This covers both cases: either the AccountId is wrong or the BeneficiaryId is wrong.
+      if (beneficiaryDto is null)
+      {
+         return Result<BeneficiaryDto>.Failure(BeneficiaryErrors.NotFound);
+      }
+
+      // 3. Return success with the projected data.
+      return Result<BeneficiaryDto>.Success(beneficiaryDto);
    }
 
    public async Task<Result<IEnumerable<BeneficiaryDto>>> SelectBeneficiariesByAccountIdAsync(
-      Guid accountId, 
+      Guid accountId,
       CancellationToken ct = default
    ) {
-      var accountExists = dbContext.Accounts
+      // 1. Query the database using the Aggregate Root (Account) as the entry point.
+      // We use a projection (Select) to check for account existence and 
+      // retrieve the list of beneficiaries in a single database roundtrip.
+      var result = await dbContext.Accounts
          .AsNoTracking()
-         .Any(a => a.Id == accountId);
-      if (!accountExists)
+         .Where(a => a.Id == accountId)
+         .Select(a => new {
+            // Project the children directly to DTOs
+            Beneficiaries = a.Beneficiaries.Select(b => b.ToBeneficiaryDto()).ToList()
+         })
+         .SingleOrDefaultAsync(ct);
+
+      // 2. Case: The AccountId does not exist in the database.
+      // We return a failure because the requested context (the Account) is invalid.
+      if (result == null) {
          return Result<IEnumerable<BeneficiaryDto>>
-                  .Failure(BeneficiaryErrors.InValidAccountId);
-      
-      var beneficiaryDtos = await dbContext.Beneficiaries
-         .AsNoTracking()
-         .Where(b => b.AccountId == accountId)
-         .Select(b => b.ToBeneficiaryDto())
-         .ToListAsync(ct);
-      return Result<IEnumerable<BeneficiaryDto>>.Success(beneficiaryDtos);
-      
+            .Failure(BeneficiaryErrors.InValidAccountId);
+      }
+
+      // 3. Case: The Account exists, but may have zero beneficiaries.
+      // We return Success with an empty list [] because an account with 
+      // no beneficiaries is a valid state, not an error.
+      return Result<IEnumerable<BeneficiaryDto>>.Success(result.Beneficiaries);
    }
 
    public async Task<Result<IEnumerable<BeneficiaryDto>>> SelectBeneficiariesByNameAsync(
-      string name, 
+      Guid accountId,
+      string name,
       CancellationToken ct = default
    ) {
-      name = name.Trim();
-      
-      var beneficiaryDtos = await dbContext.Beneficiaries
+      // 1. Sanitize the search input
+      var searchName = name?.Trim() ?? string.Empty;
+
+      // 2. Query starting from the Aggregate Root (Account) to ensure context validity.
+      // We use a projection to fetch existence and filtered data in one DB trip.
+      var result = await dbContext.Accounts
          .AsNoTracking()
-         .Where(b => b.Name.Contains(name)) // SQL like %name%
-         .Select(b => b.ToBeneficiaryDto())
-         .ToListAsync(ct);
-      
-      return Result<IEnumerable<BeneficiaryDto>>.Success(beneficiaryDtos);
-      
-   }
-   
-   public async Task<Result<BeneficiaryDto>> FindBeneficiaryByIbanAsync(
-      string iban,
-      CancellationToken ct = default
-   ) {
-      var result = IbanVo.Create(iban);
-      if (result.IsFailure)         
-         throw new ApplicationException(result.Error.Message);
-      var ibanVo = result.Value;
-      
-      var beneficiaryDto = await dbContext.Beneficiaries
-         .AsNoTracking()
-         .Where(b => b.IbanVo == ibanVo)
-         .Select(b => b.ToBeneficiaryDto())
+         .Where(a => a.Id == accountId)
+         .Select(a => new {
+            // Filter children directly within the projection
+            FilteredBeneficiaries = a.Beneficiaries
+               .Where(b => b.Name.Contains(searchName))
+               .Select(b => b.ToBeneficiaryDto())
+               .ToList()
+         })
          .SingleOrDefaultAsync(ct);
 
-      return beneficiaryDto is null
-         ? Result<BeneficiaryDto>.Failure(BeneficiaryErrors.NotFound)
-         : Result<BeneficiaryDto>.Success(beneficiaryDto);
+      // 3. Case: Account does not exist (Invalid ID provided)
+      if (result == null) {
+         return Result<IEnumerable<BeneficiaryDto>>
+            .Failure(BeneficiaryErrors.InValidAccountId);
+      }
+
+      // 4. Case: Account exists, but search may yield an empty list []
+      return Result<IEnumerable<BeneficiaryDto>>.Success(result.FilteredBeneficiaries);
    }
-
-
-   // public async Task<Result<PagedResult<CustomerDto>>> FilterAsync(
-   //    CustomerSearchFilter filter,
-   //    PageRequest page,
-   //    CancellationToken ct
-   // ) {
-   //    if (filter is null) 
-   //       return Result<PagedResult<CustomerDto>>.Failure(CustomerApplicationErrors.FilterIsRequired);
-   //    
-   //    // Normalize page defaults
-   //    var pageNumber = page?.PageNumber > 0 ? page.PageNumber : 1;
-   //    var pageSize   = page?.PageSize    > 0 ? page.PageSize    : 20;
-   //    var skip       = (pageNumber - 1) * pageSize;
-   //
-   //    IQueryable<Customer> query = dbContext.Customers
-   //       .AsNoTracking();
-   //
-   //    // Filters
-   //    if (filter is not null) {
-   //       if (!string.IsNullOrWhiteSpace(filter.Email)) {
-   //          var email = filter.Email.Trim().ToUpperInvariant();
-   //          query = query.Where(c => c.Email == email);
-   //       }
-   //       if (!string.IsNullOrWhiteSpace(filter.Firstname)) {
-   //          var fn = filter.Firstname.Trim().ToUpperInvariant();
-   //          query = query.Where(c => c.Firstname.ToUpperInvariant().Contains(fn));
-   //       }
-   //       if (!string.IsNullOrWhiteSpace(filter.Lastname)) {
-   //          var ln = filter.Lastname.Trim().ToUpperInvariant();
-   //          query = query.Where(c => c.Lastname.ToUpperInvariant().Contains(ln));
-   //       }
-   //    }
-   //    // Total BEFORE paging
-   //    var total = await query.CountAsync(ct);
-   //
-   //    // Sorting (fallback: Lastname, Firstname)
-   //    query = query.OrderBy(c => c.Lastname).ThenBy(c => c.Firstname);
-   //
-   //    // Paging + projection
-   //    var items = await query
-   //       .Skip(skip)
-   //       .Take(pageSize)
-   //       .Select(c => c.ToCustomerDto())
-   //       .ToListAsync(ct);
-   //
-   //    // Wrap into PagedResult (adjust if your PagedResult has a different constructor/factory)
-   //    var paged = new PagedResult<CustomerDto>(
-   //       items,
-   //       total,
-   //       pageNumber,
-   //       pageSize
-   //    );
-   //
-   //    return Result<PagedResult<CustomerDto>>.Success(paged);
-   // }
+   #endregion
 }
+
+// public async Task<Result<PagedResult<CustomerDto>>> FilterAsync(
+//    CustomerSearchFilter filter,
+//    PageRequest page,
+//    CancellationToken ct
+// ) {
+//    if (filter is null) 
+//       return Result<PagedResult<CustomerDto>>.Failure(CustomerApplicationErrors.FilterIsRequired);
+//    
+//    // Normalize page defaults
+//    var pageNumber = page?.PageNumber > 0 ? page.PageNumber : 1;
+//    var pageSize   = page?.PageSize    > 0 ? page.PageSize    : 20;
+//    var skip       = (pageNumber - 1) * pageSize;
+//
+//    IQueryable<Customer> query = dbContext.Customers
+//       .AsNoTracking();
+//
+//    // Filters
+//    if (filter is not null) {
+//       if (!string.IsNullOrWhiteSpace(filter.Email)) {
+//          var email = filter.Email.Trim().ToUpperInvariant();
+//          query = query.Where(c => c.Email == email);
+//       }
+//       if (!string.IsNullOrWhiteSpace(filter.Firstname)) {
+//          var fn = filter.Firstname.Trim().ToUpperInvariant();
+//          query = query.Where(c => c.Firstname.ToUpperInvariant().Contains(fn));
+//       }
+//       if (!string.IsNullOrWhiteSpace(filter.Lastname)) {
+//          var ln = filter.Lastname.Trim().ToUpperInvariant();
+//          query = query.Where(c => c.Lastname.ToUpperInvariant().Contains(ln));
+//       }
+//    }
+//    // Total BEFORE paging
+//    var total = await query.CountAsync(ct);
+//
+//    // Sorting (fallback: Lastname, Firstname)
+//    query = query.OrderBy(c => c.Lastname).ThenBy(c => c.Firstname);
+//
+//    // Paging + projection
+//    var items = await query
+//       .Skip(skip)
+//       .Take(pageSize)
+//       .Select(c => c.ToCustomerDto())
+//       .ToListAsync(ct);
+//
+//    // Wrap into PagedResult (adjust if your PagedResult has a different constructor/factory)
+//    var paged = new PagedResult<CustomerDto>(
+//       items,
+//       total,
+//       pageNumber,
+//       pageSize
+//    );
+//
+//    return Result<PagedResult<CustomerDto>>.Success(paged);
+// }

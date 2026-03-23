@@ -5,15 +5,11 @@ namespace BankingApi._2_Core.Payments._1_Ports.Outbound;
 // Provides query access to Transfer aggregates and their transactions.
 public interface ITransferDbContext {
 
-   // Query access to Transfer aggregates
+   // Transfer aggregates
    IQueryable<Transfer> Transfers { get; }
-
-   // Query access to transactions belonging to transfers
-   IQueryable<Transaction> Transactions { get; }
-
-   // Add a new entity to the persistence context
-   void Add<T>(T entity) where T : class;
-   void AddRange<T>(IEnumerable<T> entities) where T : class;
+   void Add(Transfer transfer);
+   void AddRange(IEnumerable<Transfer> transfers);
+   
 }
 
 /*

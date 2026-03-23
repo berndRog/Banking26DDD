@@ -92,9 +92,8 @@ public sealed class CustomerRepositoryIntT : TestBaseIntegration {
    
    [Fact]
    public async Task FindByEmailAsync_returns_Customer3() {
-      var ct = TestContext.Current.CancellationToken;
-      
       using var scope = Root.CreateDefaultScope();
+      var ct = TestContext.Current.CancellationToken;
       var dbContext = scope.ServiceProvider.GetRequiredService<BankingDbContext>();
       var repository = scope.ServiceProvider.GetRequiredService<ICustomerRepository>();
       var unitOfWork = scope.ServiceProvider.GetRequiredService<IUnitOfWork>();
@@ -125,9 +124,8 @@ public sealed class CustomerRepositoryIntT : TestBaseIntegration {
    
    [Fact]
    public async Task SelectAsync_returns_all_customers() {
-      var ct = TestContext.Current.CancellationToken;
-      
       using var scope = Root.CreateDefaultScope();
+      var ct = TestContext.Current.CancellationToken;
       var dbContext = scope.ServiceProvider.GetRequiredService<BankingDbContext>();
       var repository = scope.ServiceProvider.GetRequiredService<ICustomerRepository>();
       var unitOfWork = scope.ServiceProvider.GetRequiredService<IUnitOfWork>();
@@ -150,9 +148,8 @@ public sealed class CustomerRepositoryIntT : TestBaseIntegration {
    
    [Fact]
    public async Task SelectByName_returns_all_customers() {
-      var ct = TestContext.Current.CancellationToken;
-      
       using var scope = Root.CreateDefaultScope();
+      var ct = TestContext.Current.CancellationToken;
       var dbContext = scope.ServiceProvider.GetRequiredService<BankingDbContext>();
       var repository = scope.ServiceProvider.GetRequiredService<ICustomerRepository>();
       var unitOfWork = scope.ServiceProvider.GetRequiredService<IUnitOfWork>();
@@ -173,6 +170,4 @@ public sealed class CustomerRepositoryIntT : TestBaseIntegration {
       Equal(2, actualIds.Count);
       Equal(expectedIds, actualIds);
    }
-
-
 }

@@ -48,15 +48,16 @@ public sealed class ConfigAccount(
          .HasMaxLength(50);
       builder.HasIndex(c => c.IbanVo).IsUnique();
 
-      builder.OwnsOne(a => a.BalanceVo, b => {
-         b.Property(p => p.Amount)
+      builder.ComplexProperty(a => a.BalanceVo, money => {
+         money.Property(m => m.Amount)
             .HasColumnName("Balance")
-            .HasColumnType("decimal(18,2)")
+            .HasPrecision(18, 2)
             .IsRequired();
 
-         b.Property(p => p.Currency)
+         money.Property(m => m.Currency)
             .HasColumnName("Currency")
-            .HasConversion<int>()
+            .HasConversion<string>()
+            .HasMaxLength(3)
             .IsRequired();
       });
 

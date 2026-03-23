@@ -5,8 +5,8 @@ public record TransferDto(
    Guid FromAccountId,
    Guid ToAccountId,         // Receipient name
    string Purpose,
-   decimal AmountDecimal,
-   int CurrencyInt,
+   decimal Amount,
+   int Currency,
    Guid DebitTransactionId,
    Guid CreditTransactionId
 ); 

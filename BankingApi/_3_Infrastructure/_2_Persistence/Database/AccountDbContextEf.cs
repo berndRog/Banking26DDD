@@ -8,6 +8,7 @@ internal sealed class AccountDbContextEf(
    
    public IQueryable<Account> Accounts => db.Set<Account>();
    public IQueryable<Beneficiary> Beneficiaries => db.Set<Beneficiary>();
+   public IQueryable<Transaction> Transactions => db.Set<Transaction>();
    
    public void Add<T>(T entity) where T : class 
       => db.Set<T>().Add(entity);

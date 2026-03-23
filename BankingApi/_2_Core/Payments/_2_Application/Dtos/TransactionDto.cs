@@ -4,10 +4,10 @@ namespace BankingApi._2_Core.Payments._2_Application.Dtos;
 public sealed record TransactionDto(
    Guid Id,
    Guid AccountId,
-   int typeInt,
-   string purpose,
-   decimal amountDecimal,
-   int currencyInt,
-   DateTimeOffset bookedAt,
+   int TypeInt,
+   string Purpose,
+   decimal Amount,
+   int Currency,
+   DateTimeOffset BookedAt,
    Guid? transferId
 );

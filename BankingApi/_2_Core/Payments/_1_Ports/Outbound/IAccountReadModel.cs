@@ -27,13 +27,14 @@ public interface IAccountReadModel {
    );
 
    // Return all accounts owned by a specific customer
-   Task<Result<IEnumerable<AccountDto>>> SelectByOwnerIdAsync(
+   Task<Result<IEnumerable<AccountDto>>> SelectByCustomerIdAsync(
       Guid customerId,
-      CancellationToken ctToken = default
+      CancellationToken ct = default
    );
 
    // Find a beneficiary by identifier
    Task<Result<BeneficiaryDto>> FindBeneficiaryByIdAsync(
+      Guid accountId,
       Guid beneficiaryId,
       CancellationToken ct = default
    );
@@ -46,16 +47,11 @@ public interface IAccountReadModel {
 
    // Search beneficiaries by name
    Task<Result<IEnumerable<BeneficiaryDto>>> SelectBeneficiariesByNameAsync(
+      Guid accountId,
       string name,
       CancellationToken ct = default
    );
-
-   // Find a beneficiary by IBAN
-   Task<Result<BeneficiaryDto>> FindBeneficiaryByIbanAsync(
-      string iban,
-      CancellationToken ct = default
-   );
-
+   
    // Optional filtering / paging query
    // Task<Result<PagedResult<CustomerDto>>> FilterAsync(
    //    CustomerSearchFilter filter,

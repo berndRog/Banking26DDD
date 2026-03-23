@@ -85,7 +85,7 @@ public class AccountsController(
    ) {
       const string context = $"{nameof(AccountsController)}.{nameof(GetAccountsByOwnerIdAsync)}";
       
-      var result = await accountReadModel.SelectByOwnerIdAsync(customerId, ct);
+      var result = await accountReadModel.SelectByCustomerIdAsync(customerId, ct);
       
       return this.ToActionResult(result, logger, context, args: new { customerId });
    }
@@ -108,7 +108,7 @@ public class AccountsController(
       var result = await accountUseCases.CreateAsync(
          customerId: customerId,
          iban: accountDto.Iban,
-         balance: accountDto.BalanceDecimal,
+         balance: accountDto.Balance,
          id: accountDto.Id.ToString(),
          ct: ct
       );
@@ -139,56 +139,42 @@ public class AccountsController(
    }
    
    [Authorize(Policy="CustomersOrEmployees")]
-   [HttpGet("beneficiaries/{id:guid}", Name = nameof(GetBeneficiaryByIdAsync))]
+   [HttpGet("accounts/{accountId:guid}/beneficiaries/{id:guid}", Name = nameof(GetBeneficiaryByIdAsync))]
    [EndpointSummary("Get a beneficiary by Id")]
    [ProducesResponseType(typeof(BeneficiaryDto), StatusCodes.Status200OK)]
    [ProducesResponseType<ProblemDetails>(StatusCodes.Status404NotFound, "application/problem+json")]
    public async Task<ActionResult<BeneficiaryDto>> GetBeneficiaryByIdAsync(
+      [FromRoute] Guid accountId,
       [FromRoute] Guid id,
-      CancellationToken ctToken = default
+      CancellationToken ct = default
    ) {
       const string context = $"{nameof(AccountsController)}.{nameof(GetBeneficiaryByIdAsync)}";
 
-      var result = await accountReadModel.FindBeneficiaryByIdAsync(id, ctToken);
+      var result = await accountReadModel
+         .FindBeneficiaryByIdAsync(accountId, id, ct);
       
       return this.ToActionResult(result, logger, context, args: new { id });
    }
 
    [Authorize(Policy="CustomersOrEmployees")]
-   [HttpGet("beneficiaries/name/{name}", Name = nameof(GetBeneficiariesByNameAsync))]
+   [HttpGet("accounts/{accountId:guid}/beneficiaries/name/{name}", Name = nameof(GetBeneficiariesByNameAsync))]
    [EndpointSummary("Get beneficiaries name, SQL like %name%")]
    [ProducesResponseType(typeof(BeneficiaryDto), StatusCodes.Status200OK)]
    [ProducesResponseType<ProblemDetails>(StatusCodes.Status404NotFound, "application/problem+json")]
    public async Task<ActionResult<IEnumerable<BeneficiaryDto>>> GetBeneficiariesByNameAsync(
+      [FromRoute] Guid accountId,
       [FromRoute] string name,
       CancellationToken ct 
    ){
       const string context = $"{nameof(AccountsController)}.{nameof(GetBeneficiaryByIdAsync)}";
 
       // Find beneficiaries by SQL like %name%
-      var result = 
-         await accountReadModel.SelectBeneficiariesByNameAsync(name, ct);
+      var result = await accountReadModel
+            .SelectBeneficiariesByNameAsync(accountId, name, ct);
 
       return this.ToActionResult(result, logger, context, args: new { name });
    }
    
-   [Authorize(Policy="CustomersOrEmployees")]
-   [HttpGet("beneficiaries/iban/{iban}", Name = nameof(GetBeneficiaryByIbanAsync))]
-   [EndpointSummary("Get beneficiaries name, SQL like %name%")]
-   [ProducesResponseType(typeof(BeneficiaryDto), StatusCodes.Status200OK)]
-   [ProducesResponseType<ProblemDetails>(StatusCodes.Status404NotFound, "application/problem+json")]
-   public async Task<ActionResult<IEnumerable<BeneficiaryDto>>> GetBeneficiaryByIbanAsync(
-      [FromRoute] string iban,
-      CancellationToken ct
-   ){
-      const string context = $"{nameof(AccountsController)}.{nameof(GetBeneficiaryByIbanAsync)}";
-
-      // Find beneficiaries by SQL like %name%
-      var result = 
-         await accountReadModel.FindBeneficiaryByIbanAsync(iban, ct);
-
-      return this.ToActionResult(result, logger, context, args: new { iban });
-   }
 
    [Authorize(Policy="CustomersOrEmployees")]
    [HttpPost("accounts/{accountId:guid}/beneficiaries", Name = nameof(CreateBeneficiaryAsync))]

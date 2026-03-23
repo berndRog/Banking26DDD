@@ -29,7 +29,7 @@ public sealed class TransferUcReverse(
       // load accounts
       // Reverse means: "from is now to" and  "to is now from"
       var toAccount = 
-         await accountRepository.FindWithBeneficiariesByIdAsync(originalTransfer.FromAccountId, ct);
+         await accountRepository.FindAccountByIdWithBeneficiariesAsync(originalTransfer.FromAccountId, ct);
       var fromAccount = 
          await accountRepository.FindByIdAsync(originalTransfer.ToAccountId, ct);
 

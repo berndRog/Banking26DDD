@@ -3,7 +3,7 @@
 public record AccountDto(
    Guid Id,
    string Iban,
-   decimal BalanceDecimal,
-   int CurrencyInt,
+   decimal Balance,
+   int Currency,
    Guid CustomerId
 ); 

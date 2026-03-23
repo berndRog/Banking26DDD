@@ -9,8 +9,8 @@ public static class TransferMappings {
       FromAccountId: transfer.FromAccountId,
       ToAccountId: transfer.ToAccountId,
       Purpose: transfer.Purpose,
-      AmountDecimal: transfer.AmountVo.Amount,
-      CurrencyInt: (int)transfer.AmountVo.Currency,
+      Amount: transfer.AmountVo.Amount,
+      Currency: (int) transfer.AmountVo.Currency,
       DebitTransactionId: transfer.DebitTransactionId,
       CreditTransactionId: transfer.CreditTransactionId
    );
@@ -18,11 +18,11 @@ public static class TransferMappings {
    public static TransactionDto ToTransactionDto(this Transaction transaction) => new(
       Id: transaction.Id,
       AccountId: transaction.AccountId,
-      typeInt: (int)transaction.Type,
-      purpose: transaction.Purpose,
-      amountDecimal: transaction.AmountVo.Amount,
-      currencyInt: (int)transaction.AmountVo.Currency,
-      bookedAt: transaction.BookedAt,
+      TypeInt: (int)transaction.Type,
+      Purpose: transaction.Purpose,
+      Amount: transaction.AmountVo.Amount,
+      Currency: (int)transaction.AmountVo.Currency,
+      BookedAt: transaction.BookedAt,
       transferId: transaction.TransferId
    );
 }

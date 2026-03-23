@@ -22,7 +22,7 @@ public sealed class AccountUcBeneficiaryAdd(
       CancellationToken ct = default
    ) {
       // find account with beneficiaries
-      var account = await accountRepository.FindWithBeneficiariesByIdAsync(accountId, ct);
+      var account = await accountRepository.FindAccountByIdWithBeneficiariesAsync(accountId, ct);
       if (account is null) 
          return Result<BeneficiaryDto>.Failure(BeneficiaryErrors.AccountNotFound);
       

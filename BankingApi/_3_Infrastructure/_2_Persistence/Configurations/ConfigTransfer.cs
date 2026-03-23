@@ -35,15 +35,16 @@ public sealed class ConfigTransfer(
       builder.HasIndex(t => t.ToAccountId);
 
       // amount value object
-      builder.OwnsOne(t => t.AmountVo, b => {
-         b.Property(p => p.Amount)
+      builder.ComplexProperty(a => a.AmountVo, money => {
+         money.Property(m => m.Amount)
             .HasColumnName("Amount")
-            .HasColumnType("decimal(18,2)")
+            .HasPrecision(18, 2)
             .IsRequired();
 
-         b.Property(p => p.Currency)
+         money.Property(m => m.Currency)
             .HasColumnName("Currency")
-            .HasConversion<int>()
+            .HasConversion<string>()
+            .HasMaxLength(3)
             .IsRequired();
       });
 
