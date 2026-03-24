@@ -1,5 +1,6 @@
 using System.ComponentModel.DataAnnotations.Schema;
 using System.Text;
+using BankingApi._2_Core.BuildingBlocks;
 using BankingApi._2_Core.BuildingBlocks._3_Domain;
 using BankingApi._2_Core.BuildingBlocks._3_Domain.Enums;
 using BankingApi._2_Core.BuildingBlocks._3_Domain.Errors;
@@ -42,7 +43,7 @@ public sealed record class IbanVo {
    }
 
    // Rehydrates Iban from database value.
-   internal static IbanVo FromPersisted(string value) {
+   public static IbanVo FromPersisted(string value) {
       if (!IsCanonical(value))
          throw new InvalidOperationException($"Invalid Iban in database: '{value}'");
 

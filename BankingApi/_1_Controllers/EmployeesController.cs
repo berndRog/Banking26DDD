@@ -1,9 +1,7 @@
 using BankingApi._1_Controllers.Extensions;
-using BankingApi._2_Core.Employees._1_Ports.Inbound;
 using BankingApi._2_Core.Employees._1_Ports.Outbound;
 using BankingApi._2_Core.Employees._2_Application.Dtos;
 using BankingApi._2_Core.Employees._2_Application.UseCases;
-using BankingApi._2_Core.Employees._3_Domain.Enums;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 namespace BankingApi._1_Controllers;

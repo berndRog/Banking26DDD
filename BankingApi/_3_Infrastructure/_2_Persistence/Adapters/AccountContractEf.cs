@@ -1,6 +1,9 @@
 using System.Runtime.CompilerServices;
+using BankingApi._2_Core.BuildingBlocks;
 using BankingApi._2_Core.BuildingBlocks._1_Ports.Outbound;
 using BankingApi._2_Core.BuildingBlocks._3_Domain;
+using BankingApi._2_Core.BuildingBlocks._4_IntegrationContracts._1_Ports;
+using BankingApi._2_Core.BuildingBlocks._4_IntegrationContracts._2_Application.Dtos;
 using BankingApi._2_Core.BuildingBlocks.Utils;
 using BankingApi._2_Core.Payments;
 using BankingApi._2_Core.Payments._1_Ports.Inbound;
@@ -22,7 +25,7 @@ internal class AccountContractEf(
    ILogger<AccountContractEf> logger
 ): IAccountContract{
    
-   public async Task<Result<AccountDto>> OpenInitialAccountAsync(
+   public async Task<Result<AccountContractDto>> OpenInitialAccountAsync(
       Guid customerId, 
       string? accoutIdString = null,
       string? iban = null,
@@ -32,7 +35,7 @@ internal class AccountContractEf(
       // Check if owner already has an account (not required, but good to have for this use case)
       var exists = await accountRepository.ExistsByCustomerIdAsync(customerId, ct);
       if (exists)
-         return Result<AccountDto>.Failure(AccountErrors.OwnerAlreadyHasAccount);
+         return Result<AccountContractDto>.Failure(AccountErrors.OwnerAlreadyHasAccount);
       
       // Create IBAN (generate if not provided, validate if provided)
       if (string.IsNullOrEmpty(iban)) {
@@ -46,14 +49,14 @@ internal class AccountContractEf(
             iban = IbanGenerator.CreateGermanIban(iban);
          }
          catch (FormatException) {
-            return Result<AccountDto>.Failure(AccountErrors.InvalidIbanFormat);
+            return Result<AccountContractDto>.Failure(AccountErrors.InvalidIbanFormat);
          }
       }
       
       // Create Iban VO
       var resultIban = IbanVo.Create(iban);
       if(resultIban.IsFailure)
-         return Result<AccountDto>.Failure(resultIban.Error);
+         return Result<AccountContractDto>.Failure(resultIban.Error);
       var ibanVo = resultIban.Value;
       
       // Create initial account
@@ -67,7 +70,7 @@ internal class AccountContractEf(
          id: accoutIdString
       );
       if(resultAccount.IsFailure)
-         return Result<AccountDto>.Failure(resultAccount.Error);
+         return Result<AccountContractDto>.Failure(resultAccount.Error);
       var account = resultAccount.Value;
       
       // Add to repository
@@ -79,7 +82,7 @@ internal class AccountContractEf(
          "Initial account created customerId={ownId} accountId {accId} savedRows={rows}", 
          customerId, account.Id, savedRows);
       
-      return Result<AccountDto>.Success(account.ToAccountDto());
+      return Result<AccountContractDto>.Success(account.ToAccountContractDto());
    }
    
 }

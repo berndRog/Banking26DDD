@@ -1,13 +1,12 @@
 using BankingApi._2_Core.BuildingBlocks;
 using BankingApi._2_Core.BuildingBlocks._1_Ports.Outbound;
-using BankingApi._2_Core.BuildingBlocks._3_Domain;
+using BankingApi._2_Core.BuildingBlocks._3_Domain.Enums;
 using BankingApi._2_Core.BuildingBlocks._3_Domain.Errors;
 using BankingApi._2_Core.BuildingBlocks._3_Domain.ValueObjects;
 using BankingApi._2_Core.Employees._1_Ports.Outbound;
 using BankingApi._2_Core.Employees._2_Application.Dtos;
 using BankingApi._2_Core.Employees._2_Application.Mappings;
 using BankingApi._2_Core.Employees._3_Domain.Entities;
-using BankingApi._2_Core.Employees._3_Domain.Enums;
 using BankingApi._2_Core.Employees._3_Domain.Errors;
 namespace BankingApi._2_Core.Employees._2_Application.UseCases;
 

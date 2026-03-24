@@ -1,5 +1,7 @@
+using System.Runtime.CompilerServices;
 using BankingApi._2_Core.Payments._1_Ports.Outbound;
 using BankingApi._2_Core.Payments._3_Domain.Entities;
+[assembly: InternalsVisibleTo("BankingApiTest")]
 namespace BankingApi._3_Infrastructure._2_Persistence.Database;
 
 internal sealed class AccountDbContextEf(

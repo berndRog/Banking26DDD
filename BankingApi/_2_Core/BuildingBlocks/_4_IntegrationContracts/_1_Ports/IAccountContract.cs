@@ -1,6 +1,5 @@
-using BankingApi._2_Core.BuildingBlocks._3_Domain;
-using BankingApi._2_Core.Payments._2_Application.Dtos;
-namespace BankingApi._2_Core.Payments._1_Ports.Inbound;
+using BankingApi._2_Core.BuildingBlocks._4_IntegrationContracts._2_Application.Dtos;
+namespace BankingApi._2_Core.BuildingBlocks._4_IntegrationContracts._1_Ports;
 
 // Contract used by other bounded contexts to interact with the Accounts domain.
 // Provides a minimal interface for account-related operations without exposing
@@ -8,7 +7,7 @@ namespace BankingApi._2_Core.Payments._1_Ports.Inbound;
 public interface IAccountContract {
 
    // Open the initial account for a newly activated customer
-   Task<Result<AccountDto>> OpenInitialAccountAsync(
+   Task<Result<AccountContractDto>> OpenInitialAccountAsync(
       Guid customerId,
       string? accountIdString,
       string? iban,

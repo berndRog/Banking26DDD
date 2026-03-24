@@ -1,20 +1,16 @@
+using System.Runtime.CompilerServices;
+using BankingApi._2_Core.BuildingBlocks;
 using BankingApi._2_Core.BuildingBlocks._1_Ports.Outbound;
-using BankingApi._2_Core.BuildingBlocks._3_Domain;
+using BankingApi._2_Core.BuildingBlocks._3_Domain.Enums;
+using BankingApi._2_Core.BuildingBlocks._4_IntegrationContracts._1_Ports;
 using BankingApi._2_Core.Customers._1_Ports.Outbound;
 using BankingApi._2_Core.Customers._3_Domain.Enum;
 using BankingApi._2_Core.Customers._3_Domain.Errors;
-using BankingApi._2_Core.Employees._1_Ports.Inbound;
-using BankingApi._2_Core.Employees._3_Domain.Enums;
-using BankingApi._2_Core.Payments._1_Ports.Inbound;
+[assembly: InternalsVisibleTo("BankingApiTest")]
 namespace BankingApi._2_Core.Customers._2_Application.UseCases;
 
-/// <summary>
-/// Employee use case: activate a customer after external identity verification.
-/// NOTE: This use case does NOT create the initial account yet.
-/// (You can add that orchestration in the Core BC later.)
-/// </summary>
-public sealed class CustomerUcActivate(
-
+// Employee use case: activate a customer after external identity verification.
+internal sealed class CustomerUcActivate(
    ICustomerRepository repository,
    IEmployeeContract employeeContract,
    IAccountContract accountContract,
@@ -22,18 +18,14 @@ public sealed class CustomerUcActivate(
    IClock clock,
    ILogger<CustomerUcActivate> logger
 ) {
-   /// <summary>
-   /// Converts the identity subject into an employeeId.
-   /// In your final solution this should use a proper Employee lookup / gateway.
-   /// For lecture/testing we accept "sub is Guid" as convention.
-   /// </summary>
+   // Converts the identity subject into an employeeId.
+   // In your final solution this should use a proper Employee lookup / gateway.
    public async Task<Result> ExecuteAsync(
       Guid customerId,
       string? accountIdString,
       string? ibanString,
       CancellationToken ct
    ) {
-      
       // 1) Authorization: check if caller is an employee with required rights
       var requiredRights = AdminRights.ManageCustomers | AdminRights.ManageAccounts;
       var resultEmployee = await employeeContract.GetAuthorizedEmployeeAsync(requiredRights, ct);

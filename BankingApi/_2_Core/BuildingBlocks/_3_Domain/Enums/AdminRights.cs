@@ -1,4 +1,4 @@
-namespace BankingApi._2_Core.Employees._3_Domain.Enums;
+namespace BankingApi._2_Core.BuildingBlocks._3_Domain.Enums;
 
 [Flags]
 public enum AdminRights {

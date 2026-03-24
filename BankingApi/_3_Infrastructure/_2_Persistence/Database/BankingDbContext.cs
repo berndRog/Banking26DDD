@@ -1,9 +1,11 @@
+using System.Runtime.CompilerServices;
 using BankingApi._2_Core.Customers._3_Domain.Entities;
 using BankingApi._2_Core.Employees._3_Domain.Entities;
 using BankingApi._2_Core.Payments._3_Domain.Entities;
 using BankingApi._3_Infrastructure._2_Persistence.Configurations;
 using BankingApi._3_Infrastructure._2_Persistence.Database.Converter;
 using Microsoft.EntityFrameworkCore;
+[assembly: InternalsVisibleTo("BankingApiTest")]
 namespace BankingApi._3_Infrastructure._2_Persistence.Database;
 
 public sealed partial class BankingDbContext(

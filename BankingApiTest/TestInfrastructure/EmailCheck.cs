@@ -1,4 +1,5 @@
 using System.Net.Mail;
+using BankingApi._2_Core.BuildingBlocks;
 using BankingApi._2_Core.BuildingBlocks._3_Domain;
 using BankingApi._2_Core.BuildingBlocks._3_Domain.Errors;
 namespace BankingApiTest._2_Core.BuildingBlocks;

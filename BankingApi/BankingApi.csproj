@@ -49,6 +49,8 @@
 
   <ItemGroup>
     <Folder Include="_2_Core\BuildingBlocks\_1_Ports\Inbound\" />
+    <Folder Include="_2_Core\Employees\_3_Domain\Enums\" />
+    <Folder Include="_3_Infrastructure\_4_Logging\" />
   </ItemGroup>
   
   

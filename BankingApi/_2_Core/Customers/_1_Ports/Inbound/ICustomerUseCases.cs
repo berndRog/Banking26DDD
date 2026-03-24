@@ -1,3 +1,4 @@
+using BankingApi._2_Core.BuildingBlocks;
 using BankingApi._2_Core.BuildingBlocks._3_Domain;
 using BankingApi._2_Core.Customers._2_Application.Dtos;
 using BankingApi._2_Modules.Customers._3_Domain.Enums;

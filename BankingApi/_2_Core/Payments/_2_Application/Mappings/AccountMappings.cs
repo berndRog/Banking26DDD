@@ -1,3 +1,4 @@
+using BankingApi._2_Core.BuildingBlocks._4_IntegrationContracts._2_Application.Dtos;
 using BankingApi._2_Core.Payments._2_Application.Dtos;
 using BankingApi._2_Core.Payments._3_Domain.Entities;
 namespace BankingApi._2_Core.Payments._2_Application.Mappings;
@@ -17,6 +18,12 @@ public static class AccountMappings {
       Name: beneficiary.Name,
       Iban: beneficiary.IbanVo.Value,
       AccountId: beneficiary.AccountId
+   );
+   
+   public static AccountContractDto ToAccountContractDto(this Account account) => new(
+      Id: account.Id,
+      Iban: account.IbanVo.Value,
+      CustomerId: account.CustomerId   
    );
    
 }

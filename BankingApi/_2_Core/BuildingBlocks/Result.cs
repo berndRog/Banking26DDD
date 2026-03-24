@@ -1,5 +1,5 @@
 using BankingApi._2_Core.BuildingBlocks._3_Domain.Errors;
-namespace BankingApi._2_Core.BuildingBlocks._3_Domain;
+namespace BankingApi._2_Core.BuildingBlocks;
 
 /// <summary>
 /// Generic result type for operations that return a value.
