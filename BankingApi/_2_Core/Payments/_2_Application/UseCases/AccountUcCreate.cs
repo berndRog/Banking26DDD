@@ -1,6 +1,7 @@
 using BankingApi._2_Core.BuildingBlocks;
 using BankingApi._2_Core.BuildingBlocks._1_Ports.Outbound;
 using BankingApi._2_Core.BuildingBlocks._3_Domain;
+using BankingApi._2_Core.BuildingBlocks._3_Domain.Entities;
 using BankingApi._2_Core.BuildingBlocks._4_IntegrationContracts._1_Ports;
 using BankingApi._2_Core.BuildingBlocks.Utils;
 using BankingApi._2_Core.Customers._1_Ports.Inbound;
@@ -15,7 +16,9 @@ using BankingApi._2_Core.Payments._3_Domain.ValueObjects;
 namespace BankingApi._2_Core.Payments._2_Application.UseCases;
 
 public sealed class AccountUcCreate(
-   ICustomerContract customer,
+   IIdentityGateway identityGateway,
+   ICustomerContract customerContract,
+   IEmployeeContract employeeContract,
    IAccountRepository accountRepository,
    IUnitOfWork unitOfWork,
    IClock clock,
@@ -24,48 +27,54 @@ public sealed class AccountUcCreate(
    
    public async Task<Result<AccountDto>> ExecuteAsync(
       Guid customerId,
-      string iban,
-      decimal balance,
-      int currency,
-      string? id,
+      AccountDto accountDto,
       CancellationToken ct = default
    ) {
       
-      if (!await customer.ExistsActiveAsync(customerId, ct))
+      if (!await customerContract.ExistsActiveAsync(customerId, ct))
          return Result<AccountDto>.Failure(AccountErrors.OwnerIdNotFoundOrInactive);
       
-      // invariant: initial balance must be >= 0
-
+      // 1) subject required
+      var resultSubject = SubjectCheck.Run(identityGateway.Subject);
+      if (resultSubject.IsFailure) 
+         return Result<AccountDto>.Failure(resultSubject.Error);
+      var subject = resultSubject.Value;
       
-      // domain   
-      var resultIban = IbanVo.Create(iban);
+      // 2) load employee id
+      var resultEmployee = await employeeContract.GetEmployeeBySubjectAsync(subject, ct);   
+      if(resultEmployee == null)
+         return Result<AccountDto>.Failure(resultSubject.Error);
+      var employeeContractDto = resultEmployee.Value;
+      
+      // 3) domain model  
+      var resultIban = IbanVo.Create(accountDto.Iban);
       if (resultIban.IsFailure)
          return Result<AccountDto>.Failure(AccountErrors.InvalidIban);
       var ibanVo = resultIban.Value;
       
-      // create enitity
+      // create entity
       var result = Account.Create(
          customerId: customerId,
          ibanVo: ibanVo, 
-         balance: balance, 
+         balance: accountDto.Balance, 
+         createdByEmployeeId: employeeContractDto.Id,
          createdAt: clock.UtcNow,
-         id: id
+         id: accountDto.Id.ToString()
       );
       if (result.IsFailure)
-         return Result<AccountDto>.Failure(result.Error);
-      var account = result.Value!;
+         return Result<AccountDto>.Failure(result.Error)
+            .LogIfFailure(logger, "CustomerUcCreate.DomainRejected",
+               new { accountDto });
+      var account = result.Value;
       
       // add to repository
-      accountRepository.Add(account);
-      
+      accountRepository.Add(account);            
+         
       // unit of work, save changes to database
-      var savedRows = 
-         await unitOfWork.SaveAllChangesAsync("Add account to owner", ct);
-
-      logger.LogDebug("Account created ({Id}) ",
-         account.Id.To8());
-
+      var rows = await unitOfWork.SaveAllChangesAsync("Add account", ct);
+      
+      logger.LogInformation("AccountUcCreate={id} rows={rows}", account.Id, rows);
+      
       return Result<AccountDto>.Success(account.ToAccountDto());
    }
 }
-

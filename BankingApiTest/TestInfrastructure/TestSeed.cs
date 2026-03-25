@@ -30,11 +30,11 @@ public sealed class TestSeed {
    #endregion
 
    #region -------------- Test Addresses (Value Objects) -------------------------------------
-   public AddressVo Address1 => _seed.Address1;
-   public AddressVo Address2 => _seed.Address1;
-   public AddressVo Address3 => _seed.Address1;
-   public AddressVo Address4 => _seed.Address1;
-   public AddressVo Address5 => _seed.Address1;
+   public AddressVo Address1Vo => _seed.Address1Vo;
+   public AddressVo Address2Vo => _seed.Address2Vo;
+   public AddressVo Address3Vo => _seed.Address3Vo;
+   public AddressVo Address4Vo => _seed.Address4Vo;
+   public AddressVo Address5Vo => _seed.Address5Vo;
    #endregion
 
    #region -------------- Test Customers (Enities) -------------------------------------------

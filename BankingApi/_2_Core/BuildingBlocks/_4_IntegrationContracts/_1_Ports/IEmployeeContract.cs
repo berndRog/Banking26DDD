@@ -6,8 +6,15 @@ public interface IEmployeeContract {
 
    // Returns the currently authenticated employee
    // and verifies that the employee has the required administrative rights
+   Task<Result<EmployeeContractDto>> GetEmployeeBySubjectAsync(
+      string subject,
+      CancellationToken ct = default
+   );
+   
+   // Returns the currently authenticated employee
+   // and verifies that the employee has the required administrative rights
    Task<Result<EmployeeContractDto>> GetAuthorizedEmployeeAsync(
-      AdminRights requiredRights,
+      AdminRights adminRights,
       CancellationToken ct = default
    );
 

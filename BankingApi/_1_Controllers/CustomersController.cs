@@ -1,26 +1,36 @@
+using Asp.Versioning;
 using BankingApi._1_Controllers.Extensions;
 using BankingApi._2_Core.Customers._1_Ports.Inbound;
 using BankingApi._2_Core.Customers._1_Ports.Outbound;
 using BankingApi._2_Core.Customers._2_Application.Dtos;
-using BankingApi._2_Core.Customers._2_Application.UseCases;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 namespace BankingApi._1_Controllers;
 
+[ApiVersion("1.0")]
+[Route("banking/v{version:apiVersion}")]
 [ApiController]
-
-[Route("bankingapi/v1")]
 public sealed class CustomersController(
    ICustomerReadModel readModel,
    ICustomerUseCases useCases,
    ILogger<CustomersController> logger
 ) : ControllerBase {
-   
+
+   /// <summary>
+   /// Creates an activated customer together with a first account.
+   /// This endpoint is intended for testing and demo purposes only.
+   /// </summary>
+   /// <param name="accountId">Identifier of the first account.</param>
+   /// <param name="iban">IBAN of the first account, or an empty string.</param>
+   /// <param name="customerDto">Customer data transferred in the request body.</param>
+   /// <param name="ct">Cancellation token.</param>
+   /// <returns>The created customer resource.</returns>
    [HttpPost("customers", Name = nameof(CreateCustomerAsync))]
-   [EndpointSummary("Create a new customer with IBAN (not for production use)")]
+   [Consumes("application/json")]
+   [Produces("application/json")]
    [ProducesResponseType<CustomerDto>(StatusCodes.Status201Created)]
-   [ProducesResponseType<ProblemDetails>(StatusCodes.Status400BadRequest, "application/problem+json")]   
-   public async Task<ActionResult<Guid>> CreateCustomerAsync(
+   [ProducesResponseType<ProblemDetails>(StatusCodes.Status400BadRequest, "application/problem+json")]
+   public async Task<ActionResult<CustomerDto>> CreateCustomerAsync(
       [FromQuery] string accountId,
       [FromQuery] string iban,
       [FromBody] CustomerDto customerDto,
@@ -31,22 +41,34 @@ public sealed class CustomersController(
       var result = await useCases.CreateAsync(
          customerDto: customerDto,
          accountIdString: accountId,
-         ibanString: iban, 
+         ibanString: iban,
          ct: ct
       );
-      
+
       return this.ToCreatedAtRoute(
          routeName: nameof(GetCustomerById),
          routeValues: new { id = customerDto.Id },
          result, logger, context);
    }
 
-   // ------------------------------------------------------------------
-   // SELF-SERVICE (logged-in user)
-   // ------------------------------------------------------------------
-   //[Authorize(Policy = "CustomersOnly")]
+   /// <summary>
+   /// Creates the current customer after first login in a self-service and idempotent way.
+   /// </summary>
+   /// <remarks>
+   /// If the customer has not been provisioned yet, the endpoint creates the customer
+   /// and returns <c>201 Created</c>. If the customer already exists, it returns
+   /// <c>200 OK</c> with the existing provisioned data.
+   /// </remarks>
+   /// <param name="customerDto">Customer data used for provisioning.</param>
+   /// <param name="ct">Cancellation token.</param>
+   /// <returns>
+   /// A provision result containing the customer information and an indicator
+   /// whether the resource was newly created.
+   /// </returns>
+   [Authorize(Policy = "CustomersOnly")]
    [HttpPost("customers/me/provision", Name = nameof(CreateCustomerProvisionAsync))]
-   [EndpointSummary("Provision customer on first login (idempotent)")]
+   [Consumes("application/json")]
+   [Produces("application/json")]
    [ProducesResponseType<CustomerProvisionDto>(StatusCodes.Status200OK)]
    [ProducesResponseType<CustomerProvisionDto>(StatusCodes.Status201Created)]
    [ProducesResponseType<ProblemDetails>(StatusCodes.Status400BadRequest, "application/problem+json")]
@@ -55,42 +77,59 @@ public sealed class CustomersController(
       [FromBody] CustomerDto customerDto,
       CancellationToken ct
    ) {
-
       const string context = $"{nameof(CustomersController)}.{nameof(CreateCustomerProvisionAsync)}";
 
       var result = await useCases.CreateProvisionAsync(customerDto, ct);
-      if(result.IsFailure)
+      if (result.IsFailure)
          return this.ToActionResult(result: result, logger: logger, context: context);
-      
+
       // If provisioning was just created, return 201 Created with profile data
       if (result.Value.WasCreated) {
-         return this.ToCreatedAtRoute(routeName: nameof(GetCustomerProfileAsync), routeValues: new { }, 
-             result, logger, context);
+         return this.ToCreatedAtRoute(
+            routeName: nameof(GetCustomerProfileAsync),
+            routeValues: new { },
+            result, logger, context
+         );
       }
+
       // Already provisioned, return 200 OK with profile data
       return this.ToActionResult(result, logger, context, args: null);
-      
    }
 
-   //[Authorize(Policy = "CustomersOnly")]
+   /// <summary>
+   /// Returns the profile of the currently authenticated customer.
+   /// </summary>
+   /// <remarks>
+   /// The customer must already be provisioned. If no provisioned customer profile
+   /// exists for the current identity, the endpoint returns <c>404 Not Found</c>.
+   /// </remarks>
+   /// <param name="ct">Cancellation token.</param>
+   /// <returns>The customer profile of the current user.</returns>
    [HttpGet("customers/me/profile", Name = nameof(GetCustomerProfileAsync))]
-   [EndpointSummary("Get customers profile (requires provision)")]
    [ProducesResponseType<CustomerDto>(StatusCodes.Status200OK)]
    [ProducesResponseType<ProblemDetails>(StatusCodes.Status404NotFound, "application/problem+json")]
    [ProducesResponseType<ProblemDetails>(StatusCodes.Status401Unauthorized, "application/problem+json")]
    public async Task<ActionResult<CustomerDto>> GetCustomerProfileAsync(
       CancellationToken ct
-   ) {    
+   ) {
       const string context = $"{nameof(CustomersController)}.{nameof(GetCustomerProfileAsync)}";
-      
+
       var result = await readModel.FindMeAsync(ct);
 
       return this.ToActionResult(result, logger, context, args: null);
    }
 
-   //[Authorize(Policy = "CustomersOnly")]
+   /// <summary>
+   /// Updates the profile of the currently authenticated customer.
+   /// </summary>
+   /// <remarks>
+   /// The customer must already be provisioned before the profile can be updated.
+   /// </remarks>
+   /// <param name="dto">New profile data for the current customer.</param>
+   /// <param name="ct">Cancellation token.</param>
+   /// <returns>The updated customer profile.</returns>
    [HttpPut("customers/me/profile", Name = nameof(PutCustomerProfileAsync))]
-   [EndpointSummary("Update my customer profile (requires provisioning)")]
+   [Produces("application/json")]
    [ProducesResponseType<CustomerDto>(StatusCodes.Status200OK)]
    [ProducesResponseType<ProblemDetails>(StatusCodes.Status400BadRequest, "application/problem+json")]
    [ProducesResponseType<ProblemDetails>(StatusCodes.Status404NotFound, "application/problem+json")]
@@ -100,31 +139,40 @@ public sealed class CustomersController(
       CancellationToken ct
    ) {
       const string context = $"{nameof(CustomersController)}.{nameof(PutCustomerProfileAsync)}";
-      
+
       var result = await useCases.UpdateProfileAsync(dto, ct);
 
       return this.ToActionResult(result, logger, context, args: dto);
    }
-   
-   //[Authorize] 
+
+   /// <summary>
+   /// Returns a customer by its unique identifier.
+   /// </summary>
+   /// <param name="id">Unique identifier of the customer.</param>
+   /// <param name="ct">Cancellation token.</param>
+   /// <returns>The customer resource if found.</returns>
    [HttpGet("customers/{id:guid}", Name = nameof(GetCustomerById))]
-   [EndpointSummary("Get a customer by ReservationId")]
    [ProducesResponseType<CustomerDto>(StatusCodes.Status200OK)]
    [ProducesResponseType<ProblemDetails>(StatusCodes.Status404NotFound, "application/problem+json")]
    public async Task<ActionResult<CustomerDto>> GetCustomerById(
       [FromRoute] Guid id,
-      CancellationToken ct  // Cancel when request is aborted (e.g. client disconnects
+      CancellationToken ct
    ) {
       const string context = $"{nameof(CustomersController)}.{nameof(GetCustomerById)}";
-      
+
       var result = await readModel.FindByIdAsync(id, ct);
 
       return this.ToActionResult(result, logger, context, args: id);
    }
 
+   /// <summary>
+   /// Returns a customer by email address.
+   /// </summary>
+   /// <param name="email">Email address of the customer.</param>
+   /// <param name="ct">Cancellation token.</param>
+   /// <returns>The customer resource if a matching email address exists.</returns>
    [Authorize]
    [HttpGet("customers/email/{email}", Name = nameof(GetCustomerByEmail))]
-   [EndpointSummary("Get a customer by email")]
    [ProducesResponseType<CustomerDto>(StatusCodes.Status200OK)]
    [ProducesResponseType<ProblemDetails>(StatusCodes.Status401Unauthorized, "application/problem+json")]
    [ProducesResponseType<ProblemDetails>(StatusCodes.Status404NotFound, "application/problem+json")]
@@ -132,68 +180,32 @@ public sealed class CustomersController(
       [FromRoute] string email,
       CancellationToken ct
    ) {
-      const string context = $"{nameof(CustomersController)}.{nameof(GetCustomerById)}";
-      
+      const string context = $"{nameof(CustomersController)}.{nameof(GetCustomerByEmail)}";
+
       var result = await readModel.FindByEmailAsync(email, ct);
-      
+
       return this.ToActionResult(result, logger, context, args: email);
    }
-   
-   [Authorize(Policy="EmployeesOnly")]
+
+   /// <summary>
+   /// Returns all customers.
+   /// </summary>
+   /// <remarks>
+   /// This endpoint is intended for employees and administrative use cases.
+   /// </remarks>
+   /// <param name="ct">Cancellation token.</param>
+   /// <returns>A collection of all customers.</returns>
+   [Authorize(Policy = "EmployeesOnly")]
    [HttpGet("customers")]
-   [EndpointSummary("Get all customers")]
    [ProducesResponseType<IEnumerable<CustomerDto>>(StatusCodes.Status200OK)]
    [ProducesResponseType<ProblemDetails>(StatusCodes.Status401Unauthorized, "application/problem+json")]
    public async Task<ActionResult<IEnumerable<CustomerDto>>> GetAllCustomersAsync(
       CancellationToken ct
    ) {
       const string context = $"{nameof(CustomersController)}.{nameof(GetAllCustomersAsync)}";
-      
+
       var result = await readModel.SelectAllAsync(ct);
-      
+
       return this.ToActionResult(result, logger, context, args: null);
    }
-   
-   // [HttpGet(OwnersFilterRoute)]
-   // //[Authorize] // later optionally Policy="EmployeesOnly"
-   // [EndpointSummary("Filter and page employees")]
-   // [ProducesResponseType<PagedResult<CustomerDto>>(StatusCodes.Status200OK)]
-   // [ProducesResponseType<ProblemDetails>(StatusCodes.Status400BadRequest, "application/problem+json")]
-   // [ProducesResponseType<ProblemDetails>(StatusCodes.Status401Unauthorized, "application/problem+json")]
-   // public async Task<ActionResult<PagedResult<CustomerDto>>> GetAllOwners(
-   //    [FromBody] CustomerSearchFilter? filter,
-   //    [FromQuery] PageRequest? page,
-   //    CancellationToken ct
-   // ) {
-   //    var result = await readModel.FilterAsync(filter, page, ct);
-   //
-   //    return this.ToActionResult<PagedResult<CustomerDto>>(
-   //       result,
-   //       logger,
-   //       context: $"GET {UrlStart}/{OwnersFilterRoute}",
-   //       args: new { filter, page }
-   //    );
-   // }
-   
-   
-   // [HttpGet(OwnersFilterRoute)]
-   // //[Authorize] // later optionally Policy="EmployeesOnly"
-   // [EndpointSummary("Filter and page employees")]
-   // [ProducesResponseType<PagedResult<CustomerDto>>(StatusCodes.Status200OK)]
-   // [ProducesResponseType<ProblemDetails>(StatusCodes.Status400BadRequest, "application/problem+json")]
-   // [ProducesResponseType<ProblemDetails>(StatusCodes.Status401Unauthorized, "application/problem+json")]
-   // public async Task<ActionResult<PagedResult<CustomerDto>>> FilterOwners(
-   //    [FromBody] CustomerSearchFilter? filter,
-   //    [FromQuery] PageRequest? page,
-   //    CancellationToken ct
-   // ) {
-   //    var result = await readModel.FilterAsync(filter, page, ct);
-   //
-   //    return this.ToActionResult<PagedResult<CustomerDto>>(
-   //       result,
-   //       logger,
-   //       context: $"GET {UrlStart}/{OwnersFilterRoute}",
-   //       args: new { filter, page }
-   //    );
-   // }
 }

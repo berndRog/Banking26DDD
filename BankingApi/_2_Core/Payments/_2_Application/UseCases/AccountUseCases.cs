@@ -1,23 +1,26 @@
 using BankingApi._2_Core.BuildingBlocks;
-using BankingApi._2_Core.BuildingBlocks._3_Domain;
+using BankingApi._2_Core.Customers._2_Application.UseCases;
 using BankingApi._2_Core.Payments._1_Ports.Inbound;
 using BankingApi._2_Core.Payments._2_Application.Dtos;
 namespace BankingApi._2_Core.Payments._2_Application.UseCases;
 
 public class AccountUseCases(
    AccountUcCreate accountUcCreate,
+   AccountUcDeactivate accountUcDeactivate,
    AccountUcBeneficiaryAdd accountUcBeneficiaryAdd,
    AccountUcBeneficiaryRemove accountUcBeneficiaryRemove
 ) : IAccountUseCases {
    
    public Task<Result<AccountDto>> CreateAsync(
       Guid customerId,
-      string iban,
-      decimal balance = 0m,
-      int currency = 1, // default to EUR
-      string? id = null,
+      AccountDto accountDto,
       CancellationToken ct = default
-   ) => accountUcCreate.ExecuteAsync(customerId, iban, balance, currency, id, ct);
+   ) => accountUcCreate.ExecuteAsync(customerId, accountDto, ct);
+   
+   public Task<Result> DeactivateAsync(
+      Guid accountId,
+      CancellationToken ct = default
+   ) => accountUcDeactivate.ExecuteAsync(accountId, ct);
    
    public Task<Result<BeneficiaryDto>> AddBeneficiaryAsync(
       Guid accountId,
@@ -25,7 +28,7 @@ public class AccountUseCases(
       CancellationToken ct = default
    ) => accountUcBeneficiaryAdd.ExecuteAsync(accountId, beneficiaryDto, ct);
    
-   public Task<Result<Guid>> RemoveBeneficiaryAsync(
+   public Task<Result> RemoveBeneficiaryAsync(
       Guid accountId,
       Guid beneficiaryId,
       CancellationToken ct = default

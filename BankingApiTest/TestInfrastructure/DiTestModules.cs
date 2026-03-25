@@ -4,7 +4,6 @@ using BankingApi._2_Core.BuildingBlocks._4_IntegrationContracts._1_Ports;
 using BankingApi._2_Core.Customers._1_Ports.Inbound;
 using BankingApi._2_Core.Customers._1_Ports.Outbound;
 using BankingApi._2_Core.Customers._2_Application.UseCases;
-using BankingApi._2_Core.Employees._1_Ports.Inbound;
 using BankingApi._2_Core.Employees._1_Ports.Outbound;
 using BankingApi._2_Core.Payments._1_Ports.Inbound;
 using BankingApi._2_Core.Payments._1_Ports.Outbound;
@@ -16,10 +15,9 @@ using BankingApi._3_Infrastructure._2_Persistence.ReadModel;
 using BankingApi._3_Infrastructure._2_Persistence.Repositories;
 using BankingApiTest._3_Infrastructure._3_Security;
 using BankingApiTest._3_Infrastructure._5_Utils;
-using BankingApiTest.TestInfrastructure;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
-namespace BankingApiTest.TestController;
+namespace BankingApiTest.TestInfrastructure;
 
 public static class DiTestModules {
    

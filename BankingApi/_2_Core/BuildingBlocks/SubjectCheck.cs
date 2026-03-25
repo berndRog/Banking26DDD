@@ -1,4 +1,3 @@
-using BankingApi._2_Core.BuildingBlocks._3_Domain;
 using BankingApi._2_Core.BuildingBlocks._3_Domain.Errors;
 namespace BankingApi._2_Core.BuildingBlocks;
 
@@ -10,7 +9,7 @@ public static class SubjectCheck {
       if (input.Length > 200)
          return Result<string>.Failure(CommonErrors.InvalidIdentitySubject);
 
-      /// Identity subject as issued by IAM (opaque, not interpreted).
+      // Identity subject as issued by IAM (opaque, not interpreted).
       return Result<string>.Success(input);
    }
 }

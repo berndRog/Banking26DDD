@@ -1,81 +1,56 @@
 using BankingApi._2_Core.BuildingBlocks._3_Domain.Errors;
 namespace BankingApi._2_Core.BuildingBlocks;
 
-/// <summary>
-/// Generic result type for operations that return a value.
-/// 
-/// Binary states:
-/// - Success(value) => IsSuccess == true, Error == DomainErrors.None
-/// - Failure(error) => IsFailure == true, Value is default
-/// 
-/// Design intent:
-/// - Explicit success/failure without throwing exceptions for domain-level errors.
-/// - Encourage composing operations via OnSuccess/OnFailure/Fold.
-/// </summary>
+// Generic result type for operations that return a value.
+// 
+// Binary states:
+// - Success(value) => IsSuccess == true, Error == DomainErrors.None
+// - Failure(error) => IsFailure == true, Value is default
+// Design intent:
+// - Explicit success/failure without throwing exceptions for domain-level errors.
+// - Encourage composing operations via OnSuccess/OnFailure/Fold.
 public sealed class Result<T> {
-    /// <summary>
-    /// Indicates whether the operation failed.
-    /// </summary>
+    // Indicates whether the operation failed.
     public bool IsFailure { get; }
-
-    /// <summary>
-    /// Convenience flag: true if the operation succeeded.
-    /// </summary>
+    // Convenience flag: true if the operation succeeded.
     public bool IsSuccess => !IsFailure;
 
-    /// <summary>
-    /// Error information (DomainErrors.None on success).
-    /// </summary>
+    // Error information (DomainErrors.None on success).
     public DomainErrors Error { get; }
-
-    /// <summary>
-    /// The successful value (meaningful only when IsSuccess is true).
-    /// </summary>
+    // The successful value (meaningful only when IsSuccess is true).
     public T Value { get; }
 
-    /// <summary>
-    /// Private constructor to enforce factory usage.
-    /// </summary>
+    // Private constructor to enforce factory usage.
     private Result(bool isFailure, T value, DomainErrors error) {
         IsFailure = isFailure;
         Value = value;
         Error = error;
     }
 
-    /// <summary>
-    /// Creates a successful result with the provided value.
-    /// </summary>
+    // Creates a successful result with the provided value.
     public static Result<T> Success(T value) =>
         new(isFailure: false, value: value, error: DomainErrors.None);
 
-    /// <summary>
-    /// Creates a failed result with the provided domain error.
-    /// Note: Value is set to default because no valid value exists on failure.
-    /// </summary>
+    // Creates a failed result with the provided domain error.
+    // Note: Value is set to default because no valid value exists on failure.
     public static Result<T> Failure(DomainErrors error) =>
         new(isFailure: true, value: default!, error: error);
 
-    /// <summary>
-    /// Returns Value if successful and non-null; otherwise returns the provided default value.
-    /// Useful for optional read scenarios.
-    /// </summary>
+    // Returns Value if successful and non-null; otherwise returns the provided default value.
+    // Useful for optional read scenarios.
     public T GetValueOrDefault(T defaultValue = default!) =>
         IsSuccess && Value is not null ? Value : defaultValue;
-
-    /// <summary>
-    /// Returns Value if successful; otherwise throws.
-    /// Use sparingly (typically at boundaries or in tests), not for expected domain failures.
-    /// </summary>
+    
+    // Returns Value if successful; otherwise throws.
+    // Use sparingly (typically at boundaries or in tests), not for expected domain failures.
     public T GetValueOrThrow() {
         if (!IsSuccess || Value is null)
             throw new InvalidOperationException($"Result failed: {Error}");
         return Value;
     }
 
-    /// <summary>
-    /// Executes an action if the result is successful and Value is non-null.
-    /// Returns this result for fluent chaining.
-    /// </summary>
+    // Executes an action if the result is successful and Value is non-null.
+    // </summary>
     public Result<T> OnSuccess(Action<T> action) {
         if (IsSuccess && Value is not null)
             action(Value);
@@ -83,22 +58,18 @@ public sealed class Result<T> {
         return this;
     }
 
-    /// <summary>
-    /// Executes an action if the result is a failure.
-    /// Returns this result for fluent chaining.
-    /// </summary>
+    // Executes an action if the result is a failure.
+    // Returns this result for fluent chaining.
     public Result<T> OnFailure(Action<DomainErrors> action) {
         if (IsFailure)
             action(Error);
 
         return this;
     }
-
-    /// <summary>
-    /// Maps a result into a single value (expression form).
-    /// - onSuccess is called when successful
-    /// - onFailure is called when failed
-    /// </summary>
+    
+    // Maps a result into a single value (expression form).
+    // - onSuccess is called when successful
+    // - onFailure is called when failed
     public TResult Fold<TResult>(
         Func<T, TResult> onSuccess,
         Func<DomainErrors, TResult> onFailure) {
@@ -107,36 +78,31 @@ public sealed class Result<T> {
             : onFailure(Error);
     }
 
-    /// <summary>
-    /// Transforms the successful value using the provided mapper function.
-    ///
-    /// Behavior:
-    /// - If Success → applies mapper to Value and wraps result in Result<TResult>.Success.
-    /// - If Failure → propagates the existing error without invoking mapper.
-    ///
-    /// Purpose:
-    /// - Enables functional-style value transformation.
-    /// - Does NOT allow the mapper to return another Result.
-    /// - Also known as "Select" in functional terminology.
-    /// </summary>
+    // Transforms the successful value using the provided mapper function.
+    //
+    // Behavior:
+    // - If Success → applies mapper to Value and wraps result in Result<TResult>.Success.
+    // - If Failure → propagates the existing error without invoking mapper.
+    // Purpose:
+    // - Enables functional-style value transformation.
+    // - Does NOT allow the mapper to return another Result.
+    // - Also known as "Select" in functional terminology.
     public Result<TResult> Map<TResult>(Func<T, TResult> mapper) {
         return IsSuccess && Value is not null
             ? Result<TResult>.Success(mapper(Value))
             : Result<TResult>.Failure(Error);
     }
 
-    /// <summary>
-    /// Chains another operation that itself returns a Result.
-    ///
-    /// Behavior:
-    /// - If Success → invokes binder(Value) and returns its Result directly.
-    /// - If Failure → propagates the existing error without invoking binder.
-    ///
-    /// Purpose:
-    /// - Enables composition of operations that may fail.
-    /// - Prevents nested Result<Result<T>> structures.
-    /// - Also known as "FlatMap" or "SelectMany" in functional terminology.
-    /// </summary>
+
+    // Chains another operation that itself returns a Result.
+    //
+    // Behavior:
+    // - If Success → invokes binder(Value) and returns its Result directly.
+    // - If Failure → propagates the existing error without invoking binder.
+    // Purpose:
+    // - Enables composition of operations that may fail.
+    // - Prevents nested Result<Result<T>> structures.
+    // - Also known as "FlatMap" or "SelectMany" in functional terminology.
     public Result<TResult> Bind<TResult>(Func<T, Result<TResult>> binder) {
         return IsSuccess && Value is not null
             ? binder(Value)
@@ -144,50 +110,35 @@ public sealed class Result<T> {
     }
 }
 
-/// <summary>
-/// Non-generic result type for operations that return no value.
-/// 
-/// Semantics:
-/// - Success  => no error (DomainErrors.None)
-/// - Failure  => an error is present
-/// 
-/// Design intent:
-/// - Avoid exceptions for expected business/validation failures.
-/// - Make control flow explicit and testable.
-/// </summary>
+// Non-generic result type for operations that return no value.
+// 
+// Semantics:
+// - Success  => no error (DomainErrors.None)
+// - Failure  => an error is present
+// 
+// Design intent:
+// - Avoid exceptions for expected business/validation failures.
+// - Make control flow explicit and testable.
 public sealed class Result {
-    /// <summary>
-    /// Indicates whether the operation succeeded.
-    /// </summary>
+    // Indicates whether the operation succeeded.
     public bool IsSuccess { get; }
-
-    /// <summary>
-    /// Convenience flag: true if the operation failed.
-    /// </summary>
+    // Convenience flag: true if the operation failed.
     public bool IsFailure => !IsSuccess;
 
-    /// <summary>
-    /// Error information (DomainErrors.None on success).
-    /// </summary>
+    // Error information (DomainErrors.None on success).
     public DomainErrors Error { get; }
-
-    /// <summary>
-    /// Private constructor to enforce factory usage.
-    /// </summary>
+    
+    // Private constructor to enforce factory usage.
     private Result(bool isSuccess, DomainErrors error) {
         IsSuccess = isSuccess;
         Error = error;
     }
 
-    /// <summary>
-    /// Creates a successful result with DomainErrors.None.
-    /// </summary>
+    // Creates a successful result with DomainErrors.None.
     public static Result Success() =>
         new(isSuccess: true, error: DomainErrors.None);
 
-    /// <summary>
-    /// Creates a failed result with the provided domain error.
-    /// </summary>
+    // Creates a failed result with the provided domain error.
     public static Result Failure(DomainErrors error) =>
         new(isSuccess: false, error: error);
 }

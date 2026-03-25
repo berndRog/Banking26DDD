@@ -56,7 +56,6 @@ public sealed class Employee : AggregateRoot {
    }
 
    // ---------- Factory (Result-based) ----------
-   /// </summary>
    public static Result<Employee> Create(
       string firstname,
       string lastname,

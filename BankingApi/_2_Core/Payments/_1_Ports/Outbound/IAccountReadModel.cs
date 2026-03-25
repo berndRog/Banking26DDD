@@ -23,12 +23,12 @@ public interface IAccountReadModel {
    );
 
    // Return all accounts
-   Task<Result<IReadOnlyList<AccountDto>>> SelectAsync(
+   Task<Result<IEnumerable<AccountDto>>> SelectAsync(
       CancellationToken ctToken = default
    );
 
    // Return all accounts owned by a specific customer
-   Task<Result<IReadOnlyList<AccountDto>>> SelectByCustomerIdAsync(
+   Task<Result<IEnumerable<AccountDto>>> SelectByCustomerIdAsync(
       Guid customerId,
       CancellationToken ct = default
    );
@@ -41,13 +41,13 @@ public interface IAccountReadModel {
    );
 
    // Return all beneficiaries of an account
-   Task<Result<IReadOnlyList<BeneficiaryDto>>> SelectBeneficiariesByAccountIdAsync(
+   Task<Result<IEnumerable<BeneficiaryDto>>> SelectBeneficiariesByAccountIdAsync(
       Guid accountId,
       CancellationToken ct = default
    );
 
    // Search beneficiaries by name
-   Task<Result<IReadOnlyList<BeneficiaryDto>>> SelectBeneficiariesByNameAsync(
+   Task<Result<IEnumerable<BeneficiaryDto>>> SelectBeneficiariesByNameAsync(
       Guid accountId,
       string name,
       CancellationToken ct = default

@@ -53,9 +53,9 @@ internal sealed class CustomerUcActivate(
       if(customer.Status != CustomerStatus.Pending)
          return Result.Failure(CustomerErrors.InvalidStatusTransition);
       
-      // Customer is not storing the accountId
-      var utcNow = clock.UtcNow;
-      var result = customer.Activate(employeeDto.Id, utcNow);
+      // customer is activeted
+      var activatedAt = clock.UtcNow;
+      var result = customer.Activate(employeeDto.Id, activatedAt);
       if (result.IsFailure)
          return Result.Failure(result.Error);
 

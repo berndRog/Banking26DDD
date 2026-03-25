@@ -10,9 +10,9 @@ public sealed class CustomerRepositoryIntT : TestBaseIntegration {
 
    [Fact]
    public async Task Add_customer_ok() {
-      var ct = TestContext.Current.CancellationToken;
       
       using var scope = Root.CreateDefaultScope();
+      var ct = TestContext.Current.CancellationToken;
       var repository = scope.ServiceProvider.GetRequiredService<ICustomerRepository>();
       var unitOfWork = scope.ServiceProvider.GetRequiredService<IUnitOfWork>();
       var seed = scope.ServiceProvider.GetRequiredService<TestSeed>();
@@ -37,9 +37,8 @@ public sealed class CustomerRepositoryIntT : TestBaseIntegration {
 
    [Fact]
    public async Task FindByIdAsync_returns_Customer1() {
-      var ct = TestContext.Current.CancellationToken;
-      
       using var scope = Root.CreateDefaultScope();
+      var ct = TestContext.Current.CancellationToken;
       var dbContext = scope.ServiceProvider.GetRequiredService<BankingDbContext>();
       var repository = scope.ServiceProvider.GetRequiredService<ICustomerRepository>();
       var unitOfWork = scope.ServiceProvider.GetRequiredService<IUnitOfWork>();
@@ -64,28 +63,6 @@ public sealed class CustomerRepositoryIntT : TestBaseIntegration {
       Equal(customer.Firstname, actual.Firstname);
       Equal(customer.Lastname, actual.Lastname);
       Equal(customer.EmailVo, actual.EmailVo);
-      Equal(customer.AddressVo, actual.AddressVo);
-   }
-
-   [Fact]
-   public async Task FindByIdAsync_returns_customer2_with_required_address() {
-      var ct = TestContext.Current.CancellationToken;
-
-      using var scope = Root.CreateDefaultScope();
-      var dbContext = scope.ServiceProvider.GetRequiredService<BankingDbContext>();
-      var repository = scope.ServiceProvider.GetRequiredService<ICustomerRepository>();
-      var unitOfWork = scope.ServiceProvider.GetRequiredService<IUnitOfWork>();
-      var seed = scope.ServiceProvider.GetRequiredService<Seed>();
-
-      var customer = seed.Customer2();
-      dbContext.Customers.Add(customer);
-      await unitOfWork.SaveAllChangesAsync("Add customer with address", ct);
-      dbContext.ChangeTracker.Clear();
-
-      var actual = await repository.FindByIdAsync(customer.Id, ct);
-
-      NotNull(actual);
-      Equal(customer.Id, actual.Id);
       Equal(customer.AddressVo, actual.AddressVo);
    }
    

@@ -1,171 +1,132 @@
-﻿// using System.Net.Mime;
-// using Asp.Versioning;
-// using BankingApi.Core;
-// using BankingApi.Core.Dto;
-// using BankingApi.Core.Mapping;
-// using BankingApi.Core.Misc;
-// using Microsoft.AspNetCore.Mvc;
-// namespace BankingApi.Controllers.V2;
-// [Route("banking/v{version:apiVersion}")]
-// [ApiVersion("2.0")]
-//
-// [ApiController]
-// [Consumes("application/json")] //default
-// [Produces("application/json")] //default
-//
-// public class BeneficiariesController(
-//    ICustomerRepository employeesRepository,
-//    IAccountsRepository accountsRepository,
-//    IBeneficiariesRepository beneficiariesRepository,
-//    ITransfersRepository transfersRepository,
-//    IDataContext dataContext
-// ): ControllerBase {
-//    
-//    [HttpGet("beneficiaries")]
-//    [EndpointSummary("Get all beneficiaries")]
-//    [ProducesResponseType(StatusCodes.Status200OK)]
-//    [ProducesDefaultResponseType]
-//    public async Task<ActionResult<AccountDto>> GetAllAsync(
-//       CancellationToken ctToken = default
-//    ) {
-//       var beneficiaries = await beneficiariesRepository.SelectAsync(false, ctToken);
-//       return Ok(beneficiaries.Select(b => b.ToBeneficiaryDto()));
-//    }
-//
-//
-//    [HttpGet("accounts/{accountId:guid}/beneficiaries")]
-//    [EndpointSummary("Get beneficiaries of an account by accountId")]
-//    [Produces(MediaTypeNames.Application.Json)]
-//    [ProducesResponseType(StatusCodes.Status200OK)]
-//    public async Task<ActionResult<IEnumerable<BeneficiaryDto>>> GetByAccountIdAsync(
-//       [FromRoute] Guid accountId,
-//       CancellationToken ctToken = default
-//    ){
-//       var account = await accountsRepository.FindByIdAsync(accountId, ctToken);
-//       if(account == null)
-//          return BadRequest("Bad request: accountId does not exist.");
-//
-//       var beneficiaries =
-//          await beneficiariesRepository.SelectByAccountIdAsync(accountId, ctToken);
-//
-//       return Ok(beneficiaries.Select(beneficiary => beneficiary.ToBeneficiaryDto()) );
-//    }
-//    
-//    [HttpGet("beneficiaries/{id:guid}")]
-//    [EndpointSummary("Get a beneficiary by Id")]
-//    [ProducesResponseType(typeof(BeneficiaryDto), StatusCodes.Status200OK)]
-//    [ProducesResponseType<ProblemDetails>(StatusCodes.Status404NotFound, "application/problem+json")]
-//    public async Task<ActionResult<BeneficiaryDto>> GetByIdAsync(
-//       [FromRoute] Guid id,
-//       CancellationToken ctToken = default
-//    ){
-//       return await beneficiariesRepository.FindByIdAsync(id, ctToken) switch {
-//          { } beneficiary => Ok(beneficiary.ToBeneficiaryDto()),
-//          null => NotFound("Beneficiary with given id not found.")
-//       };
-//    }
-//
-//    [HttpGet("beneficiaries/name/{name}")]
-//    [EndpointSummary("Get beneficiaries name, SQL like %name%")]
-//    [ProducesResponseType(typeof(BeneficiaryDto), StatusCodes.Status200OK)]
-//    [ProducesResponseType<ProblemDetails>(StatusCodes.Status404NotFound, "application/problem+json")]
-//    public async Task<ActionResult<IEnumerable<BeneficiaryDto>>> GetByNameAsync(
-//       [FromRoute] string name,
-//       CancellationToken ctToken = default
-//    ){
-//       // Find beneficiaries by SQL like %name%
-//       var beneficiaries = await beneficiariesRepository.SelectByNameAsync(name, ctToken);
-//
-//       // if employees are found return them
-//       if (beneficiaries.Any()) return Ok(beneficiaries.Select(beneficiary => beneficiary.ToBeneficiaryDto()));
-//       // else return not found
-//       return NotFound("Beneficiaries with given Name not found");
-//    }
-//
-//    [HttpPost("accounts/{accountDebitId:guid}/beneficiaries")]
-//    [EndpointSummary("Create a new beneficiary")]
-//    [ProducesResponseType<ProblemDetails>(StatusCodes.Status400BadRequest, "application/problem+json")]
-//    [ProducesResponseType<ProblemDetails>(StatusCodes.Status404NotFound, "application/problem+json")]
-//    public async Task<ActionResult<BeneficiaryDto?>> CreateAsync(
-//       [FromRoute] Guid accountDebitId,
-//       [FromBody] BeneficiaryDto beneficiaryDto,
-//       CancellationToken ctToken = default
-//    ){
-//       // Trim Iban and Check if Iban is valid
-//       beneficiaryDto = beneficiaryDto with { Iban = Utils.CheckIban(beneficiaryDto.Iban) };
-//       
-//       // check if beneficiaryDto.Id is empty
-//       if (beneficiaryDto.Id == Guid.Empty)
-//          beneficiaryDto = beneficiaryDto with { Id = Guid.NewGuid() };
-//       // check if beneficiaryDto.Id already exists
-//       if (await beneficiariesRepository.FindByIdAsync(beneficiaryDto.Id, ctToken) != null)
-//          return BadRequest("Beneficiary with given id already exists.");
-//       
-//       // Credit Account
-//       var accountCredit = 
-//          await accountsRepository.FindByAsync(a => a.Iban == beneficiaryDto.Iban, ctToken);
-//       // check if account with given Iban exists
-//       if(accountCredit == null)
-//           return NotFound("Beneficiary: Credit account with given Iban not found");
-//       
-//       // Debit account
-//       var accountDebit = await accountsRepository.FindByIdAsync(accountDebitId, ctToken);
-//       if(accountDebit == null)
-//          return NotFound("Beneficiary: Debit accountId not found.");
-//       
-//       // Domain model
-//       var beneficiary = beneficiaryDto.ToBeneficiary();
-//       accountDebit.AddBeneficiary(beneficiary);
-//
-//       // save to repository and write to database
-//       beneficiariesRepository.Add(beneficiary);
-//       await dataContext.SaveAllChangesAsync("Add Beneficiary", ctToken);
-//
-//       // return an absolute URL as location 
-//       var url = "";
-//       if (Request != null) url = Request?.Scheme + "://" + Request?.Host
-//          + Request?.Path.ToString() +$"/{beneficiary.Id}";
-//       else url = $"http://localhost:5100/banking/v2/beneficiaries/{beneficiary.Id}";
-//      
-//       var uri = new Uri(url, UriKind.Absolute);
-//       return Created(uri, beneficiary.ToBeneficiaryDto());
-//    }
-//    
-//    // Delete a beneficiary by Id.
-//    [HttpDelete("accounts/{accountId:guid}/beneficiaries/{id:guid}")]
-//    [ProducesResponseType(StatusCodes.Status200OK)]
-//    [ProducesResponseType<ProblemDetails>(StatusCodes.Status400BadRequest, "application/problem+json")]
-//    [ProducesResponseType<ProblemDetails>(StatusCodes.Status404NotFound, "application/problem+json")]
-//    public async Task<IActionResult> DeleteAsync(
-//       [FromRoute] Guid accountId,
-//       [FromRoute] Guid id,
-//       CancellationToken ctToken = default
-//    ){
-//       // Debit account
-//       var account = await accountsRepository.FindByIdAsync(accountId,ctToken);
-//       if(account == null  || account.Id != accountId)
-//          return BadRequest("Bad request: accountId does not exist.");
-//       
-//       // check if beneficiary with given id exists
-//       var beneficiary = await beneficiariesRepository.FindByIdAsync(id, ctToken);
-//       if(beneficiary == null)
-//          return NotFound("DeleteBeneficiary: Beneficiary with given id not found.");
-//
-//       if(beneficiary.AccountId != accountId)
-//          return BadRequest("Bad request: accountId does not match.");
-//       
-//       // Load all transfers linked with the beneficiary
-//       var transfers = await transfersRepository.FilterByBeneficiaryIdJoinTransactionsAsync(id, ctToken);
-//       foreach(var transfer in transfers) {
-//          // delete fk, don't delete the transfer 
-//          transfer.SetBeneficiary(null);
-//          transfersRepository.Update(transfer);
-//       }
-//       
-//       // save to repository and write to database 
-//       beneficiariesRepository.Remove(beneficiary);
-//       await dataContext.SaveAllChangesAsync("Remove Benefificary",ctToken);
-//
-//       return NoContent();
-//    }
-// }
+﻿using Asp.Versioning;
+using BankingApi._1_Controllers.Extensions;
+using BankingApi._2_Core.Payments._1_Ports.Inbound;
+using BankingApi._2_Core.Payments._1_Ports.Outbound;
+using BankingApi._2_Core.Payments._2_Application.Dtos;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
+
+namespace BankingApi._1_Controllers;
+
+[ApiVersion("1.0")]
+[Route("banking/v{version:apiVersion}")]
+[ApiController]
+public sealed class BeneficiariesController(
+   IAccountReadModel readModel,
+   IAccountUseCases useCases,
+   ILogger<BeneficiariesController> logger
+) : ControllerBase {
+
+   /// <summary>
+   /// Adds a beneficiary to an account.
+   /// </summary>
+   /// <remarks>
+   /// A beneficiary belongs to a source account and can later be used as a saved
+   /// receiver for transfers.
+   /// </remarks>
+   /// <param name="accountId">Unique identifier of the source account.</param>
+   /// <param name="dto">Beneficiary data used to create the beneficiary.</param>
+   /// <param name="ct">Cancellation token.</param>
+   /// <returns>The created beneficiary resource.</returns>
+   [Authorize]
+   [HttpPost("accounts/{accountId:guid}/beneficiaries", Name = nameof(CreateBeneficiaryAsync))]
+   [Consumes("application/json")]
+   [Produces("application/json")]
+   [ProducesResponseType<BeneficiaryDto>(StatusCodes.Status201Created)]
+   [ProducesResponseType<ProblemDetails>(StatusCodes.Status400BadRequest, "application/problem+json")]
+   [ProducesResponseType<ProblemDetails>(StatusCodes.Status401Unauthorized, "application/problem+json")]
+   [ProducesResponseType<ProblemDetails>(StatusCodes.Status404NotFound, "application/problem+json")]
+   [ProducesResponseType<ProblemDetails>(StatusCodes.Status409Conflict, "application/problem+json")]
+   [ProducesResponseType<ProblemDetails>(StatusCodes.Status422UnprocessableEntity, "application/problem+json")]
+   public async Task<ActionResult<BeneficiaryDto>> CreateBeneficiaryAsync(
+      [FromRoute] Guid accountId,
+      [FromBody] BeneficiaryDto dto,
+      CancellationToken ct
+   ) {
+      const string context = $"{nameof(BeneficiariesController)}.{nameof(CreateBeneficiaryAsync)}";
+
+      var result = await useCases.AddBeneficiaryAsync(accountId, dto, ct);
+
+      return this.ToCreatedAtRoute(
+         routeName: nameof(GetBeneficiaryByIdAsync),
+         routeValues: new {
+            accountId,
+            beneficiaryId = result.IsSuccess ? result.Value.Id : Guid.Empty
+         },
+         result,
+         logger,
+         context
+      );
+   }
+
+   /// <summary>
+   /// Returns a beneficiary of an account by its unique identifier.
+   /// </summary>
+   /// <param name="accountId">Unique identifier of the account.</param>
+   /// <param name="beneficiaryId">Unique identifier of the beneficiary.</param>
+   /// <param name="ct">Cancellation token.</param>
+   /// <returns>The beneficiary resource if found.</returns>
+   [Authorize]
+   [HttpGet("accounts/{accountId:guid}/beneficiaries/{beneficiaryId:guid}", Name = nameof(GetBeneficiaryByIdAsync))]
+   [ProducesResponseType<BeneficiaryDto>(StatusCodes.Status200OK)]
+   [ProducesResponseType<ProblemDetails>(StatusCodes.Status401Unauthorized, "application/problem+json")]
+   [ProducesResponseType<ProblemDetails>(StatusCodes.Status404NotFound, "application/problem+json")]
+   public async Task<ActionResult<BeneficiaryDto>> GetBeneficiaryByIdAsync(
+      [FromRoute] Guid accountId,
+      [FromRoute] Guid beneficiaryId,
+      CancellationToken ct
+   ) {
+      const string context = $"{nameof(BeneficiariesController)}.{nameof(GetBeneficiaryByIdAsync)}";
+
+      var result = await readModel.FindBeneficiaryByIdAsync(accountId, beneficiaryId, ct);
+
+      return this.ToActionResult(result, logger, context, args: new { accountId, beneficiaryId });
+   }
+
+   /// <summary>
+   /// Returns all beneficiaries of an account.
+   /// </summary>
+   /// <param name="accountId">Unique identifier of the account.</param>
+   /// <param name="ct">Cancellation token.</param>
+   /// <returns>A collection of beneficiaries assigned to the account.</returns>
+   [Authorize]
+   [HttpGet("accounts/{accountId:guid}/beneficiaries", Name = nameof(GetBeneficiariesByAccountIdAsync))]
+   [ProducesResponseType<IEnumerable<BeneficiaryDto>>(StatusCodes.Status200OK)]
+   [ProducesResponseType<ProblemDetails>(StatusCodes.Status401Unauthorized, "application/problem+json")]
+   [ProducesResponseType<ProblemDetails>(StatusCodes.Status404NotFound, "application/problem+json")]
+   public async Task<ActionResult<IEnumerable<BeneficiaryDto>>> GetBeneficiariesByAccountIdAsync(
+      [FromRoute] Guid accountId,
+      CancellationToken ct
+   ) {
+      const string context = $"{nameof(BeneficiariesController)}.{nameof(GetBeneficiariesByAccountIdAsync)}";
+
+      var result = await readModel.SelectBeneficiariesByAccountIdAsync(accountId, ct);
+
+      return this.ToActionResult(result, logger, context, args: new { accountId });
+   }
+
+   /// <summary>
+   /// Removes a beneficiary from an account.
+   /// </summary>
+   /// <param name="accountId">Unique identifier of the account.</param>
+   /// <param name="beneficiaryId">Unique identifier of the beneficiary.</param>
+   /// <param name="ct">Cancellation token.</param>
+   /// <returns>No content on success.</returns>
+   [Authorize]
+   [HttpDelete("accounts/{accountId:guid}/beneficiaries/{beneficiaryId:guid}", Name = nameof(DeleteBeneficiaryAsync))]
+   [ProducesResponseType(StatusCodes.Status204NoContent)]
+   [ProducesResponseType<ProblemDetails>(StatusCodes.Status401Unauthorized, "application/problem+json")]
+   [ProducesResponseType<ProblemDetails>(StatusCodes.Status404NotFound, "application/problem+json")]
+   [ProducesResponseType<ProblemDetails>(StatusCodes.Status409Conflict, "application/problem+json")]
+   public async Task<ActionResult> DeleteBeneficiaryAsync(
+      [FromRoute] Guid accountId,
+      [FromRoute] Guid beneficiaryId,
+      CancellationToken ct
+   ) {
+      const string context = $"{nameof(BeneficiariesController)}.{nameof(DeleteBeneficiaryAsync)}";
+
+      var result = await useCases.RemoveBeneficiaryAsync(accountId, beneficiaryId, ct);
+
+      return this.ToActionResult(result, logger, context, args: new { accountId, beneficiaryId });
+   }
+}

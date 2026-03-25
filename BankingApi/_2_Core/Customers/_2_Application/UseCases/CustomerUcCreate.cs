@@ -66,10 +66,10 @@ internal sealed class CustomerUcCreate(
       // Add customer to repository (tracked by EF)
       var customer = result.Value!;
       repository.Add(customer);
+     
       // Save all changes to database using a transaction
-      var savedRows = await unitOfWork.SaveAllChangesAsync("Create Customer", ct);
-      logger.LogInformation("CustomerUcCreatePerson done customerId={id} savedRows={rows}",
-         customer.Id, savedRows);
+      var rows = await unitOfWork.SaveAllChangesAsync("Create Customer", ct);
+      logger.LogInformation("CustomerUcCreate={id} rows={rows}", customer.Id, rows);
       
       // Create initial account for owner (domain logic in accounts module)
       var resultAccount = 

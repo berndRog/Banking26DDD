@@ -24,6 +24,11 @@ public static class AccountErrors {
       new(ErrorCode.BadRequest,
          Title: "Account: Invalid CustomerId",
          Message: "The given CustomerId is not valid.");
+   
+   public static readonly DomainErrors InvalidEmployeeId =
+      new(ErrorCode.BadRequest,
+         Title: "Account: Invalid EmployeeId",
+         Message: "The EmployeeId is not valid.");
 
    public static readonly DomainErrors InvalidBalance =
       new(ErrorCode.BadRequest,

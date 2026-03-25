@@ -1,6 +1,7 @@
 using BankingApi._2_Core.BuildingBlocks._1_Ports.Outbound;
 using BankingApi._2_Core.Customers._1_Ports.Outbound;
 using BankingApi._2_Core.Payments._1_Ports.Outbound;
+using BankingApi._2_Core.Payments._2_Application.Mappings;
 using BankingApi._2_Core.Payments._2_Application.UseCases;
 using BankingApi._3_Infrastructure._2_Persistence.Database;
 using BankingApiTest._3_Infrastructure;
@@ -29,14 +30,12 @@ public sealed class AccountUcCreateIntT : TestBaseIntegration {
       await unitOfWork.SaveAllChangesAsync("Seeding data", ct);
       unitOfWork.ClearChangeTracker(); 
       var account = _seed.Account1();
+      var accountDto = account.ToAccountDto();
       
       // Act
       var result = await sut.ExecuteAsync(
          customerId: customer.Id,
-         iban: account.IbanVo.Value,
-         balance: account.BalanceVo.Amount,
-         currency: (int)account.BalanceVo.Currency,
-         id: account.Id.ToString(),
+         accountDto: accountDto,
          ct: ct
       );
       unitOfWork.ClearChangeTracker();
@@ -62,14 +61,13 @@ public sealed class AccountUcCreateIntT : TestBaseIntegration {
       var owner = _seed.Customer1();
       var account = _seed.Account1();
       var sut = scope.ServiceProvider.GetRequiredService<AccountUcCreate>();
+      var accountDto = account.ToAccountDto();
 
       // Act
+      accountDto = accountDto with { Iban = "ABC123456789" };
       var result = await sut.ExecuteAsync(
-         customerId: owner.Id,
-         iban: "ABC123456789",
-         balance: account.BalanceVo.Amount,
-         currency: (int)account.BalanceVo.Currency,
-         id: account.Id.ToString(),
+         customerId: owner.Id, 
+         accountDto: accountDto,
          ct: ct
       );
       True(result.IsFailure);

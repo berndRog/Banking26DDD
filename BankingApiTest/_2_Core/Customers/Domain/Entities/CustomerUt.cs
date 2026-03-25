@@ -21,7 +21,7 @@ public sealed class CustomerUt {
       _clock = _seed.Clock;
       _customer = _seed.Customer1();
       _customer5 = _seed.Customer5();
-      _addressVo = _seed.Address1;
+      _addressVo = _seed.Address1Vo;
    }
 
    public static IEnumerable<object[]> InvalidLengths() {

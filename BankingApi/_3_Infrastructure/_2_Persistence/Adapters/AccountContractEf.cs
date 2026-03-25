@@ -1,17 +1,11 @@
 using System.Runtime.CompilerServices;
 using BankingApi._2_Core.BuildingBlocks;
 using BankingApi._2_Core.BuildingBlocks._1_Ports.Outbound;
-using BankingApi._2_Core.BuildingBlocks._3_Domain;
 using BankingApi._2_Core.BuildingBlocks._4_IntegrationContracts._1_Ports;
 using BankingApi._2_Core.BuildingBlocks._4_IntegrationContracts._2_Application.Dtos;
-using BankingApi._2_Core.BuildingBlocks.Utils;
-using BankingApi._2_Core.Payments;
-using BankingApi._2_Core.Payments._1_Ports.Inbound;
 using BankingApi._2_Core.Payments._1_Ports.Outbound;
-using BankingApi._2_Core.Payments._2_Application.Dtos;
 using BankingApi._2_Core.Payments._2_Application.Mappings;
 using BankingApi._2_Core.Payments._3_Domain.Entities;
-using BankingApi._2_Core.Payments._3_Domain.Enums;
 using BankingApi._2_Core.Payments._3_Domain.Errors;
 using BankingApi._2_Core.Payments._3_Domain.ValueObjects;
 using IbanGenerator = BankingApi._2_Core.BuildingBlocks.Utils.IbanGenerator;
@@ -66,6 +60,7 @@ internal class AccountContractEf(
          customerId: customerId,
          ibanVo: ibanVo,
          balance: balance,
+         createdByEmployeeId:Guid.NewGuid(), // for simplicity, we use a random employee id here, in real life we would get it from the identity gateway
          createdAt: clock.UtcNow,
          id: accoutIdString
       );

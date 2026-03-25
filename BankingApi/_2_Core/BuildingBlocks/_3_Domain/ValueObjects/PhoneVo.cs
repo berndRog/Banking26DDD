@@ -45,7 +45,7 @@ public sealed record PhoneVo {
    }
 
    // database 
-   internal static PhoneVo FromPersisted(string value) {
+   public static PhoneVo FromPersisted(string value) {
       if (!IsCanonical(value))
          throw new InvalidOperationException($"Invalid phone in database: '{value}'");
       return new PhoneVo(value);

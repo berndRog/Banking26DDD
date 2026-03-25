@@ -1,5 +1,6 @@
 using BankingApi._2_Core.BuildingBlocks._1_Ports.Outbound;
 using BankingApi._2_Core.Customers._3_Domain.Entities;
+using BankingApi._2_Core.Employees._3_Domain.Entities;
 using BankingApi._2_Core.Payments._3_Domain.Entities;
 using BankingApiTest.TestInfrastructure;
 namespace BankingApiTest._2_Core.Core.Domain.Aggregates;
@@ -10,12 +11,14 @@ public sealed class AccountUt {
 
    private readonly Customer _customer;
    private readonly Account _account;
+   private readonly Employee _employee;
    
    public AccountUt() {
       _seed = new TestSeed();
       _clock = _seed.Clock;
       _customer = _seed.Customer1();
       _account = _seed.Account1();
+      _employee = _seed.Employee1();
    }
 
    [Fact]
@@ -26,6 +29,7 @@ public sealed class AccountUt {
          customerId: _customer.Id,
          ibanVo: _account.IbanVo,
          balance: _account.BalanceVo.Amount,
+         createdByEmployeeId: _employee.Id,
          createdAt: _account.CreatedAt,
          id: _account.Id.ToString()
       );
@@ -50,6 +54,7 @@ public sealed class AccountUt {
          customerId: _customer.Id,
          ibanVo: _account.IbanVo,
          balance: _account.BalanceVo.Amount,
+         createdByEmployeeId: _employee.Id,
          createdAt: _account.CreatedAt,
          id: null
       );
@@ -72,6 +77,7 @@ public sealed class AccountUt {
          customerId: _customer.Id,
          ibanVo: _account.IbanVo,
          balance: _account.BalanceVo.Amount,
+         createdByEmployeeId: _employee.Id,
          createdAt: _account.CreatedAt,
          id: "not-a-guid"
       );
@@ -101,6 +107,7 @@ public sealed class AccountUt {
          customerId: _customer.Id,
          ibanVo: _account.IbanVo,
          balance: _account.BalanceVo.Amount,
+         createdByEmployeeId: _employee.Id,
          createdAt: _account.CreatedAt,
          id: "not.allowed"
       );
@@ -115,6 +122,7 @@ public sealed class AccountUt {
          customerId: _customer.Id,
          ibanVo: _account.IbanVo,
          balance: _account.BalanceVo.Amount,
+         createdByEmployeeId: _employee.Id,
          createdAt: _account.CreatedAt,
          id: _account.Id.ToString()
       );
@@ -123,6 +131,7 @@ public sealed class AccountUt {
          customerId: _customer.Id,
          ibanVo: _account.IbanVo,
          balance: _account.BalanceVo.Amount,
+         createdByEmployeeId: _employee.Id,
          createdAt: _account.CreatedAt,
          id: _account.Id.ToString()
       );

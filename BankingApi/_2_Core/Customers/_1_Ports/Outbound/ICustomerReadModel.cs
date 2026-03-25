@@ -27,12 +27,12 @@ public interface ICustomerReadModel {
    );
 
    // Return all customers
-   Task<Result<IReadOnlyList<CustomerDto>>> SelectAllAsync(
+   Task<Result<IEnumerable<CustomerDto>>> SelectAllAsync(
       CancellationToken ct
    );
    
    // Load all customers with SQL like displayName
-   Task<Result<IReadOnlyList<CustomerDto>>> SelectByDisplayNameAsync(
+   Task<Result<IEnumerable<CustomerDto>>> SelectByDisplayNameAsync(
       string displayName,
       CancellationToken ct = default
    );

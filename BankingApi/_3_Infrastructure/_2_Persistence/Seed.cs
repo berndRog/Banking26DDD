@@ -41,25 +41,25 @@ public sealed class Seed(
    #endregion
 
    #region -------------- Test Addresses (Value Objects) -------------------------------------
-   public AddressVo Address1
+   public AddressVo Address1Vo
       => AddressVo.Create("Hauptstr. 23", "29556", "Suderburg", "DE").GetValueOrThrow();
 
-   public AddressVo Address2
+   public AddressVo Address2Vo
       => AddressVo.Create("Hauptstr. 23", "29556", "Suderburg", "DE").GetValueOrThrow();
 
-   public AddressVo Address3
+   public AddressVo Address3Vo
       => AddressVo.Create("Neuperverstraße. 29", "29410", "Salzwedel").GetValueOrThrow();
 
-   public AddressVo Address4
+   public AddressVo Address4Vo
       => AddressVo.Create("Schillerstr. 1", "30123", "Hannover", "DE").GetValueOrThrow();
 
-   public AddressVo Address5
+   public AddressVo Address5Vo
       => AddressVo.Create("Berliner Platz 8", "29614", "Soltau", "DE").GetValueOrThrow();
 
-   public AddressVo Address6
+   public AddressVo Address6Vo
       => AddressVo.Create("Am Markt 14", "04109", "Leipzig", "DE").GetValueOrThrow();
 
-   public AddressVo AddressReg
+   public AddressVo AddressRegVo
       => AddressVo.Create("Allertalweg. 2", "29227", "Celle", "DE").GetValueOrThrow();
    #endregion
 
@@ -80,7 +80,7 @@ public sealed class Seed(
       companyName: null,
       subject: "a00090ad-d9df-486a-8757-4a649e26a54e",
       email: "erika.mustermann@t-online.de",
-      addressVo: Address1
+      addressVo: Address1Vo
    );
 
    public Customer Customer2() => CreateCustomer(
@@ -90,7 +90,7 @@ public sealed class Seed(
       companyName: null,
       subject: "b0000640-161e-4228-9729-d6b142C2dfad",
       email: "max.mustermann@gmail.com",
-      addressVo: Address2
+      addressVo: Address2Vo
    );
 
    public Customer Customer3() => CreateCustomer(
@@ -100,7 +100,7 @@ public sealed class Seed(
       companyName: null,
       email: "a.arndt@t-online.com",
       subject: "c0004e61-ba7a-4d2a-977f-766b42bb79a9",
-      addressVo: Address3
+      addressVo: Address3Vo
    );
 
    public Customer Customer4() => CreateCustomer(
@@ -110,7 +110,7 @@ public sealed class Seed(
       companyName: null,
       subject: "d0024ab-43c5-4c64-872d-6ca05f66756b",
       email: "b.bauer@gmail.com",
-      addressVo: Address4
+      addressVo: Address4Vo
    );
 
    public Customer Customer5() => CreateCustomer(
@@ -120,7 +120,7 @@ public sealed class Seed(
       companyName: "Conrad Consulting GmbH",
       subject: "e00050fb-a381-4e3f-a44b-81ffa7610b72",
       email: "c.conrad@gmx.de",
-      addressVo: Address5
+      addressVo: Address5Vo
    );
 
    public Customer Customer6() => CreateCustomer(
@@ -130,7 +130,7 @@ public sealed class Seed(
       companyName: null,
       subject: "f0004f67-72a3-4449-af1f-803dcfaddb7f",
       email: "d.deppe@icloud.com",
-      addressVo: Address6
+      addressVo: Address6Vo
    );
 
    public Customer CustomerRegister() => CreateCustomer(
@@ -140,7 +140,7 @@ public sealed class Seed(
       companyName: null,
       email: "j.doe@mail.local",
       subject: "11111111-a224-492b-bb8f-b4bac23d7c88",
-      addressVo: AddressReg
+      addressVo: AddressRegVo
    );
 
    public IReadOnlyList<Customer> Customers => [
@@ -737,6 +737,7 @@ public sealed class Seed(
          ibanVo: ibanVo,
          balance: balance,
          createdAt: clock.UtcNow,
+         createdByEmployeeId: Employee1().Id,
          id: id
       );
       return result.Value!;

@@ -4,7 +4,7 @@ namespace BankingApi._2_Core.Customers;
 
 public static class DiCustomerModules {
    
-   public static IServiceCollection AddCustomerModules(
+   public static IServiceCollection AddCustomerModule(
       this IServiceCollection services
    ) {
       // Inbound ports / Use Cases

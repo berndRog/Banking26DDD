@@ -39,9 +39,9 @@ public sealed class CustomerUcReject(
          return Result.Failure(CustomerErrors.NotFound);
 
       // 4) Domain change (audit + status transition)
-      var utcNow = clock.UtcNow;
+      var rejectedAt = clock.UtcNow;
       var employeeId = ParseEmployeeId(identityGateway.Subject);
-      var result = customer.Reject(employeeId, rejectCode, utcNow);
+      var result = customer.Reject(employeeId, rejectCode, rejectedAt);
       if (result.IsFailure)
          return Result.Failure(result.Error);
 

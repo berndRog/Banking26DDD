@@ -13,7 +13,7 @@ public sealed class AccountUcBeneficiaryRemove(
    ILogger<AccountUcBeneficiaryRemove> logger
 ) {
 
-   public async Task<Result<Guid>> ExecuteAsync(
+   public async Task<Result> ExecuteAsync(
       Guid accountId,
       Guid beneficiaryId,
       CancellationToken ct = default
@@ -21,7 +21,7 @@ public sealed class AccountUcBeneficiaryRemove(
       
       var account = await accountRepository.FindByIdAsync(accountId, ct);
       if (account is null) 
-         return Result<Guid>.Failure(BeneficiaryErrors.AccountNotFound);
+         return Result.Failure(BeneficiaryErrors.AccountNotFound);
       
       // Domain operation
       account.RemoveBeneficiary(beneficiaryId, clock.UtcNow);
@@ -32,6 +32,6 @@ public sealed class AccountUcBeneficiaryRemove(
       logger.LogInformation("Beneficiary removed {id}, saedRow {rows})", 
          beneficiaryId.To8(), savedRows);
       
-      return Result<Guid>.Success(beneficiaryId);
+      return Result.Success();
    }
 }

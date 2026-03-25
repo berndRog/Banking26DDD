@@ -15,7 +15,7 @@ public sealed class AddressVoUt {
 
    public AddressVoUt() {
       _seed = new TestSeed();
-      _addressVo = _seed.Address1;
+      _addressVo = _seed.Address1Vo;
    }
 
    public static IEnumerable<object[]> InvalidLengths() {

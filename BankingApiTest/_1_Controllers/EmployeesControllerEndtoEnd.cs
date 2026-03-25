@@ -1,12 +1,9 @@
 using System.Net;
 using System.Net.Http.Json;
-using BankingApi._2_Core.BuildingBlocks;
 using BankingApi._2_Core.BuildingBlocks._3_Domain.ValueObjects;
 using BankingApi._2_Core.Customers._2_Application.Dtos;
 using BankingApi._2_Core.Employees._2_Application.Dtos;
 using BankingApi._3_Infrastructure._2_Persistence.Database;
-using BankingApiTest._2_Core.BuildingBlocks;
-using BankingApiTest._3_Infrastructure._3_Security;
 using BankingApiTest.TestController;
 using BankingApiTest.TestInfrastructure;
 using Microsoft.EntityFrameworkCore;

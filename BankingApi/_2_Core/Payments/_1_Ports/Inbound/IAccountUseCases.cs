@@ -10,13 +10,15 @@ namespace BankingApi._2_Core.Payments._1_Ports.Inbound;
 public interface IAccountUseCases {
 
    // Create a new account for a customer
-   // Optionally set an initial balance and currency
    Task<Result<AccountDto>> CreateAsync(
       Guid customerId,
-      string iban,
-      decimal balance = 0m,
-      int currency = 1, // default to EUR
-      string? id = null,
+      AccountDto accountDto,
+      CancellationToken ct = default
+   );
+   
+   // deactivate an account 
+   Task<Result> DeactivateAsync(
+      Guid accountId,
       CancellationToken ct = default
    );
 
@@ -29,7 +31,7 @@ public interface IAccountUseCases {
    );
 
    // Remove a beneficiary from an account
-   Task<Result<Guid>> RemoveBeneficiaryAsync(
+   Task<Result> RemoveBeneficiaryAsync(
       Guid accountId,
       Guid beneficiaryId,
       CancellationToken ct = default

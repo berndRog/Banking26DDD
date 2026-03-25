@@ -1,6 +1,9 @@
 using BankingApi._2_Core.BuildingBlocks;
 using BankingApi._2_Core.BuildingBlocks._3_Domain;
 using BankingApi._2_Core.BuildingBlocks._3_Domain.Entities;
+using BankingApi._2_Core.BuildingBlocks._3_Domain.Errors;
+using BankingApi._2_Core.Customers._3_Domain.Enum;
+using BankingApi._2_Core.Customers._3_Domain.Errors;
 using BankingApi._2_Core.Payments._3_Domain.Enums;
 using BankingApi._2_Core.Payments._3_Domain.Errors;
 using BankingApi._2_Core.Payments._3_Domain.ValueObjects;
@@ -15,7 +18,11 @@ public sealed class Account : AggregateRoot {
    // Account balance as a domain value object.
    public MoneyVo BalanceVo { get; private set; } = default!;
 
+   // Employee decisions (audit facts)
+   public Guid? CreatedByEmployeeId { get; private set; }
    public DateTimeOffset? DeactivatedAt { get; private set; } = null;
+   public Guid? DeactivatedByEmployeeId { get; private set; }
+   
    public bool IsActive => DeactivatedAt == null;
 
    // BC: Account -> Customer [0..*] : [1]
@@ -45,12 +52,14 @@ public sealed class Account : AggregateRoot {
       Guid id,
       Guid customerId,
       IbanVo ibanVo,
-      MoneyVo balanceVo
+      MoneyVo balanceVo,
+      Guid createdByEmployeeId
    ) : base() {
       Id = id;
       CustomerId = customerId;
       IbanVo = ibanVo;
       BalanceVo = balanceVo;
+      CreatedByEmployeeId = createdByEmployeeId;
    }
 
    //--- Static Factory --------------------------------------------------------
@@ -59,12 +68,16 @@ public sealed class Account : AggregateRoot {
       Guid customerId,
       IbanVo ibanVo,
       decimal balance,
+      Guid createdByEmployeeId,
       DateTimeOffset createdAt,
       string? id = null
    ) {
       // invariant: customerId must be valid
       if (customerId == Guid.Empty)
          return Result<Account>.Failure(AccountErrors.InvalidCustomerId);
+      
+      if (createdByEmployeeId == Guid.Empty)
+         return Result<Account>.Failure(AccountErrors.InvalidEmployeeId);
       
       var resultVo = MoneyVo.Create(balance,Currency.EUR);
       if(resultVo.IsFailure)
@@ -81,7 +94,8 @@ public sealed class Account : AggregateRoot {
          id: accountId, 
          customerId: customerId, 
          ibanVo: ibanVo, 
-         balanceVo: balanceVo
+         balanceVo: balanceVo,
+         createdByEmployeeId: createdByEmployeeId
       );
       
       // 
@@ -91,6 +105,25 @@ public sealed class Account : AggregateRoot {
    }
 
    //--- Domain operations -----------------------------------------------------
+   // Employee deactivates the customer (end customer relationship).
+   public Result Deactivate(
+      Guid deactivatedByEmployeeId,
+      DateTimeOffset deactivatedAt
+   ) {
+      if (deactivatedAt == default)
+         return Result.Failure(CommonErrors.TimestampIsRequired);
+
+      if (deactivatedByEmployeeId == Guid.Empty)
+         return Result.Failure(CustomerErrors.AuditRequiresEmployee);
+      
+      DeactivatedAt = deactivatedAt;
+      DeactivatedByEmployeeId = deactivatedByEmployeeId;
+
+      Touch(deactivatedAt);
+      return Result.Success();
+   }
+
+   
    
    #region -------------------- Transactions --------------------------------------------
    // Debit = withdraw money from THIS account (Lastschrift)
