@@ -1,4 +1,5 @@
 using System.Data.Common;
+using System.Reflection;
 using BankingApi._3_Infrastructure._2_Persistence.Database;
 using Microsoft.Data.Sqlite;
 using Microsoft.EntityFrameworkCore;
@@ -230,7 +231,7 @@ public static class TestDatabase {
 
       // Usually the assembly name matches the test project name
       var projectName =
-         System.Reflection.Assembly.GetExecutingAssembly().GetName().Name
+         Assembly.GetExecutingAssembly().GetName().Name
          ?? throw new InvalidOperationException("Could not determine test project name.");
 
       // Walk up from bin/Debug/... until the csproj is found

@@ -1,6 +1,5 @@
 using System.Data.Common;
 using BankingApi._3_Infrastructure._2_Persistence.Database;
-using BankingApiTest.TestController;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;

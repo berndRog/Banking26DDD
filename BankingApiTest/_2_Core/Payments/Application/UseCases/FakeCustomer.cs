@@ -1,6 +1,4 @@
 using BankingApi._2_Core.BuildingBlocks._4_IntegrationContracts._1_Ports;
-using BankingApi._2_Core.Customers._1_Ports.Inbound;
-using BankingApi._2_Core.Customers._1_Ports.Outbound;
 using BankingApiTest.TestInfrastructure;
 namespace BankingApiTest._2_Core.Core.Application.UseCases;
 

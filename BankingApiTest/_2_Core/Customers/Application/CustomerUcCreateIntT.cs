@@ -3,7 +3,6 @@ using BankingApi._2_Core.Customers._1_Ports.Outbound;
 using BankingApi._2_Core.Customers._2_Application.Mappings;
 using BankingApi._2_Core.Customers._2_Application.UseCases;
 using BankingApi._2_Core.Payments._1_Ports.Outbound;
-using BankingApi._3_Infrastructure._2_Persistence.Database;
 using BankingApiTest.TestInfrastructure;
 using Microsoft.Extensions.DependencyInjection;
 namespace BankingApiTest._2_Core.Customers.Application;

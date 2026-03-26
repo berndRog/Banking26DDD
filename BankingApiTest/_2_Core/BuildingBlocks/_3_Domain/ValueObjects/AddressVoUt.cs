@@ -1,11 +1,5 @@
-using BankingApi._2_Core.BuildingBlocks;
-using BankingApi._2_Core.BuildingBlocks._1_Ports.Outbound;
 using BankingApi._2_Core.BuildingBlocks._3_Domain.Errors;
 using BankingApi._2_Core.BuildingBlocks._3_Domain.ValueObjects;
-using BankingApi._2_Core.Customers._2_Application.Dtos;
-using BankingApi._2_Core.Customers._3_Domain.Entities;
-using BankingApi._2_Core.Customers._3_Domain.Enum;
-using BankingApi._2_Core.Customers._3_Domain.Errors;
 using BankingApiTest.TestInfrastructure;
 namespace BankingApiTest._2_Core.Customers.Domain.Entities;
 

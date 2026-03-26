@@ -5,10 +5,10 @@ using BankingApi._2_Core.Employees._2_Application.Dtos;
 using BankingApi._2_Core.Employees._2_Application.UseCases;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-
-namespace BankingApi._1_Controllers;
+namespace BankingApi._1_Controllers.V2;
 
 [ApiVersion("1.0")]
+[ApiVersion("2.0")]
 [Route("banking/v{version:apiVersion}")]
 [ApiController]
 public sealed class EmployeesController(

@@ -1,10 +1,5 @@
 using BankingApi._2_Core.BuildingBlocks._1_Ports.Outbound;
-using BankingApi._2_Core.Customers._1_Ports.Outbound;
-using BankingApi._2_Core.Customers._3_Domain.Entities;
 using BankingApi._2_Core.Payments._1_Ports.Outbound;
-using BankingApi._2_Core.Payments._2_Application.Mappings;
-using BankingApi._3_Infrastructure._2_Persistence;
-using BankingApi._3_Infrastructure._2_Persistence.Database;
 using BankingApiTest.TestInfrastructure;
 using Microsoft.Extensions.DependencyInjection;
 namespace BankingApiTest._3_Infrastructure._2_Persistence.Repositories;

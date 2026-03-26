@@ -1,19 +1,9 @@
 using BankingApi._2_Core.BuildingBlocks._1_Ports.Outbound;
 using BankingApi._2_Core.Customers._1_Ports.Outbound;
-using BankingApi._2_Core.Customers._3_Domain.Entities;
 using BankingApi._2_Core.Payments._1_Ports.Outbound;
-using BankingApi._2_Core.Payments._2_Application.Dtos;
-using BankingApi._2_Core.Payments._2_Application.Mappings;
-using BankingApi._2_Core.Payments._2_Application.UseCases;
 using BankingApi._3_Infrastructure._2_Persistence.Database;
-using BankingApi._3_Infrastructure._2_Persistence.Repositories;
-using BankingApiTest._3_Infrastructure;
-using BankingApiTest._3_Infrastructure._5_Utils;
 using BankingApiTest.TestInfrastructure;
-using Microsoft.Data.Sqlite;
-using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Logging.Abstractions;
 namespace BankingApiTest._2_Core.Core.Application.UseCases;
 
 public sealed class AccountUcBeneficiaryAddIntT : TestBaseIntegration {
