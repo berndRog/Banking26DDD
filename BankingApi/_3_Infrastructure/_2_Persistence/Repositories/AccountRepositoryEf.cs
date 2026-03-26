@@ -29,7 +29,8 @@ public sealed class AccountRepositoryEf(
       Guid customerId,
       CancellationToken ct = default
    ) => await dbContext.Accounts
-      .AnyAsync(a => a.CustomerId == customerId, ct);
+      .Where(a => a.CustomerId == customerId && a.DeactivatedAt == null)
+      .AnyAsync(ct);
 
    // Retrieves all accounts associated with a customer ID.
    public async Task<IReadOnlyList<Account>> SelelctByCustomerIdAsync(

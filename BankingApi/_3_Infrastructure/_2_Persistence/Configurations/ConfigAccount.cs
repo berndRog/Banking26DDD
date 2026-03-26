@@ -26,20 +26,6 @@ public sealed class ConfigAccount(
       builder.Property(a => a.UpdatedAt)
          .HasConversion(dtConv)
          .IsRequired();
-
-      // business properties
-      builder.Property(a => a.CustomerId)
-         .IsRequired();
-
-      builder.Property(a => a.DeactivatedAt)
-         .HasConversion(dtConv)
-         .IsRequired(false);
-
-      builder.Property(a => a.IbanVo)
-         .HasMaxLength(34)
-         .IsRequired();
-      builder.HasIndex(a => a.IbanVo)
-         .IsUnique();
       
       builder.Property(a => a.IbanVo)
          .HasConversion(vo => vo.Value, s => IbanVo.FromPersisted(s))
@@ -60,7 +46,24 @@ public sealed class ConfigAccount(
             .HasMaxLength(3)
             .IsRequired();
       });
+      
+      builder.Property(o => o.CreatedByEmployeeId)
+         .IsRequired(false);
 
+      builder.Property(o => o.DeactivatedByEmployeeId)
+         .IsRequired(false);
+      
+      builder.Property(a => a.DeactivatedAt)
+         .HasConversion(dtConv)
+         .IsRequired(false);
+
+      // Domain-only
+      builder.Ignore(o => o.IsActive);
+      
+      // business properties
+      builder.Property(a => a.CustomerId)
+         .IsRequired();
+      
       // child entities: beneficiaries
       builder.HasMany(a => a.Beneficiaries)
          .WithOne()

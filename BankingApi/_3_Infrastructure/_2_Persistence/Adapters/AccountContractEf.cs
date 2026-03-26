@@ -23,13 +23,9 @@ internal class AccountContractEf(
       Guid customerId, 
       string? accoutIdString = null,
       string? iban = null,
+      decimal balance = 0m,
       CancellationToken ct = default!
    ) {
-      
-      // Check if owner already has an account (not required, but good to have for this use case)
-      var exists = await accountRepository.ExistsByCustomerIdAsync(customerId, ct);
-      if (exists)
-         return Result<AccountContractDto>.Failure(AccountErrors.OwnerAlreadyHasAccount);
       
       // Create IBAN (generate if not provided, validate if provided)
       if (string.IsNullOrEmpty(iban)) {
@@ -53,8 +49,6 @@ internal class AccountContractEf(
          return Result<AccountContractDto>.Failure(resultIban.Error);
       var ibanVo = resultIban.Value;
       
-      // Create initial account
-      var balance = 0m; // initial balance is always 0 EUR
       
       var resultAccount = Account.Create(
          customerId: customerId,
@@ -79,5 +73,12 @@ internal class AccountContractEf(
       
       return Result<AccountContractDto>.Success(account.ToAccountContractDto());
    }
-   
+
+   public async Task<Result<bool>> HasAccountsAsync(
+      Guid accountId, 
+      CancellationToken ct 
+   ) {
+      var exits = await accountRepository.ExistsByCustomerIdAsync(accountId, ct);
+      return Result<bool>.Success(false);
+   }
 }

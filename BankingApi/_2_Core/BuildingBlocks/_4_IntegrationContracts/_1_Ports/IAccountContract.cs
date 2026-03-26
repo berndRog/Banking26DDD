@@ -9,10 +9,16 @@ public interface IAccountContract {
    // Open the initial account for a newly activated customer
    Task<Result<AccountContractDto>> OpenInitialAccountAsync(
       Guid customerId,
-      string? accountIdString,
+      string? accountId,
       string? iban,
-      CancellationToken ct
-   ); 
+      decimal balance,
+      CancellationToken ct = default
+   );
+
+   Task<Result<bool>> HasAccountsAsync(
+      Guid accountId,
+      CancellationToken ct = default
+   );
 }
 
 /*

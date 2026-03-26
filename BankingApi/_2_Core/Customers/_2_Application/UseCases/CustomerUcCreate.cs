@@ -13,7 +13,6 @@ using WebApi._2_Core.BuildingBlocks._2_Application.Mappings;
 namespace BankingApi._2_Core.Customers._2_Application.UseCases;
 
 internal sealed class CustomerUcCreate(
-   IIdentityGateway identityGateway,
    ICustomerRepository repository,
    IAccountContract accountContract,
    IUnitOfWork unitOfWork,
@@ -21,50 +20,52 @@ internal sealed class CustomerUcCreate(
    ILogger<CustomerUcCreate> logger
 ) {
    public async Task<Result<CustomerDto>> ExecuteAsync(
-      CustomerDto customerDto,
-      string? accountIdString = null,
-      string? ibanString = null,
+      CustomerCreateDto customerCreateDto,
       CancellationToken ct = default
    ) {
-      if (customerDto.AddressDto is null)
-         return Result<CustomerDto>.Failure(CustomerErrors.AddressIsRequired);
-      
-      // subject required
-      var resultSubject = SubjectCheck.Run(identityGateway.Subject);
-      if (resultSubject.IsFailure) 
-         return Result<CustomerDto>.Failure(resultSubject.Error);
-      var subject = resultSubject.Value;
+      // subject required -> Fake
+      var subject = Guid.NewGuid().ToString();
       
       // create email value object (domain logic inside)
-      var resultDtoEmail = EmailVo.Create(customerDto.Email);
+      var resultDtoEmail = EmailVo.Create(customerCreateDto.Email);
       if (resultDtoEmail.IsFailure)
          return Result<CustomerDto>.Failure(resultDtoEmail.Error);
       var emailDtoVo = resultDtoEmail.Value;
       
       // check email uniqueness
       if (await repository.FindByEmailAsync(emailDtoVo, ct) != null) {
-         return Result<CustomerDto>.Failure(CustomerErrors.EmailMustBeUnique);
+         return Result<CustomerDto>.Failure(CustomerErrors.EmailAlreadyInUse);
       }
       
       // create aggregate (domain logic inside)
       var result = Customer.Create(
-         firstname: customerDto.Firstname, 
-         lastname: customerDto.Lastname,  
-         companyName: customerDto.CompanyName, 
+         firstname: customerCreateDto.Firstname, 
+         lastname: customerCreateDto.Lastname,  
+         companyName: customerCreateDto.CompanyName, 
          emailVo: emailDtoVo,
          subject: subject, 
          createdAt: clock.UtcNow,
-         id: customerDto.Id.ToString(),
-         addressVo: customerDto.AddressDto.ToAddressVo()
+         id: customerCreateDto.Id.ToString(),
+         addressVo: customerCreateDto.AddressDto.ToAddressVo()
       );
       
       if (result.IsFailure) 
          return Result<CustomerDto>.Failure(result.Error)
             .LogIfFailure(logger, "CustomerUcCreate.DomainRejected",
-               new { customerDto });
-      
-      // Add customer to repository (tracked by EF)
+               new { customerDto = customerCreateDto });
       var customer = result.Value!;
+      
+      // Check if there are accounts for this customer,
+      // if so, fail (this is a severe error)
+      var resultHasAccounts = await accountContract.HasAccountsAsync(customer.Id, ct);
+      if (resultHasAccounts.IsFailure)
+         return Result<CustomerDto>.Failure(resultHasAccounts.Error)
+            .LogIfFailure(logger, "CustomerUcCreate.HasAccountsCheckFailed", new { customerId = result.Value!.Id });
+      var hasAccounts = resultHasAccounts.Value;
+      if (hasAccounts)
+         return Result<CustomerDto>.Failure(CustomerErrors.AlreadyHasAccounts);
+      //
+      // Add customer to repository (tracked by EF)
       repository.Add(customer);
      
       // Save all changes to database using a transaction
@@ -72,11 +73,16 @@ internal sealed class CustomerUcCreate(
       logger.LogInformation("CustomerUcCreate={id} rows={rows}", customer.Id, rows);
       
       // Create initial account for owner (domain logic in accounts module)
-      var resultAccount = 
-         await accountContract.OpenInitialAccountAsync(customerId:customer.Id, accountIdString, ibanString, ct);
+      var resultAccount = await accountContract.OpenInitialAccountAsync(
+         customerId: customer.Id,
+         accountId: customerCreateDto.AccountId,
+         iban: customerCreateDto.Iban,
+         balance: customerCreateDto.Balance ?? 0.0m,
+         ct: ct
+      );
       if(resultAccount.IsFailure)
          return Result<CustomerDto>.Failure(resultAccount.Error)
-            .LogIfFailure(logger, "CustomerUcCreate.OpenInitialAccountFailed", new { customerId = customer.Id, ibanString });
+            .LogIfFailure(logger, "CustomerUcCreate.OpenInitialAccountFailed", new { customerId = customer.Id });
      
       logger.LogInformation("CustomerUcCreate done OpenInitialAccount for CustomerId={id} with iban={iban}",
          customer.Id, resultAccount.Value!.Iban);  

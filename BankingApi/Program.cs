@@ -116,7 +116,7 @@ public class Program {
       
       var app = builder.Build();
 
-      await SeedDataAsync(app);
+      await SeedEmployeeDataAsync(app);
 
       // API Versioning, OpenAPI/Swagger documentation
       var provider =
@@ -159,6 +159,33 @@ public class Program {
       app.Run();
    }
 
+   private static async Task SeedEmployeeDataAsync(WebApplication app) {
+      // Seed the database in development
+      if (app.Environment.IsDevelopment()) {
+         using var scope = app.Services.CreateScope();
+         var services = scope.ServiceProvider;
+         var db = services.GetRequiredService<BankingDbContext>();
+         var unitOfWork = services.GetRequiredService<IUnitOfWork>();
+         var clock = services.GetRequiredService<IClock>();
+      
+         // Ensure database is created
+         db.Database.EnsureCreated();
+      
+         // Seed if empty
+         if (!db.Employees.Any()) {
+            var seed = new Seed(clock);
+            
+            var employee1 =  seed.Employee1();
+            var employee2 =  seed.Employee2();
+            var employees = seed.Employees;
+            db.Employees.AddRange(employees);
+            await unitOfWork.SaveAllChangesAsync("Seed Employees");
+            unitOfWork.ClearChangeTracker();
+         }
+      }
+   }
+   
+   
    private static async Task SeedDataAsync(WebApplication app) {
       // Seed the database in development
       if (app.Environment.IsDevelopment()) {

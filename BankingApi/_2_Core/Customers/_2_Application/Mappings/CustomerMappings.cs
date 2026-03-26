@@ -5,6 +5,20 @@ namespace BankingApi._2_Core.Customers._2_Application.Mappings;
 
 public static class CustomerMappings {
 
+   public static CustomerCreateDto ToCustomerCreateDto(this Customer customer) => new(
+      Id:          customer.Id,
+      Firstname:   customer.Firstname,
+      Lastname:    customer.Lastname,
+      CompanyName: customer.CompanyName,
+      StatusInt: (int) customer.Status,
+      Email: customer.EmailVo.Value,
+      AddressDto: customer.AddressVo.ToAddressDto(),
+      AccountId: null,
+      Iban: null,
+      Balance: null
+   );
+   
+   
    public static CustomerDto ToCustomerDto(this Customer customer) => new(
       Id:          customer.Id,
       Firstname:   customer.Firstname,
@@ -35,5 +49,7 @@ public static class CustomerMappings {
       Email: customer.EmailVo.Value,
       AddressDto: customer.AddressVo.ToAddressDto()
    );
+   
+
 
 }

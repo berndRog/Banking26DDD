@@ -13,9 +13,7 @@ public interface ICustomerUseCases {
    // Create a fully initialized customer
    // And also create the first account
    Task<Result<CustomerDto>> CreateAsync(
-      CustomerDto customerDto,
-      string? accountIdString,
-      string? ibanString,
+      CustomerCreateDto customerCreateDto,
       CancellationToken ct = default
    );
 

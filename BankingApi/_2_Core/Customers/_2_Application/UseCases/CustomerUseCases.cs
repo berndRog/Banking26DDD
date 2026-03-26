@@ -20,14 +20,10 @@ internal class CustomerUseCases(
 ): ICustomerUseCases {
 
    public Task<Result<CustomerDto>> CreateAsync(
-      CustomerDto customerDto,
-      string? accountIdString,
-      string? ibanString,
+      CustomerCreateDto customerCreateDto,
       CancellationToken ct
    ) => createUc.ExecuteAsync(
-      customerDto: customerDto,
-      accountIdString: accountIdString,
-      ibanString: ibanString,
+      customerCreateDto: customerCreateDto,
       ct: ct
    );
 

@@ -24,7 +24,7 @@ public sealed class Employee : AggregateRoot {
 
    private const AdminRights AllowedRights =
       AdminRights.ViewReports |
-      AdminRights.ViewEmployees | AdminRights.ManageEmployees |
+      AdminRights.ViewCustomers | AdminRights.ManageCustomers |
       AdminRights.ViewAccounts | AdminRights.ManageAccounts |
       AdminRights.ViewTransfers | AdminRights.ManageTransfers |
       AdminRights.ViewEmployees | AdminRights.ManageEmployees; 

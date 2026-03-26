@@ -134,10 +134,16 @@ public static class CustomerErrors {
    public static readonly DomainErrors EmailMustBeUnique =
       new(
          ErrorCode.Conflict,
-         Title: "Email Must Be Unique",
-         Message: "An employee with the given email address already exists."
+         Title: "Customer: Email Must Be Unique",
+         Message: "A customer with the given email address already exists."
       );
    
+   public static readonly DomainErrors AlreadyHasAccounts =
+      new(
+         ErrorCode.Conflict,
+         Title: "Customer: Already Has Accounts",
+         Message: "A new customer must not have existing accounts."
+      );
    
    public static readonly DomainErrors FilterIsRequired =
       new(ErrorCode.Conflict,

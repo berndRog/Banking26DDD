@@ -28,7 +28,7 @@ public sealed class BeneficiariesController(
    /// <param name="dto">Beneficiary data used to create the beneficiary.</param>
    /// <param name="ct">Cancellation token.</param>
    /// <returns>The created beneficiary resource.</returns>
-   [Authorize]
+   // [Authorize]
    [HttpPost("accounts/{accountId:guid}/beneficiaries", Name = nameof(CreateBeneficiaryAsync))]
    [Consumes("application/json")]
    [Produces("application/json")]
@@ -66,7 +66,7 @@ public sealed class BeneficiariesController(
    /// <param name="beneficiaryId">Unique identifier of the beneficiary.</param>
    /// <param name="ct">Cancellation token.</param>
    /// <returns>The beneficiary resource if found.</returns>
-   [Authorize]
+   //[Authorize]
    [HttpGet("accounts/{accountId:guid}/beneficiaries/{beneficiaryId:guid}", Name = nameof(GetBeneficiaryByIdAsync))]
    [ProducesResponseType<BeneficiaryDto>(StatusCodes.Status200OK)]
    [ProducesResponseType<ProblemDetails>(StatusCodes.Status401Unauthorized, "application/problem+json")]
@@ -89,7 +89,7 @@ public sealed class BeneficiariesController(
    /// <param name="accountId">Unique identifier of the account.</param>
    /// <param name="ct">Cancellation token.</param>
    /// <returns>A collection of beneficiaries assigned to the account.</returns>
-   [Authorize]
+   //[Authorize]
    [HttpGet("accounts/{accountId:guid}/beneficiaries", Name = nameof(GetBeneficiariesByAccountIdAsync))]
    [ProducesResponseType<IEnumerable<BeneficiaryDto>>(StatusCodes.Status200OK)]
    [ProducesResponseType<ProblemDetails>(StatusCodes.Status401Unauthorized, "application/problem+json")]
@@ -112,7 +112,7 @@ public sealed class BeneficiariesController(
    /// <param name="beneficiaryId">Unique identifier of the beneficiary.</param>
    /// <param name="ct">Cancellation token.</param>
    /// <returns>No content on success.</returns>
-   [Authorize]
+   // [Authorize]
    [HttpDelete("accounts/{accountId:guid}/beneficiaries/{beneficiaryId:guid}", Name = nameof(DeleteBeneficiaryAsync))]
    [ProducesResponseType(StatusCodes.Status204NoContent)]
    [ProducesResponseType<ProblemDetails>(StatusCodes.Status401Unauthorized, "application/problem+json")]

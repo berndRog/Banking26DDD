@@ -6,9 +6,6 @@ using BankingApi._2_Core.Payments._2_Application.Dtos;
 using Microsoft.AspNetCore.Mvc;
 namespace BankingApi._1_Controllers.V2;
 
-//[ApiVersion("2.0")]
-//[Route("banking/v{version:apiVersion}")]
-
 [ApiVersion("1.0")]
 [ApiVersion("2.0")]
 [Route("banking/v{version:apiVersion}")]
@@ -19,6 +16,75 @@ public sealed class AccountsController(
    ILogger<AccountsController> logger
 ) : ControllerBase {
 
+   /// <summary>
+   /// Returns an account by its unique identifier.
+   /// </summary>
+   /// <param name="id">Unique identifier of the account.</param>
+   /// <param name="ct">Cancellation token.</param>
+   /// <returns>The account resource if found.</returns>
+   // [Authorize]
+   [HttpGet("accounts/{id:guid}", Name = nameof(GetAccountByIdAsync))]
+   [Produces("application/json")]
+   [ProducesResponseType<AccountDto>(StatusCodes.Status200OK)]
+   [ProducesResponseType<ProblemDetails>(StatusCodes.Status401Unauthorized, "application/problem+json")]
+   [ProducesResponseType<ProblemDetails>(StatusCodes.Status404NotFound, "application/problem+json")]
+   public async Task<ActionResult<AccountDto>> GetAccountByIdAsync(
+      [FromRoute] Guid id,
+      CancellationToken ct
+   ) {
+      const string context = $"{nameof(AccountsController)}.{nameof(GetAccountByIdAsync)}";
+
+      var result = await readModel.FindByIdAsync(id, ct);
+
+      return this.ToActionResult(result, logger, context, args: new { id });
+   }
+
+   /// <summary>
+   /// Returns an account by IBAN.
+   /// </summary>
+   /// <param name="iban">IBAN of the account.</param>
+   /// <param name="ct">Cancellation token.</param>
+   /// <returns>The account resource if found.</returns>
+   // [Authorize]
+   [HttpGet("accounts/iban", Name = nameof(GetAccountByIbanAsync))]
+   [Produces("application/json")]
+   [ProducesResponseType<AccountDto>(StatusCodes.Status200OK)]
+   [ProducesResponseType<ProblemDetails>(StatusCodes.Status401Unauthorized, "application/problem+json")]
+   [ProducesResponseType<ProblemDetails>(StatusCodes.Status404NotFound, "application/problem+json")]
+   public async Task<ActionResult<AccountDto>> GetAccountByIbanAsync(
+      [FromQuery] string iban,
+      CancellationToken ct
+   ) {
+      const string context = $"{nameof(AccountsController)}.{nameof(GetAccountByIbanAsync)}";
+
+      var result = await readModel.FindByIbanAsync(iban, ct);
+
+      return this.ToActionResult(result, logger, context, args: new { iban });
+   }
+
+   /// <summary>
+   /// Returns all accounts of a specific customer.
+   /// </summary>
+   /// <param name="customerId">Unique identifier of the customer.</param>
+   /// <param name="ct">Cancellation token.</param>
+   /// <returns>A collection of accounts belonging to the given customer.</returns>
+   // [Authorize]
+   [HttpGet("customers/{customerId:guid}/accounts", Name = nameof(GetAccountsByCustomerIdAsync))]
+   [Produces("application/json")]
+   [ProducesResponseType<IEnumerable<AccountDto>>(StatusCodes.Status200OK)]
+   [ProducesResponseType<ProblemDetails>(StatusCodes.Status401Unauthorized, "application/problem+json")]
+   [ProducesResponseType<ProblemDetails>(StatusCodes.Status404NotFound, "application/problem+json")]
+   public async Task<ActionResult<IEnumerable<AccountDto>>> GetAccountsByCustomerIdAsync(
+      [FromRoute] Guid customerId,
+      CancellationToken ct
+   ) {
+      const string context = $"{nameof(AccountsController)}.{nameof(GetAccountsByCustomerIdAsync)}";
+
+      var result = await readModel.SelectByCustomerIdAsync(customerId, ct);
+
+      return this.ToActionResult(result, logger, context, args: new { customerId });
+   }
+   
    /// <summary>
    /// Creates a new account for a customer.
    /// </summary>
@@ -56,72 +122,6 @@ public sealed class AccountsController(
          context
       );
    }
-
-   /// <summary>
-   /// Returns an account by its unique identifier.
-   /// </summary>
-   /// <param name="id">Unique identifier of the account.</param>
-   /// <param name="ct">Cancellation token.</param>
-   /// <returns>The account resource if found.</returns>
-   // [Authorize]
-   [HttpGet("accounts/{id:guid}", Name = nameof(GetAccountByIdAsync))]
-   [ProducesResponseType<AccountDto>(StatusCodes.Status200OK)]
-   [ProducesResponseType<ProblemDetails>(StatusCodes.Status401Unauthorized, "application/problem+json")]
-   [ProducesResponseType<ProblemDetails>(StatusCodes.Status404NotFound, "application/problem+json")]
-   public async Task<ActionResult<AccountDto>> GetAccountByIdAsync(
-      [FromRoute] Guid id,
-      CancellationToken ct
-   ) {
-      const string context = $"{nameof(AccountsController)}.{nameof(GetAccountByIdAsync)}";
-
-      var result = await readModel.FindByIdAsync(id, ct);
-
-      return this.ToActionResult(result, logger, context, args: new { id });
-   }
-
-   /// <summary>
-   /// Returns an account by IBAN.
-   /// </summary>
-   /// <param name="iban">IBAN of the account.</param>
-   /// <param name="ct">Cancellation token.</param>
-   /// <returns>The account resource if found.</returns>
-   // [Authorize]
-   [HttpGet("accounts/iban/{iban}", Name = nameof(GetAccountByIbanAsync))]
-   [ProducesResponseType<AccountDto>(StatusCodes.Status200OK)]
-   [ProducesResponseType<ProblemDetails>(StatusCodes.Status401Unauthorized, "application/problem+json")]
-   [ProducesResponseType<ProblemDetails>(StatusCodes.Status404NotFound, "application/problem+json")]
-   public async Task<ActionResult<AccountDto>> GetAccountByIbanAsync(
-      [FromRoute] string iban,
-      CancellationToken ct
-   ) {
-      const string context = $"{nameof(AccountsController)}.{nameof(GetAccountByIbanAsync)}";
-
-      var result = await readModel.FindByIbanAsync(iban, ct);
-
-      return this.ToActionResult(result, logger, context, args: new { iban });
-   }
-
-   /// <summary>
-   /// Returns all accounts of a specific customer.
-   /// </summary>
-   /// <param name="customerId">Unique identifier of the customer.</param>
-   /// <param name="ct">Cancellation token.</param>
-   /// <returns>A collection of accounts belonging to the given customer.</returns>
-   // [Authorize]
-   [HttpGet("customers/{customerId:guid}/accounts", Name = nameof(GetAccountsByCustomerIdAsync))]
-   [ProducesResponseType<IEnumerable<AccountDto>>(StatusCodes.Status200OK)]
-   [ProducesResponseType<ProblemDetails>(StatusCodes.Status401Unauthorized, "application/problem+json")]
-   [ProducesResponseType<ProblemDetails>(StatusCodes.Status404NotFound, "application/problem+json")]
-   public async Task<ActionResult<IEnumerable<AccountDto>>> GetAccountsByCustomerIdAsync(
-      [FromRoute] Guid customerId,
-      CancellationToken ct
-   ) {
-      const string context = $"{nameof(AccountsController)}.{nameof(GetAccountsByCustomerIdAsync)}";
-
-      var result = await readModel.SelectByCustomerIdAsync(customerId, ct);
-
-      return this.ToActionResult(result, logger, context, args: new { customerId });
-   }
    
    /// <summary>
    /// Deactivates an account.
@@ -134,7 +134,7 @@ public sealed class AccountsController(
    /// <param name="ct">Cancellation token.</param>
    /// <returns>No content on success.</returns>
    //[Authorize(Policy = "EmployeesOnly")]
-   [HttpDelete("accounts/{id:guid}", Name = nameof(DeactivateAccountAsync))]
+   [HttpPut("accounts/{id:guid}", Name = nameof(DeactivateAccountAsync))]
    [ProducesResponseType(StatusCodes.Status204NoContent)]
    [ProducesResponseType<ProblemDetails>(StatusCodes.Status401Unauthorized, "application/problem+json")]
    [ProducesResponseType<ProblemDetails>(StatusCodes.Status404NotFound, "application/problem+json")]
@@ -150,4 +150,5 @@ public sealed class AccountsController(
 
       return this.ToActionResult(result, logger, context, args: new { id });
    }
+
 }

@@ -22,14 +22,18 @@ public sealed class CustomerUcCreateIntT : TestBaseIntegration {
 
       // Arrange
       var customer = _seed.CustomerRegister(); // with address
-      var customerDto = customer.ToCustomerDto(); 
+      var customerCreateDto = customer.ToCustomerCreateDto(); 
       var account1 = _seed.Account1(); 
      
       // Act
+      customerCreateDto = customerCreateDto with {
+         AccountId = account1.Id.ToString(),
+         Iban = account1.IbanVo.Value,
+         Balance = account1.BalanceVo.Amount
+      }; // we set the id to be the same as the seeded customer, so we can assert it later
+      
       await sut.ExecuteAsync(
-         customerDto: customerDto,
-         accountIdString: account1.Id.ToString(),
-         ibanString: account1.IbanVo.Value,
+         customerCreateDto: customerCreateDto,
          ct
       );
       unitOfWork.ClearChangeTracker();

@@ -14,11 +14,11 @@ public sealed class Seed(
    #region --------------- Test Employees (Entities) -----------------------------------------
    public Employee Employee1() => CreateEmployee(
       id: "00000000-0001-0000-0000-000000000000",
-      firstname: "Emil",
-      lastname: "Engel",
-      email: "emil.engel@bankingapi.de",
+      firstname: "Veronika",
+      lastname: "Vogel",
+      email: "v.vogel@banking.de",
       phone: "+49 5826 123 4010",
-      subject: "003946D9-9B67-4691-A91B-DB4A98929F5D",
+      subject: "11111111-0001-0000-0000-000000000000",
       personnelNumber: "Emp001",
       adminRights: AdminRights.ViewEmployees | AdminRights.ManageEmployees |
       AdminRights.ViewAccounts | AdminRights.ManageAccounts
@@ -26,13 +26,13 @@ public sealed class Seed(
 
    public Employee Employee2() => CreateEmployee(
       id: "00000000-0002-0000-0000-000000000000",
-      firstname: "Frieda",
-      lastname: "Fischer",
-      email: "frieda.fischer@bankingapi.de",
+      firstname: "Walter",
+      lastname: "Wagner",
+      email: "w.wagner@banking.de",
       phone: "+49 5826 123 4020",
-      subject: "009A7C8E-3F2B-4C5D-9E6F-7A8B9C0D1E2F",
+      subject: "11111111-0002-0000-0000-000000000000",
       personnelNumber: "Emp002",
-      adminRights: (AdminRights)511
+      adminRights: (AdminRights) 511
    );
 
    public IReadOnlyList<Employee> Employees => new List<Employee>() {
@@ -57,10 +57,10 @@ public sealed class Seed(
       => AddressVo.Create("Berliner Platz 8", "29614", "Soltau", "DE").GetValueOrThrow();
 
    public AddressVo Address6Vo
-      => AddressVo.Create("Am Markt 14", "04109", "Leipzig", "DE").GetValueOrThrow();
+      => AddressVo.Create("Allertalweg. 2", "29227", "Celle", "DE").GetValueOrThrow();
 
    public AddressVo AddressRegVo
-      => AddressVo.Create("Allertalweg. 2", "29227", "Celle", "DE").GetValueOrThrow();
+      => AddressVo.Create("Am Markt 14", "04109", "Leipzig", "DE").GetValueOrThrow();
    #endregion
 
    #region -------------- Test Customers (Entities) ------------------------------------------

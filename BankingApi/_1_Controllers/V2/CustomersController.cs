@@ -20,9 +20,7 @@ public sealed class CustomersController(
    /// Creates an activated customer together with a first account.
    /// This endpoint is intended for testing and demo purposes only.
    /// </summary>
-   /// <param name="accountId">Identifier of the first account.</param>
-   /// <param name="iban">IBAN of the first account, or an empty string.</param>
-   /// <param name="customerDto">Customer data transferred in the request body.</param>
+   /// <param name="customerCreateDto">Customer data with initial account transferred in the request body.</param>
    /// <param name="ct">Cancellation token.</param>
    /// <returns>The created customer resource.</returns>
    [HttpPost("customers", Name = nameof(CreateCustomerAsync))]
@@ -31,23 +29,16 @@ public sealed class CustomersController(
    [ProducesResponseType<CustomerDto>(StatusCodes.Status201Created)]
    [ProducesResponseType<ProblemDetails>(StatusCodes.Status400BadRequest, "application/problem+json")]
    public async Task<ActionResult<CustomerDto>> CreateCustomerAsync(
-      [FromQuery] string accountId,
-      [FromQuery] string iban,
-      [FromBody] CustomerDto customerDto,
+      [FromBody] CustomerCreateDto customerCreateDto,
       CancellationToken ct
    ) {
       const string context = $"{nameof(CustomersController)}.{nameof(CreateCustomerAsync)}";
-
-      var result = await useCases.CreateAsync(
-         customerDto: customerDto,
-         accountIdString: accountId,
-         ibanString: iban,
-         ct: ct
-      );
+      
+      var result = await useCases.CreateAsync(customerCreateDto, ct);
 
       return this.ToCreatedAtRoute(
          routeName: nameof(GetCustomerById),
-         routeValues: new { id = customerDto.Id },
+         routeValues: new { id = customerCreateDto.Id },
          result, logger, context);
    }
 
@@ -175,12 +166,12 @@ public sealed class CustomersController(
    /// <param name="ct">Cancellation token.</param>
    /// <returns>The customer resource if a matching email address exists.</returns>
    // [Authorize]
-   [HttpGet("customers/email/{email}", Name = nameof(GetCustomerByEmail))]
+   [HttpGet("customers/email", Name = nameof(GetCustomerByEmail))]
    [ProducesResponseType<CustomerDto>(StatusCodes.Status200OK)]
    [ProducesResponseType<ProblemDetails>(StatusCodes.Status401Unauthorized, "application/problem+json")]
    [ProducesResponseType<ProblemDetails>(StatusCodes.Status404NotFound, "application/problem+json")]
    public async Task<ActionResult<CustomerDto>> GetCustomerByEmail(
-      [FromRoute] string email,
+      [FromQuery] string email,
       CancellationToken ct
    ) {
       const string context = $"{nameof(CustomersController)}.{nameof(GetCustomerByEmail)}";
@@ -210,5 +201,29 @@ public sealed class CustomersController(
       var result = await readModel.SelectAllAsync(ct);
 
       return this.ToActionResult(result, logger, context, args: null);
+   }
+   
+   /// <summary>
+   /// Returns customers by display name.
+   /// </summary>
+   /// <remarks>
+   /// This endpoint is intended for employees and administrative use cases.
+   /// </remarks>
+   /// <param name="name">Displayname for SQL %like.</param>
+   /// <param name="ct">Cancellation token.</param>
+   /// <returns>A collection of all customers.</returns>
+   // [Authorize(Policy = "EmployeesOnly")]
+   [HttpGet("customers/name")]
+   [ProducesResponseType<IEnumerable<CustomerDto>>(StatusCodes.Status200OK)]
+   [ProducesResponseType<ProblemDetails>(StatusCodes.Status401Unauthorized, "application/problem+json")]
+   public async Task<ActionResult<IEnumerable<CustomerDto>>> GetCustomersByDisplayNameAsync(
+      [FromQuery] string name,
+      CancellationToken ct
+   ) {
+      const string context = $"{nameof(CustomersController)}.{nameof(GetCustomersByDisplayNameAsync)}";
+
+      var result = await readModel.SelectByDisplayNameAsync(name, ct);
+
+      return this.ToActionResult(result, logger, context, args: name);
    }
 }
