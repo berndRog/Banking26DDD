@@ -5,7 +5,6 @@ using BankingApi._2_Core.BuildingBlocks._3_Domain.Errors;
 using Microsoft.AspNetCore.Mvc;
 namespace BankingApi._1_Controllers.Extensions;
 
-
 // Translates domain/application Result objects into HTTP responses.
 // Controllers stay thin and delegate protocol mapping to this adapter.
 public static class ControllerExtensions {

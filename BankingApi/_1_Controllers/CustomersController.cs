@@ -65,7 +65,7 @@ public sealed class CustomersController(
    /// A provision result containing the customer information and an indicator
    /// whether the resource was newly created.
    /// </returns>
-   [Authorize(Policy = "CustomersOnly")]
+   // [Authorize(Policy = "CustomersOnly")]
    [HttpPost("customers/me/provision", Name = nameof(CreateCustomerProvisionAsync))]
    [Consumes("application/json")]
    [Produces("application/json")]
@@ -105,6 +105,7 @@ public sealed class CustomersController(
    /// </remarks>
    /// <param name="ct">Cancellation token.</param>
    /// <returns>The customer profile of the current user.</returns>
+   // [Authorize(Policy = "CustomersOnly")]
    [HttpGet("customers/me/profile", Name = nameof(GetCustomerProfileAsync))]
    [ProducesResponseType<CustomerDto>(StatusCodes.Status200OK)]
    [ProducesResponseType<ProblemDetails>(StatusCodes.Status404NotFound, "application/problem+json")]
@@ -128,6 +129,7 @@ public sealed class CustomersController(
    /// <param name="dto">New profile data for the current customer.</param>
    /// <param name="ct">Cancellation token.</param>
    /// <returns>The updated customer profile.</returns>
+   // [Authorize(Policy = "CustomersOnly")]
    [HttpPut("customers/me/profile", Name = nameof(PutCustomerProfileAsync))]
    [Produces("application/json")]
    [ProducesResponseType<CustomerDto>(StatusCodes.Status200OK)]
@@ -151,6 +153,7 @@ public sealed class CustomersController(
    /// <param name="id">Unique identifier of the customer.</param>
    /// <param name="ct">Cancellation token.</param>
    /// <returns>The customer resource if found.</returns>
+   // [Authorize]
    [HttpGet("customers/{id:guid}", Name = nameof(GetCustomerById))]
    [ProducesResponseType<CustomerDto>(StatusCodes.Status200OK)]
    [ProducesResponseType<ProblemDetails>(StatusCodes.Status404NotFound, "application/problem+json")]
@@ -171,7 +174,7 @@ public sealed class CustomersController(
    /// <param name="email">Email address of the customer.</param>
    /// <param name="ct">Cancellation token.</param>
    /// <returns>The customer resource if a matching email address exists.</returns>
-   [Authorize]
+   // [Authorize]
    [HttpGet("customers/email/{email}", Name = nameof(GetCustomerByEmail))]
    [ProducesResponseType<CustomerDto>(StatusCodes.Status200OK)]
    [ProducesResponseType<ProblemDetails>(StatusCodes.Status401Unauthorized, "application/problem+json")]
@@ -195,7 +198,7 @@ public sealed class CustomersController(
    /// </remarks>
    /// <param name="ct">Cancellation token.</param>
    /// <returns>A collection of all customers.</returns>
-   [Authorize(Policy = "EmployeesOnly")]
+   // [Authorize(Policy = "EmployeesOnly")]
    [HttpGet("customers")]
    [ProducesResponseType<IEnumerable<CustomerDto>>(StatusCodes.Status200OK)]
    [ProducesResponseType<ProblemDetails>(StatusCodes.Status401Unauthorized, "application/problem+json")]
