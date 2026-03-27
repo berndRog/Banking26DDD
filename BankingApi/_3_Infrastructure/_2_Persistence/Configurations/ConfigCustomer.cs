@@ -18,47 +18,60 @@ public sealed class ConfigCustomer(
 
       // Primary Key will never be generated
       builder.HasKey(o => o.Id);
-      builder.Property(o => o.Id).ValueGeneratedNever();
-      
-      // Auditing timestamps
-      builder.Property(o => o.CreatedAt)
-         .HasConversion(dtConv)
-         .IsRequired();
-
-      builder.Property(o => o.UpdatedAt)
-         .HasConversion(dtConv)
-         .IsRequired();
+      builder.Property(o => o.Id)
+         .ValueGeneratedNever()
+         .HasColumnName("Id")
+         .HasColumnOrder(0);
       
       // Profile data
       builder.Property(o => o.Firstname)
          .HasMaxLength(80)
+         .HasColumnName("Firstname")
+         .HasColumnOrder(1)
          .IsRequired();
       builder.Property(o => o.Lastname)
          .HasMaxLength(80)
+         .HasColumnName("Lastname")
+         .HasColumnOrder(2)
          .IsRequired();
       builder.Property(o => o.CompanyName)
          .HasMaxLength(80)
+         .HasColumnName("CompanyName")
+         .HasColumnOrder(3)
          .IsRequired(false);
 
       // Value Object EmailVo mit Conversion
       builder.Property(c => c.EmailVo)
          .HasConversion(vo => vo.Value, s => EmailVo.FromPersisted(s))
          .IsRequired()
-         .HasColumnName("Email") 
+         .HasColumnName("Email")
+         .HasColumnOrder(4)
          .HasMaxLength(254);
       builder.HasIndex(c => c.EmailVo).IsUnique();
 
-      builder.Property(o => o.Subject)
-         .HasMaxLength(200)
-         .IsRequired();
-      builder.HasIndex(o => o.Subject).IsUnique();
-
       // Status
       builder.Property(o => o.Status)
-         .HasConversion<int>()   
+         .HasConversion<int>()
+         .HasColumnName("Status")
+         .HasColumnOrder(5)
          .IsRequired();
-
+      
+      builder.Property(o => o.Subject)
+         .HasMaxLength(200)
+         .HasColumnName("Subject")
+         .HasColumnOrder(6)
+         .IsRequired();
+      builder.HasIndex(o => o.Subject).IsUnique();
+      
+      // Auditing timestamps
+      builder.Property(o => o.CreatedAt)
+         .HasConversion(dtConv)
+         .IsRequired();
       // Employee decisions / audit facts
+      builder.Property(o => o.UpdatedAt)
+         .HasConversion(dtConv)
+         .IsRequired();
+      
       builder.Property(o => o.ActivatedAt)
          .HasConversion(dtConvNul)
          .IsRequired(false);

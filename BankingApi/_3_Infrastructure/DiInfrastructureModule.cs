@@ -41,11 +41,13 @@ public static class DiInfrastructureModule {
       services.AddScoped<IEmployeeRepository, EmployeeRepositoryEf>();
       services.AddScoped<ICustomerRepository, CustomerRepositoryEf>();
       services.AddScoped<IAccountRepository, AccountRepositoryEf>();
+      services.AddScoped<ITransferRepository, TransferRepositoryEf>();
       
       // ReadModels
       services.AddScoped<IEmployeeReadModel, EmployeeReadModelEf>();     
       services.AddScoped<ICustomerReadModel, CustomerReadModelEf>();  
       services.AddScoped<IAccountReadModel, AccountReadModelEf>();  
+      services.AddScoped<ITransferReadModel, TransferReadModelEf>();  
       
       // Unit of Work
       services.AddScoped<IUnitOfWork, UnitOfWork>();

@@ -82,6 +82,33 @@ public sealed class BeneficiariesController(
 
       return this.ToActionResult(result, logger, context, args: new { accountId, beneficiaryId });
    }
+   
+   /// <summary>
+   /// Returns a beneficiary of an account by its name
+   /// </summary>
+   /// <param name="accountId">Unique identifier of the account.</param>
+   /// <param name="name">display name of the beneficiary (SQL Like%).</param>
+   /// <param name="ct">Cancellation token.</param>
+   /// <returns>The beneficiary resource if found.</returns>
+   //[Authorize]
+   [HttpGet("accounts/{accountId:guid}/beneficiaries/name", Name = nameof(SelectBeneficiariesByNameAsync))]
+   [ProducesResponseType<BeneficiaryDto>(StatusCodes.Status200OK)]
+   [ProducesResponseType<ProblemDetails>(StatusCodes.Status401Unauthorized, "application/problem+json")]
+   [ProducesResponseType<ProblemDetails>(StatusCodes.Status404NotFound, "application/problem+json")]
+   public async Task<ActionResult<IEnumerable<BeneficiaryDto>>> SelectBeneficiariesByNameAsync(
+      [FromQuery] Guid accountId,
+      [FromRoute] string name,
+      CancellationToken ct
+   ) {
+      const string context = $"{nameof(BeneficiariesController)}.{nameof(SelectBeneficiariesByNameAsync)}";
+
+      var result = await readModel.SelectBeneficiariesByNameAsync(accountId, name, ct);
+
+      return this.ToActionResult(result, logger, context, args: new { accountId, name });
+   }
+   
+   
+   
 
    /// <summary>
    /// Returns all beneficiaries of an account.

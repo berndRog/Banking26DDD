@@ -1,6 +1,5 @@
 using BankingApi._2_Core.BuildingBlocks;
 using BankingApi._2_Core.BuildingBlocks._1_Ports.Outbound;
-using BankingApi._2_Core.BuildingBlocks._3_Domain;
 using BankingApi._2_Core.BuildingBlocks.Utils;
 using BankingApi._2_Core.Payments._1_Ports.Outbound;
 using BankingApi._2_Core.Payments._2_Application.Dtos;
@@ -9,7 +8,6 @@ using BankingApi._2_Core.Payments._3_Domain.Entities;
 using BankingApi._2_Core.Payments._3_Domain.Enums;
 using BankingApi._2_Core.Payments._3_Domain.Errors;
 using BankingApi._2_Core.Payments._3_Domain.ValueObjects;
-
 namespace BankingApi._2_Core.Payments._2_Application.UseCases;
 
 public sealed class TransferUcSendMoney(
@@ -35,7 +33,6 @@ public sealed class TransferUcSendMoney(
       var resultVo = MoneyVo.Create(amount, Currency.EUR);
       if (resultVo.IsFailure)
          return Result<TransferDto>.Failure(resultVo.Error);
-
       var amountVo = resultVo.Value;
 
       // 2) Load required domain objects ---------------------------------------
@@ -53,7 +50,6 @@ public sealed class TransferUcSendMoney(
       var resultBeneficiary = fromAccount.FindBeneficiary(dto.BeneficiaryId);
       if (resultBeneficiary.IsFailure)
          return Result<TransferDto>.Failure(resultBeneficiary.Error!);
-
       var beneficiary = resultBeneficiary.Value!;
 
       // Resolve the receiver account via the beneficiary's IBAN.
@@ -78,7 +74,6 @@ public sealed class TransferUcSendMoney(
       );
       if (resultDebit.IsFailure)
          return Result<TransferDto>.Failure(resultDebit.Error!);
-
       var debitTransaction = resultDebit.Value!;
 
       // Post the credit transaction on the receiver account.
@@ -90,7 +85,6 @@ public sealed class TransferUcSendMoney(
       );
       if (resultCredit.IsFailure)
          return Result<TransferDto>.Failure(resultCredit.Error!);
-
       var creditTransaction = resultCredit.Value!;
 
       // Create the transfer entity that represents the complete business operation.

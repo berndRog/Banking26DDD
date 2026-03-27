@@ -14,35 +14,36 @@ public sealed class ConfigTransfer(
 
       // key
       builder.HasKey(t => t.Id);
-      builder.Property(t => t.Id).ValueGeneratedNever();
+      builder.Property(t => t.Id)
+         .ValueGeneratedNever()
+         .HasColumnName("Id")
+         .HasColumnOrder(0);
 
-      // audit fields
-      builder.Property(t => t.CreatedAt)
-         .HasConversion(dtConv)
-         .IsRequired();
 
-      builder.Property(t => t.UpdatedAt)
-         .HasConversion(dtConv)
-         .IsRequired();
-      
       // account references
       builder.Property(t => t.FromAccountId)
+         .HasColumnName("FromAccountId")
+         .HasColumnOrder(1)
          .IsRequired();
       builder.HasIndex(t => t.FromAccountId);
 
       builder.Property(t => t.ToAccountId)
-         .IsRequired();
+         .IsRequired()
+         .HasColumnName("ToAccountId")
+         .HasColumnOrder(2);
       builder.HasIndex(t => t.ToAccountId);
 
       // amount value object
       builder.ComplexProperty(a => a.AmountVo, money => {
          money.Property(m => m.Amount)
             .HasColumnName("Amount")
+            .HasColumnOrder(3)
             .HasPrecision(18, 2)
             .IsRequired();
 
          money.Property(m => m.Currency)
             .HasColumnName("Currency")
+            .HasColumnOrder(4)
             .HasConversion<string>()
             .HasMaxLength(3)
             .IsRequired();
@@ -51,6 +52,17 @@ public sealed class ConfigTransfer(
       // business fields
       builder.Property(t => t.Purpose)
          .HasMaxLength(80)
+         .HasColumnName("Purpose")
+         .HasColumnOrder(5)
+         .IsRequired();
+      
+      // status and booking time
+      builder.Property(t => t.Status)
+         .HasConversion<int>()
+         .IsRequired();
+
+      builder.Property(t => t.BookedAt)
+         .HasConversion(dtConv)
          .IsRequired();
 
       // transaction references
@@ -67,13 +79,13 @@ public sealed class ConfigTransfer(
          .IsRequired(false);
       builder.HasIndex(t => t.ReversedByTransferId)
          .IsUnique();
-
-      // status and booking time
-      builder.Property(t => t.Status)
-         .HasConversion<int>()
+      
+      // audit fields
+      builder.Property(t => t.CreatedAt)
+         .HasConversion(dtConv)
          .IsRequired();
 
-      builder.Property(t => t.BookedAt)
+      builder.Property(t => t.UpdatedAt)
          .HasConversion(dtConv)
          .IsRequired();
 

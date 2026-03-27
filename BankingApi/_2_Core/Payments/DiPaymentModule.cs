@@ -3,7 +3,7 @@ using BankingApi._2_Core.Payments._1_Ports.Inbound;
 using BankingApi._2_Core.Payments._2_Application.UseCases;
 namespace BankingApi._2_Core.Payments;
 
-public static class DiPaymentModules {
+public static class DiPaymentModule {
    
    public static IServiceCollection AddPaymentModule(
       this IServiceCollection services
@@ -14,6 +14,10 @@ public static class DiPaymentModules {
       services.AddScoped<AccountUcBeneficiaryAdd>();
       services.AddScoped<AccountUcBeneficiaryRemove>();
       services.AddScoped<IAccountUseCases, AccountUseCases>();      
+      
+      services.AddScoped<TransferUcSendMoney>();
+      services.AddScoped<TransferUcReverse>();
+      services.AddScoped<ITransferUseCases, TransferUseCases>();      
       
       // Policies
       return services;

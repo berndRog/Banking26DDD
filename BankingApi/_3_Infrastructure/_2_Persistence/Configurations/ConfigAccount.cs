@@ -16,8 +16,40 @@ public sealed class ConfigAccount(
 
       // key
       builder.HasKey(a => a.Id);
-      builder.Property(a => a.Id).ValueGeneratedNever();
+      builder.Property(a => a.Id)
+         .ValueGeneratedNever()
+         .HasColumnName("Id")
+         .HasColumnOrder(0);
+
+      builder.Property(a => a.IbanVo)
+         .HasConversion(vo => vo.Value, s => IbanVo.FromPersisted(s))
+         .IsRequired()
+         .HasColumnName("Iban")
+         .HasColumnOrder(1)
+         .HasMaxLength(50);
+      builder.HasIndex(c => c.IbanVo).IsUnique();
+
+      builder.ComplexProperty(a => a.BalanceVo, money => {
+         money.Property(m => m.Amount)
+            .HasColumnName("Balance")
+            .HasColumnOrder(2)
+            .HasPrecision(18, 2)
+            .IsRequired();
+
+         money.Property(m => m.Currency)
+            .HasColumnName("Currency")
+            .HasColumnOrder(3)
+            .HasConversion<string>()
+            .HasMaxLength(3)
+            .IsRequired();
+      });
       
+
+      builder.Property(a => a.CustomerId)
+         .HasColumnName("CustomerId")
+         .HasColumnOrder(4)
+         .IsRequired();
+
       // audit fields
       builder.Property(a => a.CreatedAt)
          .HasConversion(dtConv)
@@ -26,26 +58,6 @@ public sealed class ConfigAccount(
       builder.Property(a => a.UpdatedAt)
          .HasConversion(dtConv)
          .IsRequired();
-      
-      builder.Property(a => a.IbanVo)
-         .HasConversion(vo => vo.Value, s => IbanVo.FromPersisted(s))
-         .IsRequired()
-         .HasColumnName("Iban") 
-         .HasMaxLength(50);
-      builder.HasIndex(c => c.IbanVo).IsUnique();
-
-      builder.ComplexProperty(a => a.BalanceVo, money => {
-         money.Property(m => m.Amount)
-            .HasColumnName("Balance")
-            .HasPrecision(18, 2)
-            .IsRequired();
-
-         money.Property(m => m.Currency)
-            .HasColumnName("Currency")
-            .HasConversion<string>()
-            .HasMaxLength(3)
-            .IsRequired();
-      });
       
       builder.Property(o => o.CreatedByEmployeeId)
          .IsRequired(false);
@@ -60,9 +72,6 @@ public sealed class ConfigAccount(
       // Domain-only
       builder.Ignore(o => o.IsActive);
       
-      // business properties
-      builder.Property(a => a.CustomerId)
-         .IsRequired();
       
       // child entities: beneficiaries
       builder.HasMany(a => a.Beneficiaries)

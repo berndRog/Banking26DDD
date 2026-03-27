@@ -15,20 +15,27 @@ internal sealed class ConfigBeneficiary : IEntityTypeConfiguration<Beneficiary> 
 
       builder.HasKey(x => x.Id);
       builder.Property(x => x.Id)
-         .ValueGeneratedNever();
+         .ValueGeneratedNever()
+         .HasColumnName("Id")
+         .HasColumnOrder(1);
       
       // Domain properties
       builder.Property(x => x.AccountId)
+         .HasColumnName("AccountId")
+         .HasColumnOrder(2)
          .IsRequired();
 
       builder.Property(x => x.Name)
          .HasMaxLength(160)
+         .HasColumnName("Name")
+         .HasColumnOrder(3)
          .IsRequired();
 
       builder.Property(a => a.IbanVo)
          .HasConversion(vo => vo.Value, s => IbanVo.FromPersisted(s))
          .IsRequired()
          .HasColumnName("Iban") 
+         .HasColumnOrder(4)
          .HasMaxLength(50);
       builder.HasIndex(c => c.IbanVo);
       

@@ -21,6 +21,52 @@ public sealed class TransfersController(
 ) : ControllerBase {
 
    /// <summary>
+   /// Sends money from a given account.
+   /// </summary>
+   /// <remarks>
+   /// This endpoint creates a new transfer and returns <c>201 Created</c> on success.
+   /// The response contains the created transfer resource and a Location header
+   /// pointing to the newly created transfer.
+   /// </remarks>
+   /// <param name="accountId">Unique identifier of the sender account.</param>
+   /// <param name="sendMoneyDto">Transfer data required to execute the money transfer.</param>
+   /// <param name="ct">Cancellation token.</param>
+   /// <returns>The created transfer resource.</returns>
+   // [Authorize(Policy = "CustomersOrEmployees")]
+   [HttpPost("accounts/{accountId:guid}/transfers", Name = nameof(SendMoneyAsync))]
+   [ProducesResponseType<TransferDto>(StatusCodes.Status201Created)]
+   [ProducesResponseType<ProblemDetails>(StatusCodes.Status400BadRequest, "application/problem+json")]
+   [ProducesResponseType<ProblemDetails>(StatusCodes.Status404NotFound, "application/problem+json")]
+   public async Task<ActionResult<TransferDto>> SendMoneyAsync(
+      [Description("Unique accountId of the sender account")]
+      [FromRoute] Guid accountId,
+
+      [Description("Transfer data for the new money transfer")]
+      [FromBody] SendMoneyDto sendMoneyDto,
+
+      CancellationToken ct
+   ) {
+      const string context = $"{nameof(TransfersController)}.{nameof(SendMoneyAsync)}";
+
+      var result = await transferUseCases.SendMoneyAsync(
+         sendMoneyDto: sendMoneyDto,
+         ct: ct
+      );
+
+      return this.ToCreatedAtRoute(
+         routeName: nameof(GetTransferByAccountIdAndTransferIdAsync),
+         routeValues: new {
+            accountId = accountId,
+            id = result.Value.Id
+         },
+         result,
+         logger,
+         context,
+         args: new { accountId, sendMoneyDto.Id }
+      );
+   }
+   
+   /// <summary>
    /// Returns all transfers of a given account.
    /// </summary>
    /// <remarks>
@@ -31,7 +77,7 @@ public sealed class TransfersController(
    /// <param name="accountId">Unique identifier of the account.</param>
    /// <param name="ct">Cancellation token.</param>
    /// <returns>A collection of transfers belonging to the given account.</returns>
-   [Authorize(Policy = "CustomersOrEmployees")]
+   // [Authorize(Policy = "CustomersOrEmployees")]
    [HttpGet("accounts/{accountId:guid}/transfers", Name = nameof(GetTransfersByAccountIdAsync))]
    [ProducesResponseType<IReadOnlyList<TransferDto>>(StatusCodes.Status200OK)]
    [ProducesResponseType<ProblemDetails>(StatusCodes.Status404NotFound, "application/problem+json")]
@@ -73,49 +119,5 @@ public sealed class TransfersController(
       return this.ToActionResult(result, logger, context, args: new { accountId, id });
    }
 
-   /// <summary>
-   /// Sends money from a given account.
-   /// </summary>
-   /// <remarks>
-   /// This endpoint creates a new transfer and returns <c>201 Created</c> on success.
-   /// The response contains the created transfer resource and a Location header
-   /// pointing to the newly created transfer.
-   /// </remarks>
-   /// <param name="accountId">Unique identifier of the sender account.</param>
-   /// <param name="sendMoneyDto">Transfer data required to execute the money transfer.</param>
-   /// <param name="ct">Cancellation token.</param>
-   /// <returns>The created transfer resource.</returns>
-   [Authorize(Policy = "CustomersOrEmployees")]
-   [HttpPost("accounts/{accountId:guid}/transfers", Name = nameof(SendMoneyAsync))]
-   [ProducesResponseType<TransferDto>(StatusCodes.Status201Created)]
-   [ProducesResponseType<ProblemDetails>(StatusCodes.Status400BadRequest, "application/problem+json")]
-   [ProducesResponseType<ProblemDetails>(StatusCodes.Status404NotFound, "application/problem+json")]
-   public async Task<ActionResult<TransferDto>> SendMoneyAsync(
-      [Description("Unique accountId of the sender account")]
-      [FromRoute] Guid accountId,
 
-      [Description("Transfer data for the new money transfer")]
-      [FromBody] SendMoneyDto sendMoneyDto,
-
-      CancellationToken ct
-   ) {
-      const string context = $"{nameof(TransfersController)}.{nameof(SendMoneyAsync)}";
-
-      var result = await transferUseCases.SendMoneyAsync(
-         sendMoneyDto: sendMoneyDto,
-         ct: ct
-      );
-
-      return this.ToCreatedAtRoute(
-         routeName: nameof(GetTransferByAccountIdAndTransferIdAsync),
-         routeValues: new {
-            accountId = accountId,
-            id = result.Value.Id
-         },
-         result,
-         logger,
-         context,
-         args: new { accountId, sendMoneyDto.Id }
-      );
-   }
 }
