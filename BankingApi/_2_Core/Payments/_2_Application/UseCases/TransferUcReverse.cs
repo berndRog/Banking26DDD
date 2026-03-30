@@ -31,29 +31,27 @@ public sealed class TransferUcReverse(
          return Result<TransferDto>.Failure(TransferErrors.OriginalTransferNotFound);
 
       // 2) Load participating accounts ----------------------------------------
-      
       // For a reversal, the booking direction is inverted:
-      // original sender becomes receiver, original.fromAccount becomes toAccount
-      // original receiver becomes sender, original.toAccount becomes fromAccount.
-      var toAccount = await accountRepository.FindAccountByIdWithBeneficiariesAsync(
-         accountId: originalTransfer.FromAccountId,
+      // original debitAccount becomes creditAccount
+      // original credditAccount becomes debitAccoutn
+      var creditAccount = await accountRepository.FindAccountByIdWithBeneficiariesAsync(
+         accountId: originalTransfer.DebitAccountId,
          ct: ct
       );
-      var fromAccount = await accountRepository.FindByIdAsync(
-         id: originalTransfer.ToAccountId,
+      var debitAccount = await accountRepository.FindByIbanAsync(
+         ibanVo: originalTransfer.CreditAccountIbanVo,
          ct
       );
 
-      if (fromAccount is null)
-         return Result<TransferDto>.Failure(TransferErrors.FromAccountNotFound);
-      if (toAccount is null)
-         return Result<TransferDto>.Failure(TransferErrors.ToAccountNotFound);
+      if (debitAccount is null)
+         return Result<TransferDto>.Failure(TransferErrors.DebitAccountNotFound);
+      if (creditAccount is null)
+         return Result<TransferDto>.Failure(TransferErrors.CreditAccountNotFound);
 
       // 3) Validate reversal preconditions ------------------------------------
-      
       // Ensure that the requested account matches the original sender account.
       // Only the original sender side should be allowed to reference this transfer here.
-      if (originalTransfer.FromAccountId != accountId)
+      if (originalTransfer.DebitAccountId != accountId)
          return Result<TransferDto>.Failure(TransferErrors.FromAccountIdMismatch);
 
       // Use the injected clock for deterministic and testable timestamps.
@@ -62,7 +60,7 @@ public sealed class TransferUcReverse(
       // 4) Execute reversal bookings ------------------------------------------
       
       // Post the debit on the account that originally received the money.
-      var resultDebit = fromAccount.PostDebit(
+      var resultDebit = debitAccount.PostDebit(
          amountVo: originalTransfer.AmountVo,
          purpose: purpose,
          bookedAt: bookedAt
@@ -72,7 +70,7 @@ public sealed class TransferUcReverse(
       var debitTransaction = resultDebit.Value!;
 
       // Post the credit on the account that originally sent the money.
-      var resultCredit = toAccount.PostCredit(
+      var resultCredit = creditAccount.PostCredit(
          amountVo: originalTransfer.AmountVo,
          purpose: purpose,
          bookedAt: bookedAt
@@ -82,11 +80,12 @@ public sealed class TransferUcReverse(
       var creditTransaction = resultCredit.Value!;
 
       // 5) Create and link reversal transfer ----------------------------------
-      
       // Create the reversal transfer based on the original transfer.
       var reversalResult = Transfer.CreateReversalFromOriginal(
          originalTransfer: originalTransfer,
          reversalPurpose: $"Reversal tranfer for: {purpose}",
+         debitAccountId: debitAccount.Id,
+         creditAccountIbanVo: creditAccount.IbanVo,
          reversalDebitTransactionId: debitTransaction.Id,
          reversalCreditTransactionId: creditTransaction.Id,
          bookedAt: bookedAt
@@ -101,7 +100,7 @@ public sealed class TransferUcReverse(
       creditTransaction.AttachTransfer(reversalTransfer.Id);
 
       // Register the transfer on the sender account aggregate.
-      fromAccount.AddTransfer(
+      debitAccount.AddTransfer(
          transfer: reversalTransfer,
          updatedAt: bookedAt
       );

@@ -27,7 +27,7 @@ public sealed class TransferRepositoryIntT : TestBaseIntegration {
 
       var transfer = transfers[0]; // Customer1
       var transferId = transfer.Id;
-      var accountId = transfer.FromAccountId;
+      var accountId = transfer.DebitAccountId;
       
       // Act
       var actual = await repository.FindByIdAsync(accountId, transferId, ct);
@@ -35,8 +35,8 @@ public sealed class TransferRepositoryIntT : TestBaseIntegration {
       // Assert
       NotNull(actual);
       Equal(transfer.Id, actual.Id);
-      Equal(transfer.FromAccountId, actual.FromAccountId);
-      Equal(transfer.ToAccountId, actual.ToAccountId);
+      Equal(transfer.DebitAccountId, actual.DebitAccountId);
+      Equal(transfer.CreditAccountIbanVo, actual.CreditAccountIbanVo);
       Equal(transfer.AmountVo, actual.AmountVo);
       Equal(transfer.Purpose, actual.Purpose);
       

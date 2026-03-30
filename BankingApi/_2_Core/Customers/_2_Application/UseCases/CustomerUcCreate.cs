@@ -23,9 +23,6 @@ internal sealed class CustomerUcCreate(
       CustomerCreateDto customerCreateDto,
       CancellationToken ct = default
    ) {
-      // subject required -> Fake
-      var subject = Guid.NewGuid().ToString();
-      
       // create email value object (domain logic inside)
       var resultDtoEmail = EmailVo.Create(customerCreateDto.Email);
       if (resultDtoEmail.IsFailure)
@@ -43,7 +40,7 @@ internal sealed class CustomerUcCreate(
          lastname: customerCreateDto.Lastname,  
          companyName: customerCreateDto.CompanyName, 
          emailVo: emailDtoVo,
-         subject: subject, 
+         subject: customerCreateDto.Subject, 
          createdAt: clock.UtcNow,
          id: customerCreateDto.Id.ToString(),
          addressVo: customerCreateDto.AddressDto.ToAddressVo()

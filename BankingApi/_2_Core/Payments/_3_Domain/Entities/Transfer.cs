@@ -9,11 +9,11 @@ namespace BankingApi._2_Core.Payments._3_Domain.Entities;
 public sealed class Transfer : AggregateRoot {
    
    //--- Properties ------------------------------------------------------------
-   // sender account
-   public Guid FromAccountId { get; private set; }
+   // debit account (Lastschrift)
+   public Guid DebitAccountId { get; private set; }
 
-   // receiver account
-   public Guid ToAccountId { get; private set; }
+   // credit account (Gutschrift)
+   public IbanVo CreditAccountIbanVo { get; private set; } = default!;
    
    // purpose and booked amount
    public MoneyVo AmountVo { get; private set; } = default!;
@@ -40,8 +40,8 @@ public sealed class Transfer : AggregateRoot {
    // Domain ctor
    private Transfer(
       Guid id,
-      Guid fromAccountId,
-      Guid toAccountId,
+      Guid debitAccountId,
+      IbanVo creditAccountIbanVo,
       string purpose,
       MoneyVo amountVo,
       Guid debitTransactionId,
@@ -49,8 +49,8 @@ public sealed class Transfer : AggregateRoot {
       DateTimeOffset bookedAt
    ) : base() {
       Id = id;
-      FromAccountId = fromAccountId;
-      ToAccountId = toAccountId;
+      DebitAccountId = debitAccountId;
+      CreditAccountIbanVo = creditAccountIbanVo;
       AmountVo = amountVo;
       Purpose = purpose;
       DebitTransactionId = debitTransactionId;
@@ -63,8 +63,8 @@ public sealed class Transfer : AggregateRoot {
 
    //--- Static Factories ------------------------------------------------------
    public static Result<Transfer> CreateBooked(
-      Guid fromAccountId,
-      Guid toAccountId,
+      Guid debitAccountId,
+      IbanVo creditAccountIbanVo,
       string purpose,
       MoneyVo amountVo,
       Guid debitTransactionId,
@@ -72,21 +72,14 @@ public sealed class Transfer : AggregateRoot {
       DateTimeOffset bookedAt,
       string? id = null
    ) {
-      if (fromAccountId == Guid.Empty)
-         return Result<Transfer>.Failure(TransferErrors.FromAccountNotFound);
-
-      if (toAccountId == Guid.Empty)
-         return Result<Transfer>.Failure(TransferErrors.ToAccountNotFound);
-
-      if (fromAccountId == toAccountId)
-         return Result<Transfer>.Failure(TransferErrors.SameAccountNotAllowed);
-
+      if (debitAccountId == Guid.Empty)
+         return Result<Transfer>.Failure(TransferErrors.DebitAccountNotFound);
+      
       if (debitTransactionId == Guid.Empty || creditTransactionId == Guid.Empty)
          return Result<Transfer>.Failure(TransferErrors.InvalidTransactionReference);
 
       if (amountVo.Amount <= 0)
          return Result<Transfer>.Failure(TransferErrors.InvalidAmount);
-
       
       var idResult = Resolve(id, TransferErrors.InvalidId);
       if (idResult.IsFailure)
@@ -95,8 +88,8 @@ public sealed class Transfer : AggregateRoot {
       
       var transfer = new Transfer(
          id: transferId,
-         fromAccountId: fromAccountId,
-         toAccountId: toAccountId,
+         debitAccountId: debitAccountId,
+         creditAccountIbanVo: creditAccountIbanVo,
          purpose: purpose,
          amountVo: amountVo,
          debitTransactionId: debitTransactionId,
@@ -110,6 +103,8 @@ public sealed class Transfer : AggregateRoot {
    public static Result<Transfer> CreateReversalFromOriginal(
       Transfer originalTransfer,
       string reversalPurpose,
+      Guid debitAccountId,
+      IbanVo creditAccountIbanVo,
       Guid reversalDebitTransactionId,
       Guid reversalCreditTransactionId,
       DateTimeOffset bookedAt,
@@ -132,11 +127,10 @@ public sealed class Transfer : AggregateRoot {
          return Result<Transfer>.Failure(idResult.Error);
       var transferId = idResult.Value;
       
-      
       var transfer = new Transfer(
          id: transferId,
-         fromAccountId: originalTransfer.ToAccountId,
-         toAccountId: originalTransfer.FromAccountId,
+         debitAccountId: debitAccountId,
+         creditAccountIbanVo: creditAccountIbanVo,
          purpose: reversalPurpose,
          amountVo: originalTransfer.AmountVo,
          debitTransactionId: reversalDebitTransactionId,

@@ -6,8 +6,8 @@ public static class TransferMappings {
 
    public static TransferDto ToTransferDto(this Transfer transfer) => new(
       Id: transfer.Id,
-      FromAccountId: transfer.FromAccountId,
-      ToAccountId: transfer.ToAccountId,
+      DebitAccountId: transfer.DebitAccountId,
+      CreditAccountIban: transfer.CreditAccountIbanVo.Value,
       Purpose: transfer.Purpose,
       Amount: transfer.AmountVo.Amount,
       Currency: (int) transfer.AmountVo.Currency,

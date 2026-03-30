@@ -71,7 +71,7 @@ public sealed class Seed(
    public string customer5Id = "50000000-0000-0000-0000-000000000000";
    public string customer6Id = "60000000-0000-0000-0000-000000000000";
 
-   public string customerRegister = "11111111-0000-0000-0000-000000000000";
+   public string customerRegister = "70000000-0000-0000-0000-000000000000";
 
    public Customer Customer1() => CreateCustomer(
       id: customer1Id,
@@ -135,11 +135,11 @@ public sealed class Seed(
 
    public Customer CustomerRegister() => CreateCustomer(
       id: customerRegister,
-      firstname: "Jane",
-      lastname: "Doe",
+      firstname: "Edgar",
+      lastname: "Engel",
       companyName: null,
-      email: "j.doe@mail.local",
-      subject: "11111111-a224-492b-bb8f-b4bac23d7c88",
+      email: "e.engel@freenet.de",
+      subject: "70000000-0007-0000-0000-000000000000",
       addressVo: AddressRegVo
    );
 
@@ -397,8 +397,8 @@ public sealed class Seed(
    
    public Transfer Transfer1() => CreateTransfer(
       id: transfer1Id,
-      fromAccountId: Guid.Parse(account1Id),
-      toAccountId: Guid.Parse(account6Id),
+      debitAccountId: Guid.Parse(account1Id),
+      creditAccountIban: Iban6,
       amount: 345.0m,
       purpose: "Erika an Chris1",
       debitTransactionId: Guid.Parse(transaction1dId),
@@ -407,8 +407,8 @@ public sealed class Seed(
 
    public Transfer Transfer2() => CreateTransfer(
       id: transfer2Id,
-      fromAccountId: Guid.Parse(account1Id),
-      toAccountId: Guid.Parse(account7Id),
+      debitAccountId: Guid.Parse(account1Id),
+      creditAccountIban: Iban7,
       amount: 231.0m,
       purpose: "Erika an Chris2",
       debitTransactionId: Guid.Parse(transaction2dId),
@@ -503,8 +503,8 @@ public sealed class Seed(
       var bookedAt = clock.UtcNow;
 
       SendMoney( // Transfer 1: Account 1 --> Account 7
-         fromAccount: accounts[0],
-         toAccount: accounts[5],
+         debitAccount: accounts[0],
+         creditAccount: accounts[5],
          amount: MoneyVo.Create(345.0m,Currency.EUR).GetValueOrThrow(),
          purpose: "Erika 1 an Chris1",
          bookedAt: bookedAt,
@@ -514,8 +514,8 @@ public sealed class Seed(
       );
 
       SendMoney( // Transfer 2: Account 1 --> Account 7
-         fromAccount: accounts[0],
-         toAccount: accounts[7],
+         debitAccount: accounts[0],
+         creditAccount: accounts[7],
          amount: MoneyVo.Create(231.0m,Currency.EUR).GetValueOrThrow(),
          purpose: "Erika 1 an Chris2",
          bookedAt: bookedAt,
@@ -526,8 +526,8 @@ public sealed class Seed(
 
       // Erika 2 an ...
       SendMoney( // Transfer 3: Account 2 --> Account 4
-         fromAccount: accounts[1],
-         toAccount: accounts[3],
+         debitAccount: accounts[1],
+         creditAccount: accounts[3],
          amount: MoneyVo.Create(289.0m, Currency.EUR).GetValueOrThrow(),
          purpose: "Erika 2 an Arne",
          bookedAt: bookedAt,
@@ -537,8 +537,8 @@ public sealed class Seed(
       );
 
       SendMoney( // Transfer 4: Account 2 --> Account 5
-         fromAccount: accounts[1],
-         toAccount: accounts[4],
+         debitAccount: accounts[1],
+         creditAccount: accounts[4],
          amount: MoneyVo.Create(125.0m, Currency.EUR).GetValueOrThrow(),
          purpose: "Erika 2 an Benno",
          bookedAt: bookedAt,
@@ -549,8 +549,8 @@ public sealed class Seed(
 
       // Max ... 
       SendMoney( // Transfer 5: Account 3 --> Account 4
-         fromAccount: accounts[2],
-         toAccount: accounts[3],
+         debitAccount: accounts[2],
+         creditAccount: accounts[3],
          amount: MoneyVo.Create(167.0m,  Currency.EUR).GetValueOrThrow(),
          purpose: "Max an Arne",
          bookedAt: bookedAt,
@@ -560,8 +560,8 @@ public sealed class Seed(
       );
 
       SendMoney( // Transfer 6: Account 3 --> Account 5
-         fromAccount: accounts[2],
-         toAccount: accounts[4],
+         debitAccount: accounts[2],
+         creditAccount: accounts[4],
          amount: MoneyVo.Create(167.0m, Currency.EUR).GetValueOrThrow(),
          purpose: "Max an Benno",
          bookedAt: bookedAt,
@@ -571,8 +571,8 @@ public sealed class Seed(
       );
 
       SendMoney( // Transfer 7: Account 3 --> Account 5
-         fromAccount: accounts[2],
-         toAccount: accounts[4],
+         debitAccount: accounts[2],
+         creditAccount: accounts[4],
          amount: MoneyVo.Create(312.0m, Currency.EUR).GetValueOrThrow(),
          purpose: "Max an Dana",
          bookedAt: bookedAt,
@@ -583,8 +583,8 @@ public sealed class Seed(
       
       // Arne ... 
       SendMoney( // Transfer 8: Account 4 --> Account 3
-         fromAccount: accounts[3],
-         toAccount: accounts[2],
+         debitAccount: accounts[3],
+         creditAccount: accounts[2],
          amount: MoneyVo.Create(278.0m, Currency.EUR).GetValueOrThrow(),
          purpose: "Arne an Max",
          bookedAt: bookedAt,
@@ -594,8 +594,8 @@ public sealed class Seed(
       );
 
       SendMoney( // Transfer 9: Account 4 --> Account 6
-         fromAccount: accounts[3],
-         toAccount: accounts[5],
+         debitAccount: accounts[3],
+         creditAccount: accounts[5],
          amount: MoneyVo.Create(356.0m, Currency.EUR).GetValueOrThrow(),
          purpose: "Arne an Chris 2",
          bookedAt: bookedAt,
@@ -606,8 +606,8 @@ public sealed class Seed(
 
       // Benno ... 
       SendMoney( // Transfer 10: Account 5 --> Account 1
-         fromAccount: accounts[4],
-         toAccount: accounts[0],
+         debitAccount: accounts[4],
+         creditAccount: accounts[0],
          amount: MoneyVo.Create(412.0m, Currency.EUR).GetValueOrThrow(),
          purpose: "Benno an Erika 1",
          bookedAt: bookedAt,
@@ -617,8 +617,8 @@ public sealed class Seed(
       );
 
       SendMoney( // Transfer 11: Account 5 --> Account 2
-         fromAccount: accounts[4],
-         toAccount: accounts[1],
+         debitAccount: accounts[4],
+         creditAccount: accounts[1],
          amount: MoneyVo.Create(89.0m, Currency.EUR).GetValueOrThrow(),
          purpose: "Benno an Erika 2",
          bookedAt: bookedAt,
@@ -631,8 +631,8 @@ public sealed class Seed(
    }
 
    private void SendMoney(
-      Account fromAccount,
-      Account toAccount,
+      Account debitAccount,
+      Account creditAccount,
       MoneyVo amount,
       
       string purpose,
@@ -641,11 +641,11 @@ public sealed class Seed(
       string transactionCreditId,
       string transferId
    ) {
-      var transactionDebit = fromAccount.PostDebit(amount, purpose, bookedAt, transactionDebitId).GetValueOrThrow();
-      var transactionCredit = toAccount.PostCredit(amount, purpose, bookedAt, transactionCreditId).GetValueOrThrow();
+      var transactionDebit = debitAccount.PostDebit(amount, purpose, bookedAt, transactionDebitId).GetValueOrThrow();
+      var transactionCredit = creditAccount.PostCredit(amount, purpose, bookedAt, transactionCreditId).GetValueOrThrow();
       var transfer = Transfer.CreateBooked(
-         fromAccountId: fromAccount.Id,
-         toAccountId: toAccount.Id,
+         debitAccountId: debitAccount.Id,
+         creditAccountIbanVo: creditAccount.IbanVo,
          amountVo: amount,
          purpose: purpose,
          debitTransactionId: transactionDebit.Id,
@@ -653,7 +653,7 @@ public sealed class Seed(
          bookedAt: bookedAt,
          id: transferId
       ).GetValueOrThrow();
-      fromAccount.AddTransfer(transfer, bookedAt).GetValueOrThrow();
+      debitAccount.AddTransfer(transfer, bookedAt).GetValueOrThrow();
 
       _transfers.Add(transfer);
    }
@@ -765,18 +765,21 @@ public sealed class Seed(
 
    private Transfer CreateTransfer(
       string id,
-      Guid fromAccountId,
-      Guid toAccountId,
+      Guid debitAccountId,
+      string creditAccountIban,
       string purpose,
       decimal amount,
       Guid debitTransactionId,
       Guid creditTransactionId
    ) {
+      
+      var creditAccountIbanVo = IbanVo.Create(creditAccountIban).GetValueOrThrow();
       var amountVo = MoneyVo.Create(amount, Currency.EUR).GetValueOrThrow();
 
+      
       var result = Transfer.CreateBooked(
-         fromAccountId: fromAccountId,
-         toAccountId: toAccountId,
+         debitAccountId: debitAccountId,
+         creditAccountIbanVo: creditAccountIbanVo,
          purpose: purpose,
          amountVo: amountVo,
          debitTransactionId: debitTransactionId,

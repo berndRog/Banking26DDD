@@ -10,9 +10,10 @@ public static class CustomerMappings {
       Firstname:   customer.Firstname,
       Lastname:    customer.Lastname,
       CompanyName: customer.CompanyName,
-      StatusInt: (int) customer.Status,
-      Email: customer.EmailVo.Value,
-      AddressDto: customer.AddressVo.ToAddressDto(),
+      StatusInt:  (int) customer.Status,
+      Email:       customer.EmailVo.Value,
+      Subject:     customer.Subject,
+      AddressDto:  customer.AddressVo.ToAddressDto(),
       AccountId: null,
       Iban: null,
       Balance: null

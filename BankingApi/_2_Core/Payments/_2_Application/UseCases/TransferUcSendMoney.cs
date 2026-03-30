@@ -36,29 +36,29 @@ public sealed class TransferUcSendMoney(
       var amountVo = resultVo.Value;
 
       // 2) Load required domain objects ---------------------------------------
-      // Load the sender account together with its beneficiaries.
+      // Load the debit account together with its beneficiaries.
       // The selected beneficiary must belong to this sender account.
-      var fromAccount = await accountRepository.FindAccountByIdWithBeneficiariesAsync(
-         dto.FromAccountId,
+      var debitAccount = await accountRepository.FindAccountByIdWithBeneficiariesAsync(
+         dto.DebitAccountId,
          ct
       );
-      if (fromAccount is null)
-         return Result<TransferDto>.Failure(TransferErrors.FromAccountNotFound);
+      if (debitAccount is null)
+         return Result<TransferDto>.Failure(TransferErrors.DebitAccountNotFound);
 
       // Resolve the beneficiary from the sender account.
       // This ensures that money can only be sent to a registered recipient.
-      var resultBeneficiary = fromAccount.FindBeneficiary(dto.BeneficiaryId);
+      var resultBeneficiary = debitAccount.FindBeneficiary(dto.BeneficiaryId);
       if (resultBeneficiary.IsFailure)
          return Result<TransferDto>.Failure(resultBeneficiary.Error!);
       var beneficiary = resultBeneficiary.Value!;
 
-      // Resolve the receiver account via the beneficiary's IBAN.
-      var toAccount = await accountRepository.FindByIbanAsync(beneficiary.IbanVo, ct);
-      if (toAccount is null)
-         return Result<TransferDto>.Failure(TransferErrors.ToAccountNotFound);
+      // Resolve the credit account via the beneficiary's IBAN.
+      var creditAccount = await accountRepository.FindByIbanAsync(beneficiary.IbanVo, ct);
+      if (creditAccount is null)
+         return Result<TransferDto>.Failure(TransferErrors.CreditAccountNotFound);
 
       // Prevent transfers from an account to itself.
-      if (toAccount.Id == fromAccount.Id)
+      if (creditAccount.Id == debitAccount.Id)
          return Result<TransferDto>.Failure(TransferErrors.SameAccountNotAllowed);
 
       // Use the injected clock to avoid direct dependency on system time.
@@ -66,7 +66,7 @@ public sealed class TransferUcSendMoney(
 
       // 3) Execute domain logic -----------------------------------------------
       // Post the debit transaction on the sender account.
-      var resultDebit = fromAccount.PostDebit(
+      var resultDebit = debitAccount.PostDebit(
          amountVo: amountVo,
          purpose: dto.Purpose,
          bookedAt: bookedAt,
@@ -77,7 +77,7 @@ public sealed class TransferUcSendMoney(
       var debitTransaction = resultDebit.Value!;
 
       // Post the credit transaction on the receiver account.
-      var resultCredit = toAccount.PostCredit(
+      var resultCredit = creditAccount.PostCredit(
          amountVo: amountVo,
          purpose: dto.Purpose,
          bookedAt: bookedAt,
@@ -90,8 +90,8 @@ public sealed class TransferUcSendMoney(
       // Create the transfer entity that represents the complete business operation.
       // It links sender account, receiver account, debit booking, and credit booking.
       var transferResult = Transfer.CreateBooked(
-         fromAccountId: fromAccount.Id,
-         toAccountId: toAccount.Id,
+         debitAccountId: debitAccount.Id,
+         creditAccountIbanVo: creditAccount.IbanVo,
          amountVo: amountVo,
          purpose: dto.Purpose,
          debitTransactionId: debitTransaction.Id,
@@ -109,7 +109,7 @@ public sealed class TransferUcSendMoney(
       creditTransaction.AttachTransfer(transfer.Id);
 
       // Register the transfer on the sender account aggregate.
-      fromAccount.AddTransfer(
+      debitAccount.AddTransfer(
          transfer: transfer,
          updatedAt: bookedAt
       );
@@ -124,10 +124,10 @@ public sealed class TransferUcSendMoney(
       // 5) Log and return result ----------------------------------------------
       // Write a log entry for diagnostics and traceability.
       logger.LogInformation(
-         "Transfer booked ({TransferId}) from ({From}) to ({To}) amount ({Amount})",
+         "Transfer booked ({TransferId}) Debit:({debit}) Credit:({credit}) amount ({Amount})",
          transfer.Id.To8(),
-         fromAccount.Id.To8(),
-         toAccount.Id.To8(),
+         debitAccount.Id.To8(),
+         creditAccount.Id.To8(),
          amount
       );
 

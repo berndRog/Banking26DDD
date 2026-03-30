@@ -13,7 +13,7 @@ public static class EmployeeMappings {
       Phone: employee.PhoneVo.Value,
       PersonnelNumber: employee!.PersonnelNumber,
       IsActive: employee.IsActive,
-      AdminRights: (int) employee.AdminRights
+      AdminRightsInt: (int) employee.AdminRights
    );
    
    public static EmployeeProvisionDto ToEmployeeProvisionDto(this Employee employee) => new(
@@ -25,6 +25,6 @@ public static class EmployeeMappings {
       Id: employee.Id, 
       PersonnelNumber: employee!.PersonnelNumber,
       IsActive: employee.IsActive,
-      AdminRights: (int) employee.AdminRights
+      AdminRightsInt: (int) employee.AdminRights
    );
 }

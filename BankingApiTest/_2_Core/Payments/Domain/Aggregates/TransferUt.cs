@@ -30,8 +30,8 @@ public sealed class TransferUt {
 
       // Act
       var result = Transfer.CreateBooked(
-         fromAccountId: _transfer.FromAccountId,
-         toAccountId: _transfer.ToAccountId, 
+         debitAccountId: _transfer.DebitAccountId,
+         creditAccountIbanVo: _transfer.CreditAccountIbanVo, 
          purpose: _transfer.Purpose,
          amountVo: _transfer.AmountVo,
          debitTransactionId: _transfer.DebitTransactionId,
@@ -47,8 +47,8 @@ public sealed class TransferUt {
       var actual = result.Value!;
       IsType<Transfer>(actual);
       Equal(_transfer.Id, actual.Id);
-      Equal(_transfer.FromAccountId, actual.FromAccountId);
-      Equal(_transfer.ToAccountId, actual.ToAccountId);
+      Equal(_transfer.DebitAccountId, actual.DebitAccountId);
+      Equal(_transfer.CreditAccountIbanVo, actual.CreditAccountIbanVo);
       Equal(_transfer.Purpose, actual.Purpose);
       Equal(_transfer.AmountVo, actual.AmountVo);
       Equal(_transfer.DebitTransactionId, actual.DebitTransactionId);
@@ -61,8 +61,8 @@ public sealed class TransferUt {
       // Arrange
       // Act
       var result = Transfer.CreateBooked(
-         fromAccountId: _transfer.FromAccountId,
-         toAccountId: _transfer.ToAccountId, 
+         debitAccountId: _transfer.DebitAccountId,
+         creditAccountIbanVo: _transfer.CreditAccountIbanVo, 
          purpose: _transfer.Purpose,
          amountVo: _transfer.AmountVo,
          debitTransactionId: _transfer.DebitTransactionId,
@@ -79,7 +79,7 @@ public sealed class TransferUt {
       IsType<Transfer>(actual);
       NotEqual(Guid.Empty, actual.Id);
       NotEqual(Guid.Parse(_id), actual.Id);
-      Equal(_fromAccount.Id, actual.FromAccountId);
+      Equal(_fromAccount.Id, actual.DebitAccountId);
       Equal(_transfer.AmountVo, actual.AmountVo);
       Equal(_transfer.Purpose, actual.Purpose);
       Equal(TransferStatus.Booked, actual.Status);
@@ -90,8 +90,8 @@ public sealed class TransferUt {
       // Arrange
       // Act
       var result = Transfer.CreateBooked(
-         fromAccountId: _transfer.FromAccountId,
-         toAccountId: _transfer.ToAccountId, 
+         debitAccountId: _transfer.DebitAccountId,
+         creditAccountIbanVo: _transfer.CreditAccountIbanVo, 
          purpose: _transfer.Purpose,
          amountVo: _transfer.AmountVo,
          debitTransactionId: _transfer.DebitTransactionId,
@@ -109,8 +109,8 @@ public sealed class TransferUt {
    public void Create_is_deterministic_for_same_input_id() {
       // Act
       var result1 = Transfer.CreateBooked(
-         fromAccountId: _transfer.FromAccountId,
-         toAccountId: _transfer.ToAccountId, 
+         debitAccountId: _transfer.DebitAccountId,
+         creditAccountIbanVo: _transfer.CreditAccountIbanVo, 
          purpose: _transfer.Purpose,
          amountVo: _transfer.AmountVo,
          debitTransactionId: _transfer.DebitTransactionId,
@@ -119,8 +119,8 @@ public sealed class TransferUt {
          id: _transfer.Id.ToString()
       );
       var result2 = Transfer.CreateBooked(
-         fromAccountId: _transfer.FromAccountId,
-         toAccountId: _transfer.ToAccountId, 
+         debitAccountId: _transfer.DebitAccountId,
+         creditAccountIbanVo: _transfer.CreditAccountIbanVo, 
          purpose: _transfer.Purpose,
          amountVo: _transfer.AmountVo,
          debitTransactionId: _transfer.DebitTransactionId,
@@ -135,7 +135,7 @@ public sealed class TransferUt {
       True(result1.IsSuccess);
       True(result2.IsSuccess);
       Equal(transfer1.Id, transfer2.Id);
-      Equal(transfer1.FromAccountId, transfer2.FromAccountId);
+      Equal(transfer1.DebitAccountId, transfer2.DebitAccountId);
       Equal(transfer1.AmountVo, transfer2.AmountVo);
       Equal(transfer1.Purpose, transfer2.Purpose);
       Equal(transfer1.Status, transfer2.Status);

@@ -8,5 +8,5 @@ public sealed record EmployeeDto(
    string Phone,
    string PersonnelNumber,
    bool IsActive,
-   int AdminRights
+   int AdminRightsInt
 );

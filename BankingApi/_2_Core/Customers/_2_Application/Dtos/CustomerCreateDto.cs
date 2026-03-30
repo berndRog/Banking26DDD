@@ -9,6 +9,7 @@ public sealed record CustomerCreateDto(
    string? CompanyName,
    int StatusInt,            // "Pending = 0 | Active = 1 | Rejected ? 2 | Deactivated = 3"
    string Email,
+   string Subject,
    AddressDto AddressDto,
    string? AccountId,
    string? Iban,

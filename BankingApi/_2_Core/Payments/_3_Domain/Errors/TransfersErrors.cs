@@ -33,15 +33,15 @@ public static class TransferErrors {
       Title: "Transfer: Recipient IBAN Required",
       Message: "The recipient IBAN is required.");
 
-   public static readonly DomainErrors FromAccountNotFound = new(
+   public static readonly DomainErrors DebitAccountNotFound = new(
       ErrorCode.NotFound,
-      Title: "Transfer: Sender Account Not Found",
-      Message: "The sender account for the given identifier identifier not found.");
+      Title: "Transfer: Debit Account Not Found",
+      Message: "The debit account (sender) for the given identifier was not found.");
 
-   public static readonly DomainErrors ToAccountNotFound = new(
+   public static readonly DomainErrors CreditAccountNotFound = new(
       ErrorCode.NotFound,
-      Title: "Transfer: Receiver Account Not Found",
-      Message: "The receiver account for the given identifier was not found.");
+      Title: "Transfer: Credit Account Not Found",
+      Message: "The credit account (receiver) for the given identifier was not found.");
 
    public static readonly DomainErrors SameAccountNotAllowed = new(
       ErrorCode.Conflict,

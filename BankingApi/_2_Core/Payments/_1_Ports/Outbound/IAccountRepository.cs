@@ -75,8 +75,21 @@ public interface IAccountRepository {
    );
 
    // Load a transaction by its identifier
+   Task<Account?> FindAccountByIbanWithTransactionsAsync(
+      IbanVo IbanVo,
+      CancellationToken ct = default
+   );
+   
+   // Load a transaction by its identifier
    Task<Account?> FindAccountByIdWithTransactionByIdAsync(
-      Guid AccountId,
+      Guid accountId,
+      Guid transactionId,
+      CancellationToken ct = default
+   );
+   
+   // Load a transaction by its iban and transaction id
+   Task<Account?> FindAccountByIbanWithTransactionByIdAsync(
+      IbanVo accountIbanVo,
       Guid transactionId,
       CancellationToken ct = default
    );

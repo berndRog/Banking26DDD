@@ -10,9 +10,6 @@ namespace BankingApi._2_Core.Payments._3_Domain.Entities;
 public sealed class Transaction : Entity {
 
    //--- Properties ------------------------------------------------------------
-   // owning account
-   public Guid AccountId { get; private set; }
-
    // debit or credit from perspective of this account
    public TransactionType Type { get; private set; }
 
@@ -28,7 +25,11 @@ public sealed class Transaction : Entity {
    // booking timestamp
    public DateTimeOffset BookedAt { get; private set; }
    
-   //
+   
+   // Transaction --> Account  [?] : [1]  (owning account)
+   public Guid AccountId { get; private set; }
+
+   // Transaction --> Tranfer  [?] : [0..1]
    public Guid? TransferId { get; private set; }
    
 

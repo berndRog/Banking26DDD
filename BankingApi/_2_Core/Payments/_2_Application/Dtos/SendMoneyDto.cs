@@ -2,8 +2,8 @@ namespace BankingApi._2_Core.Payments._2_Application.Dtos;
 
 public sealed record SendMoneyDto(
    Guid Id,
-   Guid FromAccountId,
-   Guid BeneficiaryId,
+   Guid DebitAccountId,
+   Guid BeneficiaryId,  // Credit Iban -> CreditAccountI
    string Purpose,
    decimal Amount,
    int Currency,

@@ -15,7 +15,7 @@ internal sealed class TransferRepositoryEf(
       Guid transferId,
       CancellationToken ct = default
    ) => await transferDbContext.Transfers
-         .Where(t => t.FromAccountId == accountId && t.Id == transferId )   
+         .Where(t => t.DebitAccountId == accountId && t.Id == transferId )   
          .SingleOrDefaultAsync(ct);
 
    public void Add(Transfer transfer) 

@@ -7,21 +7,20 @@ using Microsoft.Extensions.DependencyInjection;
 namespace BankingApiTest._2_Core.Customers.Application;
 
 public sealed class CustomerUcCreateProvisionIntT : TestBaseIntegration {
-
-   private TestSeed _seed = new();
    
    [Fact]
    public async Task CustomerUcCreateProvison_ok() {
-      var ct = TestContext.Current.CancellationToken;
       
       using var scope = Root.CreateDefaultScope();
+      var ct = TestContext.Current.CancellationToken;
       var customerRepository = scope.ServiceProvider.GetRequiredService<ICustomerRepository>();
       var unitOfWork = scope.ServiceProvider.GetRequiredService<IUnitOfWork>();
       var identity = scope.ServiceProvider.GetRequiredService<IIdentityGateway>();
+      var seed = scope.ServiceProvider.GetRequiredService<TestSeed>();
       var sut = scope.ServiceProvider.GetRequiredService<CustomerUcCreateProvision>();
       
       // Test Onwer
-      var customer = _seed.CustomerRegister();
+      var customer = seed.CustomerRegister();
       var customerDto = customer.ToCustomerDto();
       
       // Act
@@ -45,11 +44,14 @@ public sealed class CustomerUcCreateProvisionIntT : TestBaseIntegration {
    [Fact]
    public async Task CustomerUcCreateProvision_second_call_is_idempotent() {
       var ct = TestContext.Current.CancellationToken;
-
       using var scope = Root.CreateDefaultScope();
+      var customerRepository = scope.ServiceProvider.GetRequiredService<ICustomerRepository>();
+      var unitOfWork = scope.ServiceProvider.GetRequiredService<IUnitOfWork>();
+      var identity = scope.ServiceProvider.GetRequiredService<IIdentityGateway>();
+      var seed = scope.ServiceProvider.GetRequiredService<TestSeed>();
       var sut = scope.ServiceProvider.GetRequiredService<CustomerUcCreateProvision>();
 
-      var customerDto = _seed.CustomerRegister().ToCustomerDto();
+      var customerDto = seed.CustomerRegister().ToCustomerDto();
 
       var first = await sut.ExecuteAsync(customerDto, ct);
       var second = await sut.ExecuteAsync(customerDto, ct);

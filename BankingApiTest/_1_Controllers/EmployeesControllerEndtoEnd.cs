@@ -3,6 +3,7 @@ using System.Net.Http.Json;
 using BankingApi._2_Core.BuildingBlocks._3_Domain.ValueObjects;
 using BankingApi._2_Core.Customers._2_Application.Dtos;
 using BankingApi._2_Core.Employees._2_Application.Dtos;
+using BankingApi._2_Core.Employees._2_Application.Mappings;
 using BankingApi._3_Infrastructure._2_Persistence.Database;
 using BankingApiTest.TestController;
 using BankingApiTest.TestInfrastructure;
@@ -29,7 +30,7 @@ public sealed class EmployeesControllerEndToEnd : TestBaseEndToEnd {
          Phone: "+49 (0)1234 / 5678-9123",
          PersonnelNumber: "EMP-12345",
          IsActive: true,
-         AdminRights: 511
+         AdminRightsInt: 511
       );
       var expectedEmail = EmailVo.Create(requestDto.Email).Value;
       var expectdPhone = PhoneVo.Create(requestDto.Phone).Value; 
@@ -67,16 +68,18 @@ public sealed class EmployeesControllerEndToEnd : TestBaseEndToEnd {
             .SingleOrDefaultAsync(ct);
          
          NotNull(employee);
+         var employeeDto = employee.ToEmployeeDto();
 
          // Domain-level checks
-         Equal(requestDto.Firstname, employee.Firstname);
-         Equal(requestDto.Lastname, employee.Lastname);
-         Equal(requestDto.Email, employee.EmailVo.Value);
-         Equal(requestDto.Phone, employee.PhoneVo.Value);
          Equal(subject, employee.Subject);
-         Equal(requestDto.PersonnelNumber, employee.PersonnelNumber);
-         Equal(requestDto.IsActive, employee.IsActive);
-         Equal(requestDto.AdminRights, (int) employee.AdminRights);
+         
+         Equal(requestDto.Firstname, employeeDto.Firstname);
+         Equal(requestDto.Lastname, employeeDto.Lastname);
+         Equal(requestDto.Email, employeeDto.Email);
+         Equal(requestDto.Phone, employeeDto.Phone);
+         Equal(requestDto.PersonnelNumber, employeeDto.PersonnelNumber);
+         Equal(requestDto.IsActive, employeeDto.IsActive);
+         Equal(requestDto.AdminRightsInt, employeeDto.AdminRightsInt);
       });
    }
    

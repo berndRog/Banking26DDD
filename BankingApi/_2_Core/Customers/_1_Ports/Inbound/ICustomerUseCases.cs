@@ -33,8 +33,9 @@ public interface ICustomerUseCases {
    // and create the first account during activation
    Task<Result> ActivateAsync(
       Guid customerId,
-      string? accountIdString,
-      string? ibanString,
+      string? accountId,
+      string? iban,
+      decimal? balance,
       CancellationToken ct = default
    );
 

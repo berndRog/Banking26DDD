@@ -25,7 +25,7 @@ internal sealed class TransferReadModelEf(
       // We use AsNoTracking for read-only performance and project directly to a DTO.      
       var transferDto = await transferDbContext.Transfers
          .AsNoTracking()
-         .Where(t => t.FromAccountId == accountId && t.Id == transferId)
+         .Where(t => t.DebitAccountId == accountId && t.Id == transferId)
          .Select(t => t.ToTransferDto())
          .SingleOrDefaultAsync(ct);
       
@@ -42,7 +42,7 @@ internal sealed class TransferReadModelEf(
    ) {
       var transferDtos = await transferDbContext.Transfers
          .AsNoTracking()
-         .Where(t => t.FromAccountId == accountId)
+         .Where(t => t.DebitAccountId == accountId)
          .Select(t => t.ToTransferDto())
          .ToListAsync(ct);
       return Result<IReadOnlyList<TransferDto>>.Success(transferDtos.AsReadOnly());

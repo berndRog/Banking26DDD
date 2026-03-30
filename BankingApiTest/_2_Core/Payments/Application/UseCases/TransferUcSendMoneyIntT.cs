@@ -3,12 +3,12 @@ using BankingApi._2_Core.Customers._1_Ports.Outbound;
 using BankingApi._2_Core.Payments._1_Ports.Outbound;
 using BankingApi._2_Core.Payments._2_Application.Dtos;
 using BankingApi._2_Core.Payments._2_Application.UseCases;
+using BankingApi._2_Core.Payments._3_Domain.ValueObjects;
 using BankingApiTest.TestInfrastructure;
 using Microsoft.Extensions.DependencyInjection;
 namespace BankingApiTest._2_Core.Core.Application.UseCases;
 
 public sealed class TransferUcSendMoneyIntT : TestBaseIntegration {
-
    private readonly TestSeed _seed = new();
 
    [Fact]
@@ -25,15 +25,17 @@ public sealed class TransferUcSendMoneyIntT : TestBaseIntegration {
       var customer = _seed.Customer1();
       // fill datbase with customer
       customerRepository.Add(customer);
-      
-      var fromAccount = _seed.Account1();
+
+      var debitAccount = _seed.Account1();
       var beneficiary = _seed.Beneficiary1();
-      fromAccount.AddBeneficiary(beneficiary, _seed.Clock.UtcNow);
-      accountRepository.Add(fromAccount);
-      
-      accountRepository.AddRange([_seed.Account2(), _seed.Account3(), 
-         _seed.Account4(), _seed.Account5(), _seed.Account6()]);
-      
+      debitAccount.AddBeneficiary(beneficiary, _seed.Clock.UtcNow);
+      accountRepository.Add(debitAccount);
+
+      accountRepository.AddRange([
+         _seed.Account2(), _seed.Account3(),
+         _seed.Account4(), _seed.Account5(), _seed.Account6()
+      ]);
+
       await unitOfWork.SaveAllChangesAsync("Seeding data", ct);
       unitOfWork.ClearChangeTracker();
 
@@ -41,7 +43,7 @@ public sealed class TransferUcSendMoneyIntT : TestBaseIntegration {
 
       var sendMoneyDto = new SendMoneyDto(
          Id: transfer.Id,
-         FromAccountId: fromAccount.Id,
+         DebitAccountId: debitAccount.Id,
          BeneficiaryId: beneficiary.Id,
          Purpose: transfer.Purpose,
          Amount: transfer.AmountVo.Amount,
@@ -49,29 +51,47 @@ public sealed class TransferUcSendMoneyIntT : TestBaseIntegration {
          debitId: transfer.DebitTransactionId.ToString(),
          creditId: transfer.CreditTransactionId.ToString()
       );
-      
+
       // Act
       var result = await sut.ExecuteAsync(
          sendMoneyDto,
          ct: ct
       );
       unitOfWork.ClearChangeTracker();
-      
+
       // Assert
       True(result.IsSuccess);
       var transferDto = result.Value;
-      var toAccountId = transferDto.ToAccountId;
+      
+      var debitAccountId = transferDto.DebitAccountId;
       var debitId = transferDto.DebitTransactionId;
+      var creditAccountIbanVo = IbanVo.Create(transferDto.CreditAccountIban).GetValueOrThrow();
       var creditId = transferDto.CreditTransactionId;
 
-      var actualTransfer = await transferRepository.FindByIdAsync(fromAccount.Id, transfer.Id, ct);
+      var actualTransfer = await transferRepository.FindByIdAsync(
+         accountId: debitAccount.Id, 
+         transferId: transfer.Id, 
+         ct: ct);
 
-      var actualFromAccount =
-         await accountRepository.FindAccountByIdWithTransactionByIdAsync(fromAccount.Id, debitId, ct);
-      var actualToAccount =
-         await accountRepository.FindAccountByIdWithTransactionByIdAsync(toAccountId, creditId, ct);
-       
-
+      var actualCreditAccount = await accountRepository.FindAccountByIdWithTransactionByIdAsync(
+            accountId: debitAccountId, 
+            transactionId: debitId, 
+            ct: ct);
+      var actualDebitAccount = await accountRepository.FindAccountByIbanWithTransactionByIdAsync(
+            accountIbanVo: creditAccountIbanVo, 
+            transactionId: creditId,   
+            ct: ct);
+      NotNull(actualTransfer);
+      NotNull(actualCreditAccount);
+      NotNull(actualDebitAccount);
+      Equal(transfer.Id, actualTransfer!.Id);
+      Equal(transfer.DebitAccountId, actualTransfer.DebitAccountId);
+      Equal(transfer.CreditAccountIbanVo, actualTransfer.CreditAccountIbanVo);
+      Equal(transfer.Purpose, actualTransfer.Purpose);
+      Equal(transfer.AmountVo.Amount, actualTransfer.AmountVo.Amount);
+      Equal(transfer.AmountVo.Currency, actualTransfer.AmountVo.Currency);
+      Equal(transfer.DebitTransactionId, actualTransfer.DebitTransactionId);
+      Equal(transfer.CreditTransactionId, actualTransfer.CreditTransactionId);
       
       
    }

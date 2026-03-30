@@ -4,5 +4,5 @@ public sealed record EmployeeContractDto(
    Guid Id,
    string PersonnelNumber,
    bool IsActive,
-   int AdminRights
+   int AdminRightsInt
 );

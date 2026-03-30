@@ -14,10 +14,8 @@ public sealed class CustomerUcUpdateProfileIntT : TestBaseIntegration {
 
    [Fact]
    public async Task UpdateProfile_ok() {
-      var ct = TestContext.Current.CancellationToken;
-
       using var scope = Root.CreateDefaultScope();
-      var dbContext = scope.ServiceProvider.GetRequiredService<BankingDbContext>();
+      var ct = TestContext.Current.CancellationToken;
       var customerRepository = scope.ServiceProvider.GetRequiredService<ICustomerRepository>();
       var unitOfWork = scope.ServiceProvider.GetRequiredService<IUnitOfWork>();
       var identity = scope.ServiceProvider.GetRequiredService<IIdentityGateway>();
@@ -27,10 +25,11 @@ public sealed class CustomerUcUpdateProfileIntT : TestBaseIntegration {
       // Arrange
       var customer = _seed.CustomerRegister();
       var customerDto = customer.ToCustomerDto();
+      // create provision
       var result = await customerUcCreateProvision.ExecuteAsync(customerDto, ct);
       True(result.IsSuccess);
 
-      // Act
+      // Act, update profile
       var resultProfile = await sut.ExecuteAsync(customerDto, ct);
       unitOfWork.ClearChangeTracker();
 

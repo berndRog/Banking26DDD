@@ -8,22 +8,22 @@ using Microsoft.Extensions.DependencyInjection;
 namespace BankingApiTest._2_Core.Customers.Application;
 
 public sealed class CustomerUcCreateIntT : TestBaseIntegration {
-   private readonly TestSeed _seed = new();
    
    [Fact]
    public async Task Create_Customer_ok() {
-      var ct = TestContext.Current.CancellationToken;
       
       using var scope = Root.CreateDefaultScope();
+      var ct = TestContext.Current.CancellationToken;
       var customerRepository = scope.ServiceProvider.GetRequiredService<ICustomerRepository>();
       var accountRepository = scope.ServiceProvider.GetRequiredService<IAccountRepository>();
       var unitOfWork = scope.ServiceProvider.GetRequiredService<IUnitOfWork>();
+      var seed = scope.ServiceProvider.GetRequiredService<TestSeed>();
       var sut = scope.ServiceProvider.GetRequiredService<CustomerUcCreate>();
 
       // Arrange
-      var customer = _seed.CustomerRegister(); // with address
+      var customer = seed.CustomerRegister(); // with address
       var customerCreateDto = customer.ToCustomerCreateDto(); 
-      var account1 = _seed.Account1(); 
+      var account1 = seed.Account1(); 
      
       // Act
       customerCreateDto = customerCreateDto with {
@@ -51,6 +51,9 @@ public sealed class CustomerUcCreateIntT : TestBaseIntegration {
       var actualAccounts = await accountRepository.SelelctByCustomerIdAsync(customer.Id, ct);
       NotNull(actualAccounts);
       Single(actualAccounts);
-
+      var actualAccount = actualAccounts.First();
+      Equal(account1.Id,  actualAccount.Id); 
+      Equal(account1.IbanVo, actualAccount.IbanVo);
+      Equal(account1.BalanceVo, actualAccount.BalanceVo);
    }
 }

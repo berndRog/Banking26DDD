@@ -9,7 +9,6 @@ namespace BankingApi._2_Core.Employees._1_Ports.Outbound;
 public interface IEmployeeRepository {
 
    // Queries (0..1)
-   // --------------------------------------------------------------
    // Load an employee aggregate by identifier
    Task<Employee?> FindByIdAsync(
       Guid id,
@@ -35,17 +34,13 @@ public interface IEmployeeRepository {
    );
 
    // Queries (0..n)
-   // --------------------------------------------------------------
-   // Return all employees with administrative rights
    Task<IReadOnlyList<Employee>> SelectAdminsAsync(
       CancellationToken ct
    );
 
    // Commands
-   // --------------------------------------------------------------
-   // Add a new employee aggregate to the persistence context
-   // The entity becomes tracked by the ORM
    void Add(Employee employee);
+   void AddRange(IEnumerable<Employee> employees);
 }
 
 /* =====================================================================

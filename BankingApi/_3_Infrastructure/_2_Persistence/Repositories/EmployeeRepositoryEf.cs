@@ -36,12 +36,15 @@ internal sealed class EmployeeRepositoryEf(
    ) => await dbContext.Employees
       .FirstOrDefaultAsync(e => e.PersonnelNumber == personnelNumber, ct);
    
-   public async Task<IReadOnlyList<Employee>> SelectAdminsAsync(CancellationToken ct) =>
-      await dbContext.Employees
+   public async Task<IReadOnlyList<Employee>> SelectAdminsAsync(CancellationToken ct) 
+      => await dbContext.Employees
          .Where(e => e.AdminRights != AdminRights.None)
          .OrderBy(e => e.Lastname)
          .ToListAsync(ct);
 
-   public void Add(Employee employee) =>
-      dbContext.Employees.Add(employee);
+   public void Add(Employee employee) 
+      => dbContext.Employees.Add(employee);
+
+   public void AddRange(IEnumerable<Employee> employees) 
+      => dbContext.Employees.AddRange(employees);
 }

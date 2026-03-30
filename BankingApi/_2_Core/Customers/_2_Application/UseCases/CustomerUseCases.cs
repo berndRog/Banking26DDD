@@ -1,6 +1,5 @@
 using System.Runtime.CompilerServices;
 using BankingApi._2_Core.BuildingBlocks;
-using BankingApi._2_Core.BuildingBlocks._3_Domain;
 using BankingApi._2_Core.Customers._1_Ports.Inbound;
 using BankingApi._2_Core.Customers._2_Application.Dtos;
 using BankingApi._2_Modules.Customers._3_Domain.Enums;
@@ -39,10 +38,16 @@ internal class CustomerUseCases(
    
    public Task<Result> ActivateAsync(
       Guid customerId,
-      string? accountIdString,
-      string? ibanString,
+      string? accountId,
+      string? iban,
+      decimal? balance,
       CancellationToken ct
-   ) => activateUc.ExecuteAsync(customerId, accountIdString, ibanString, ct);
+   ) => activateUc.ExecuteAsync(
+      customerId: customerId,
+      accountId: accountId, 
+      iban: iban,
+      balance: balance,
+      ct: ct);
 
    public Task<Result> RejectAsync(
       Guid customerId, 

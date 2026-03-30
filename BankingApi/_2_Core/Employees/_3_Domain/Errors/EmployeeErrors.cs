@@ -97,14 +97,12 @@ public static class EmployeeErrors {
          Message: "An employee must have at least one admin right."
       );
 
-   public static readonly DomainErrors AdminRightsInvalid =
+   public static readonly DomainErrors AdminRightsNotSufficient =
       new(
-         ErrorCode.BadRequest,
-         Title: "Employee: Invalid Admin Rights",
-         Message: "The provided admin rights value is invalid."
+         ErrorCode.Forbidden,
+         Title: "Employee: Insufficient Admin Rights",
+         Message: "The authenticated employee does not have sufficient administrative permissions to perform this action."
       );
-
-   
    
    public static readonly DomainErrors InvalidAdminRightsBitmask =
       new(

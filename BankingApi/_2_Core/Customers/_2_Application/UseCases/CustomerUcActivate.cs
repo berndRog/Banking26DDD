@@ -24,6 +24,7 @@ internal sealed class CustomerUcActivate(
       Guid customerId,
       string? accountId,
       string? iban,
+      decimal? balance,
       CancellationToken ct
    ) {
       // 1) Authorization: check if caller is an employee with required rights

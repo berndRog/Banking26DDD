@@ -1,5 +1,6 @@
 using BankingApi._2_Core.BuildingBlocks._1_Ports.Outbound;
 using BankingApi._2_Core.Customers._1_Ports.Outbound;
+using BankingApi._2_Core.Employees._1_Ports.Outbound;
 using BankingApi._2_Core.Payments._1_Ports.Outbound;
 using BankingApi._2_Core.Payments._2_Application.Mappings;
 using BankingApi._2_Core.Payments._2_Application.UseCases;
@@ -17,6 +18,7 @@ public sealed class AccountUcCreateIntT : TestBaseIntegration {
       var ct = CancellationToken.None;
       var dbContext = scope.ServiceProvider.GetRequiredService<BankingDbContext>();
       var customerRepository = scope.ServiceProvider.GetRequiredService<ICustomerRepository>();
+      var employeeRepository = scope.ServiceProvider.GetRequiredService<IEmployeeRepository>();
       var accountRepository = scope.ServiceProvider.GetRequiredService<IAccountRepository>();
       var unitOfWork = scope.ServiceProvider.GetRequiredService<IUnitOfWork>();
       
@@ -24,8 +26,9 @@ public sealed class AccountUcCreateIntT : TestBaseIntegration {
       
       // Arrange
       var customer = _seed.Customer1();
-      // fill datbase with customer
       customerRepository.Add(customer);
+      var employee = _seed.Employee2();   // Walter Wagner
+      employeeRepository.Add(employee);
       await unitOfWork.SaveAllChangesAsync("Seeding data", ct);
       unitOfWork.ClearChangeTracker(); 
       var account = _seed.Account1();

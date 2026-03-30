@@ -1,4 +1,5 @@
 using BankingApi._2_Core.Payments._3_Domain.Entities;
+using BankingApi._2_Core.Payments._3_Domain.ValueObjects;
 using BankingApi._3_Infrastructure._2_Persistence.Database.Converter;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
@@ -21,18 +22,21 @@ public sealed class ConfigTransfer(
 
 
       // account references
-      builder.Property(t => t.FromAccountId)
-         .HasColumnName("FromAccountId")
+      builder.Property(t => t.DebitAccountId)
+         .HasColumnName("DebitAccountId")
          .HasColumnOrder(1)
          .IsRequired();
-      builder.HasIndex(t => t.FromAccountId);
-
-      builder.Property(t => t.ToAccountId)
+      builder.HasIndex(t => t.DebitAccountId);
+      
+      
+      builder.Property(a => a.CreditAccountIbanVo)
+         .HasConversion(vo => vo.Value, s => IbanVo.FromPersisted(s))
          .IsRequired()
-         .HasColumnName("ToAccountId")
-         .HasColumnOrder(2);
-      builder.HasIndex(t => t.ToAccountId);
-
+         .HasColumnName("CreditAccountIban")
+         .HasColumnOrder(2)
+         .HasMaxLength(50);
+      builder.HasIndex(c => c.CreditAccountIbanVo).IsUnique();
+      
       // amount value object
       builder.ComplexProperty(a => a.AmountVo, money => {
          money.Property(m => m.Amount)

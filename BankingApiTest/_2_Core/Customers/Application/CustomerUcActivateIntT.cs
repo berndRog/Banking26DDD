@@ -1,57 +1,52 @@
-using BankingApi._2_Core.Customers._1_Ports.Inbound;
-using BankingApi._3_Infrastructure._2_Persistence.Database;
-using BankingApiTest.TestController;
+using BankingApi._2_Core.BuildingBlocks._1_Ports.Outbound;
+using BankingApi._2_Core.Customers._1_Ports.Outbound;
+using BankingApi._2_Core.Customers._2_Application.Mappings;
+using BankingApi._2_Core.Customers._2_Application.UseCases;
+using BankingApi._2_Core.Employees._1_Ports.Outbound;
 using BankingApiTest.TestInfrastructure;
 using Microsoft.Extensions.DependencyInjection;
 namespace BankingApiTest._2_Core.Customers.Application;
 
-public sealed class CustomerUcActivateIntT : TestBaseEndToEnd {
-   
-   TestSeed _seed = new TestSeed();
-   
-   // For teaching: keep DB so students can inspect it afterwards.
-   protected override bool DeleteDatabaseOnDispose => false;
+public sealed class CustomerUcActivateIntT : TestBaseIntegration {
 
-   // [Fact]
-   // public async Task Activate_creates_first_account_and_updates_views() {
-   //    await Factory.WithScopeAsync(async sp => {
-   //       var db = sp.GetRequiredService<BankingDbContext>();
-   //       // seed here...
-   //       await db.SaveChangesAsync();
-   //    });
-   //
-   //    //var res = await Client.PostAsync("/employees/activate", content: null);
-   //    //res.EnsureSuccessStatusCode();
-   // }
-   
-   
    [Fact]
-   public async Task Activate_creates_first_account() {
-      // Assert
-      await Factory.WithScopeAsync(async sp => {
-         var db = sp.GetRequiredService<BankingDbContext>();
-         // seed here..
-         var owner = _seed.Customer1();
-         
-         
-         
-         //await db.SaveChangesAsync();
-      });
+   public async Task CustomerUcActivate_ok() {
 
+      using var scope = Root.CreateDefaultScope();
+      var ct = TestContext.Current.CancellationToken;
+      var unitOfWork = scope.ServiceProvider.GetRequiredService<IUnitOfWork>();
+      var emplyeeRepository = scope.ServiceProvider.GetRequiredService<IEmployeeRepository>();
+      var seed = scope.ServiceProvider.GetRequiredService<TestSeed>();
+      var customerUcCreateProvision = scope.ServiceProvider.GetRequiredService<CustomerUcCreateProvision>();
+      var customerUcUpdateProfile = scope.ServiceProvider.GetRequiredService<CustomerUcUpdateProfile>();
+      var sut = scope.ServiceProvider.GetRequiredService<CustomerUcActivate>();
+      
+      var customer = seed.CustomerRegister();
+      var customerDto = customer.ToCustomerDto();
+      var account = seed.Account1(); 
+      var employee = seed.Employee2();  // Walter Wagner
+
+      // Arrange
+      emplyeeRepository.Add(employee);
+      
+      // create provision
+      var resultProvision = await customerUcCreateProvision.ExecuteAsync(customerDto, ct);
+      True(resultProvision.IsSuccess);
+      // update profile
+      var resultProfile = await customerUcUpdateProfile.ExecuteAsync(customerDto, ct);
+      True(resultProfile.IsSuccess);
+      unitOfWork.ClearChangeTracker();
       
       // Act
-      //Guid customerId;
-      await Factory.WithScopeAsync(async serviceProvider => {
-         // Option A: resolve the "use case facade" (preferred)
-         var ownerUseCases = serviceProvider.GetRequiredService<ICustomerUseCases>();
+      var result = await sut.ExecuteAsync(
+         customerId: customer.Id,
+         accountId: account.Id.ToString(),
+         iban: account.IbanVo.Value,
+         balance: account.BalanceVo.Amount,
+         ct: ct);
+      True(result.IsSuccess);
 
-         // Call the use case method you want to test
-         //var result = await ownerUseCases.ActivateAsync(customerId, null, ct: default);
-
-         //Assert.True(result.IsSuccess);
-
-      });
-      //var res = await Client.PostAsync("/employees/activate", content: null);
-      //res.EnsureSuccessStatusCode();
    }
+
+
 }

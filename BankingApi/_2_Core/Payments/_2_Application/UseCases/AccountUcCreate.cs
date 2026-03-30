@@ -2,6 +2,7 @@ using BankingApi._2_Core.BuildingBlocks;
 using BankingApi._2_Core.BuildingBlocks._1_Ports.Outbound;
 using BankingApi._2_Core.BuildingBlocks._3_Domain;
 using BankingApi._2_Core.BuildingBlocks._3_Domain.Entities;
+using BankingApi._2_Core.BuildingBlocks._3_Domain.Enums;
 using BankingApi._2_Core.BuildingBlocks._4_IntegrationContracts._1_Ports;
 using BankingApi._2_Core.BuildingBlocks.Utils;
 using BankingApi._2_Core.Customers._1_Ports.Inbound;
@@ -16,7 +17,6 @@ using BankingApi._2_Core.Payments._3_Domain.ValueObjects;
 namespace BankingApi._2_Core.Payments._2_Application.UseCases;
 
 public sealed class AccountUcCreate(
-   IIdentityGateway identityGateway,
    ICustomerContract customerContract,
    IEmployeeContract employeeContract,
    IAccountRepository accountRepository,
@@ -30,20 +30,14 @@ public sealed class AccountUcCreate(
       AccountDto accountDto,
       CancellationToken ct = default
    ) {
-      
+      // 1) Exits Customer with given id and is active?
       if (!await customerContract.ExistsActiveAsync(customerId, ct))
          return Result<AccountDto>.Failure(AccountErrors.OwnerIdNotFoundOrInactive);
       
-      // 1) subject required
-      var resultSubject = SubjectCheck.Run(identityGateway.Subject);
-      if (resultSubject.IsFailure) 
-         return Result<AccountDto>.Failure(resultSubject.Error);
-      var subject = resultSubject.Value;
-      
-      // 2) load employee id
-      var resultEmployee = await employeeContract.GetEmployeeBySubjectAsync(subject, ct);   
-      if(resultEmployee == null)
-         return Result<AccountDto>.Failure(resultSubject.Error);
+      // 2) Load authorized employee and check if has rights to manage accounts
+      var resultEmployee = await employeeContract.GetAuthorizedEmployeeAsync(AdminRights.ManageAccounts, ct);   
+      if(resultEmployee.IsFailure)
+         return Result<AccountDto>.Failure(resultEmployee.Error);
       var employeeContractDto = resultEmployee.Value;
       
       // 3) domain model  
@@ -67,10 +61,10 @@ public sealed class AccountUcCreate(
                new { accountDto });
       var account = result.Value;
       
-      // add to repository
+      // 4) add to repository
       accountRepository.Add(account);            
          
-      // unit of work, save changes to database
+      // 5) unit of work, save changes to database
       var rows = await unitOfWork.SaveAllChangesAsync("Add account", ct);
       
       logger.LogInformation("AccountUcCreate={id} rows={rows}", account.Id, rows);

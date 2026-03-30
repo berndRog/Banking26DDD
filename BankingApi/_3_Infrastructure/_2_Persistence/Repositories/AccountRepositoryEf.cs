@@ -90,12 +90,29 @@ public sealed class AccountRepositoryEf(
       .Where(a => a.Id == accountId)
       .Include(a => a.Transactions.Where(b => b.Id == transactionId))
       .SingleOrDefaultAsync(ct);
+   
+   public async Task<Account?> FindAccountByIbanWithTransactionByIdAsync(
+      IbanVo accountIbanVo,
+      Guid transactionId,
+      CancellationToken ct = default
+   ) => await dbContext.Accounts
+      .Where(a => a.IbanVo == accountIbanVo)
+      .Include(a => a.Transactions.Where(b => b.Id == transactionId))
+      .SingleOrDefaultAsync(ct);
 
    public async Task<Account?> FindAccountByIdWithTransactionsAsync(
       Guid accountId,
       CancellationToken ct = default
    ) => await dbContext.Accounts
       .Where(a => a.Id == accountId)
+      .Include(a => a.Transactions)
+      .SingleOrDefaultAsync(ct);
+   
+   public async Task<Account?> FindAccountByIbanWithTransactionsAsync(
+      IbanVo accountIbanVo,
+      CancellationToken ct = default
+   ) => await dbContext.Accounts
+      .Where(a => a.IbanVo == accountIbanVo)
       .Include(a => a.Transactions)
       .SingleOrDefaultAsync(ct);
 
