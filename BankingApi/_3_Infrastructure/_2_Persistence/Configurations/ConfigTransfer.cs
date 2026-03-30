@@ -35,7 +35,7 @@ public sealed class ConfigTransfer(
          .HasColumnName("CreditAccountIban")
          .HasColumnOrder(2)
          .HasMaxLength(50);
-      builder.HasIndex(c => c.CreditAccountIbanVo).IsUnique();
+      builder.HasIndex(c => c.CreditAccountIbanVo);
       
       // amount value object
       builder.ComplexProperty(a => a.AmountVo, money => {

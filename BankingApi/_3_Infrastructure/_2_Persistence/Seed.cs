@@ -643,6 +643,7 @@ public sealed class Seed(
    ) {
       var transactionDebit = debitAccount.PostDebit(amount, purpose, bookedAt, transactionDebitId).GetValueOrThrow();
       var transactionCredit = creditAccount.PostCredit(amount, purpose, bookedAt, transactionCreditId).GetValueOrThrow();
+     
       var transfer = Transfer.CreateBooked(
          debitAccountId: debitAccount.Id,
          creditAccountIbanVo: creditAccount.IbanVo,
