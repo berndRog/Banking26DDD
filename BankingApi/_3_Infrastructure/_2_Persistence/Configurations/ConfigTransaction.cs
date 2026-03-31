@@ -13,68 +13,71 @@ public sealed class ConfigTransaction(
 
       // key
       builder.HasKey(t => t.Id);
-      builder.Property(t => t.Id).ValueGeneratedNever();
-
-      // owning account
-      builder.Property(t => t.AccountId)
-         .IsRequired();
-
+      builder.Property(t => t.Id)
+         .ValueGeneratedNever()
+         .HasColumnName("Id")
+         .HasColumnOrder(0);
+      
       // debit / credit
       builder.Property(t => t.Type)
          .HasConversion<int>()
+         .HasColumnName("Type")
+         .HasColumnOrder(1)
          .IsRequired();
-
-      // optional reference to transfer aggregate
-      builder.Property(t => t.TransferId)
-         .IsRequired(false);
 
       // business data
       builder.Property(t => t.Purpose)
          .HasMaxLength(200)
-         .IsRequired();
-
-      // amount value object
-      // builder.OwnsOne(t => t.AmountVo, b => {
-      //    b.Property(p => p.Amount)
-      //       .HasColumnName("Amount")
-      //       .HasColumnType("decimal(18,2)")
-      //       .IsRequired();
-      //
-      //    b.Property(p => p.Currency)
-      //       .HasColumnName("Currency")
-      //       .HasConversion<int>()
-      //       .IsRequired();
-      // });
-
+         .HasColumnName("Purpose")
+         .HasColumnOrder(2);
+      
       builder.ComplexProperty(x => x.AmountVo, money => {
          money.Property(x => x.Amount)
-            .HasColumnName("Amount")
             .HasPrecision(18, 2)
+            .HasColumnName("Amount")
+            .HasColumnOrder(3)
             .IsRequired();
 
          money.Property(x => x.Currency)
-            .HasColumnName("AmountCurrency")
             .HasConversion<string>()
             .HasMaxLength(3)
+            .HasColumnName("AmCurrency")
+            .HasColumnOrder(4)
             .IsRequired();
       });
 
       builder.ComplexProperty(x => x.BalanceAfterVo, money => {
          money.Property(x => x.Amount)
-            .HasColumnName("BalanceAfter")
             .HasPrecision(18, 2)
+            .HasColumnName("BalanceAfter")
+            .HasColumnOrder(5)
             .IsRequired();
 
          money.Property(x => x.Currency)
-            .HasColumnName("BalanceAfterCurrency")
             .HasConversion<string>()
             .HasMaxLength(3)
+            .HasColumnName("BaCurrency")
+            .HasColumnOrder(6)
             .IsRequired();
       });
+      
+      // owning account
+      builder.Property(t => t.AccountId)
+         .HasColumnName("AccountId")
+         .HasColumnOrder(7)
+         .IsRequired();
 
+      // optional reference to transfer aggregate
+      builder.Property(t => t.TransferId)
+         .HasColumnName("TransferId")
+         .HasColumnOrder(8)
+         .IsRequired(false);
+      
       // booking timestamp
       builder.Property(t => t.BookedAt)
          .HasConversion(dtConv)
+         .HasColumnName("BookedAt")
+         .HasColumnOrder(9)
          .IsRequired();
 
       // query indexes

@@ -58,7 +58,7 @@ public sealed class Transfer : AggregateRoot {
       BookedAt = bookedAt;
       CreatedAt = bookedAt;
       UpdatedAt = bookedAt;
-      Status = TransferStatus.Booked;
+      Status = TransferStatus.Initiated;
    }
 
    //--- Static Factories ------------------------------------------------------
@@ -97,6 +97,8 @@ public sealed class Transfer : AggregateRoot {
          bookedAt: bookedAt
       );
 
+      
+      
       return Result<Transfer>.Success(transfer);
    }
    

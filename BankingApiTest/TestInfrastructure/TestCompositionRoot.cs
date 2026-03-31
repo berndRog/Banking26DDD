@@ -10,11 +10,15 @@ namespace BankingApiTest.TestInfrastructure;
 // Concrete test composition root for BankingDbContext
 public sealed class TestCompositionRoot : TestCompositionRoot<BankingDbContext> {
 
-   public TestCompositionRoot() {
-      DatabaseName = "BankingTest";
-      DatabaseMode = DbMode.FileUnique;
+   public TestCompositionRoot(
+      string dbName = "BankingTest",
+      DbMode dbMode = DbMode.InMemory,
+      bool sensitiveDataLogging = false
+   ) {
+      DatabaseName = dbName;
+      DatabaseMode = dbMode;
       ApplyMigrations =  true;
-      EnableSensitiveDataLoggingForDatabase =  true;
+      EnableSensitiveDataLoggingForDatabase = sensitiveDataLogging;
    }
 
    // Create the concrete BankingDbContext

@@ -120,6 +120,7 @@ public sealed class CustomerReadModelIntT : TestBaseIntegration {
       Equal(customer2Dto.Email, actual2Dto.Email);
       Equal(customer2Dto.AddressDto, actual2Dto.AddressDto);
    }
+   
    [Fact]
    public async Task SelectByNameAsync_loads_CompanyName_ok() {
       using var scope = Root.CreateDefaultScope();
@@ -155,6 +156,7 @@ public sealed class CustomerReadModelIntT : TestBaseIntegration {
       Equal(customer5Dto.Email, actual5Dto.Email);
       Equal(customer5Dto.AddressDto, actual5Dto.AddressDto); 
    }
+   
    [Fact]
    public async Task SelectAll_ok() {
       using var scope = Root.CreateDefaultScope();

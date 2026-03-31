@@ -150,6 +150,6 @@ public sealed class TestSeed {
    public List<Account> AddBeneficiariesToAccounts() 
       =>  _seed.AddBeneficiariesToAccounts();
    
-   public List<Account> AddBeneficiariesAndTransactionsAndTransfersToAccounts() 
-      =>  _seed.AddBeneficiariesAndTransactionAndTransfersToAccounts();
+   public List<Account> AddBeneficiariesAndTransactionsAndTransfersToAccounts(List<Account> accounts) 
+      =>  _seed.AddBeneficiariesAndTransactionsAndTransfersToAccounts(accounts);
 }

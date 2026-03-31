@@ -6,6 +6,13 @@ using Microsoft.Extensions.DependencyInjection;
 namespace BankingApiTest._3_Infrastructure._2_Persistence.Repositories;
 public sealed class AccountReadModelIntT : TestBaseIntegration {
 
+   public AccountReadModelIntT() {
+      DbMode = DbMode.InMemory;
+      DbName = "xxxApiTest";
+      SensitiveDataLogging = true;
+   }
+      
+   
    #region --- Aggregate root: Account ------------------------------------------------------
    [Fact]
    public async Task FindByIdAsync_ok() {

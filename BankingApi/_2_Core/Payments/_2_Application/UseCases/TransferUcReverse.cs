@@ -26,7 +26,7 @@ public sealed class TransferUcReverse(
       // 1) Load original transfer ---------------------------------------------
       
       // Load the original transfer that should be reversed.
-      var originalTransfer = await transferRepository.FindByIdAsync(accountId, transferId, ct);
+      var originalTransfer = await transferRepository.FindByIdAsync(transferId, ct);
       if (originalTransfer is null)
          return Result<TransferDto>.Failure(TransferErrors.OriginalTransferNotFound);
 

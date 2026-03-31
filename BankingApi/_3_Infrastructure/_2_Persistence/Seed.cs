@@ -496,9 +496,7 @@ public sealed class Seed(
       _beneficiaries.Add(beneficiary);
    }
 
-   public List<Account> AddBeneficiariesAndTransactionAndTransfersToAccounts() {
-      
-      var accounts = AddBeneficiariesToAccounts().ToList();
+   public List<Account> AddBeneficiariesAndTransactionsAndTransfersToAccounts(List<Account> accounts) {
       
       var bookedAt = clock.UtcNow;
 

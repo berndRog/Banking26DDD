@@ -6,6 +6,12 @@ using Microsoft.Extensions.DependencyInjection;
 namespace BankingApiTest._3_Infrastructure._2_Persistence.Repositories;
 public sealed class AccountRepositoryIntTests : TestBaseIntegration {
    
+   public AccountRepositoryIntTests() {
+      DbMode = DbMode.FileUnique;
+      DbName = "BankingTest";
+      SensitiveDataLogging = true;
+   }
+   
    #region --- Aggregate root: Account ------------------------------------------------------
    [Fact]
    public async Task FindByIdAsync_ok() {
@@ -161,12 +167,17 @@ public sealed class AccountRepositoryIntTests : TestBaseIntegration {
       var seed = scope.ServiceProvider.GetRequiredService<TestSeed>();
 
       // Arrange
-      var accounts = seed.AddBeneficiariesAndTransactionsAndTransfersToAccounts();
+      var accounts = seed.AddBeneficiariesToAccounts();
+      accounts = seed.AddBeneficiariesAndTransactionsAndTransfersToAccounts(accounts);
       repository.AddRange(accounts);
       await unitOfWork.SaveAllChangesAsync("Accounts inserted", ct);
       unitOfWork.ClearChangeTracker();
       
       var expected = accounts[0];
+      var expectedTransactionIds = expected.Transactions
+         .Select(t => t.Id)
+         .OrderBy(id => id)
+         .ToList();
 
       // Act
       var account = 
@@ -178,7 +189,11 @@ public sealed class AccountRepositoryIntTests : TestBaseIntegration {
       Equal(expected.IbanVo, account.IbanVo);
       Equal(expected.BalanceVo, account.BalanceVo);
       Equal(expected.CustomerId, account.CustomerId);
-      Equal(expected.Beneficiaries.Count, account.Beneficiaries.Count);
       Equal(expected.Transactions.Count, account.Transactions.Count);
+      var accountTransactionIds = account.Transactions
+         .Select(t => t.Id)
+         .OrderBy(id => id)
+         .ToList();
+      Equal(expectedTransactionIds, accountTransactionIds);
    }
 }

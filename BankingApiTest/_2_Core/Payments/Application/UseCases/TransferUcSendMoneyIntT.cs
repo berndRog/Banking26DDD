@@ -68,10 +68,7 @@ public sealed class TransferUcSendMoneyIntT : TestBaseIntegration {
       var creditAccountIbanVo = IbanVo.Create(transferDto.CreditAccountIban).GetValueOrThrow();
       var creditId = transferDto.CreditTransactionId;
 
-      var actualTransfer = await transferRepository.FindByIdAsync(
-         accountId: debitAccount.Id, 
-         transferId: transfer.Id, 
-         ct: ct);
+      var actualTransfer = await transferRepository.FindByIdAsync(transfer.Id, ct);
 
       var actualCreditAccount = await accountRepository.FindAccountByIdWithTransactionByIdAsync(
             accountId: debitAccountId, 

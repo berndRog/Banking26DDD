@@ -8,18 +8,16 @@ public interface ITransferRepository {
 
    // Load a transfer by its identifier
    Task<Transfer?> FindByIdAsync(
-      Guid accountId,
       Guid transferId,
       CancellationToken ct = default
    );
-
-   // // Find a transfer using the idempotency key
-   // // Used to prevent duplicate execution of payment requests
-   // Task<Transfer?> FindByIdempotencyKeyAsync(
-   //    string key,
-   //    CancellationToken ct
-   // );
-
+   
+   // Load transfers by accountId
+   Task<IEnumerable<Transfer?>> SelectTransfersByAccountIdAsync(
+      Guid accountId,
+      CancellationToken ct = default
+   );
+   
    // Add a new transfer aggregate to the persistence context
    void Add(Transfer transfer);
    void AddRange(IEnumerable<Transfer> transfers);

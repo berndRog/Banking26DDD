@@ -38,14 +38,13 @@ public sealed class CustomerRepositoryIntT : TestBaseIntegration {
    public async Task FindByIdAsync_ok() {
       using var scope = Root.CreateDefaultScope();
       var ct = TestContext.Current.CancellationToken;
-      var dbContext = scope.ServiceProvider.GetRequiredService<ICustomerDbContext>();
       var repository = scope.ServiceProvider.GetRequiredService<ICustomerRepository>();
       var unitOfWork = scope.ServiceProvider.GetRequiredService<IUnitOfWork>();
       var seed = scope.ServiceProvider.GetRequiredService<Seed>();
 
       // Arrange
       var customers = seed.Customers;
-      dbContext.AddRange(customers);
+      repository.AddRange(customers);
       await unitOfWork.SaveAllChangesAsync("Add customers", ct);
       unitOfWork.ClearChangeTracker();
 
@@ -102,13 +101,12 @@ public sealed class CustomerRepositoryIntT : TestBaseIntegration {
    public async Task SelectAsync_ok() {
       using var scope = Root.CreateDefaultScope();
       var ct = TestContext.Current.CancellationToken;
-      var dbContext = scope.ServiceProvider.GetRequiredService<ICustomerDbContext>();
       var repository = scope.ServiceProvider.GetRequiredService<ICustomerRepository>();
       var unitOfWork = scope.ServiceProvider.GetRequiredService<IUnitOfWork>();
       var seed = scope.ServiceProvider.GetRequiredService<Seed>();
 
       // Arrange
-      dbContext.AddRange(seed.Customers);
+      repository.AddRange(seed.Customers);
       await unitOfWork.SaveAllChangesAsync("Add customers", ct);
       unitOfWork.ClearChangeTracker();
 
@@ -126,13 +124,12 @@ public sealed class CustomerRepositoryIntT : TestBaseIntegration {
    public async Task SelectByName_ok() {
       using var scope = Root.CreateDefaultScope();
       var ct = TestContext.Current.CancellationToken;
-      var dbContext = scope.ServiceProvider.GetRequiredService<ICustomerDbContext>();
       var repository = scope.ServiceProvider.GetRequiredService<ICustomerRepository>();
       var unitOfWork = scope.ServiceProvider.GetRequiredService<IUnitOfWork>();
       var seed = scope.ServiceProvider.GetRequiredService<Seed>();
 
       // Arrange
-      dbContext.AddRange(seed.Customers);
+      repository.AddRange(seed.Customers);
       await unitOfWork.SaveAllChangesAsync("Add customers", ct);
       unitOfWork.ClearChangeTracker();
       var expected = new List<Customer>() { seed.Customers[0], seed.Customers[1] };
