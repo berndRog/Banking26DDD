@@ -2,7 +2,6 @@ using BankingApi._2_Core.BuildingBlocks._1_Ports.Outbound;
 using BankingApi._2_Core.Customers._1_Ports.Outbound;
 using BankingApi._2_Core.Customers._3_Domain.Entities;
 using BankingApi._3_Infrastructure._2_Persistence;
-using BankingApi._3_Infrastructure._2_Persistence.Database;
 using BankingApiTest.TestInfrastructure;
 using Microsoft.Extensions.DependencyInjection;
 namespace BankingApiTest._3_Infrastructure._2_Persistence.Repositories;
@@ -36,19 +35,19 @@ public sealed class CustomerRepositoryIntT : TestBaseIntegration {
 
 
    [Fact]
-   public async Task FindByIdAsync_returns_Customer1() {
+   public async Task FindByIdAsync_ok() {
       using var scope = Root.CreateDefaultScope();
       var ct = TestContext.Current.CancellationToken;
-      var dbContext = scope.ServiceProvider.GetRequiredService<BankingDbContext>();
+      var dbContext = scope.ServiceProvider.GetRequiredService<ICustomerDbContext>();
       var repository = scope.ServiceProvider.GetRequiredService<ICustomerRepository>();
       var unitOfWork = scope.ServiceProvider.GetRequiredService<IUnitOfWork>();
       var seed = scope.ServiceProvider.GetRequiredService<Seed>();
 
       // Arrange
       var customers = seed.Customers;
-      dbContext.Customers.AddRange(customers);
+      dbContext.AddRange(customers);
       await unitOfWork.SaveAllChangesAsync("Add customers", ct);
-      dbContext.ChangeTracker.Clear();
+      unitOfWork.ClearChangeTracker();
 
       var customer = customers[0]; // Customer1
       var id = customer.Id;
@@ -68,19 +67,19 @@ public sealed class CustomerRepositoryIntT : TestBaseIntegration {
    
    
    [Fact]
-   public async Task FindByEmailAsync_returns_Customer3() {
+   public async Task FindByEmailAsync_ok() {
       using var scope = Root.CreateDefaultScope();
       var ct = TestContext.Current.CancellationToken;
-      var dbContext = scope.ServiceProvider.GetRequiredService<BankingDbContext>();
+      var dbContext = scope.ServiceProvider.GetRequiredService<ICustomerDbContext>();
       var repository = scope.ServiceProvider.GetRequiredService<ICustomerRepository>();
       var unitOfWork = scope.ServiceProvider.GetRequiredService<IUnitOfWork>();
       var seed = scope.ServiceProvider.GetRequiredService<Seed>();
 
       // Arrange
       var customers = seed.Customers;
-      dbContext.Customers.AddRange(customers);
+      dbContext.AddRange(customers);
       await unitOfWork.SaveAllChangesAsync("Add customers", ct);
-      dbContext.ChangeTracker.Clear();
+      unitOfWork.ClearChangeTracker();
 
       var customer = customers[2]; // Customer3
       var emailVo = customer.EmailVo;
@@ -100,18 +99,18 @@ public sealed class CustomerRepositoryIntT : TestBaseIntegration {
    }
    
    [Fact]
-   public async Task SelectAsync_returns_all_customers() {
+   public async Task SelectAsync_ok() {
       using var scope = Root.CreateDefaultScope();
       var ct = TestContext.Current.CancellationToken;
-      var dbContext = scope.ServiceProvider.GetRequiredService<BankingDbContext>();
+      var dbContext = scope.ServiceProvider.GetRequiredService<ICustomerDbContext>();
       var repository = scope.ServiceProvider.GetRequiredService<ICustomerRepository>();
       var unitOfWork = scope.ServiceProvider.GetRequiredService<IUnitOfWork>();
       var seed = scope.ServiceProvider.GetRequiredService<Seed>();
 
       // Arrange
-      dbContext.Customers.AddRange(seed.Customers);
+      dbContext.AddRange(seed.Customers);
       await unitOfWork.SaveAllChangesAsync("Add customers", ct);
-      dbContext.ChangeTracker.Clear();
+      unitOfWork.ClearChangeTracker();
 
       // Act
       var customers = await repository.SelectAllAsync(ct);
@@ -124,18 +123,18 @@ public sealed class CustomerRepositoryIntT : TestBaseIntegration {
    }
    
    [Fact]
-   public async Task SelectByName_returns_all_customers() {
+   public async Task SelectByName_ok() {
       using var scope = Root.CreateDefaultScope();
       var ct = TestContext.Current.CancellationToken;
-      var dbContext = scope.ServiceProvider.GetRequiredService<BankingDbContext>();
+      var dbContext = scope.ServiceProvider.GetRequiredService<ICustomerDbContext>();
       var repository = scope.ServiceProvider.GetRequiredService<ICustomerRepository>();
       var unitOfWork = scope.ServiceProvider.GetRequiredService<IUnitOfWork>();
       var seed = scope.ServiceProvider.GetRequiredService<Seed>();
 
       // Arrange
-      dbContext.Customers.AddRange(seed.Customers);
+      dbContext.AddRange(seed.Customers);
       await unitOfWork.SaveAllChangesAsync("Add customers", ct);
-      dbContext.ChangeTracker.Clear();
+      unitOfWork.ClearChangeTracker();
       var expected = new List<Customer>() { seed.Customers[0], seed.Customers[1] };
 
       // Act

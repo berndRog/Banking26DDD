@@ -1,3 +1,4 @@
+using System.Transactions;
 using BankingApi._2_Core.BuildingBlocks._1_Ports.Outbound;
 using BankingApi._2_Core.Payments._1_Ports.Outbound;
 using BankingApiTest.TestInfrastructure;
@@ -165,15 +166,19 @@ public sealed class AccountRepositoryIntTests : TestBaseIntegration {
       await unitOfWork.SaveAllChangesAsync("Accounts inserted", ct);
       unitOfWork.ClearChangeTracker();
       
-      var account1 = accounts[0];
+      var expected = accounts[0];
 
       // Act
       var account = 
-         await repository.FindAccountByIdWithTransactionsAsync(account1.Id, ct);
+         await repository.FindAccountByIdWithTransactionsAsync(expected.Id, ct);
 
-      
+      // Asert
+      NotNull(account);
+      Equal(expected.Id, account.Id);  
+      Equal(expected.IbanVo, account.IbanVo);
+      Equal(expected.BalanceVo, account.BalanceVo);
+      Equal(expected.CustomerId, account.CustomerId);
+      Equal(expected.Beneficiaries.Count, account.Beneficiaries.Count);
+      Equal(expected.Transactions.Count, account.Transactions.Count);
    }
-
-
-   
 }
