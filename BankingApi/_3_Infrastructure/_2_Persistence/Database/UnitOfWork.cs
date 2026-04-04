@@ -4,7 +4,7 @@ using Microsoft.EntityFrameworkCore;
 namespace BankingApi._3_Infrastructure._2_Persistence.Database;
 
 public sealed class UnitOfWork(
-   BankingDbContext dbContext,
+   AppDbContext dbContext,
    IClock clock,
    ILogger<UnitOfWork> logger
 ) : IUnitOfWork {

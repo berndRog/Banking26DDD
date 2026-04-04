@@ -5,7 +5,7 @@ using BankingApi._2_Core.Employees._3_Domain.Entities;
 namespace BankingApi._3_Infrastructure._2_Persistence.Database;
 
 internal sealed class EmployeeDbContextEf(
-   BankingDbContext db
+   AppDbContext db
 ) : IEmployeesDbContext {
 
    public IQueryable<Employee> Employees 

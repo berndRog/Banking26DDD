@@ -9,7 +9,7 @@ using Microsoft.EntityFrameworkCore;
 namespace BankingApi._3_Infrastructure._2_Persistence.Repositories;
 
 internal sealed class EmployeeRepositoryEf(
-   BankingDbContext dbContext
+   AppDbContext dbContext
 ) : IEmployeeRepository {
 
    public async Task<Employee?> FindByIdAsync(

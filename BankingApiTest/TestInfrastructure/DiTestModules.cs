@@ -28,7 +28,7 @@ public static class DiTestModules {
    ) {
       services.AddSingleton(dbConnection);
 
-      services.AddDbContext<BankingDbContext>((sp, options) => {
+      services.AddDbContext<AppDbContext>((sp, options) => {
          var connection = sp.GetRequiredService<DbConnection>();
          options.UseSqlite(connection);
 

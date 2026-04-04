@@ -22,7 +22,7 @@ public static class DiInfrastructureModule {
       var connectionString = configuration.GetConnectionString("BankingApiDb");
       Console.WriteLine("---> Using SQLite connection string: " + connectionString);
       
-      services.AddDbContext<BankingDbContext>(options =>
+      services.AddDbContext<AppDbContext>(options =>
          options.UseSqlite(connectionString)
       );
 

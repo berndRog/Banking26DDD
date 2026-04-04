@@ -164,7 +164,7 @@ public class Program {
       if (app.Environment.IsDevelopment()) {
          using var scope = app.Services.CreateScope();
          var services = scope.ServiceProvider;
-         var db = services.GetRequiredService<BankingDbContext>();
+         var db = services.GetRequiredService<AppDbContext>();
          var unitOfWork = services.GetRequiredService<IUnitOfWork>();
          var clock = services.GetRequiredService<IClock>();
       
@@ -191,7 +191,7 @@ public class Program {
       if (app.Environment.IsDevelopment()) {
          using var scope = app.Services.CreateScope();
          var services = scope.ServiceProvider;
-         var db = services.GetRequiredService<BankingDbContext>();
+         var db = services.GetRequiredService<AppDbContext>();
          var unitOfWork = services.GetRequiredService<IUnitOfWork>();
          var clock = services.GetRequiredService<IClock>();
       

@@ -89,14 +89,14 @@ public sealed class TestBaseFactory : WebApplicationFactory<Program> {
             throw new InvalidOperationException("Factory not initialized. Did you call InitializeAsync()?");
 
          // 1) Remove all registrations that might exist from Program.cs
-         services.RemoveAll<DbContextOptions<BankingDbContext>>();
-         services.RemoveAll<BankingDbContext>();
+         services.RemoveAll<DbContextOptions<AppDbContext>>();
+         services.RemoveAll<AppDbContext>();
 
          // Optional: if you use IDbContextFactory<BankingDbContext> anywhere
-         services.RemoveAll<IDbContextFactory<BankingDbContext>>();
+         services.RemoveAll<IDbContextFactory<AppDbContext>>();
 
          // 2) Re-register BankingDbContext using the test connection
-         services.AddDbContext<BankingDbContext>(options => {
+         services.AddDbContext<AppDbContext>(options => {
             options.UseSqlite(_dbConnection);
             if (_enableSensitiveDataLogging) options.EnableSensitiveDataLogging();
          });

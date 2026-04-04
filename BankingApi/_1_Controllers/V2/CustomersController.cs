@@ -37,7 +37,7 @@ public sealed class CustomersController(
       var result = await useCases.CreateAsync(customerCreateDto, ct);
 
       return this.ToCreatedAtRoute(
-         routeName: nameof(GetCustomerById),
+         routeName: nameof(GetCustomerByIdAsync),
          routeValues: new { id = customerCreateDto.Id },
          result, logger, context);
    }
@@ -145,14 +145,14 @@ public sealed class CustomersController(
    /// <param name="ct">Cancellation token.</param>
    /// <returns>The customer resource if found.</returns>
    // [Authorize]
-   [HttpGet("customers/{id:guid}", Name = nameof(GetCustomerById))]
+   [HttpGet("customers/{id:guid}", Name = nameof(GetCustomerByIdAsync))]
    [ProducesResponseType<CustomerDto>(StatusCodes.Status200OK)]
    [ProducesResponseType<ProblemDetails>(StatusCodes.Status404NotFound, "application/problem+json")]
-   public async Task<ActionResult<CustomerDto>> GetCustomerById(
+   public async Task<ActionResult<CustomerDto>> GetCustomerByIdAsync(
       [FromRoute] Guid id,
       CancellationToken ct
    ) {
-      const string context = $"{nameof(CustomersController)}.{nameof(GetCustomerById)}";
+      const string context = $"{nameof(CustomersController)}.{nameof(GetCustomerByIdAsync)}";
 
       var result = await readModel.FindByIdAsync(id, ct);
 
@@ -166,15 +166,15 @@ public sealed class CustomersController(
    /// <param name="ct">Cancellation token.</param>
    /// <returns>The customer resource if a matching email address exists.</returns>
    // [Authorize]
-   [HttpGet("customers/email", Name = nameof(GetCustomerByEmail))]
+   [HttpGet("customers/email", Name = nameof(GetCustomerByEmailAsync))]
    [ProducesResponseType<CustomerDto>(StatusCodes.Status200OK)]
    [ProducesResponseType<ProblemDetails>(StatusCodes.Status401Unauthorized, "application/problem+json")]
    [ProducesResponseType<ProblemDetails>(StatusCodes.Status404NotFound, "application/problem+json")]
-   public async Task<ActionResult<CustomerDto>> GetCustomerByEmail(
+   public async Task<ActionResult<CustomerDto>> GetCustomerByEmailAsync(
       [FromQuery] string email,
       CancellationToken ct
    ) {
-      const string context = $"{nameof(CustomersController)}.{nameof(GetCustomerByEmail)}";
+      const string context = $"{nameof(CustomersController)}.{nameof(GetCustomerByEmailAsync)}";
 
       var result = await readModel.FindByEmailAsync(email, ct);
 

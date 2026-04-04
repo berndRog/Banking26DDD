@@ -6,7 +6,7 @@ using BankingApi._2_Core.Customers._3_Domain.Entities;
 namespace BankingApi._3_Infrastructure._2_Persistence.Database;
 
 internal sealed class CustomerDbContextEf(
-   BankingDbContext db
+   AppDbContext db
 ) : ICustomerDbContext {
    
    public IQueryable<Customer> Customers 

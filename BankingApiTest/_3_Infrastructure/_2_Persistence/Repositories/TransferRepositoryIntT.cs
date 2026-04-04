@@ -43,7 +43,7 @@ public sealed class TransferRepositoryIntT : TestBaseIntegration {
       var ct = TestContext.Current.CancellationToken;
       
       using var scope = Root.CreateDefaultScope();
-      var dbContext = scope.ServiceProvider.GetRequiredService<BankingDbContext>();
+      var dbContext = scope.ServiceProvider.GetRequiredService<AppDbContext>();
       var repository = scope.ServiceProvider.GetRequiredService<ICustomerRepository>();
       var unitOfWork = scope.ServiceProvider.GetRequiredService<IUnitOfWork>();
       var seed = scope.ServiceProvider.GetRequiredService<Seed>();

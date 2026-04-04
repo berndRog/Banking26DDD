@@ -13,7 +13,7 @@ public sealed class AccountUcBeneficiaryAddIntT : TestBaseIntegration {
    public async Task AddBeneficiaryUt() {
       using var scope = Root.CreateDefaultScope();
       var ct = CancellationToken.None;
-      var dbContext = scope.ServiceProvider.GetRequiredService<BankingDbContext>();
+      var dbContext = scope.ServiceProvider.GetRequiredService<AppDbContext>();
       var customerRepository = scope.ServiceProvider.GetRequiredService<ICustomerRepository>();
       var accountRepository = scope.ServiceProvider.GetRequiredService<IAccountRepository>();
       var unitOfWork = scope.ServiceProvider.GetRequiredService<IUnitOfWork>();

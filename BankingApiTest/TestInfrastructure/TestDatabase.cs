@@ -66,8 +66,8 @@ public static class TestDatabase {
       bool enableSensitiveDataLogging = true,
       CancellationToken ct = default
    ) {
-      var (dbPath, dbConnection, dbContext) = await CreateAsync<BankingDbContext>(
-         createDbContext: options => new BankingDbContext(options),
+      var (dbPath, dbConnection, dbContext) = await CreateAsync<AppDbContext>(
+         createDbContext: options => new AppDbContext(options),
          mode: mode,
          databaseName: databaseName,
          applyMigrations: applyMigrations,

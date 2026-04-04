@@ -66,7 +66,7 @@ public sealed class CustomersControllerEndtoEnd : TestBaseEndToEnd {
 
       // Assert (DB)
       await Factory.WithScopeAsync(async serviceProvider => {
-         var dbContext = serviceProvider.GetRequiredService<BankingDbContext>();
+         var dbContext = serviceProvider.GetRequiredService<AppDbContext>();
 
          // IMPORTANT: use AsNoTracking to avoid tracking artifacts
          var customer = await dbContext.Customers
@@ -128,7 +128,7 @@ public sealed class CustomersControllerEndtoEnd : TestBaseEndToEnd {
 
       // Assert (DB)
       await Factory.WithScopeAsync(async serviceProvider => {
-         var dbContext = serviceProvider.GetRequiredService<BankingDbContext>();
+         var dbContext = serviceProvider.GetRequiredService<AppDbContext>();
 
          // IMPORTANT: use AsNoTracking to avoid tracking artifacts
          var owner = await dbContext.Customers
@@ -246,7 +246,7 @@ public sealed class CustomersControllerEndtoEnd : TestBaseEndToEnd {
       Equal(reqPostProfileOwnerDto.AddressDto, resPostProfileOwnerDto.AddressDto);
       // Assert (DB) 
       await Factory.WithScopeAsync(async serviceProvider => {
-         var dbContext = serviceProvider.GetRequiredService<BankingDbContext>();
+         var dbContext = serviceProvider.GetRequiredService<AppDbContext>();
 
          // IMPORTANT: use AsNoTracking to avoid tracking artifacts
          var customer = await dbContext.Customers
@@ -278,7 +278,7 @@ public sealed class CustomersControllerEndtoEnd : TestBaseEndToEnd {
 
       // damit TestAuthHandler den
       await Factory.WithScopeAsync(async serviceProvider => {
-         var db = serviceProvider.GetRequiredService<BankingDbContext>();
+         var db = serviceProvider.GetRequiredService<AppDbContext>();
          // seed here...
          db.Customers.AddRange(employees);
          await db.SaveChangesAsync(ct);
@@ -324,7 +324,7 @@ public sealed class CustomersControllerEndtoEnd : TestBaseEndToEnd {
       var customers = _seed.Customers;
       var customer1 = customers[0];
       await Factory.WithScopeAsync(async serviceProvider => {
-         var dbContext = serviceProvider.GetRequiredService<BankingDbContext>();
+         var dbContext = serviceProvider.GetRequiredService<AppDbContext>();
          // seed here...
          dbContext.Customers.AddRange(customers);
          await dbContext.SaveChangesAsync(ct);
@@ -371,7 +371,7 @@ public sealed class CustomersControllerEndtoEnd : TestBaseEndToEnd {
       // Assert
       var customers = _seed.Customers;
       await Factory.WithScopeAsync(async serviceProvider => {
-         var dbContext = serviceProvider.GetRequiredService<BankingDbContext>();
+         var dbContext = serviceProvider.GetRequiredService<AppDbContext>();
          // seed here...
          dbContext.Customers.AddRange(customers);
          await dbContext.SaveChangesAsync(ct);

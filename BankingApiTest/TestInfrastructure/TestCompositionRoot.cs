@@ -8,7 +8,7 @@ using Microsoft.Extensions.Logging;
 namespace BankingApiTest.TestInfrastructure;
 
 // Concrete test composition root for BankingDbContext
-public sealed class TestCompositionRoot : TestCompositionRoot<BankingDbContext> {
+public sealed class TestCompositionRoot : TestCompositionRoot<AppDbContext> {
 
    public TestCompositionRoot(
       string dbName = "BankingTest",
@@ -22,8 +22,8 @@ public sealed class TestCompositionRoot : TestCompositionRoot<BankingDbContext> 
    }
 
    // Create the concrete BankingDbContext
-   protected override BankingDbContext CreateDbContext(DbContextOptions<BankingDbContext> options) {
-      return new BankingDbContext(options);
+   protected override AppDbContext CreateDbContext(DbContextOptions<AppDbContext> options) {
+      return new AppDbContext(options);
    }
 
    // Register all project services needed for tests

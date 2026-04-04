@@ -13,7 +13,7 @@ using Microsoft.EntityFrameworkCore;
 namespace BankingApi._3_Infrastructure._2_Persistence.ReadModel;
 
 internal sealed class AccountReadModelEf(
-   BankingDbContext dbContext
+   AppDbContext dbContext
 ) : IAccountReadModel {
    
    #region --- Aggregate root: Account ------------------------------------------------------

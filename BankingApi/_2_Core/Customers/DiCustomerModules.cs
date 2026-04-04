@@ -14,7 +14,7 @@ public static class DiCustomerModules {
       services.AddScoped<CustomerUcActivate>();
       services.AddScoped<CustomerUcReject>();
       services.AddScoped<CustomerUcDeactivate>();
-      services.AddScoped<CustomerUcUpdateEmail>();
+      services.AddScoped<CustomerUcUpdate>();
       services.AddScoped<ICustomerUseCases, CustomerUseCases>();
       return services;
    }

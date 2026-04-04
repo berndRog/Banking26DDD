@@ -15,7 +15,7 @@ internal class CustomerUseCases(
    CustomerUcActivate activateUc,
    CustomerUcReject rejectUc,
    CustomerUcDeactivate deactivateUc,
-   CustomerUcUpdateEmail updateEmailUc
+   CustomerUcUpdate updateUc
 ): ICustomerUseCases {
 
    public Task<Result<CustomerDto>> CreateAsync(
@@ -63,6 +63,6 @@ internal class CustomerUseCases(
    public Task<Result> UpdateAsync(
       CustomerDto customerDto, 
       CancellationToken ct = default
-   ) => updateEmailUc.ExecuteAsync(customerDto,ct);
+   ) => updateUc.ExecuteAsync(customerDto,ct);
    
 }

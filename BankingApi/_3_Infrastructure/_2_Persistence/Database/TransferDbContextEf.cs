@@ -5,7 +5,7 @@ using BankingApi._2_Core.Payments._3_Domain.Entities;
 namespace BankingApi._3_Infrastructure._2_Persistence.Database;
 
 internal sealed class TransferDbContextEf(
-   BankingDbContext db
+   AppDbContext db
 ) : ITransferDbContext {
    
    public IQueryable<Transfer> Transfers => db.Set<Transfer>();

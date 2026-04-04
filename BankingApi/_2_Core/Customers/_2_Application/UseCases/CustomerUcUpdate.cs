@@ -7,11 +7,11 @@ using BankingApi._2_Core.Customers._2_Application.Dtos;
 using BankingApi._2_Core.Customers._3_Domain.Errors;
 namespace BankingApi._2_Core.Customers._2_Application.UseCases;
 
-public sealed class CustomerUcUpdateEmail(
+public sealed class CustomerUcUpdate(
    ICustomerRepository repository,
    IUnitOfWork unitOfWork,
    IClock clock,
-   ILogger<CustomerUcUpdateEmail> logger
+   ILogger<CustomerUcUpdate> logger
 )  {
    
    public async Task<Result> ExecuteAsync(
@@ -26,7 +26,7 @@ public sealed class CustomerUcUpdateEmail(
       }
       
       // Update existing customer 
-      var resultEmail = customer.Update(
+      var resultUpdate = customer.Update(
          lastname: customer.Lastname,
          companyName: customer.CompanyName,
          emailVo: customer.EmailVo, 
@@ -34,8 +34,8 @@ public sealed class CustomerUcUpdateEmail(
          updatedAt: clock.UtcNow
       );
       
-      if (resultEmail.IsFailure) 
-         return Result.Failure(resultEmail.Error);
+      if (resultUpdate.IsFailure) 
+         return Result.Failure(resultUpdate.Error);
 
       // Save changes in database
       var savedRows = await unitOfWork.SaveAllChangesAsync("Email changes",ct);

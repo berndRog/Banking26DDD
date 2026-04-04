@@ -16,7 +16,7 @@ public sealed class AccountUcCreateIntT : TestBaseIntegration {
    public async Task Create_account_ok() {
       using var scope = Root.CreateDefaultScope();
       var ct = CancellationToken.None;
-      var dbContext = scope.ServiceProvider.GetRequiredService<BankingDbContext>();
+      var dbContext = scope.ServiceProvider.GetRequiredService<AppDbContext>();
       var customerRepository = scope.ServiceProvider.GetRequiredService<ICustomerRepository>();
       var employeeRepository = scope.ServiceProvider.GetRequiredService<IEmployeeRepository>();
       var accountRepository = scope.ServiceProvider.GetRequiredService<IAccountRepository>();
@@ -54,7 +54,7 @@ public sealed class AccountUcCreateIntT : TestBaseIntegration {
    public async Task Create_account_with_invalid_iban_fails() {
       using var scope = Root.CreateDefaultScope();
       var ct = CancellationToken.None;
-      var dbContext = scope.ServiceProvider.GetRequiredService<BankingDbContext>();
+      var dbContext = scope.ServiceProvider.GetRequiredService<AppDbContext>();
       var customerRepository = scope.ServiceProvider.GetRequiredService<ICustomerRepository>();
       var accountRepository = scope.ServiceProvider.GetRequiredService<IAccountRepository>();
       var unitOfWork = scope.ServiceProvider.GetRequiredService<IUnitOfWork>();

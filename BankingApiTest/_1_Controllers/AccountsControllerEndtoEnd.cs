@@ -27,7 +27,7 @@ public sealed class AccountsControllerEndToEnd : TestBaseEndToEnd {
       var customerId = customer1.Id;
       
       await Factory.WithScopeAsync(async serviceProvider => {
-         var db = serviceProvider.GetRequiredService<BankingDbContext>();
+         var db = serviceProvider.GetRequiredService<AppDbContext>();
          // seed here...
          db.Customers.Add(customer1);
          db.Accounts.Add(account1);
@@ -70,7 +70,7 @@ public sealed class AccountsControllerEndToEnd : TestBaseEndToEnd {
 
       // Assert (DB)
       await Factory.WithScopeAsync(async serviceProvider => {
-         var dbContext = serviceProvider.GetRequiredService<BankingDbContext>();
+         var dbContext = serviceProvider.GetRequiredService<AppDbContext>();
          
          // Domain-level checks
          var accounts = await dbContext.Accounts
@@ -101,7 +101,7 @@ public sealed class AccountsControllerEndToEnd : TestBaseEndToEnd {
       var accountId = account2.Id;
       
       await Factory.WithScopeAsync(async serviceProvider => {
-         var dbContext = serviceProvider.GetRequiredService<BankingDbContext>();
+         var dbContext = serviceProvider.GetRequiredService<AppDbContext>();
          var unitOfWork = serviceProvider.GetRequiredService<IUnitOfWork>();
          // seed here...
          dbContext.Customers.Add(customer1);
@@ -134,7 +134,7 @@ public sealed class AccountsControllerEndToEnd : TestBaseEndToEnd {
 
       // Assert (DB)
       await Factory.WithScopeAsync(async serviceProvider => {
-         var dbContext = serviceProvider.GetRequiredService<BankingDbContext>();
+         var dbContext = serviceProvider.GetRequiredService<AppDbContext>();
          
          // Domain-level checks
          var actualAccount = await dbContext.Accounts
@@ -161,7 +161,7 @@ public sealed class AccountsControllerEndToEnd : TestBaseEndToEnd {
       var account2 = _seed.Account2();
       
       await Factory.WithScopeAsync(async serviceProvider => {
-         var dbContext = serviceProvider.GetRequiredService<BankingDbContext>();
+         var dbContext = serviceProvider.GetRequiredService<AppDbContext>();
          var unitOfWork = serviceProvider.GetRequiredService<IUnitOfWork>();
          // seed here...
          dbContext.Customers.Add(customer1);
@@ -194,7 +194,7 @@ public sealed class AccountsControllerEndToEnd : TestBaseEndToEnd {
 
       // Assert (DB)
       await Factory.WithScopeAsync(async serviceProvider => {
-         var dbContext = serviceProvider.GetRequiredService<BankingDbContext>();
+         var dbContext = serviceProvider.GetRequiredService<AppDbContext>();
          
          // Domain-level checks
          var actualAccount = await dbContext.Accounts
@@ -218,7 +218,7 @@ public sealed class AccountsControllerEndToEnd : TestBaseEndToEnd {
       var accounts = _seed.Accounts;
       
       await Factory.WithScopeAsync(async serviceProvider => {
-         var dbContext = serviceProvider.GetRequiredService<BankingDbContext>();
+         var dbContext = serviceProvider.GetRequiredService<AppDbContext>();
          var unitOfWork = serviceProvider.GetRequiredService<IUnitOfWork>(); 
          dbContext.Accounts.AddRange(accounts);
          await unitOfWork.SaveAllChangesAsync("",ct);
@@ -250,7 +250,7 @@ public sealed class AccountsControllerEndToEnd : TestBaseEndToEnd {
 
       // Assert (DB)
       await Factory.WithScopeAsync(async serviceProvider => {
-         var dbContext = serviceProvider.GetRequiredService<BankingDbContext>();
+         var dbContext = serviceProvider.GetRequiredService<AppDbContext>();
          
          // Domain-level checks
          var actualAccount = await dbContext.Accounts
@@ -276,7 +276,7 @@ public sealed class AccountsControllerEndToEnd : TestBaseEndToEnd {
       var customerId = _seed.Customer1().Id;
       
       await Factory.WithScopeAsync(async serviceProvider => {
-         var dbContext = serviceProvider.GetRequiredService<BankingDbContext>();
+         var dbContext = serviceProvider.GetRequiredService<AppDbContext>();
          var unitOfWork = serviceProvider.GetRequiredService<IUnitOfWork>(); 
          dbContext.Customers.AddRange(Customers);
          dbContext.Accounts.AddRange(accounts);
@@ -313,7 +313,7 @@ public sealed class AccountsControllerEndToEnd : TestBaseEndToEnd {
       
       // Assert (DB)
       await Factory.WithScopeAsync(async serviceProvider => {
-         var dbContext = serviceProvider.GetRequiredService<BankingDbContext>();
+         var dbContext = serviceProvider.GetRequiredService<AppDbContext>();
          
          // Domain-level checks
          var actualAccountIds = await dbContext.Accounts
