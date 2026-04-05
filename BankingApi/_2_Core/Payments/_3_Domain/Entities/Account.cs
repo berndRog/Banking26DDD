@@ -122,8 +122,6 @@ public sealed class Account : AggregateRoot {
       Touch(deactivatedAt);
       return Result.Success();
    }
-
-   
    
    #region -------------------- Transactions --------------------------------------------
    // Debit = withdraw money from THIS account (Lastschrift)
@@ -279,7 +277,8 @@ public sealed class Account : AggregateRoot {
 /*
 Didaktik und Lernziele
    
-   In diesem Modell ist das Konto (Account) das zentrale Aggregate im Zahlungsverkehr.
+   In diesem Domännen-Modell ist das Konto (Account) das zentrale Aggregate im 
+   Zahlungsverkehr.
    
    Ein Account verwaltet:
    - seinen Kontostand (Balance)
