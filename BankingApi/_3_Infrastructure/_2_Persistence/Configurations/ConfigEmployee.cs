@@ -8,8 +8,8 @@ using Microsoft.EntityFrameworkCore.Metadata.Builders;
 namespace BankingApi._3_Infrastructure._2_Persistence.Configurations;
 
 public sealed class ConfigEmployee(
-   DateTimeOffsetToIsoStringConverter _dtConv,
-   DateTimeOffsetToIsoStringConverterNullable _dtConvNul
+   DateTimeOffsetToIsoStringConverter dtConv,
+   DateTimeOffsetToIsoStringConverterNullable dtConvNul
 ) : IEntityTypeConfiguration<Employee> {
 
    public void Configure(EntityTypeBuilder<Employee> builder) {
@@ -49,10 +49,10 @@ public sealed class ConfigEmployee(
       builder.Property(x => x.IsActive)
          .IsRequired();
       builder.Property(x => x.CreatedAt)
-         .HasConversion(_dtConv)
+         .HasConversion(dtConv)
          .IsRequired();
       builder.Property(x => x.DeactivatedAt)
-         .HasConversion(_dtConvNul)
+         .HasConversion(dtConvNul)
          .IsRequired(false);
       
       builder.Property(e => e.EmailVo)

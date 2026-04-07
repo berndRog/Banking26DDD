@@ -1,12 +1,10 @@
 using BankingApi._2_Core.BuildingBlocks;
 using BankingApi._2_Core.BuildingBlocks._1_Ports.Outbound;
-using BankingApi._2_Core.BuildingBlocks._3_Domain;
 using BankingApi._2_Core.Payments._1_Ports.Outbound;
 using BankingApi._2_Core.Payments._2_Application.Dtos;
 using BankingApi._2_Core.Payments._2_Application.Mappings;
 using BankingApi._2_Core.Payments._3_Domain.Entities;
 using BankingApi._2_Core.Payments._3_Domain.Errors;
-
 namespace BankingApi._2_Core.Payments._2_Application.UseCases;
 
 public sealed class TransferUcReverse(
@@ -66,8 +64,8 @@ public sealed class TransferUcReverse(
          bookedAt: bookedAt
       );
       if (resultDebit.IsFailure)
-         return Result<TransferDto>.Failure(resultDebit.Error!);
-      var debitTransaction = resultDebit.Value!;
+         return Result<TransferDto>.Failure(resultDebit.Error);
+      var debitTransaction = resultDebit.Value;
 
       // Post the credit on the account that originally sent the money.
       var resultCredit = creditAccount.PostCredit(
@@ -76,7 +74,7 @@ public sealed class TransferUcReverse(
          bookedAt: bookedAt
       );
       if (resultCredit.IsFailure)
-         return Result<TransferDto>.Failure(resultCredit.Error!);
+         return Result<TransferDto>.Failure(resultCredit.Error);
       var creditTransaction = resultCredit.Value!;
 
       // 5) Create and link reversal transfer ----------------------------------
@@ -91,8 +89,8 @@ public sealed class TransferUcReverse(
          bookedAt: bookedAt
       );
       if (reversalResult.IsFailure)
-         return Result<TransferDto>.Failure(reversalResult.Error!);
-      var reversalTransfer = reversalResult.Value!;
+         return Result<TransferDto>.Failure(reversalResult.Error);
+      var reversalTransfer = reversalResult.Value;
       
       // Add backward references from both transactions to the transfer.
       // This supports later navigation from a booking entry to the transfer.
@@ -111,7 +109,7 @@ public sealed class TransferUcReverse(
          bookedAt
       );
       if (markResult.IsFailure)
-         return Result<TransferDto>.Failure(markResult.Error!);
+         return Result<TransferDto>.Failure(markResult.Error);
 
       // 6) Persist changes ----------------------------------------------------
 

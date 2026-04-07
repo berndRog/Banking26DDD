@@ -46,7 +46,7 @@ public static class IbanGenerator {
    }
 
    private static int Mod97(string input) {
-      int remainder = 0;
+      var remainder = 0;
       foreach (var c in input)
          remainder = (remainder * 10 + (c - '0')) % 97;
 

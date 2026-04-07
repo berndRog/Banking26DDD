@@ -2,8 +2,8 @@ using BankingApi._2_Core.BuildingBlocks;
 using BankingApi._2_Core.BuildingBlocks._1_Ports.Outbound;
 using BankingApi._2_Core.BuildingBlocks._3_Domain;
 using BankingApi._2_Core.Customers._1_Ports.Outbound;
+using BankingApi._2_Core.Customers._3_Domain.Enum;
 using BankingApi._2_Core.Customers._3_Domain.Errors;
-using BankingApi._2_Modules.Customers._3_Domain.Enums;
 namespace BankingApi._2_Core.Customers._2_Application.UseCases;
 
 /// <summary>

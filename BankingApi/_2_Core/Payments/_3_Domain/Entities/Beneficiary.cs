@@ -45,7 +45,7 @@ public sealed class Beneficiary : Entity {
       if (string.IsNullOrWhiteSpace(name))
          return Result<Beneficiary>.Failure(BeneficiaryErrors.InvalidName);
       
-      var idResult = Entity.Resolve(id, BeneficiaryErrors.InvalidId);
+      var idResult = Resolve(id, BeneficiaryErrors.InvalidId);
       if (idResult.IsFailure)
          return Result<Beneficiary>.Failure(idResult.Error);
       var beneficiaryId = idResult.Value;

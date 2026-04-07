@@ -92,7 +92,7 @@ public sealed class Transaction : Entity {
       string? id = null
    ) {
       
-      var idResult = Entity.Resolve(id, TransactionErrors.InvalidId);
+      var idResult = Resolve(id, TransactionErrors.InvalidId);
       if (idResult.IsFailure)
          return Result<Transaction>.Failure(idResult.Error);
       var transactionId = idResult.Value;

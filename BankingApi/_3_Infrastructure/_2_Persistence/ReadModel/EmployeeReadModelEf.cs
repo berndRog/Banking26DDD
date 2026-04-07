@@ -1,7 +1,6 @@
 using System.Runtime.CompilerServices;
 using BankingApi._2_Core.BuildingBlocks;
 using BankingApi._2_Core.BuildingBlocks._1_Ports.Outbound;
-using BankingApi._2_Core.BuildingBlocks._3_Domain;
 using BankingApi._2_Core.BuildingBlocks._3_Domain.ValueObjects;
 using BankingApi._2_Core.Employees._1_Ports.Outbound;
 using BankingApi._2_Core.Employees._2_Application.Dtos;
@@ -10,7 +9,7 @@ using BankingApi._2_Core.Employees._3_Domain.Errors;
 using Microsoft.EntityFrameworkCore;
 [assembly: InternalsVisibleTo("BankingApiTest")]
 namespace BankingApi._3_Infrastructure._2_Persistence.ReadModel;
-sealed class EmployeeReadModelEf(
+internal sealed class EmployeeReadModelEf(
    IEmployeesDbContext employeesDbContext,
    IIdentityGateway identityGateway
 ) : IEmployeeReadModel {
@@ -30,10 +29,9 @@ sealed class EmployeeReadModelEf(
          .Select(o => o.Id)                 // project to Id only (map)
          .SingleOrDefaultAsync(ct);
 
-      if (id == Guid.Empty)
-         return Result<Guid>.Failure(EmployeeErrors.NotProvisioned);
-
-      return Result<Guid>.Success(id);
+      return id == Guid.Empty 
+         ? Result<Guid>.Failure(EmployeeErrors.NotProvisioned) 
+         : Result<Guid>.Success(id);
    }
    
    public async Task<Result<EmployeeDto>> FindMeAsync(CancellationToken ct) {
@@ -57,12 +55,12 @@ sealed class EmployeeReadModelEf(
    }
    
    public async Task<Result<EmployeeDto>> FindByIdAsync(
-      Guid Id,
+      Guid id,
       CancellationToken ct
    ) {
       var employeeDto = await employeesDbContext.Employees
          .AsNoTracking()
-         .Where(c => c.Id == Id)  // filter by Id
+         .Where(c => c.Id == id)  // filter by Id
          .Select(c => c.ToEmployeeDto())  // project to CustomerDto (map)
          .SingleOrDefaultAsync(ct);
 

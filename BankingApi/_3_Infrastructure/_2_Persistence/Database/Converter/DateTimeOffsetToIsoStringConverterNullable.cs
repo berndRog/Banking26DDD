@@ -15,5 +15,5 @@ public sealed class DateTimeOffsetToIsoStringConverterNullable()
             CultureInfo.InvariantCulture,
             DateTimeStyles.AssumeUniversal | DateTimeStyles.AdjustToUniversal
          )
-   ) {
-}
+   ); 
+

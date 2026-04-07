@@ -36,12 +36,14 @@ public sealed class UnitOfWork(
       var now = clock.UtcNow;
 
       foreach (var entry in dbContext.ChangeTracker.Entries<AggregateRoot>()) {
-         if (entry.State == EntityState.Added) {
-            entry.Property(nameof(AggregateRoot.CreatedAt)).CurrentValue = now;
-            entry.Property(nameof(AggregateRoot.UpdatedAt)).CurrentValue = now;
-         }
-         else if (entry.State == EntityState.Modified) {
-            entry.Property(nameof(AggregateRoot.UpdatedAt)).CurrentValue = now;
+         switch (entry.State) {
+            case EntityState.Added:
+               entry.Property(nameof(AggregateRoot.CreatedAt)).CurrentValue = now;
+               entry.Property(nameof(AggregateRoot.UpdatedAt)).CurrentValue = now;
+               break;
+            case EntityState.Modified:
+               entry.Property(nameof(AggregateRoot.UpdatedAt)).CurrentValue = now;
+               break;
          }
       }
    }

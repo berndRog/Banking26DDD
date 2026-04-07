@@ -2,7 +2,7 @@ using System.Runtime.CompilerServices;
 using BankingApi._2_Core.BuildingBlocks;
 using BankingApi._2_Core.Customers._1_Ports.Inbound;
 using BankingApi._2_Core.Customers._2_Application.Dtos;
-using BankingApi._2_Modules.Customers._3_Domain.Enums;
+using BankingApi._2_Core.Customers._3_Domain.Enum;
 [assembly: InternalsVisibleTo("BankingApiTest")]
 namespace BankingApi._2_Core.Customers._2_Application.UseCases;
 

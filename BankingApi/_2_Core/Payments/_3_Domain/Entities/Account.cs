@@ -1,8 +1,6 @@
 using BankingApi._2_Core.BuildingBlocks;
-using BankingApi._2_Core.BuildingBlocks._3_Domain;
 using BankingApi._2_Core.BuildingBlocks._3_Domain.Entities;
 using BankingApi._2_Core.BuildingBlocks._3_Domain.Errors;
-using BankingApi._2_Core.Customers._3_Domain.Enum;
 using BankingApi._2_Core.Customers._3_Domain.Errors;
 using BankingApi._2_Core.Payments._3_Domain.Enums;
 using BankingApi._2_Core.Payments._3_Domain.Errors;
@@ -45,7 +43,7 @@ public sealed class Account : AggregateRoot {
 
    //--- Ctors -----------------------------------------------------------------
    // EF Core ctor
-   private Account() : base() { }
+   private Account() { }
 
    // Domain ctor, to inject IClock for testing
    private Account(
@@ -54,7 +52,7 @@ public sealed class Account : AggregateRoot {
       IbanVo ibanVo,
       MoneyVo balanceVo,
       Guid createdByEmployeeId
-   ) : base() {
+   )  {
       Id = id;
       CustomerId = customerId;
       IbanVo = ibanVo;
@@ -84,7 +82,7 @@ public sealed class Account : AggregateRoot {
          return Result<Account>.Failure(resultVo.Error);
       var balanceVo = resultVo.Value;
       
-      var idResult = Entity.Resolve(id, AccountErrors.InvalidId);
+      var idResult = Resolve(id, AccountErrors.InvalidId);
       if (idResult.IsFailure)
          return Result<Account>.Failure(idResult.Error);
       var accountId = idResult.Value;

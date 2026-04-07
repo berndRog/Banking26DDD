@@ -1,4 +1,4 @@
-namespace WebApi._2_Core.BuildingBlocks._2_Application.Dtos;
+namespace BankingApi._2_Core.BuildingBlocks._2_Application.Dtos;
 
 public sealed record AddressDto(
    string  Street,

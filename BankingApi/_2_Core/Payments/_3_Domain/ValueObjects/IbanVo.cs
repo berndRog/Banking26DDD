@@ -1,7 +1,6 @@
 using System.ComponentModel.DataAnnotations.Schema;
 using System.Text;
 using BankingApi._2_Core.BuildingBlocks;
-using BankingApi._2_Core.BuildingBlocks._3_Domain;
 using BankingApi._2_Core.BuildingBlocks._3_Domain.Enums;
 using BankingApi._2_Core.BuildingBlocks._3_Domain.Errors;
 namespace BankingApi._2_Core.Payments._3_Domain.ValueObjects;
@@ -172,8 +171,8 @@ public sealed record class IbanVo {
       // Move first four chars to the end
       var rearranged = iban.Substring(4) + iban.Substring(0, 4);
 
-      int mod = 0;
-      for (int i = 0; i < rearranged.Length; i++) {
+      var mod = 0;
+      for (var i = 0; i < rearranged.Length; i++) {
          char c = rearranged[i];
 
          if (char.IsDigit(c)) {
@@ -182,7 +181,7 @@ public sealed record class IbanVo {
          }
 
          if (IsUpperAlpha(c)) {
-            int val = (c - 'A') + 10; // A=10 ... Z=35
+            var val = (c - 'A') + 10; // A=10 ... Z=35
             mod = (mod * 10 + (val / 10)) % 97;
             mod = (mod * 10 + (val % 10)) % 97;
             continue;

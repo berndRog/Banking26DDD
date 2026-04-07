@@ -49,8 +49,8 @@ public sealed class TransferUcSendMoney(
       // This ensures that money can only be sent to a registered recipient.
       var resultBeneficiary = debitAccount.FindBeneficiary(dto.BeneficiaryId);
       if (resultBeneficiary.IsFailure)
-         return Result<TransferDto>.Failure(resultBeneficiary.Error!);
-      var beneficiary = resultBeneficiary.Value!;
+         return Result<TransferDto>.Failure(resultBeneficiary.Error);
+      var beneficiary = resultBeneficiary.Value;
 
       // Resolve the credit account via the beneficiary's IBAN.
       var creditAccount = await accountRepository.FindByIbanAsync(beneficiary.IbanVo, ct);
@@ -70,22 +70,22 @@ public sealed class TransferUcSendMoney(
          amountVo: amountVo,
          purpose: dto.Purpose,
          bookedAt: bookedAt,
-         id: dto.debitId
+         id: dto.DebitId
       );
       if (resultDebit.IsFailure)
-         return Result<TransferDto>.Failure(resultDebit.Error!);
-      var debitTransaction = resultDebit.Value!;
+         return Result<TransferDto>.Failure(resultDebit.Error);
+      var debitTransaction = resultDebit.Value;
 
       // Post the credit transaction on the receiver account.
       var resultCredit = creditAccount.PostCredit(
          amountVo: amountVo,
          purpose: dto.Purpose,
          bookedAt: bookedAt,
-         id: dto.creditId
+         id: dto.CreditId
       );
       if (resultCredit.IsFailure)
-         return Result<TransferDto>.Failure(resultCredit.Error!);
-      var creditTransaction = resultCredit.Value!;
+         return Result<TransferDto>.Failure(resultCredit.Error);
+      var creditTransaction = resultCredit.Value;
 
       // Create the transfer entity that represents the complete business operation.
       // It links sender account, receiver account, debit booking, and credit booking.
@@ -100,8 +100,8 @@ public sealed class TransferUcSendMoney(
          id: dto.Id.ToString()
       );
       if (transferResult.IsFailure)
-         return Result<TransferDto>.Failure(transferResult.Error!);
-      var transfer = transferResult.Value!;
+         return Result<TransferDto>.Failure(transferResult.Error);
+      var transfer = transferResult.Value;
 
       // Add backward references from both transactions to the transfer.
       // This supports later navigation from a booking entry to the transfer.

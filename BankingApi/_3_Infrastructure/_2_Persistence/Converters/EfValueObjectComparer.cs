@@ -129,7 +129,7 @@ public static class EfValueObjectComparer {
       Expression replacement
    ) {
       return new ReplaceVisitor(expr.Parameters[0], replacement)
-         .Visit(expr.Body)!;
+         .Visit(expr.Body);
    }
 
    private sealed class ReplaceVisitor : ExpressionVisitor {

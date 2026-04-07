@@ -30,7 +30,7 @@ public sealed class Employee : AggregateRoot {
       AdminRights.ViewEmployees | AdminRights.ManageEmployees; 
    
    // EF Core constructor
-   private Employee(): base() { }
+   private Employee() { }
 
    // Domain constructor
    private Employee(
@@ -43,7 +43,7 @@ public sealed class Employee : AggregateRoot {
       string personnelNumber,
       AdminRights adminRights,
       bool isActive
-   ): base() {
+   ) {
       Id = id;
       Firstname = firstname;
       Lastname  = lastname;

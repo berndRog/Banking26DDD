@@ -24,9 +24,9 @@ namespace BankingApi._2_Core.Employees._2_Application.UseCases;
 /// </summary>
 public sealed class EmployeeUcCreate(
    IIdentityGateway identityGateway,
-   IEmployeeRepository _repository,
-   IUnitOfWork _unitOfWork,
-   ILogger<EmployeeUcCreate> _logger
+   IEmployeeRepository repository,
+   IUnitOfWork unitOfWork,
+   ILogger<EmployeeUcCreate> logger
 ) {
    public async Task<Result<EmployeeDto>> ExecuteAsync(
       EmployeeDto employeeDto,
@@ -53,10 +53,10 @@ public sealed class EmployeeUcCreate(
       var phoneVo = resultPhone.Value;
       
       // ---- Uniqueness checks (I/O) ----
-      if (await _repository.FindByEmailAsync(emailVo, ct) != null)
+      if (await repository.FindByEmailAsync(emailVo, ct) != null)
          return Result<EmployeeDto>.Failure(EmployeeErrors.EmailMustBeUnique);
 
-      if (await _repository.FindByPersonnelNumberAsync(employeeDto.PersonnelNumber, ct) != null)
+      if (await repository.FindByPersonnelNumberAsync(employeeDto.PersonnelNumber, ct) != null)
          return Result<EmployeeDto>.Failure(EmployeeErrors.PersonnelNumberMustBeUnique);
 
       // ---- Domain factory (invariants) ----
@@ -72,18 +72,18 @@ public sealed class EmployeeUcCreate(
       );
       if (result.IsFailure)
          return Result<EmployeeDto>.Failure(result.Error)
-            .LogIfFailure(_logger, "EmployeeUcCreate.DomainRejected", 
+            .LogIfFailure(logger, "EmployeeUcCreate.DomainRejected", 
                new { employeeDto.Firstname, employeeDto.Lastname, emailVo, phoneVo, 
                   subject, employeeDto.PersonnelNumber, identityGateway.AdminRights });
 
       // Add to repository
       var employee = result.Value!;
-      _repository.Add(employee);
+      repository.Add(employee);
 
       // Persist via UnitOfWork
-      var savedRows = await _unitOfWork.SaveAllChangesAsync("Employee created", ct);
+      var savedRows = await unitOfWork.SaveAllChangesAsync("Employee created", ct);
 
-      _logger.LogInformation(
+      logger.LogInformation(
          "EmployeeUcCreate done Id={id} personnelNumber={nr} savedRows={rows}",
          employee.Id, employee.PersonnelNumber, savedRows);
 

@@ -1,11 +1,10 @@
+using System.Diagnostics.CodeAnalysis;
 using BankingApi._2_Core.BuildingBlocks;
-using BankingApi._2_Core.BuildingBlocks._3_Domain;
 using BankingApi._2_Core.BuildingBlocks._3_Domain.Entities;
 using BankingApi._2_Core.BuildingBlocks._3_Domain.Errors;
 using BankingApi._2_Core.BuildingBlocks._3_Domain.ValueObjects;
 using BankingApi._2_Core.Customers._3_Domain.Enum;
 using BankingApi._2_Core.Customers._3_Domain.Errors;
-using BankingApi._2_Modules.Customers._3_Domain.Enums;
 namespace BankingApi._2_Core.Customers._3_Domain.Entities;
 
 public sealed class Customer : AggregateRoot {
@@ -63,7 +62,7 @@ public sealed class Customer : AggregateRoot {
    }
 
    // Domain constructor (used by factories)
-   [System.Diagnostics.CodeAnalysis.SetsRequiredMembers]
+   [SetsRequiredMembers]
    private Customer(
       Guid id,
       string firstname,

@@ -35,46 +35,46 @@ public sealed class Seed(
       adminRights: (AdminRights) 511
    );
 
-   public IReadOnlyList<Employee> Employees => new List<Employee>() {
+   public IReadOnlyList<Employee> Employees => new List<Employee> {
       Employee1(), Employee2()
    };
    #endregion
 
    #region -------------- Test Addresses (Value Objects) -------------------------------------
-   public AddressVo Address1Vo
+   public static AddressVo Address1Vo
       => AddressVo.Create("Hauptstr. 23", "29556", "Suderburg", "DE").GetValueOrThrow();
 
-   public AddressVo Address2Vo
+   public static AddressVo Address2Vo
       => AddressVo.Create("Hauptstr. 23", "29556", "Suderburg", "DE").GetValueOrThrow();
 
-   public AddressVo Address3Vo
+   public static AddressVo Address3Vo
       => AddressVo.Create("Neuperverstraße. 29", "29410", "Salzwedel").GetValueOrThrow();
 
-   public AddressVo Address4Vo
+   public static AddressVo Address4Vo
       => AddressVo.Create("Schillerstr. 1", "30123", "Hannover", "DE").GetValueOrThrow();
 
-   public AddressVo Address5Vo
+   public static AddressVo Address5Vo
       => AddressVo.Create("Berliner Platz 8", "29614", "Soltau", "DE").GetValueOrThrow();
 
-   public AddressVo Address6Vo
+   public static AddressVo Address6Vo
       => AddressVo.Create("Allertalweg. 2", "29227", "Celle", "DE").GetValueOrThrow();
 
-   public AddressVo AddressRegVo
+   public static AddressVo AddressRegVo
       => AddressVo.Create("Am Markt 14", "04109", "Leipzig", "DE").GetValueOrThrow();
    #endregion
 
    #region -------------- Test Customers (Entities) ------------------------------------------
-   public string customer1Id = "10000000-0000-0000-0000-000000000000";
-   public string customer2Id = "20000000-0000-0000-0000-000000000000";
-   public string customer3Id = "30000000-0000-0000-0000-000000000000";
-   public string customer4Id = "40000000-0000-0000-0000-000000000000";
-   public string customer5Id = "50000000-0000-0000-0000-000000000000";
-   public string customer6Id = "60000000-0000-0000-0000-000000000000";
+   private const string Customer1Id = "10000000-0000-0000-0000-000000000000";
+   private const string Customer2Id = "20000000-0000-0000-0000-000000000000";
+   private const string Customer3Id = "30000000-0000-0000-0000-000000000000";
+   private const string Customer4Id = "40000000-0000-0000-0000-000000000000";
+   private const string Customer5Id = "50000000-0000-0000-0000-000000000000";
+   private const string Customer6Id = "60000000-0000-0000-0000-000000000000";
 
-   public string customerRegister = "70000000-0000-0000-0000-000000000000";
+   private const string _customerRegister = "70000000-0000-0000-0000-000000000000";
 
    public Customer Customer1() => CreateCustomer(
-      id: customer1Id,
+      id: Customer1Id,
       firstname: "Erika",
       lastname: "Mustermann",
       companyName: null,
@@ -84,7 +84,7 @@ public sealed class Seed(
    );
 
    public Customer Customer2() => CreateCustomer(
-      id: customer2Id,
+      id: Customer2Id,
       firstname: "Max",
       lastname: "Mustermann",
       companyName: null,
@@ -94,7 +94,7 @@ public sealed class Seed(
    );
 
    public Customer Customer3() => CreateCustomer(
-      id: customer3Id,
+      id: Customer3Id,
       firstname: "Arno",
       lastname: "Arndt",
       companyName: null,
@@ -104,7 +104,7 @@ public sealed class Seed(
    );
 
    public Customer Customer4() => CreateCustomer(
-      id: customer4Id,
+      id: Customer4Id,
       firstname: "Benno",
       lastname: "Bauer",
       companyName: null,
@@ -114,7 +114,7 @@ public sealed class Seed(
    );
 
    public Customer Customer5() => CreateCustomer(
-      id: customer5Id,
+      id: Customer5Id,
       firstname: "Christine",
       lastname: "Conrad",
       companyName: "Conrad Consulting GmbH",
@@ -124,7 +124,7 @@ public sealed class Seed(
    );
 
    public Customer Customer6() => CreateCustomer(
-      id: customer6Id,
+      id: Customer6Id,
       firstname: "Dana",
       lastname: "Deppe",
       companyName: null,
@@ -134,7 +134,7 @@ public sealed class Seed(
    );
 
    public Customer CustomerRegister() => CreateCustomer(
-      id: customerRegister,
+      id: _customerRegister,
       firstname: "Edgar",
       lastname: "Engel",
       companyName: null,
@@ -149,279 +149,280 @@ public sealed class Seed(
    #endregion
 
    #region -------------- Test Iban (Value Objects) ------------------------------------------
-   public string Iban1 = "DE10 1000 0000 0000 0000 42";
-   public string Iban2 = "DE10 2000 0000 0000 0000 04";
-   public string Iban3 = "DE20 1000 0000 0000 0000 56";
-   public string Iban4 = "DE30 1000 0000 0000 0000 70";
-   public string Iban5 = "DE40 1000 0000 0000 0000 84";
-   public string Iban6 = "DE50 1000 0000 0000 0000 01";
-   public string Iban7 = "DE50 2000 0000 0000 0000 60";
-   public string Iban8 = "DE60 1000 0000 0000 0000 15";
+   private const string Iban1 = "DE10 1000 0000 0000 0000 42";
+   private const string Iban2 = "DE10 2000 0000 0000 0000 04";
+   private const string Iban3 = "DE20 1000 0000 0000 0000 56";
+   private const string Iban4 = "DE30 1000 0000 0000 0000 70";
+   private const string Iban5 = "DE40 1000 0000 0000 0000 84";
+   private const string Iban6 = "DE50 1000 0000 0000 0000 01";
+   private const string Iban7 = "DE50 2000 0000 0000 0000 60";
+   private const string Iban8 = "DE60 1000 0000 0000 0000 15";
    #endregion
 
    #region -------------- Test Accounts (Entities) -------------------------------------------
-   public string account1Id = "01000000-0000-0000-0000-000000000000";
-   public string account2Id = "02000000-0000-0000-0000-000000000000";
-   public string account3Id = "03000000-0000-0000-0000-000000000000";
-   public string account4Id = "04000000-0000-0000-0000-000000000000";
-   public string account5Id = "05000000-0000-0000-0000-000000000000";
-   public string account6Id = "06000000-0000-0000-0000-000000000000";
-   public string account7Id = "07000000-0000-0000-0000-000000000000";
-   public string account8Id = "08000000-0000-0000-0000-000000000000";
+   private const string Account1Id = "01000000-0000-0000-0000-000000000000";
+   private const string Account2Id = "02000000-0000-0000-0000-000000000000";
+   private const string Account3Id = "03000000-0000-0000-0000-000000000000";
+   private const string Account4Id = "04000000-0000-0000-0000-000000000000";
+   private const string Account5Id = "05000000-0000-0000-0000-000000000000";
+   private const string Account6Id = "06000000-0000-0000-0000-000000000000";
+   private const string Account7Id = "07000000-0000-0000-0000-000000000000";
+   private const string Account8Id = "08000000-0000-0000-0000-000000000000";
 
    public Account Account1() => CreateAccount(
-      id: account1Id,
-      customerId: Guid.Parse(customer1Id),
+      id: Account1Id,
+      customerId: Guid.Parse(Customer1Id),
       iban: Iban1,
       balance: 2100.0m
    );
 
    public Account Account2() => CreateAccount(
-      id: account2Id,
-      customerId: Guid.Parse(customer1Id),
+      id: Account2Id,
+      customerId: Guid.Parse(Customer1Id),
       iban: Iban2,
       balance: 2000.0m
    );
 
    public Account Account3() => CreateAccount(
-      id: account3Id,
-      customerId: Guid.Parse(customer2Id),
+      id: Account3Id,
+      customerId: Guid.Parse(Customer2Id),
       iban: Iban3,
       balance: 3000.0m
    );
 
    public Account Account4() => CreateAccount(
-      id: account4Id,
-      customerId: Guid.Parse(customer3Id),
+      id: Account4Id,
+      customerId: Guid.Parse(Customer3Id),
       iban: Iban4,
       balance: 2500.0m
    );
 
    public Account Account5() => CreateAccount(
-      id: account5Id,
-      customerId: Guid.Parse(customer4Id),
+      id: Account5Id,
+      customerId: Guid.Parse(Customer4Id),
       iban: Iban5,
       balance: 1900.0m
    );
 
    public Account Account6() => CreateAccount(
-      id: account6Id,
-      customerId: Guid.Parse(customer5Id),
+      id: Account6Id,
+      customerId: Guid.Parse(Customer5Id),
       iban: Iban6,
       balance: 3500.0m
    );
 
    public Account Account7() => CreateAccount(
-      id: account7Id,
-      customerId: Guid.Parse(customer5Id),
+      id: Account7Id,
+      customerId: Guid.Parse(Customer5Id),
       iban: Iban7,
       balance: 3100.0m
    );
 
    public Account Account8() => CreateAccount(
-      id: account8Id,
-      customerId: Guid.Parse(customer6Id),
+      id: Account8Id,
+      customerId: Guid.Parse(Customer6Id),
       iban: Iban8,
       balance: 4300.0m
    );
 
    public IReadOnlyList<Account> Accounts => [
       Account1(), Account2(), Account3(), Account4(),
-      Account5(), Account6(), Account7(), Account8(),
+      Account5(), Account6(), Account7(), Account8()
    ];
    #endregion
 
    #region -------------- Test Beneficiaries (Entities) --------------------------------------
-   public string beneficiary1Id = "00100000-0000-0000-0000-000000000000";
-   public string beneficiary2Id = "00200000-0000-0000-0000-000000000000";
-   public string beneficiary3Id = "00300000-0000-0000-0000-000000000000";
-   public string beneficiary4Id = "00400000-0000-0000-0000-000000000000";
-   public string beneficiary5Id = "00500000-0000-0000-0000-000000000000";
-   public string beneficiary6Id = "00600000-0000-0000-0000-000000000000";
-   public string beneficiary7Id = "00700000-0000-0000-0000-000000000000";
-   public string beneficiary8Id = "00800000-0000-0000-0000-000000000000";
-   public string beneficiary9Id = "00900000-0000-0000-0000-000000000000";
-   public string beneficiary10Id = "01000000-0000-0000-0000-000000000000";
-   public string beneficiary11Id = "01100000-0000-0000-0000-000000000000";
+   private const string Beneficiary1Id = "00100000-0000-0000-0000-000000000000";
+   private const string Beneficiary2Id = "00200000-0000-0000-0000-000000000000";
+   private const string Beneficiary3Id = "00300000-0000-0000-0000-000000000000";
+   private const string Beneficiary4Id = "00400000-0000-0000-0000-000000000000";
+   private const string Beneficiary5Id = "00500000-0000-0000-0000-000000000000";
+   private const string Beneficiary6Id = "00600000-0000-0000-0000-000000000000";
+   private const string Beneficiary7Id = "00700000-0000-0000-0000-000000000000";
+   private const string Beneficiary8Id = "00800000-0000-0000-0000-000000000000";
+   private const string Beneficiary9Id = "00900000-0000-0000-0000-000000000000";
+   private const string Beneficiary10Id = "01000000-0000-0000-0000-000000000000";
+   private const string Beneficiary11Id = "01100000-0000-0000-0000-000000000000";
 
    public Beneficiary Beneficiary1() => CreateBeneficiary(
-      id: beneficiary1Id,
-      accountId: Guid.Parse(account1Id),
+      id: Beneficiary1Id,
+      accountId: Guid.Parse(Account1Id),
       name: Customer5().DisplayName,
       iban: Iban6
    );
 
    public Beneficiary Beneficiary2() => CreateBeneficiary(
-      id: beneficiary2Id,
-      accountId: Guid.Parse(account1Id),
+      id: Beneficiary2Id,
+      accountId: Guid.Parse(Account1Id),
       name: Customer5().DisplayName,
       iban: Iban7
    );
 
    public Beneficiary Beneficiary3() => CreateBeneficiary(
-      id: beneficiary3Id,
-      accountId: Guid.Parse(account2Id),
+      id: Beneficiary3Id,
+      accountId: Guid.Parse(Account2Id),
       name: Customer3().DisplayName,
       iban: Iban4
    );
 
    public Beneficiary Beneficiary4() => CreateBeneficiary(
-      id: beneficiary4Id,
-      accountId: Guid.Parse(account2Id),
+      id: Beneficiary4Id,
+      accountId: Guid.Parse(Account2Id),
       name: Customer4().DisplayName,
       iban: Iban5
    );
 
    public Beneficiary Beneficiary5() => CreateBeneficiary(
-      id: beneficiary5Id,
+      id: Beneficiary5Id,
       accountId: Guid.Empty,
       name: Customer3().DisplayName,
       iban: Iban4
    );
 
    public Beneficiary Beneficiary6() => CreateBeneficiary(
-      id: beneficiary6Id,
+      id: Beneficiary6Id,
       accountId: Guid.Empty,
       name: Customer4().DisplayName,
       iban: Iban5
    );
 
    public Beneficiary Beneficiary7() => CreateBeneficiary(
-      id: beneficiary7Id,
+      id: Beneficiary7Id,
       accountId: Guid.Empty,
       name: Customer6().DisplayName,
       iban: Iban8
    );
 
    public Beneficiary Beneficiary8() => CreateBeneficiary(
-      id: beneficiary8Id,
+      id: Beneficiary8Id,
       accountId: Guid.Empty,
       name: Customer2().DisplayName,
       iban: Iban3
    );
 
    public Beneficiary Beneficiary9() => CreateBeneficiary(
-      id: beneficiary9Id,
+      id: Beneficiary9Id,
       accountId: Guid.Empty,
       name: Customer6().DisplayName,
       iban: Iban6
    );
 
    public Beneficiary Beneficiary10() => CreateBeneficiary(
-      id: beneficiary10Id,
+      id: Beneficiary10Id,
       accountId: Guid.Empty,
       name: Customer1().DisplayName,
       iban: Iban1
    );
 
    public Beneficiary Beneficiary11() => CreateBeneficiary(
-      id: beneficiary11Id,
+      id: Beneficiary11Id,
       accountId: Guid.Empty,
       name: Customer1().DisplayName,
       iban: Iban2
    );
 
-   private List<Beneficiary> _beneficiaries = new();
+   private readonly List<Beneficiary> _beneficiaries = [];
    public IReadOnlyList<Beneficiary> Beneficiaries => _beneficiaries.AsReadOnly();
    #endregion
 
    #region -------------- Test Transactions (Entities) ---------------------------------------
-   public string transaction1dId = "0001d000-0000-0000-0000-000000000000";
-   public string transaction1cId = "0001c000-0000-0000-0000-000000000000";
-   public string transaction2dId = "0002d000-0000-0000-0000-000000000000";
-   public string transaction2cId = "0002c000-0000-0000-0000-000000000000";
-   public string transaction3dId = "0003d000-0000-0000-0000-000000000000";
-   public string transaction3cId = "0003c000-0000-0000-0000-000000000000";
-   public string transaction4dId = "0004d000-0000-0000-0000-000000000000";
-   public string transaction4cId = "0004c000-0000-0000-0000-000000000000";
-   public string transaction5dId = "0005d000-0000-0000-0000-000000000000";
-   public string transaction5cId = "0005c000-0000-0000-0000-000000000000";
-   public string transaction6dId = "0006d000-0000-0000-0000-000000000000";
-   public string transaction6cId = "0006c000-0000-0000-0000-000000000000";
-   public string transaction7dId = "0007d000-0000-0000-0000-000000000000";
-   public string transaction7cId = "0007c000-0000-0000-0000-000000000000";
-   public string transaction8dId = "0008d000-0000-0000-0000-000000000000";
-   public string transaction8cId = "0008c000-0000-0000-0000-000000000000";
-   public string transaction9dId = "0009d000-0000-0000-0000-000000000000";
-   public string transaction9cId = "0009c000-0000-0000-0000-000000000000";
-   public string transaction10dId = "0010d000-0000-0000-0000-000000000000";
-   public string transaction10cId = "0010c000-0000-0000-0000-000000000000";
-   public string transaction11dId = "0011d000-0000-0000-0000-000000000000";
-   public string transaction11cId = "0011c000-0000-0000-0000-000000000000";
+   private const string Transaction1DId = "0001d000-0000-0000-0000-000000000000";
+   private const string Transaction1CId = "0001c000-0000-0000-0000-000000000000";
+   private const string Transaction2DId = "0002d000-0000-0000-0000-000000000000";
+   private const string Transaction2CId = "0002c000-0000-0000-0000-000000000000";
+   private const string Transaction3DId = "0003d000-0000-0000-0000-000000000000";
+   private const string Transaction3CId = "0003c000-0000-0000-0000-000000000000";
+   private const string Transaction4DId = "0004d000-0000-0000-0000-000000000000";
+   private const string Transaction4CId = "0004c000-0000-0000-0000-000000000000";
+   private const string Transaction5DId = "0005d000-0000-0000-0000-000000000000";
+   private const string Transaction5CId = "0005c000-0000-0000-0000-000000000000";
+   private const string Transaction6DId = "0006d000-0000-0000-0000-000000000000";
+   private const string Transaction6CId = "0006c000-0000-0000-0000-000000000000";
+   private const string Transaction7DId = "0007d000-0000-0000-0000-000000000000";
+   private const string Transaction7CId = "0007c000-0000-0000-0000-000000000000";
+   private const string Transaction8DId = "0008d000-0000-0000-0000-000000000000";
+   private const string Transaction8CId = "0008c000-0000-0000-0000-000000000000";
+   private const string Transaction9DId = "0009d000-0000-0000-0000-000000000000";
+   private const string Transaction9CId = "0009c000-0000-0000-0000-000000000000";
+   private const string Transaction10DId = "0010d000-0000-0000-0000-000000000000";
+   private const string Transaction10CId = "0010c000-0000-0000-0000-000000000000";
+   private const string Transaction11DId = "0011d000-0000-0000-0000-000000000000";
+   private const string Transaction11CId = "0011c000-0000-0000-0000-000000000000";
 
    
-   public Transaction Transaction1d() => CreateDebitTransaction(
-      id: transaction1dId,
-      accountId: Guid.Parse(account1Id),
+   public Transaction Transaction1D() => CreateDebitTransaction(
+      id: Transaction1DId,
+      accountId: Guid.Parse(Account1Id),
       purpose: "Erika1 an Chris1",
       amount: 345.0m,
       balance: Account1().BalanceVo.Amount
    );
-   public Transaction Transaction1c() => CreateCreditTransaction(
-      id: transaction1cId,
-      accountId: Guid.Parse(account6Id),
+   public Transaction Transaction1C() => CreateCreditTransaction(
+      id: Transaction1CId,
+      accountId: Guid.Parse(Account6Id),
       purpose: "Erika1 an Chris1",
       amount: 345.0m,
       balance: Account6().BalanceVo.Amount
    );
-   public Transaction Transaction2d() => CreateDebitTransaction(
-      id: transaction2dId,
-      accountId: Guid.Parse(account1Id),
+   public Transaction Transaction2D() => CreateDebitTransaction(
+      id: Transaction2DId,
+      accountId: Guid.Parse(Account1Id),
       purpose: "Erika1 an Chris2",
       amount: 231.0m,
       balance: Account1().BalanceVo.Amount
    );
-   public Transaction Transaction2c() => CreateCreditTransaction(
-      id: transaction2cId,
-      accountId: Guid.Parse(account7Id),
+   public Transaction Transaction2C() => CreateCreditTransaction(
+      id: Transaction2CId,
+      accountId: Guid.Parse(Account7Id),
       purpose: "Erika1 an Chris2",
       amount: 231.0m,
       balance: Account7().BalanceVo.Amount
    );
-   private List<Transaction> _transactions = new();
+   private List<Transaction> _transactions = [];
    public IReadOnlyList<Transaction> Transactions => _transactions.AsReadOnly();
    #endregion
 
    #region -------------- Test Transfers (Entities) ------------------------------------------
-   public string transfer1Id = "00010000-0000-0000-0000-000000000000";
-   public string transfer2Id = "00020000-0000-0000-0000-000000000000";
-   public string transfer3Id = "00030000-0000-0000-0000-000000000000";
-   public string transfer4Id = "00040000-0000-0000-0000-000000000000";
-   public string transfer5Id = "00050000-0000-0000-0000-000000000000";
-   public string transfer6Id = "00060000-0000-0000-0000-000000000000";
-   public string transfer7Id = "00070000-0000-0000-0000-000000000000";
-   public string transfer8Id = "00080000-0000-0000-0000-000000000000";
-   public string transfer9Id = "00090000-0000-0000-0000-000000000000";
-   public string transfer10Id = "00100000-0000-0000-0000-000000000000";
-   public string transfer11Id = "00110000-0000-0000-0000-000000000000";
+   private const string Transfer1Id = "00010000-0000-0000-0000-000000000000";
+   private const string Transfer2Id = "00020000-0000-0000-0000-000000000000";
+   private const string Transfer3Id = "00030000-0000-0000-0000-000000000000";
+   private const string Transfer4Id = "00040000-0000-0000-0000-000000000000";
+   private const string Transfer5Id = "00050000-0000-0000-0000-000000000000";
+   private const string Transfer6Id = "00060000-0000-0000-0000-000000000000";
+   private const string Transfer7Id = "00070000-0000-0000-0000-000000000000";
+   private const string Transfer8Id = "00080000-0000-0000-0000-000000000000";
+   private const string Transfer9Id = "00090000-0000-0000-0000-000000000000";
+   private const string Transfer10Id = "00100000-0000-0000-0000-000000000000";
+   private const string Transfer11Id = "00110000-0000-0000-0000-000000000000";
    
    public Transfer Transfer1() => CreateTransfer(
-      id: transfer1Id,
-      debitAccountId: Guid.Parse(account1Id),
+      id: Transfer1Id,
+      debitAccountId: Guid.Parse(Account1Id),
       creditAccountIban: Iban6,
       amount: 345.0m,
       purpose: "Erika an Chris1",
-      debitTransactionId: Guid.Parse(transaction1dId),
-      creditTransactionId: Guid.Parse(transaction1cId)
+      debitTransactionId: Guid.Parse(Transaction1DId),
+      creditTransactionId: Guid.Parse(Transaction1CId)
    );
 
    public Transfer Transfer2() => CreateTransfer(
-      id: transfer2Id,
-      debitAccountId: Guid.Parse(account1Id),
+      id: Transfer2Id,
+      debitAccountId: Guid.Parse(Account1Id),
       creditAccountIban: Iban7,
       amount: 231.0m,
       purpose: "Erika an Chris2",
-      debitTransactionId: Guid.Parse(transaction2dId),
-      creditTransactionId: Guid.Parse(transaction2cId)
+      debitTransactionId: Guid.Parse(Transaction2DId),
+      creditTransactionId: Guid.Parse(Transaction2CId)
    );
    
-   private List<Transfer> _transfers = new List<Transfer>();
+   private readonly List<Transfer> _transfers = [];
    public IReadOnlyList<Transfer> Transfers => _transfers.AsReadOnly();
    #endregion
 
    public List<Account> AddBeneficiariesToAccounts() {
       var accounts = Accounts.ToList();
 
+      // Account 1 -> Beneficary 1 + 2 
       AddBeneficaryToAccount(
          account: accounts[0],
          beneficiary: Beneficiary1(),
@@ -432,7 +433,7 @@ public sealed class Seed(
          beneficiary: Beneficiary2(),
          createdAt: clock.UtcNow
       );
-      
+      // Account 1 -> Beneficary 3 + 4
       AddBeneficaryToAccount(
          account: accounts[1],
          beneficiary: Beneficiary3(),
@@ -443,7 +444,7 @@ public sealed class Seed(
          beneficiary: Beneficiary4(),
          createdAt: clock.UtcNow
       );
-      
+      // Account 3 -> Beneficary 5 + 6 + 7
       AddBeneficaryToAccount(
          account: accounts[2],
          beneficiary: Beneficiary5(),
@@ -459,8 +460,7 @@ public sealed class Seed(
          beneficiary: Beneficiary7(),
          createdAt: clock.UtcNow
       );
-      
-      accounts[3].AddBeneficiary(Beneficiary8(), clock.UtcNow);
+      // Account 4 -> Beneficary 8 + 9 
       AddBeneficaryToAccount(
          account: accounts[3],
          beneficiary: Beneficiary8(),
@@ -471,8 +471,7 @@ public sealed class Seed(
          beneficiary: Beneficiary9(),
          createdAt: clock.UtcNow
       );
-      
-
+      // Account 5 -> Beneficary 10 + 11 
       AddBeneficaryToAccount(
          account: accounts[4],
          beneficiary: Beneficiary10(),
@@ -506,9 +505,9 @@ public sealed class Seed(
          amount: MoneyVo.Create(345.0m,Currency.EUR).GetValueOrThrow(),
          purpose: "Erika 1 an Chris1",
          bookedAt: bookedAt,
-         transactionDebitId: transaction1dId,
-         transactionCreditId: transaction1cId,
-         transferId: transfer1Id.ToString()
+         transactionDebitId: Transaction1DId,
+         transactionCreditId: Transaction1CId,
+         transferId: Transfer1Id
       );
 
       SendMoney( // Transfer 2: Account 1 --> Account 7
@@ -517,9 +516,9 @@ public sealed class Seed(
          amount: MoneyVo.Create(231.0m,Currency.EUR).GetValueOrThrow(),
          purpose: "Erika 1 an Chris2",
          bookedAt: bookedAt,
-         transactionDebitId: transaction2dId,
-         transactionCreditId: transaction2cId,
-         transferId: transfer2Id.ToString()
+         transactionDebitId: Transaction2DId,
+         transactionCreditId: Transaction2CId,
+         transferId: Transfer2Id
       );
 
       // Erika 2 an ...
@@ -529,9 +528,9 @@ public sealed class Seed(
          amount: MoneyVo.Create(289.0m, Currency.EUR).GetValueOrThrow(),
          purpose: "Erika 2 an Arne",
          bookedAt: bookedAt,
-         transactionDebitId: transaction3dId,
-         transactionCreditId: transaction3cId,
-         transferId: transfer3Id.ToString()
+         transactionDebitId: Transaction3DId,
+         transactionCreditId: Transaction3CId,
+         transferId: Transfer3Id
       );
 
       SendMoney( // Transfer 4: Account 2 --> Account 5
@@ -540,9 +539,9 @@ public sealed class Seed(
          amount: MoneyVo.Create(125.0m, Currency.EUR).GetValueOrThrow(),
          purpose: "Erika 2 an Benno",
          bookedAt: bookedAt,
-         transactionDebitId: transaction4dId,
-         transactionCreditId: transaction4cId,
-         transferId: transfer4Id.ToString()
+         transactionDebitId: Transaction4DId,
+         transactionCreditId: Transaction4CId,
+         transferId: Transfer4Id
       );
 
       // Max ... 
@@ -552,9 +551,9 @@ public sealed class Seed(
          amount: MoneyVo.Create(167.0m,  Currency.EUR).GetValueOrThrow(),
          purpose: "Max an Arne",
          bookedAt: bookedAt,
-         transactionDebitId: transaction5dId,
-         transactionCreditId: transaction5cId,
-         transferId: transfer5Id.ToString()
+         transactionDebitId: Transaction5DId,
+         transactionCreditId: Transaction5CId,
+         transferId: Transfer5Id
       );
 
       SendMoney( // Transfer 6: Account 3 --> Account 5
@@ -563,9 +562,9 @@ public sealed class Seed(
          amount: MoneyVo.Create(167.0m, Currency.EUR).GetValueOrThrow(),
          purpose: "Max an Benno",
          bookedAt: bookedAt,
-         transactionDebitId: transaction6dId,
-         transactionCreditId: transaction6cId,
-         transferId: transfer6Id.ToString()
+         transactionDebitId: Transaction6DId,
+         transactionCreditId: Transaction6CId,
+         transferId: Transfer6Id
       );
 
       SendMoney( // Transfer 7: Account 3 --> Account 5
@@ -574,9 +573,9 @@ public sealed class Seed(
          amount: MoneyVo.Create(312.0m, Currency.EUR).GetValueOrThrow(),
          purpose: "Max an Dana",
          bookedAt: bookedAt,
-         transactionDebitId: transaction7dId,
-         transactionCreditId: transaction7cId,
-         transferId: transfer7Id.ToString()
+         transactionDebitId: Transaction7DId,
+         transactionCreditId: Transaction7CId,
+         transferId: Transfer7Id
       );
       
       // Arne ... 
@@ -586,9 +585,9 @@ public sealed class Seed(
          amount: MoneyVo.Create(278.0m, Currency.EUR).GetValueOrThrow(),
          purpose: "Arne an Max",
          bookedAt: bookedAt,
-         transactionDebitId: transaction8dId,
-         transactionCreditId: transaction8cId,
-         transferId: transfer8Id.ToString()
+         transactionDebitId: Transaction8DId,
+         transactionCreditId: Transaction8CId,
+         transferId: Transfer8Id
       );
 
       SendMoney( // Transfer 9: Account 4 --> Account 6
@@ -597,9 +596,9 @@ public sealed class Seed(
          amount: MoneyVo.Create(356.0m, Currency.EUR).GetValueOrThrow(),
          purpose: "Arne an Chris 2",
          bookedAt: bookedAt,
-         transactionDebitId: transaction9dId,
-         transactionCreditId: transaction9cId,
-         transferId: transfer9Id.ToString()
+         transactionDebitId: Transaction9DId,
+         transactionCreditId: Transaction9CId,
+         transferId: Transfer9Id
       );
 
       // Benno ... 
@@ -609,9 +608,9 @@ public sealed class Seed(
          amount: MoneyVo.Create(412.0m, Currency.EUR).GetValueOrThrow(),
          purpose: "Benno an Erika 1",
          bookedAt: bookedAt,
-         transactionDebitId: transaction10dId,
-         transactionCreditId: transaction10cId,
-         transferId: transfer10Id.ToString()
+         transactionDebitId: Transaction10DId,
+         transactionCreditId: Transaction10CId,
+         transferId: Transfer10Id
       );
 
       SendMoney( // Transfer 11: Account 5 --> Account 2
@@ -620,9 +619,9 @@ public sealed class Seed(
          amount: MoneyVo.Create(89.0m, Currency.EUR).GetValueOrThrow(),
          purpose: "Benno an Erika 2",
          bookedAt: bookedAt,
-         transactionDebitId: transaction11dId,
-         transactionCreditId: transaction11cId,
-         transferId: transfer11Id.ToString()
+         transactionDebitId: Transaction11DId,
+         transactionCreditId: Transaction11CId,
+         transferId: Transfer11Id
       );
       
       return accounts;
@@ -689,7 +688,7 @@ public sealed class Seed(
          createdAt: clock.UtcNow,
          id: id
       );
-      return result.Value!;
+      return result.Value;
    }
 
    private Customer CreateCustomer(
@@ -717,7 +716,7 @@ public sealed class Seed(
          addressVo: addressVo
       );
 
-      return result.Value!;
+      return result.Value;
    }
 
    private Account CreateAccount(
@@ -739,7 +738,7 @@ public sealed class Seed(
          createdByEmployeeId: Employee1().Id,
          id: id
       );
-      return result.Value!;
+      return result.Value;
    }
 
    private Beneficiary CreateBeneficiary(
@@ -759,7 +758,7 @@ public sealed class Seed(
          ibanVo: ibanVo,
          id: id
       );
-      return result.Value!;
+      return result.Value;
    }
 
    private Transfer CreateTransfer(
@@ -786,7 +785,7 @@ public sealed class Seed(
          bookedAt: clock.UtcNow,
          id: id
       );
-      return result.Value!;
+      return result.Value;
    }
 
    private Transaction CreateDebitTransaction(
@@ -809,7 +808,7 @@ public sealed class Seed(
          bookedAt: clock.UtcNow,
          id: id
       );
-      return result.Value!;
+      return result.Value;
    }
 
    private Transaction CreateCreditTransaction(
@@ -833,6 +832,7 @@ public sealed class Seed(
          bookedAt: clock.UtcNow,
          id: id
       );
-      return result.Value!;
+      return result.Value;
    }
+   
 }

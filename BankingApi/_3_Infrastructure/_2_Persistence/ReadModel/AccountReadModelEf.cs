@@ -1,7 +1,5 @@
 using System.Runtime.CompilerServices;
 using BankingApi._2_Core.BuildingBlocks;
-using BankingApi._2_Core.BuildingBlocks._3_Domain;
-using BankingApi._2_Core.Payments;
 using BankingApi._2_Core.Payments._1_Ports.Outbound;
 using BankingApi._2_Core.Payments._2_Application.Dtos;
 using BankingApi._2_Core.Payments._2_Application.Mappings;
@@ -18,13 +16,13 @@ internal sealed class AccountReadModelEf(
    
    #region --- Aggregate root: Account ------------------------------------------------------
    public async Task<Result<AccountDto>> FindByIdAsync(
-      Guid Id,
+      Guid id,
       CancellationToken ct
    ) {
       // the DB is doing the work: filter by Id, project to DTO, no tracking (read-only)
       var accountDto = await dbContext.Accounts
          .AsNoTracking()
-         .Where(a => a.Id == Id) // filter
+         .Where(a => a.Id == id) // filter
          .Select(c => c.ToAccountDto()) // projection
          .SingleOrDefaultAsync(ct);
 
@@ -104,11 +102,9 @@ internal sealed class AccountReadModelEf(
 
       // 2. If no record matches both IDs, we return a NotFound failure.
       // This covers both cases: either the AccountId is wrong or the BeneficiaryId is wrong.
-      if (beneficiaryDto is null)
-         return Result<BeneficiaryDto>.Failure(BeneficiaryErrors.NotFound);
-
-      // 3. Return success with the projected data.
-      return Result<BeneficiaryDto>.Success(beneficiaryDto);
+      return beneficiaryDto is null ? 
+         Result<BeneficiaryDto>.Failure(BeneficiaryErrors.NotFound) :
+         Result<BeneficiaryDto>.Success(beneficiaryDto);
    }
 
    public async Task<Result<IEnumerable<BeneficiaryDto>>> SelectBeneficiariesByAccountIdAsync(
@@ -146,7 +142,7 @@ internal sealed class AccountReadModelEf(
       CancellationToken ct = default
    ) {
       // 1. Sanitize the search input
-      var searchName = name?.Trim() ?? string.Empty;
+      var searchName = name.Trim();
 
       // 2. Query starting from the Aggregate Root (Account) to ensure context validity.
       // We use a projection to fetch existence and filtered data in one DB trip.

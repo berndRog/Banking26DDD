@@ -1,4 +1,4 @@
-namespace BankingApi._2_Modules.Customers._3_Domain.Enums;
+namespace BankingApi._2_Core.Customers._3_Domain.Enum;
 
 // Reasons why a customer application can be rejected.
 // Represents domain-level rejection codes used during customer onboarding.

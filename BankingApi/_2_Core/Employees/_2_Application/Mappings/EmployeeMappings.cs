@@ -11,7 +11,7 @@ public static class EmployeeMappings {
       Lastname: employee.Lastname,
       Email: employee.EmailVo.Value,
       Phone: employee.PhoneVo.Value,
-      PersonnelNumber: employee!.PersonnelNumber,
+      PersonnelNumber: employee.PersonnelNumber,
       IsActive: employee.IsActive,
       AdminRightsInt: (int) employee.AdminRights
    );
@@ -23,7 +23,7 @@ public static class EmployeeMappings {
    
    public static EmployeeContractDto ToEmployeeContractDto(this Employee employee) => new(
       Id: employee.Id, 
-      PersonnelNumber: employee!.PersonnelNumber,
+      PersonnelNumber: employee.PersonnelNumber,
       IsActive: employee.IsActive,
       AdminRightsInt: (int) employee.AdminRights
    );

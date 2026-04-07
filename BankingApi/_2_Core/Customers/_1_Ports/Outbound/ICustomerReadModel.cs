@@ -16,7 +16,7 @@ public interface ICustomerReadModel {
 
    // Find customer by technical identifier
    Task<Result<CustomerDto>> FindByIdAsync(
-      Guid Id,
+      Guid id,
       CancellationToken ct = default
    );
 

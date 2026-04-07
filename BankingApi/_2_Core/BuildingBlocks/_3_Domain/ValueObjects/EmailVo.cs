@@ -93,7 +93,7 @@ public sealed record EmailVo {
       if (value.Length > 254) return false;
 
       // simple structural sanity
-      int at = value.IndexOf('@');
+      var at = value.IndexOf('@');
       if (at <= 0 || at >= value.Length - 1) return false;
 
       if (value.Contains(' ')) return false;

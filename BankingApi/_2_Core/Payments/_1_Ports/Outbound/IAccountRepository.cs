@@ -70,13 +70,13 @@ public interface IAccountRepository {
    //---- Child Entity: Transaction --------------------------------------------
    // Load a transaction by its identifier
    Task<Account?> FindAccountByIdWithTransactionsAsync(
-      Guid AccountId,
+      Guid accountId,
       CancellationToken ct = default
    );
 
    // Load a transaction by its identifier
    Task<Account?> FindAccountByIbanWithTransactionsAsync(
-      IbanVo IbanVo,
+      IbanVo ibanVo,
       CancellationToken ct = default
    );
    

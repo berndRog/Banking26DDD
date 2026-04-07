@@ -1,6 +1,6 @@
+using BankingApi._2_Core.BuildingBlocks._2_Application.Mappings;
 using BankingApi._2_Core.Customers._2_Application.Dtos;
 using BankingApi._2_Core.Customers._3_Domain.Entities;
-using WebApi._2_Core.BuildingBlocks._2_Application.Mappings;
 namespace BankingApi._2_Core.Customers._2_Application.Mappings;
 
 public static class CustomerMappings {

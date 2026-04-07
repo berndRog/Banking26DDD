@@ -1,6 +1,5 @@
 using BankingApi._2_Core.Payments._3_Domain.Entities;
 using BankingApi._2_Core.Payments._3_Domain.ValueObjects;
-using BankingApi._3_Infrastructure._2_Persistence.Converters;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 namespace BankingApi._3_Infrastructure._2_Persistence.Configurations;

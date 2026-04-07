@@ -1,6 +1,6 @@
+using BankingApi._2_Core.BuildingBlocks._2_Application.Dtos;
 using BankingApi._2_Core.BuildingBlocks._3_Domain.ValueObjects;
-using WebApi._2_Core.BuildingBlocks._2_Application.Dtos;
-namespace WebApi._2_Core.BuildingBlocks._2_Application.Mappings;
+namespace BankingApi._2_Core.BuildingBlocks._2_Application.Mappings;
 
 public static class AddressMappings {
    public static AddressDto ToAddressDto(this AddressVo address) => new(

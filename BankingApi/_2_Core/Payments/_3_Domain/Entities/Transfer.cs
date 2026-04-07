@@ -35,7 +35,7 @@ public sealed class Transfer : AggregateRoot {
 
    //--- Ctors -----------------------------------------------------------------
    // EF Core ctor
-   private Transfer() : base() { }
+   private Transfer() { }
 
    // Domain ctor
    private Transfer(

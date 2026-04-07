@@ -1,6 +1,5 @@
 using System.Runtime.CompilerServices;
 using BankingApi._2_Core.BuildingBlocks;
-using BankingApi._2_Core.BuildingBlocks._1_Ports.Outbound;
 using BankingApi._2_Core.BuildingBlocks._3_Domain.Enums;
 using BankingApi._2_Core.BuildingBlocks._4_IntegrationContracts._1_Ports;
 using BankingApi._2_Core.BuildingBlocks._4_IntegrationContracts._2_Application.Dtos;

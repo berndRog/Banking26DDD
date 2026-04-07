@@ -17,10 +17,10 @@ namespace BankingApi._2_Core.Employees._2_Application.UseCases;
 /// - Uses LogIfFailure for NotFound and domain rejection
 /// </summary>
 public sealed class EmployeeUcDeactivate(
-   IEmployeeRepository _repository,
-   IClock _clock,
-   IUnitOfWork _unitOfWork,
-   ILogger<EmployeeUcDeactivate> _logger
+   IEmployeeRepository repository,
+   IClock clock,
+   IUnitOfWork unitOfWork,
+   ILogger<EmployeeUcDeactivate> logger
 ) {
 
    public async Task<Result> ExecuteAsync(
@@ -31,32 +31,32 @@ public sealed class EmployeeUcDeactivate(
        // 1) Check guards
       if (deactivatedAt == default)
          return Result.Failure(EmployeeErrors.DeactivatedAtIsRequired)
-            .LogIfFailure(_logger, "EmployeeUcDeactivate.DeactivatedAtIsRequired", employeeId);
+            .LogIfFailure(logger, "EmployeeUcDeactivate.DeactivatedAtIsRequired", employeeId);
       
       if (employeeId == Guid.Empty) 
          return Result.Failure(EmployeeErrors.InvalidId)
-            .LogIfFailure(_logger, "EmployeeUcDeactivate.InvalidId", employeeId );
+            .LogIfFailure(logger, "EmployeeUcDeactivate.InvalidId", employeeId );
       
       // 2) Load aggregate (tracked)
-      var employee = await _repository.FindByIdAsync(employeeId, ct);
+      var employee = await repository.FindByIdAsync(employeeId, ct);
       if (employee is null) {
          var fail = Result.Failure(EmployeeErrors.NotFound);
-         fail.LogIfFailure(_logger, "EmployeeUcDeactivate.NotFound", new { employeeId });
+         fail.LogIfFailure(logger, "EmployeeUcDeactivate.NotFound", new { employeeId });
          return fail;
       }
       
       // 3) Apply domain transition (pure)
-      if(deactivatedAt == default) deactivatedAt = _clock.UtcNow;
+      if(deactivatedAt == default) deactivatedAt = clock.UtcNow;
       var result = employee.Deactivate(deactivatedAt);
       if (result.IsFailure) {
-         result.LogIfFailure(_logger, "EmployeeUcDeactivate.DomainRejected", 
+         result.LogIfFailure(logger, "EmployeeUcDeactivate.DomainRejected", 
             new { employeeId, deactivatedAt });
          return result;
       }
 
       // 4) Persist changes
-      var savedRows = await _unitOfWork.SaveAllChangesAsync("Employee deactivated", ct);
-      _logger.LogInformation(
+      var savedRows = await unitOfWork.SaveAllChangesAsync("Employee deactivated", ct);
+      logger.LogInformation(
          "EmployeeUcDeactivate done employeeId={id} savedRows={rows}", 
          employeeId, savedRows);
       

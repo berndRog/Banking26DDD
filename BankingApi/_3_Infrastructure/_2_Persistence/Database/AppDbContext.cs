@@ -8,7 +8,7 @@ using Microsoft.EntityFrameworkCore;
 [assembly: InternalsVisibleTo("BankingApiTest")]
 namespace BankingApi._3_Infrastructure._2_Persistence.Database;
 
-public sealed partial class AppDbContext(
+public sealed class AppDbContext(
    DbContextOptions<AppDbContext> options
 ) : DbContext(options) {
    public DbSet<Employee> Employees => Set<Employee>();

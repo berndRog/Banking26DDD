@@ -109,10 +109,10 @@ public sealed class AccountRepositoryEf(
       .SingleOrDefaultAsync(ct);
    
    public async Task<Account?> FindAccountByIbanWithTransactionsAsync(
-      IbanVo accountIbanVo,
+      IbanVo ibanVo,
       CancellationToken ct = default
    ) => await dbContext.Accounts
-      .Where(a => a.IbanVo == accountIbanVo)
+      .Where(a => a.IbanVo == ibanVo)
       .Include(a => a.Transactions)
       .SingleOrDefaultAsync(ct);
 

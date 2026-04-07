@@ -77,21 +77,21 @@ public static class IbanGenerator {
       var A = bankCode + accountPrefix8;
 
       // --- math part (mod 97) ---
-      int aMod = Mod97Digits(A);
+      var aMod = Mod97Digits(A);
 
-      int factor100 = 100 % 97;           // = 3
-      int pow10_6 = PowMod(10, 6, 97);    // = 64
-      int tail = Mod97Digits("131470");   // "DE70"
+      var factor100 = 100 % 97;           // = 3
+      var pow10_6 = PowMod(10, 6, 97);    // = 64
+      var tail = Mod97Digits("131470");   // "DE70"
 
-      int k = ((aMod * factor100) % 97 * pow10_6) % 97;
+      var k = ((aMod * factor100) % 97 * pow10_6) % 97;
       k = (k + tail) % 97;
 
-      int rhs = (1 - k) % 97;
+      var rhs = (1 - k) % 97;
       if (rhs < 0) rhs += 97;
 
-      int inv64 = ModInverse(64, 97);
+      var inv64 = ModInverse(64, 97);
 
-      int xx = (rhs * inv64) % 97;
+      var xx = (rhs * inv64) % 97;
 
       var suffix = xx.ToString("D2");
 
@@ -106,22 +106,22 @@ public static class IbanGenerator {
       bban = NormalizeAlnum(bban);
 
       var prepared = bban + countryCode + "00";
-      int mod = Mod97(prepared);
-      int cd = 98 - mod;
+      var mod = Mod97(prepared);
+      var cd = 98 - mod;
 
       return cd.ToString("00");
    }
 
    // Streaming MOD-97 for alphanumeric input
    private static int Mod97(string alnum) {
-      int mod = 0;
+      var mod = 0;
 
       foreach (char c in alnum) {
          if (c >= '0' && c <= '9') {
             mod = (mod * 10 + (c - '0')) % 97;
          }
          else if (c >= 'A' && c <= 'Z') {
-            int val = (c - 'A') + 10;
+            var val = (c - 'A') + 10;
             mod = (mod * 10 + (val / 10)) % 97;
             mod = (mod * 10 + (val % 10)) % 97;
          }
@@ -136,15 +136,15 @@ public static class IbanGenerator {
    // --- helpers for math version (digits only) ---
 
    private static int Mod97Digits(string digits) {
-      int mod = 0;
+      var mod = 0;
       foreach (var c in digits)
          mod = (mod * 10 + (c - '0')) % 97;
       return mod;
    }
 
    private static int PowMod(int baseVal, int exp, int mod) {
-      int result = 1;
-      for (int i = 0; i < exp; i++)
+      var result = 1;
+      for (var i = 0; i < exp; i++)
          result = (result * baseVal) % mod;
       return result;
    }
@@ -154,7 +154,7 @@ public static class IbanGenerator {
       int r = mod, newR = a;
 
       while (newR != 0) {
-         int q = r / newR;
+         var q = r / newR;
 
          (t, newT) = (newT, t - q * newT);
          (r, newR) = (newR, r - q * newR);
