@@ -68,7 +68,7 @@ public sealed class TransferUcSendMoney(
          return Result<TransferDto>.Failure(TransferErrors.SameAccountNotAllowed);
 
       // Use the injected clock to avoid direct dependency on system time.
-      var bookedAt = clock.UtcNow;
+      var bookedAt = dto.BookedAt ?? clock.UtcNow;
 
       // 3) Execute domain logic -----------------------------------------------
       // Post the debit transaction on the sender account.

@@ -98,7 +98,7 @@ public sealed class TransfersController(
    /// <param name="id">Unique identifier of the transfer.</param>
    /// <param name="ct">Cancellation token.</param>
    /// <returns>The transfer resource if found.</returns>
-   [Authorize(Policy = "CustomersOrEmployees")]
+   //[Authorize(Policy = "CustomersOrEmployees")]
    [HttpGet("accounts/{accountId:guid}/transfers/{id:guid}", Name = nameof(GetTransferByAccountIdAndTransferIdAsync))]
    [ProducesResponseType<TransferDto>(StatusCodes.Status200OK)]
    [ProducesResponseType<ProblemDetails>(StatusCodes.Status404NotFound, "application/problem+json")]

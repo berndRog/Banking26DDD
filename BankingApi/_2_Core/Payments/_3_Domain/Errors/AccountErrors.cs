@@ -66,6 +66,7 @@ public static class AccountErrors {
          Title: "Account: Not found",
          Message: "No account with the given id exists."
       );
+   
    public static readonly DomainErrors CustomerNotFound =
       new(
          ErrorCode.NotFound,

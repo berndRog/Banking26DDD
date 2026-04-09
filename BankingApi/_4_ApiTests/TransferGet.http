@@ -1,7 +1,7 @@
 
 ###
-# @name Get transfer1
-GET {{baseUrl}}/transfers/00010000-0000-0000-0000-000000000000
+# @name Get transfer1 by accountId and transferId
+GET {{baseUrl}}/accounts/01000000-0000-0000-0000-000000000000/transfers/00010000-0000-0000-0000-000000000000
 Content-Type: application/json
 
 ###

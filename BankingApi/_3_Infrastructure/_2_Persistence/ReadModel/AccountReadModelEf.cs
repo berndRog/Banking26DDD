@@ -87,7 +87,7 @@ internal sealed class AccountReadModelEf(
    }
    #endregion
    
-   #region --- Aggregate root: Account ------------------------------------------------------
+   #region --- Child Entities: Beneficiaries ------------------------------------------------
    public async Task<Result<BeneficiaryDto>> FindBeneficiaryByIdAsync(
       Guid accountId,
       Guid beneficiaryId,
@@ -168,23 +168,69 @@ internal sealed class AccountReadModelEf(
       // 4. Case: Account exists, but search may yield an empty list []
       return Result<IEnumerable<BeneficiaryDto>>.Success(result.FilteredBeneficiaries);
    }
+   #endregion
+   
+   #region --- Child Entities: Transactions -------------------------------------------------
+   public async Task<Result<TransactionDetailDto>> FindTransactionByAccountIdAndTransactionIdAsync(
+      Guid accountId,
+      Guid transactionId,
+      CancellationToken ct = default
+   ) {
+      var accountExists = await dbContext.Accounts
+         .AnyAsync(a => a.Id == accountId, ct);
+      if (!accountExists)
+         return Result<TransactionDetailDto>.Failure(TransactionErrors.AccountIdNotFound);
+
+      var transaction = await dbContext.Transactions
+         .Where(t => t.Id == transactionId)
+         .Select(t => new {
+            t.Id,
+            t.AccountId,
+            Dto = t.ToTransactionDetailDto()
+         })
+         .SingleOrDefaultAsync(ct);
+
+      if (transaction is null)
+         return Result<TransactionDetailDto>.Failure(TransactionErrors.TransactionIdNotFound);
+
+      if (transaction.AccountId != accountId)
+         return Result<TransactionDetailDto>.Failure(TransactionErrors.NotFound);
+
+      return Result<TransactionDetailDto>.Success(transaction.Dto);
+   }
+
+   
+   public async Task<Result<IEnumerable<TransactionDetailDto>>> SelectTransactionsByAccountIdAndPeriodAsync(
+      Guid accountId, 
+      DateTimeOffset fromUtc, 
+      DateTimeOffset toUtc,
+      CancellationToken ct = default
+   ) {
+      var accountExists = await dbContext.Accounts
+         .AnyAsync(a => a.Id == accountId, ct);
+      if (!accountExists)
+         return Result<IEnumerable<TransactionDetailDto>>.Failure(TransactionErrors.AccountIdNotFound);
+      
+      var transactionDtos = await dbContext.Transactions
+         .Where(t =>
+            t.AccountId == accountId &&
+            t.BookedAt >= fromUtc &&
+            t.BookedAt < toUtc
+         )
+         .OrderByDescending(t => t.BookedAt)
+         .Select(t => t.ToTransactionDetailDto())
+         .ToListAsync(ct);
+      
+      return Result<IEnumerable<TransactionDetailDto>>.Success(transactionDtos);
+      
+   }
 
    // public async Task<Result<Transaction?>> FindByAccountIdAndTrabsactionIdAsync(
    //    Guid accountId, 
    //    Guid transactionId, 
    //    CancellationToken ct = default
    // ) {
-   //       var transactionDto = await dbContext.Transactions
-   //          .Where(t => t.AccountId == accountId && t.Id == transactionId)
-   //          .Select(t => t.ToTransactionDto())
-   //          .SingleAsync(ct);
    //       
-   //       // 2. If no record matches both IDs, we return a NotFound failure.
-   //       // This covers both cases: either the AccountId is wrong or the BeneficiaryId is wrong.
-   //       return transactionDto is null ? 
-   //          Result<BeneficiaryDto>.Failure(TransactionErrors.NotFound) :
-   //          Result<BeneficiaryDto>.Success(beneficiaryDto);
-   //       return transactionDto is null ? Result
    // }
 
    // public async Task<Result<IReadOnlyList<Transaction>>> SelectByAccountIdAndPeriodAsync(

@@ -26,6 +26,21 @@ public static class AccountMappings {
       CustomerId: account.CustomerId   
    );
    
+   public static TransactionDetailDto ToTransactionDetailDto(this Transaction transaction) => new(
+      Id: transaction.Id,
+      AccountId: transaction.AccountId,
+      TypeInt: (int)transaction.Type,
+      Purpose: transaction.Purpose,
+      Amount: transaction.AmountVo.Amount,
+      BalanceAfter: transaction.BalanceAfterVo.Amount,
+      Currency: (int)transaction.AmountVo.Currency,
+      OtherAccountName: transaction.OtherAccountName,
+      OtherAccountIban: transaction.OtherAccountIbanVo.Value,
+      BookedAt: transaction.BookedAt,
+      transferId: transaction.TransferId
+   );
+
+   
 }
 
 

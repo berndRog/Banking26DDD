@@ -15,16 +15,6 @@ public static class TransferMappings {
       CreditTransactionId: transfer.CreditTransactionId
    );
    
-   public static TransactionDto ToTransactionDto(this Transaction transaction) => new(
-      Id: transaction.Id,
-      AccountId: transaction.AccountId,
-      TypeInt: (int)transaction.Type,
-      Purpose: transaction.Purpose,
-      Amount: transaction.AmountVo.Amount,
-      Currency: (int)transaction.AmountVo.Currency,
-      BookedAt: transaction.BookedAt,
-      transferId: transaction.TransferId
-   );
 }
 
 

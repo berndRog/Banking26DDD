@@ -16,26 +16,60 @@ public sealed class TransactionsController(
 ) : ControllerBase {
 
    /// <summary>
-   /// Returns a transactionaccount by its unique identifier.
+   /// Returns a transaction by Ids (accountId and transferId).
    /// </summary>
-   /// <param name="id">Unique identifier of the account.</param>
+   /// <param name="accountId">Unique identifier of the account.</param>
+   /// <param name="id">Unique identifier of the transaction.</param>
    /// <param name="ct">Cancellation token.</param>
-   /// <returns>The account resource if found.</returns>
+   /// <returns>The transaction resource if found.</returns>
    // [Authorize]
    [HttpGet("accounts/{accountId:guid}/transactions/{id:guid}", Name = nameof(GetTransactionByAccountIdAndByTransactionIdAsync))]
    [Produces("application/json")]
    [ProducesResponseType<AccountDto>(StatusCodes.Status200OK)]
    [ProducesResponseType<ProblemDetails>(StatusCodes.Status401Unauthorized, "application/problem+json")]
    [ProducesResponseType<ProblemDetails>(StatusCodes.Status404NotFound, "application/problem+json")]
-   public async Task<ActionResult<AccountDto>> GetTransactionByAccountIdAndByTransactionIdAsync(
+   public async Task<ActionResult<TransactionDetailDto>> GetTransactionByAccountIdAndByTransactionIdAsync(
+      [FromRoute] Guid accountId,
       [FromRoute] Guid id,
       CancellationToken ct
    ) {
       const string context = $"{nameof(TransactionsController)}.{nameof(GetTransactionByAccountIdAndByTransactionIdAsync)}";
 
-      var result = await readModel.FindByIdAsync(id, ct);
+      var result = await readModel.FindTransactionByAccountIdAndTransactionIdAsync(accountId, id, ct);
 
       return this.ToActionResult(result, logger, context, args: new { id });
+   }
+   
+   /// <summary>
+   /// Returns a transaction by Ids (accountId and transferId).
+   /// </summary>
+   /// <param name="accountId">Unique identifier of the account.</param>
+   /// <param name="fromUtc">ISO 8061 start date</param>
+   /// <param name="toUtc">ISO 8061 end date</param>
+   /// <param name="ct">Cancellation token.</param>
+   /// <returns>The transaction resources if found.</returns>
+   // [Authorize]
+   [HttpGet("accounts/{accountId:guid}/transactions", Name = nameof(SelectTransactionByAccountIdAndTimeperiodAsync))]
+   [Produces("application/json")]
+   [ProducesResponseType<AccountDto>(StatusCodes.Status200OK)]
+   [ProducesResponseType<ProblemDetails>(StatusCodes.Status401Unauthorized, "application/problem+json")]
+   [ProducesResponseType<ProblemDetails>(StatusCodes.Status404NotFound, "application/problem+json")]
+   public async Task<ActionResult<IEnumerable<TransactionDetailDto>>> SelectTransactionByAccountIdAndTimeperiodAsync(
+      [FromRoute] Guid accountId,
+      [FromQuery] DateTimeOffset fromUtc,
+      [FromQuery] DateTimeOffset toUtc,
+      CancellationToken ct
+   ) {
+      const string context = $"{nameof(TransactionsController)}.{nameof(SelectTransactionByAccountIdAndTimeperiodAsync)}";
+
+      var result = await readModel.SelectTransactionsByAccountIdAndPeriodAsync(
+         accountId: accountId,
+         fromUtc: fromUtc,
+         toUtc: toUtc,
+         ct: ct
+      );
+
+      return this.ToActionResult(result, logger, context, args: null);
    }
 
    

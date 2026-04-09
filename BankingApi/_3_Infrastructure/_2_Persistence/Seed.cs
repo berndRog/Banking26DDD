@@ -1,3 +1,4 @@
+using System.Globalization;
 using BankingApi._2_Core.BuildingBlocks._1_Ports.Outbound;
 using BankingApi._2_Core.BuildingBlocks._3_Domain.Enums;
 using BankingApi._2_Core.BuildingBlocks._3_Domain.ValueObjects;
@@ -408,6 +409,7 @@ public sealed class Seed(
       creditAccountIban: Iban6,
       amount: 345.0m,
       purpose: "Erika an Chris1",
+      bookedAtString: "2025-01-01T00:00:00Z",
       debitTransactionId: Guid.Parse(Transaction1DId),
       creditTransactionId: Guid.Parse(Transaction1CId)
    );
@@ -418,6 +420,7 @@ public sealed class Seed(
       creditAccountIban: Iban7,
       amount: 231.0m,
       purpose: "Erika an Chris2",
+      bookedAtString: "2025-02-02T00:00:00Z",
       debitTransactionId: Guid.Parse(Transaction2DId),
       creditTransactionId: Guid.Parse(Transaction2CId)
    );
@@ -513,7 +516,7 @@ public sealed class Seed(
          creditAccount: accounts[5],
          amountVo: MoneyVo.Create(345.0m,Currency.EUR).GetValueOrThrow(),
          purpose: "Erika 1 an Chris1",
-         bookedAt: bookedAt,
+         bookedAtString: "2025-01-01T00:00:00Z",
          transactionDebitId: Transaction1DId,
          transactionCreditId: Transaction1CId,
          transferId: Transfer1Id
@@ -526,7 +529,7 @@ public sealed class Seed(
          creditAccount: accounts[7],
          amountVo: MoneyVo.Create(231.0m,Currency.EUR).GetValueOrThrow(),
          purpose: "Erika 1 an Chris2",
-         bookedAt: bookedAt,
+         bookedAtString: "2025-01-15T00:00:00Z",
          transactionDebitId: Transaction2DId,
          transactionCreditId: Transaction2CId,
          transferId: Transfer2Id
@@ -540,7 +543,7 @@ public sealed class Seed(
          creditAccount: accounts[3],
          amountVo: MoneyVo.Create(289.0m, Currency.EUR).GetValueOrThrow(),
          purpose: "Erika 2 an Arne",
-         bookedAt: bookedAt,
+         bookedAtString: "2025-02-01T00:00:00Z",
          transactionDebitId: Transaction3DId,
          transactionCreditId: Transaction3CId,
          transferId: Transfer3Id
@@ -553,7 +556,7 @@ public sealed class Seed(
          creditAccount: accounts[4],
          amountVo: MoneyVo.Create(125.0m, Currency.EUR).GetValueOrThrow(),
          purpose: "Erika 2 an Benno",
-         bookedAt: bookedAt,
+         bookedAtString: "2025-02-15T00:00:00Z",  
          transactionDebitId: Transaction4DId,
          transactionCreditId: Transaction4CId,
          transferId: Transfer4Id
@@ -567,7 +570,7 @@ public sealed class Seed(
          creditAccount: accounts[3],
          amountVo: MoneyVo.Create(167.0m,  Currency.EUR).GetValueOrThrow(),
          purpose: "Max an Arne",
-         bookedAt: bookedAt,
+         bookedAtString: "2025-03-01T00:00:00Z",
          transactionDebitId: Transaction5DId,
          transactionCreditId: Transaction5CId,
          transferId: Transfer5Id
@@ -580,7 +583,7 @@ public sealed class Seed(
          creditAccount: accounts[4],
          amountVo: MoneyVo.Create(167.0m, Currency.EUR).GetValueOrThrow(),
          purpose: "Max an Benno",
-         bookedAt: bookedAt,
+         bookedAtString: "2025-03-15T00:00:00Z",
          transactionDebitId: Transaction6DId,
          transactionCreditId: Transaction6CId,
          transferId: Transfer6Id
@@ -593,7 +596,7 @@ public sealed class Seed(
          creditAccount: accounts[4],
          amountVo: MoneyVo.Create(312.0m, Currency.EUR).GetValueOrThrow(),
          purpose: "Max an Dana",
-         bookedAt: bookedAt,
+         bookedAtString: "2025-04-01T00:00:00Z",
          transactionDebitId: Transaction7DId,
          transactionCreditId: Transaction7CId,
          transferId: Transfer7Id
@@ -607,7 +610,7 @@ public sealed class Seed(
          creditAccount: accounts[2],
          amountVo: MoneyVo.Create(278.0m, Currency.EUR).GetValueOrThrow(),
          purpose: "Arne an Max",
-         bookedAt: bookedAt,
+         bookedAtString: "2025-04-15T00:00:00Z",
          transactionDebitId: Transaction8DId,
          transactionCreditId: Transaction8CId,
          transferId: Transfer8Id
@@ -620,7 +623,7 @@ public sealed class Seed(
          creditAccount: accounts[5],
          amountVo: MoneyVo.Create(356.0m, Currency.EUR).GetValueOrThrow(),
          purpose: "Arne an Chris 2",
-         bookedAt: bookedAt,
+         bookedAtString: "2025-05-01T00:00:00Z",
          transactionDebitId: Transaction9DId,
          transactionCreditId: Transaction9CId,
          transferId: Transfer9Id
@@ -634,7 +637,7 @@ public sealed class Seed(
          creditAccount: accounts[0],
          amountVo: MoneyVo.Create(412.0m, Currency.EUR).GetValueOrThrow(),
          purpose: "Benno an Erika 1",
-         bookedAt: bookedAt,
+         bookedAtString: "2025-05-15T00:00:00Z",
          transactionDebitId: Transaction10DId,
          transactionCreditId: Transaction10CId,
          transferId: Transfer10Id
@@ -647,7 +650,7 @@ public sealed class Seed(
          creditAccount: accounts[1],
          amountVo: MoneyVo.Create(89.0m, Currency.EUR).GetValueOrThrow(),
          purpose: "Benno an Erika 2",
-         bookedAt: bookedAt,
+         bookedAtString: "2025-06-01T00:00:00Z",
          transactionDebitId: Transaction11DId,
          transactionCreditId: Transaction11CId,
          transferId: Transfer11Id
@@ -663,11 +666,17 @@ public sealed class Seed(
       Account creditAccount,
       MoneyVo amountVo,
       string purpose,
-      DateTimeOffset bookedAt,
+      string bookedAtString,
       string transactionDebitId,
       string transactionCreditId,
       string transferId
    ) {
+      
+      
+      var bookedAt = bookedAtString is not null
+         ? DateTimeOffset.Parse(bookedAtString, null, DateTimeStyles.AdjustToUniversal)
+         : clock.UtcNow;
+      
       var transactionDebit = debitAccount.PostDebit(
          creditName: creditName,
          creditIbanVo: creditAccount.IbanVo,
@@ -818,8 +827,13 @@ public sealed class Seed(
       string purpose,
       decimal amount,
       Guid debitTransactionId,
-      Guid creditTransactionId
+      Guid creditTransactionId,
+      string? bookedAtString
    ) {
+      
+      var bookedAt = bookedAtString is not null
+         ? DateTimeOffset.Parse(bookedAtString, null, DateTimeStyles.AdjustToUniversal)
+         : clock.UtcNow;
       
       var creditAccountIbanVo = IbanVo.Create(creditAccountIban).GetValueOrThrow();
       var amountVo = MoneyVo.Create(amount, Currency.EUR).GetValueOrThrow();
@@ -832,7 +846,7 @@ public sealed class Seed(
          amountVo: amountVo,
          debitTransactionId: debitTransactionId,
          creditTransactionId: creditTransactionId,
-         bookedAt: clock.UtcNow,
+         bookedAt: bookedAt,
          id: id
       );
       return result.Value;

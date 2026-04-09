@@ -59,20 +59,20 @@ public interface IAccountReadModel {
    #endregion
    
    #region transactions
-   // // Load a transaction by its identifier
-   // Task<Result<Transaction?>> FindByAccountIdAndTransactionIdAsync(
-   //    Guid accountId,
-   //    Guid transactionId,
-   //    CancellationToken ct = default
-   // );
-   //
-   // // Return all transactions of an account within a time period
-   // Task<Result<IReadOnlyList<Transaction>>> SelectByAccountIdAndPeriodAsync(
-   //    Guid accountId,
-   //    DateOnly fromDate,
-   //    DateOnly toDate,
-   //    CancellationToken ct = default
-   // );
+   // Load a transaction by its identifier
+   Task<Result<TransactionDetailDto>> FindTransactionByAccountIdAndTransactionIdAsync(
+      Guid accountId,
+      Guid transactionId,
+      CancellationToken ct = default
+   );
+   
+   // Return all transactions of an account within a time period
+   Task<Result<IEnumerable<TransactionDetailDto>>> SelectTransactionsByAccountIdAndPeriodAsync(
+      Guid accountId,
+      DateTimeOffset fromUtc,
+      DateTimeOffset toUtc,
+      CancellationToken ct = default
+   );
    
    
    #endregion
