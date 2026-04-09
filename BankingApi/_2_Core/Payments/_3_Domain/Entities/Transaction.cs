@@ -13,10 +13,8 @@ public sealed class Transaction : Entity {
 
    // payment reference / purpose
    public string Purpose { get; private set; } = string.Empty;
-   
    // booked amount
    public MoneyVo AmountVo { get; private set; } = default!;
-
    // balance after this transaction
    public MoneyVo BalanceAfterVo { get; private set; } = default!;
 

@@ -45,7 +45,7 @@ public sealed class TransferUcSendMoney(
          return Result<TransferDto>.Failure(TransferErrors.DebitAccountNotFound);
       
       // find customer Displayname
-      var resultDebitName = await customerContract.FindCustomerNameAsync(debitAccount.Id, ct);
+      var resultDebitName = await customerContract.FindCustomerNameAsync(debitAccount.CustomerId, ct);
       if(resultDebitName.IsFailure)
          return Result<TransferDto>.Failure(resultDebitName.Error);
       var debitName = resultDebitName.Value;
@@ -118,11 +118,11 @@ public sealed class TransferUcSendMoney(
       debitTransaction.AttachTransfer(transfer.Id);
       creditTransaction.AttachTransfer(transfer.Id);
 
-      // Register the transfer on the sender account aggregate.
-      debitAccount.AddTransfer(
-         transfer: transfer,
-         updatedAt: bookedAt
-      );
+      // // Register the transfer on the sender account aggregate.
+      // debitAccount.AddTransfer(
+      //    transfer: transfer,
+      //    updatedAt: bookedAt
+      // );
 
       // 4) Persist changes ----------------------------------------------------
       // Add the transfer to the repository so it becomes part of persistence.

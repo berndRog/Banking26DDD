@@ -27,7 +27,7 @@ public sealed class AccountUcCreate(
    ) {
       // 1) Exits Customer with given id and is active?
       var resultCustomer = await customerContract.ExistsActiveAsync(customerId, ct);
-      if (!resultCustomer.IsFailure)
+      if (resultCustomer.IsFailure)
          return Result<AccountDto>.Failure(AccountErrors.OwnerIdNotFoundOrInactive);
       
       // 2) Load authorized employee and check if has rights to manage accounts

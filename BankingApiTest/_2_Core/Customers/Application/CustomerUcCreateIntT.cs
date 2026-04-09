@@ -2,6 +2,7 @@ using BankingApi._2_Core.BuildingBlocks._1_Ports.Outbound;
 using BankingApi._2_Core.Customers._1_Ports.Outbound;
 using BankingApi._2_Core.Customers._2_Application.Mappings;
 using BankingApi._2_Core.Customers._2_Application.UseCases;
+using BankingApi._2_Core.Employees._1_Ports.Outbound;
 using BankingApi._2_Core.Payments._1_Ports.Outbound;
 using BankingApiTest.TestInfrastructure;
 using Microsoft.Extensions.DependencyInjection;
@@ -16,11 +17,19 @@ public sealed class CustomerUcCreateIntT : TestBaseIntegration {
       var ct = TestContext.Current.CancellationToken;
       var customerRepository = scope.ServiceProvider.GetRequiredService<ICustomerRepository>();
       var accountRepository = scope.ServiceProvider.GetRequiredService<IAccountRepository>();
+      var employeeRepository = scope.ServiceProvider.GetRequiredService<IEmployeeRepository>();
+
       var unitOfWork = scope.ServiceProvider.GetRequiredService<IUnitOfWork>();
       var seed = scope.ServiceProvider.GetRequiredService<TestSeed>();
       var sut = scope.ServiceProvider.GetRequiredService<CustomerUcCreate>();
 
       // Arrange
+      // Employee2 is used as Admin and must exists in the dataabse
+      var employee2 = seed.Employee2();
+      employeeRepository.Add(employee2);
+      unitOfWork.SaveAllChangesAsync("Employee2 must exist", ct);
+      unitOfWork.ClearChangeTracker();
+      
       var customer = seed.CustomerRegister(); // with address
       var customerCreateDto = customer.ToCustomerCreateDto(); 
       var account1 = seed.Account1(); 

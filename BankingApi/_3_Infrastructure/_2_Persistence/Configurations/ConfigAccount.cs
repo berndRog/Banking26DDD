@@ -16,6 +16,23 @@ public sealed class ConfigAccount(
 
       // key
       builder.HasKey(a => a.Id);
+      
+      // relations
+      // 1 Account -> n Beneficiaries
+      builder.HasMany(a => a.Beneficiaries)
+         .WithOne()   // no navigation property .WithOne(b => b.Account)
+         .HasForeignKey(b => b.AccountId)
+         .OnDelete(DeleteBehavior.Cascade)
+         .IsRequired();
+
+      // 1 Account -> n Transactions
+      builder.HasMany(a => a.Transactions)
+         .WithOne()   // no navigation property .WithOne(t => t.Account)
+         .HasForeignKey(t => t.AccountId)
+         .OnDelete(DeleteBehavior.Cascade)
+         .IsRequired();
+      
+      
       builder.Property(a => a.Id)
          .ValueGeneratedNever()
          .HasColumnName("Id")

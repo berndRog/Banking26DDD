@@ -10,7 +10,6 @@ using Microsoft.Extensions.DependencyInjection;
 namespace BankingApiTest._2_Core.Core.Application.UseCases;
 
 public sealed class AccountUcCreateIntT : TestBaseIntegration {
-   private readonly TestSeed _seed = new();
    
    [Fact]
    public async Task Create_account_ok() {
@@ -21,17 +20,23 @@ public sealed class AccountUcCreateIntT : TestBaseIntegration {
       var employeeRepository = scope.ServiceProvider.GetRequiredService<IEmployeeRepository>();
       var accountRepository = scope.ServiceProvider.GetRequiredService<IAccountRepository>();
       var unitOfWork = scope.ServiceProvider.GetRequiredService<IUnitOfWork>();
+      var seed = scope.ServiceProvider.GetRequiredService<TestSeed>();
       
       var sut = scope.ServiceProvider.GetRequiredService<AccountUcCreate>();
       
       // Arrange
-      var customer = _seed.Customer1();
+      // Employee2 is used as Admin and must exists in the dataabse
+      var employee2 = seed.Employee2();
+      employeeRepository.Add(employee2);
+      unitOfWork.SaveAllChangesAsync("Employee2 must exist", ct);
+      unitOfWork.ClearChangeTracker();
+      
+      var customer = seed.Customer1();
       customerRepository.Add(customer);
-      var employee = _seed.Employee2();   // Walter Wagner
-      employeeRepository.Add(employee);
       await unitOfWork.SaveAllChangesAsync("Seeding data", ct);
+      
       unitOfWork.ClearChangeTracker(); 
-      var account = _seed.Account1();
+      var account = seed.Account1();
       var accountDto = account.ToAccountDto();
       
       // Act
@@ -58,10 +63,11 @@ public sealed class AccountUcCreateIntT : TestBaseIntegration {
       var customerRepository = scope.ServiceProvider.GetRequiredService<ICustomerRepository>();
       var accountRepository = scope.ServiceProvider.GetRequiredService<IAccountRepository>();
       var unitOfWork = scope.ServiceProvider.GetRequiredService<IUnitOfWork>();
+      var seed = scope.ServiceProvider.GetRequiredService<TestSeed>();
       
       // Arrange
-      var owner = _seed.Customer1();
-      var account = _seed.Account1();
+      var owner = seed.Customer1();
+      var account = seed.Account1();
       var sut = scope.ServiceProvider.GetRequiredService<AccountUcCreate>();
       var accountDto = account.ToAccountDto();
 

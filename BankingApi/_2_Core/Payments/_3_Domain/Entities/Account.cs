@@ -36,9 +36,9 @@ public sealed class Account : AggregateRoot {
       _transactions.AsReadOnly();
    
    // Child Entities: Account -> Transfers [0..*]
-   private readonly List<Transfer> _transfers = new();
-   public IReadOnlyCollection<Transfer> Transfers => 
-      _transfers.AsReadOnly();
+   // private readonly List<Transfer> _transfers = new();
+   // public IReadOnlyCollection<Transfer> Transfers => 
+   //    _transfers.AsReadOnly();
 
    //--- Ctors -----------------------------------------------------------------
    // EF Core ctor
@@ -251,27 +251,27 @@ public sealed class Account : AggregateRoot {
    }
    #endregion
    
-   #region -------------------- Transfers -----------------------------------------------
-   public Result<Transfer> AddTransfer(
-      Transfer transfer,
-      DateTimeOffset updatedAt
-   ) {
-      // add to collection
-      _transfers.Add(transfer);
-      Touch(updatedAt); 
-
-      return Result<Transfer>.Success(transfer);
-   }
-
-   public Result<Transfer> FindTransfers(
-      Guid transferId
-   ) {
-      var found = _transfers.FirstOrDefault(t => t.Id == transferId);
-      return found is null
-         ? Result<Transfer>.Failure(TransferErrors.NotFound)
-         : Result<Transfer>.Success(found);
-   }
-   #endregion
+   // #region -------------------- Transfers -----------------------------------------------
+   // public Result<Transfer> AddTransfer(
+   //    Transfer transfer,
+   //    DateTimeOffset updatedAt
+   // ) {
+   //    // add to collection
+   //    _transfers.Add(transfer);
+   //    Touch(updatedAt); 
+   //
+   //    return Result<Transfer>.Success(transfer);
+   // }
+   //
+   // public Result<Transfer> FindTransfers(
+   //    Guid transferId
+   // ) {
+   //    var found = _transfers.FirstOrDefault(t => t.Id == transferId);
+   //    return found is null
+   //       ? Result<Transfer>.Failure(TransferErrors.NotFound)
+   //       : Result<Transfer>.Success(found);
+   // }
+   // #endregion
 }
 
 /*

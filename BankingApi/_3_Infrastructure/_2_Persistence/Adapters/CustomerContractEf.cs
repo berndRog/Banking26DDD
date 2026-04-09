@@ -24,10 +24,10 @@ internal sealed class CustomerContractEf(
       CancellationToken ct
    ) {
       var exists = await repository.ExistsActiveAsync(customerId, ct);
-      
-      return !exists
-         ? Result<bool>.Failure(CustomerErrors.NotFound)
-         : Result<bool>.Success(exists);
+
+      return exists
+         ? Result<bool>.Success(exists)
+         : Result<bool>.Failure(CustomerErrors.NotFound);
    }
 }
 

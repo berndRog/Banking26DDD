@@ -9,17 +9,22 @@ namespace BankingApi._2_Core.Payments._3_Domain.Entities;
 public sealed class Transfer : AggregateRoot {
    
    //--- Properties ------------------------------------------------------------
+ 
+   // purpose and booked amount
+   public string Purpose { get; private set; } = string.Empty;
+   public MoneyVo AmountVo { get; private set; } = default!;
    
    // debit account (Lastschrift)
    public Guid DebitAccountId { get; private set; }
-   
    // credit account (Gutschrift)
    public IbanVo CreditAccountIbanVo { get; private set; } = default!;
-   
-   // purpose and booked amount
-   public MoneyVo AmountVo { get; private set; } = default!;
-   public string Purpose { get; private set; } = string.Empty;
 
+   // current business state
+   public TransferStatus Status { get; private set; }
+
+   // booking timestamp
+   public DateTimeOffset BookedAt { get; private set; }
+   
    // references to the account transactions
    public Guid DebitTransactionId { get; private set; }
    public Guid CreditTransactionId { get; private set; }
@@ -28,12 +33,7 @@ public sealed class Transfer : AggregateRoot {
    //public Guid? OriginalTransferId { get; private set; }
    public Guid? ReversedByTransferId { get; private set; }
 
-   // current business state
-   public TransferStatus Status { get; private set; }
-
-   // booking timestamp
-   public DateTimeOffset BookedAt { get; private set; }
-
+   
    //--- Ctors -----------------------------------------------------------------
    // EF Core ctor
    private Transfer() { }

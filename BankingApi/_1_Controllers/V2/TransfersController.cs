@@ -18,7 +18,7 @@ public sealed class TransfersController(
 ) : ControllerBase {
 
    /// <summary>
-   /// Sends money from a given account.
+   /// Send money from a given account.
    /// </summary>
    /// <remarks>
    /// This endpoint creates a new transfer and returns <c>201 Created</c> on success.
@@ -37,9 +37,7 @@ public sealed class TransfersController(
    [ProducesResponseType<ProblemDetails>(StatusCodes.Status400BadRequest, "application/problem+json")]
    [ProducesResponseType<ProblemDetails>(StatusCodes.Status404NotFound, "application/problem+json")]
    public async Task<ActionResult<TransferDto>> SendMoneyAsync(
-      [Description("Unique accountId of the sender account")]
       [FromRoute] Guid accountId,
-      [Description("Transfer data for the new money transfer")]
       [FromBody] SendMoneyDto sendMoneyDto,
       CancellationToken ct
    ) {

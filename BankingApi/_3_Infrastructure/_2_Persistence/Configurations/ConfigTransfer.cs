@@ -42,7 +42,6 @@ public sealed class ConfigTransfer(
             .HasMaxLength(3)
             .IsRequired();
       });
-
       
       // account references
       builder.Property(t => t.DebitAccountId)
@@ -58,7 +57,6 @@ public sealed class ConfigTransfer(
          .HasColumnOrder(5)
          .HasMaxLength(50);
       builder.HasIndex(c => c.CreditAccountIbanVo);
-      
       
       // status and booking time
       builder.Property(t => t.Status)

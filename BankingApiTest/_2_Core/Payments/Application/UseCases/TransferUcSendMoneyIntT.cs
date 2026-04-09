@@ -4,12 +4,12 @@ using BankingApi._2_Core.Payments._1_Ports.Outbound;
 using BankingApi._2_Core.Payments._2_Application.Dtos;
 using BankingApi._2_Core.Payments._2_Application.UseCases;
 using BankingApi._2_Core.Payments._3_Domain.ValueObjects;
+using BankingApi._3_Infrastructure._2_Persistence;
 using BankingApiTest.TestInfrastructure;
 using Microsoft.Extensions.DependencyInjection;
 namespace BankingApiTest._2_Core.Core.Application.UseCases;
 
 public sealed class TransferUcSendMoneyIntT : TestBaseIntegration {
-   private readonly TestSeed _seed = new();
 
    [Fact]
    public async Task SendMoney_ok() {
@@ -19,27 +19,28 @@ public sealed class TransferUcSendMoneyIntT : TestBaseIntegration {
       var accountRepository = scope.ServiceProvider.GetRequiredService<IAccountRepository>();
       var transferRepository = scope.ServiceProvider.GetRequiredService<ITransferRepository>();
       var unitOfWork = scope.ServiceProvider.GetRequiredService<IUnitOfWork>();
+      var seed = scope.ServiceProvider.GetRequiredService<TestSeed>();
       var sut = scope.ServiceProvider.GetRequiredService<TransferUcSendMoney>();
 
       // Arrange
-      var customer = _seed.Customer1();
+      var customer = seed.Customer1();
       // fill datbase with customer
       customerRepository.Add(customer);
 
-      var debitAccount = _seed.Account1();
-      var beneficiary = _seed.Beneficiary1();
-      debitAccount.AddBeneficiary(beneficiary, _seed.Clock.UtcNow);
+      var debitAccount = seed.Account1();
+      var beneficiary = seed.Beneficiary1();
+      debitAccount.AddBeneficiary(beneficiary, seed.Clock.UtcNow);
       accountRepository.Add(debitAccount);
 
       accountRepository.AddRange([
-         _seed.Account2(), _seed.Account3(),
-         _seed.Account4(), _seed.Account5(), _seed.Account6()
+         seed.Account2(), seed.Account3(),
+         seed.Account4(), seed.Account5(), seed.Account6()
       ]);
 
       await unitOfWork.SaveAllChangesAsync("Seeding data", ct);
       unitOfWork.ClearChangeTracker();
 
-      var transfer = _seed.Transfer1();
+      var transfer = seed.Transfer1();
 
       var sendMoneyDto = new SendMoneyDto(
          Id: transfer.Id,

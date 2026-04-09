@@ -696,7 +696,7 @@ public sealed class Seed(
          bookedAt: bookedAt,
          id: transferId
       ).GetValueOrThrow();
-      debitAccount.AddTransfer(transfer, bookedAt).GetValueOrThrow();
+      //debitAccount.AddTransfer(transfer, bookedAt).GetValueOrThrow();
 
       _transfers.Add(transfer);
    }

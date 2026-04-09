@@ -1,4 +1,5 @@
 using BankingApi._2_Core.Payments._3_Domain.Entities;
+using BankingApi._2_Core.Payments._3_Domain.ValueObjects;
 using BankingApi._3_Infrastructure._2_Persistence.Database.Converter;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
@@ -60,25 +61,42 @@ public sealed class ConfigTransaction(
             .HasColumnOrder(6)
             .IsRequired();
       });
-      
-      // owning account
-      builder.Property(t => t.AccountId)
-         .HasColumnName("AccountId")
+
+      // booking timestamp
+      builder.Property(t => t.BookedAt)
+         .HasConversion(dtConv)
+         .HasColumnName("BookedAt")
          .HasColumnOrder(7)
          .IsRequired();
 
+      // other account
+      builder.Property(t => t.OtherAccountName)
+         .HasMaxLength(160)
+         .HasColumnName("OtherAccountName")
+         .HasColumnOrder(9)
+         .IsRequired();
+
+      // other account
+      builder.Property(t => t.OtherAccountIbanVo)
+         .HasConversion(vo => vo.Value, s => IbanVo.FromPersisted(s))
+         .IsRequired()
+         .HasColumnName("OtherAccountIban")
+         .HasColumnOrder(10)
+         .HasMaxLength(50);
+      builder.HasIndex(c => c.OtherAccountIbanVo);
+      
+      // account
+      builder.Property(t => t.AccountId)
+         .HasColumnName("AccountId")
+         .HasColumnOrder(8)
+         .IsRequired();
+      
       // optional reference to transfer aggregate
       builder.Property(t => t.TransferId)
          .HasColumnName("TransferId")
          .HasColumnOrder(8)
          .IsRequired(false);
       
-      // booking timestamp
-      builder.Property(t => t.BookedAt)
-         .HasConversion(dtConv)
-         .HasColumnName("BookedAt")
-         .HasColumnOrder(9)
-         .IsRequired();
 
       // query indexes
       builder.HasIndex(t => t.AccountId);
