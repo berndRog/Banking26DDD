@@ -28,7 +28,7 @@ public sealed class AccountUt {
       var result = Account.Create(
          customerId: _customer.Id,
          ibanVo: _account.IbanVo,
-         balance: _account.BalanceVo.Amount,
+         balanceVo: _account.BalanceVo,
          createdByEmployeeId: _employee.Id,
          createdAt: _account.CreatedAt,
          id: _account.Id.ToString()
@@ -53,7 +53,7 @@ public sealed class AccountUt {
       var result = Account.Create(
          customerId: _customer.Id,
          ibanVo: _account.IbanVo,
-         balance: _account.BalanceVo.Amount,
+         balanceVo: _account.BalanceVo,
          createdByEmployeeId: _employee.Id,
          createdAt: _account.CreatedAt,
          id: null
@@ -76,7 +76,7 @@ public sealed class AccountUt {
       var result = Account.Create(
          customerId: _customer.Id,
          ibanVo: _account.IbanVo,
-         balance: _account.BalanceVo.Amount,
+         balanceVo: _account.BalanceVo,
          createdByEmployeeId: _employee.Id,
          createdAt: _account.CreatedAt,
          id: "not-a-guid"
@@ -106,7 +106,7 @@ public sealed class AccountUt {
       var result = Account.Create(
          customerId: _customer.Id,
          ibanVo: _account.IbanVo,
-         balance: _account.BalanceVo.Amount,
+         balanceVo: _account.BalanceVo,
          createdByEmployeeId: _employee.Id,
          createdAt: _account.CreatedAt,
          id: "not.allowed"
@@ -121,7 +121,7 @@ public sealed class AccountUt {
       var result1 = Account.Create(
          customerId: _customer.Id,
          ibanVo: _account.IbanVo,
-         balance: _account.BalanceVo.Amount,
+         balanceVo: _account.BalanceVo,
          createdByEmployeeId: _employee.Id,
          createdAt: _account.CreatedAt,
          id: _account.Id.ToString()
@@ -130,7 +130,7 @@ public sealed class AccountUt {
       var result2 = Account.Create(
          customerId: _customer.Id,
          ibanVo: _account.IbanVo,
-         balance: _account.BalanceVo.Amount,
+         balanceVo: _account.BalanceVo,
          createdByEmployeeId: _employee.Id,
          createdAt: _account.CreatedAt,
          id: _account.Id.ToString()
@@ -186,12 +186,16 @@ public sealed class AccountUt {
    [Fact]
    public void PostDebitUt() {
       // Arrange
-      var fromAccount = _seed.Account1();
-      var toAccount = _seed.Account6();
+      var debitAccount = _seed.Account1();
+      var beneficiary = _seed.Beneficiary1();
+      var creditAccountName = beneficiary.Name;
+      var creditAccountIbanVo = beneficiary.IbanVo;
       var transfer = _seed.Transfer1();
          
       // Act
-      var transaction = fromAccount.PostDebit(
+      var transaction = debitAccount.PostDebit(
+         creditName: creditAccountName,
+         creditIbanVo: creditAccountIbanVo,
          purpose: transfer.Purpose,
          amountVo: transfer.AmountVo,
          bookedAt: _clock.UtcNow,
@@ -199,7 +203,7 @@ public sealed class AccountUt {
       );
       
       // Assert
-      var actualDebit = fromAccount.Transactions.FirstOrDefault(t => t.Id == transfer.DebitTransactionId);
+      var actualDebit = debitAccount.Transactions.FirstOrDefault(t => t.Id == transfer.DebitTransactionId);
       NotNull(actualDebit);
       Equal(transfer.DebitTransactionId, actualDebit.Id);
       Equal(transfer.Purpose, actualDebit.Purpose);      
@@ -211,12 +215,15 @@ public sealed class AccountUt {
    [Fact]
    public void PostCreditUt() {
       // Arrange
-      var fromAccount = _seed.Account1();
-      var toAccount = _seed.Account6();
+      var customer = _seed.Customer1();
+      var debitAccount = _seed.Account1();
+      var creditAccount = _seed.Account6();
       var transfer = _seed.Transfer1();
          
       // Act
-      var transaction = toAccount.PostCredit(
+      var transaction = creditAccount.PostCredit(
+         debitName: customer.DisplayName,
+         debitIbanVo: debitAccount.IbanVo,
          purpose: transfer.Purpose,
          amountVo: transfer.AmountVo,
          bookedAt: _clock.UtcNow,
@@ -224,7 +231,7 @@ public sealed class AccountUt {
       );
       
       // Assert
-      var actualCredit = toAccount.Transactions.FirstOrDefault(t => t.Id == transfer.CreditTransactionId);
+      var actualCredit = creditAccount.Transactions.FirstOrDefault(t => t.Id == transfer.CreditTransactionId);
       NotNull(actualCredit);
       Equal(transfer.CreditTransactionId, actualCredit.Id);
       Equal(transfer.Purpose, actualCredit.Purpose);      

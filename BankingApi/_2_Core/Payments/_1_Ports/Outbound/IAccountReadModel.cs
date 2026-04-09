@@ -1,6 +1,7 @@
 using BankingApi._2_Core.BuildingBlocks;
 using BankingApi._2_Core.BuildingBlocks._3_Domain;
 using BankingApi._2_Core.Payments._2_Application.Dtos;
+using BankingApi._2_Core.Payments._3_Domain.Entities;
 using BankingApi._2_Core.Payments._3_Domain.ValueObjects;
 namespace BankingApi._2_Core.Payments._1_Ports.Outbound;
 
@@ -10,6 +11,7 @@ namespace BankingApi._2_Core.Payments._1_Ports.Outbound;
 // Returns DTOs and does not expose domain aggregates.
 public interface IAccountReadModel {
 
+   #region accounts
    // Find account by technical identifier
    Task<Result<AccountDto>> FindByIdAsync(
       Guid id,
@@ -32,7 +34,9 @@ public interface IAccountReadModel {
       Guid customerId,
       CancellationToken ct = default
    );
-
+   #endregion
+   
+   #region beneficiaries
    // Find a beneficiary by identifier
    Task<Result<BeneficiaryDto>> FindBeneficiaryByIdAsync(
       Guid accountId,
@@ -52,6 +56,26 @@ public interface IAccountReadModel {
       string name,
       CancellationToken ct = default
    );
+   #endregion
+   
+   #region transactions
+   // // Load a transaction by its identifier
+   // Task<Result<Transaction?>> FindByAccountIdAndTransactionIdAsync(
+   //    Guid accountId,
+   //    Guid transactionId,
+   //    CancellationToken ct = default
+   // );
+   //
+   // // Return all transactions of an account within a time period
+   // Task<Result<IReadOnlyList<Transaction>>> SelectByAccountIdAndPeriodAsync(
+   //    Guid accountId,
+   //    DateOnly fromDate,
+   //    DateOnly toDate,
+   //    CancellationToken ct = default
+   // );
+   
+   
+   #endregion
    
    // Optional filtering / paging query
    // Task<Result<PagedResult<CustomerDto>>> FilterAsync(

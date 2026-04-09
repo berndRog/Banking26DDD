@@ -9,12 +9,12 @@ public interface ITransferUseCases {
       CancellationToken ct = default
    );
    
-   Task<Result<TransferDto>> ReverseMoneyAsync(
-      Guid fromAccountId,
-      Guid transferId,
-      string purpose,
-      CancellationToken ct = default
-   );
+   // Task<Result<TransferDto>> ReverseMoneyAsync(
+   //    Guid fromAccountId,
+   //    Guid transferId,
+   //    string purpose,
+   //    CancellationToken ct = default
+   // );
 
    // // Add a beneficiary to an account
    // // Beneficiaries represent allowed transfer targets

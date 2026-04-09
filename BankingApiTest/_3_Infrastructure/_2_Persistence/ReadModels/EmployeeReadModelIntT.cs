@@ -1,10 +1,11 @@
 using BankingApi._2_Core.BuildingBlocks._1_Ports.Outbound;
+using BankingApi._2_Core.BuildingBlocks._2_Application.Mappings;
 using BankingApi._2_Core.Customers._1_Ports.Outbound;
 using BankingApi._2_Core.Employees._1_Ports.Outbound;
 using BankingApi._2_Core.Employees._2_Application.Mappings;
 using BankingApiTest.TestInfrastructure;
 using Microsoft.Extensions.DependencyInjection;
-using WebApi._2_Core.BuildingBlocks._2_Application.Mappings;
+
 namespace BankingApiTest._3_Infrastructure._2_Persistence.Repositories;
 public sealed class EmployeeReadModelIntT : TestBaseIntegration {
 

@@ -76,7 +76,7 @@ public static class DiTestModules {
       // Transfer UseCases
       services.AddScoped<ITransferUseCases, TransferUseCases>();
       services.AddScoped<TransferUcSendMoney>();
-      services.AddScoped<TransferUcReverse>();
+//      services.AddScoped<TransferUcReverse>();
       
       // Unit of Work
       services.AddScoped<IUnitOfWork, UnitOfWork>();

@@ -16,7 +16,7 @@ public static class DiPaymentModule {
       services.AddScoped<IAccountUseCases, AccountUseCases>();      
       
       services.AddScoped<TransferUcSendMoney>();
-      services.AddScoped<TransferUcReverse>();
+      //services.AddScoped<TransferUcReverse>();
       services.AddScoped<ITransferUseCases, TransferUseCases>();      
       
       // Policies

@@ -52,14 +52,14 @@ public sealed class TestSeed {
    #endregion
 
    #region -------------- Test Iban (Value Objects) ------------------------------------------
-   public string Iban1 => _seed.Iban1;
-   public string Iban2 => _seed.Iban2;
-   public string Iban3 => _seed.Iban3;
-   public string Iban4 => _seed.Iban4;
-   public string Iban5 => _seed.Iban5;
-   public string Iban6 => _seed.Iban6;
-   public string Iban7 => _seed.Iban7;
-   public string Iban8 => _seed.Iban8;
+   public string Iban1 => Seed.Iban1;
+   public string Iban2 => Seed.Iban2;
+   public string Iban3 => Seed.Iban3;
+   public string Iban4 => Seed.Iban4;
+   public string Iban5 => Seed.Iban5;
+   public string Iban6 => Seed.Iban6;
+   public string Iban7 => Seed.Iban7;
+   public string Iban8 => Seed.Iban8;
    #endregion
    
    #region -------------- Test Accounts ------------------------------------------------------
@@ -98,48 +98,48 @@ public sealed class TestSeed {
    #endregion
 
    #region -------------- Test Transactions ---------------------------------------------------
-   public string Transaction1dId => _seed.transaction1dId;
-   public string Transaction1cId => _seed.transaction1cId;
-   public string Transaction2dId => _seed.transaction2dId;
-   public string Transaction2cId => _seed.transaction2cId;
-   public string Transaction3dId => _seed.transaction3dId;
-   public string Transaction3cId => _seed.transaction3cId;
-   public string Transaction4dId => _seed.transaction4dId;
-   public string Transaction4cId => _seed.transaction4cId;
-   public string Transaction5dId => _seed.transaction5cId;
-   public string Transaction5cId => _seed.transaction5cId;
-   public string Transaction6dId => _seed.transaction6dId;
-   public string Transaction6cId => _seed.transaction6cId;
-   public string Transaction7dId => _seed.transaction7cId;
-   public string Transaction7cId => _seed.transaction7cId;
-   public string Transaction8dId => _seed.transaction8dId;
-   public string Transaction8cId => _seed.transaction8cId;
-   public string Transaction9dId => _seed.transaction9dId;
-   public string Transaction9cId => _seed.transaction9cId;
-   public string Transaction10dId => _seed.transaction10dId;
-   public string Transaction10cId => _seed.transaction10cId;
-   public string Transaction11dId => _seed.transaction11dId;
-   public string Transaction11cId => _seed.transaction11cId;
+   public string Transaction1dId => Seed.Transaction1DId;
+   public string Transaction1cId => Seed.Transaction1CId;
+   public string Transaction2dId => Seed.Transaction2DId;
+   public string Transaction2cId => Seed.Transaction2CId;
+   public string Transaction3dId => Seed.Transaction3DId;
+   public string Transaction3cId => Seed.Transaction3CId;
+   public string Transaction4dId => Seed.Transaction4DId;
+   public string Transaction4cId => Seed.Transaction4CId;
+   public string Transaction5dId => Seed.Transaction5DId;
+   public string Transaction5cId => Seed.Transaction5CId;
+   public string Transaction6dId => Seed.Transaction6DId;
+   public string Transaction6cId => Seed.Transaction6CId;
+   public string Transaction7dId => Seed.Transaction7DId;
+   public string Transaction7cId => Seed.Transaction7CId;
+   public string Transaction8dId => Seed.Transaction8DId;
+   public string Transaction8cId => Seed.Transaction8CId;
+   public string Transaction9dId => Seed.Transaction9DId;
+   public string Transaction9cId => Seed.Transaction9CId;
+   public string Transaction10dId => Seed.Transaction10DId;
+   public string Transaction10cId => Seed.Transaction10CId;
+   public string Transaction11dId => Seed.Transaction11DId;
+   public string Transaction11cId => Seed.Transaction11CId;
    
-   public Transaction Transaction1d() => _seed.Transaction1d();
-   public Transaction Transaction1c() => _seed.Transaction1c();
-   public Transaction Transaction2d() => _seed.Transaction2d();
-   public Transaction Transaction2c() => _seed.Transaction2d();
+   public Transaction Transaction1d() => _seed.Transaction1D();
+   public Transaction Transaction1c() => _seed.Transaction1C();
+   public Transaction Transaction2d() => _seed.Transaction2D();
+   public Transaction Transaction2c() => _seed.Transaction2C();
    public IReadOnlyList<Transaction> Transaction => _seed.Transactions;
    #endregion
    
    #region -------------- Test Transfers -----------------------------------------------------
-   public string Transfer1Id => _seed.transfer1Id;
-   public string Transfer2Id => _seed.transfer2Id;
-   public string Transfer3Id => _seed.transfer3Id;
-   public string Transfer4Id => _seed.transfer4Id;
-   public string Transfer5Id => _seed.transfer5Id;
-   public string Transfer6Id => _seed.transfer6Id;
-   public string Transfer7Id => _seed.transfer7Id;
-   public string Transfer8Id => _seed.transfer8Id;
-   public string Transfer9Id => _seed.transfer9Id;
-   public string Transfer10Id => _seed.transfer10Id;
-   public string Transfer11Id => _seed.transfer11Id;
+   public string Transfer1Id => Seed.Transfer1Id;
+   public string Transfer2Id => Seed.Transfer2Id;
+   public string Transfer3Id => Seed.Transfer3Id;
+   public string Transfer4Id => Seed.Transfer4Id;
+   public string Transfer5Id => Seed.Transfer5Id;
+   public string Transfer6Id => Seed.Transfer6Id;
+   public string Transfer7Id => Seed.Transfer7Id;
+   public string Transfer8Id => Seed.Transfer8Id;
+   public string Transfer9Id => Seed.Transfer9Id;
+   public string Transfer10Id => Seed.Transfer10Id;
+   public string Transfer11Id => Seed.Transfer11Id;
    
    public Transfer Transfer1() => _seed.Transfer1();
    public Transfer Transfer2() => _seed.Transfer2();

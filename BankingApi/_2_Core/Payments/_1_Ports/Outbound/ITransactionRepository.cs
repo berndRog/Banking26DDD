@@ -6,25 +6,7 @@ namespace BankingApi._2_Core.Payments._1_Ports.Outbound;
 // Implemented in the Infrastructure layer (e.g. EF Core).
 public interface ITransactionRepository {
 
-   // Load a transaction by its identifier
-   Task<Transaction?> FindByIdAsync(
-      Guid transactionId,
-      CancellationToken ct = default
-   );
 
-   // Return all transactions belonging to an account
-   Task<IReadOnlyList<Transaction>> SelectByAccountIdAsync(
-      Guid accountId,
-      CancellationToken ct = default
-   );
-
-   // Return all transactions of an account within a time period
-   Task<IReadOnlyList<Transaction>> SelectByAccountIdAndPeriodAsync(
-      Guid accountId,
-      DateOnly fromDate,
-      DateOnly toDate,
-      CancellationToken ct = default
-   );
 
    // Add a new transaction to the persistence context
    void Add(Transaction transaction);

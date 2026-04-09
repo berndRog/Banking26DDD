@@ -3,6 +3,7 @@ using BankingApi._2_Core.BuildingBlocks;
 using BankingApi._2_Core.Payments._1_Ports.Outbound;
 using BankingApi._2_Core.Payments._2_Application.Dtos;
 using BankingApi._2_Core.Payments._2_Application.Mappings;
+using BankingApi._2_Core.Payments._3_Domain.Entities;
 using BankingApi._2_Core.Payments._3_Domain.Errors;
 using BankingApi._2_Core.Payments._3_Domain.ValueObjects;
 using BankingApi._3_Infrastructure._2_Persistence.Database;
@@ -167,6 +168,48 @@ internal sealed class AccountReadModelEf(
       // 4. Case: Account exists, but search may yield an empty list []
       return Result<IEnumerable<BeneficiaryDto>>.Success(result.FilteredBeneficiaries);
    }
+
+   // public async Task<Result<Transaction?>> FindByAccountIdAndTrabsactionIdAsync(
+   //    Guid accountId, 
+   //    Guid transactionId, 
+   //    CancellationToken ct = default
+   // ) {
+   //       var transactionDto = await dbContext.Transactions
+   //          .Where(t => t.AccountId == accountId && t.Id == transactionId)
+   //          .Select(t => t.ToTransactionDto())
+   //          .SingleAsync(ct);
+   //       
+   //       // 2. If no record matches both IDs, we return a NotFound failure.
+   //       // This covers both cases: either the AccountId is wrong or the BeneficiaryId is wrong.
+   //       return transactionDto is null ? 
+   //          Result<BeneficiaryDto>.Failure(TransactionErrors.NotFound) :
+   //          Result<BeneficiaryDto>.Success(beneficiaryDto);
+   //       return transactionDto is null ? Result
+   // }
+
+   // public async Task<Result<IReadOnlyList<Transaction>>> SelectByAccountIdAndPeriodAsync(
+   //    Guid accountId, 
+   //    DateTimeOffset fromUtc, 
+   //    DateTimeOffset toUtc,
+   //    CancellationToken ct = default
+   // ) {
+   //   
+   //    // 1. Query starting from the Aggregate Root (Account) to ensure context validity.
+   //    // We use a projection to fetch existence and filtered data in one DB trip.
+   //    var result = await dbContext.Accounts
+   //       .AsNoTracking()
+   //       .Where(a => a.Id == accountId)
+   //       .Select(a => new { a.Id, a.Iban
+   //          // Filter children directly within the projection
+   //          FilteredTransactions = a.Transactions
+   //             .Where(t => t.BookedAt >= fromUtc  && t.BookedAt <= toUtc)
+   //             .Select(b => b.ToTransactionDto())
+   //             .ToList()
+   //       })
+   //       .SingleOrDefaultAsync(ct);
+   //    
+   //    
+   // }
    #endregion
 }
 

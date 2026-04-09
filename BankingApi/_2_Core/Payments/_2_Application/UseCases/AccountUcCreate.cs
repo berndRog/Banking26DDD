@@ -6,6 +6,7 @@ using BankingApi._2_Core.Payments._1_Ports.Outbound;
 using BankingApi._2_Core.Payments._2_Application.Dtos;
 using BankingApi._2_Core.Payments._2_Application.Mappings;
 using BankingApi._2_Core.Payments._3_Domain.Entities;
+using BankingApi._2_Core.Payments._3_Domain.Enums;
 using BankingApi._2_Core.Payments._3_Domain.Errors;
 using BankingApi._2_Core.Payments._3_Domain.ValueObjects;
 namespace BankingApi._2_Core.Payments._2_Application.UseCases;
@@ -25,7 +26,8 @@ public sealed class AccountUcCreate(
       CancellationToken ct = default
    ) {
       // 1) Exits Customer with given id and is active?
-      if (!await customerContract.ExistsActiveAsync(customerId, ct))
+      var resultCustomer = await customerContract.ExistsActiveAsync(customerId, ct);
+      if (!resultCustomer.IsFailure)
          return Result<AccountDto>.Failure(AccountErrors.OwnerIdNotFoundOrInactive);
       
       // 2) Load authorized employee and check if has rights to manage accounts
@@ -40,11 +42,16 @@ public sealed class AccountUcCreate(
          return Result<AccountDto>.Failure(AccountErrors.InvalidIban);
       var ibanVo = resultIban.Value;
       
+      var resultBalance = MoneyVo.Create(accountDto.Balance, (Currency) accountDto.Currency);
+      if (resultBalance.IsFailure)
+         return Result<AccountDto>.Failure(AccountErrors.InvalidBalance);
+      var balanceVo = resultBalance.Value;
+      
       // create entity
       var result = Account.Create(
-         customerId: customerId,
          ibanVo: ibanVo, 
-         balance: accountDto.Balance, 
+         balanceVo: balanceVo, 
+         customerId: customerId,
          createdByEmployeeId: employeeContractDto.Id,
          createdAt: clock.UtcNow,
          id: accountDto.Id.ToString()

@@ -12,6 +12,7 @@ public interface IAccountContract {
       string? accountId,
       string? iban,
       decimal balance,
+      int currency = 1, // EUR
       CancellationToken ct = default
    );
 

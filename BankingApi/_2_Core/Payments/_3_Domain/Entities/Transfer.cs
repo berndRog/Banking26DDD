@@ -9,9 +9,10 @@ namespace BankingApi._2_Core.Payments._3_Domain.Entities;
 public sealed class Transfer : AggregateRoot {
    
    //--- Properties ------------------------------------------------------------
+   
    // debit account (Lastschrift)
    public Guid DebitAccountId { get; private set; }
-
+   
    // credit account (Gutschrift)
    public IbanVo CreditAccountIbanVo { get; private set; } = default!;
    

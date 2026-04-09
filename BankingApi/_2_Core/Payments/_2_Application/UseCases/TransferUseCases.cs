@@ -4,8 +4,8 @@ using BankingApi._2_Core.Payments._2_Application.Dtos;
 namespace BankingApi._2_Core.Payments._2_Application.UseCases;
 
 public class TransferUseCases(
-   TransferUcSendMoney transferUcSendMoney,
-   TransferUcReverse transferUcReverse
+   TransferUcSendMoney transferUcSendMoney
+   //TransferUcReverse transferUcReverse
 ) : ITransferUseCases {
    
    public Task<Result<TransferDto>> SendMoneyAsync(
@@ -13,12 +13,12 @@ public class TransferUseCases(
       CancellationToken ct = default
    ) => transferUcSendMoney.ExecuteAsync(sendMoneyDto, ct);
 
-   public Task<Result<TransferDto>> ReverseMoneyAsync(
-      Guid fromAccountId,
-      Guid transferId, 
-      string purpose,
-      CancellationToken ct = default
-   ) => transferUcReverse.ExecuteAsync(fromAccountId, transferId, purpose, ct);
+   // public Task<Result<TransferDto>> ReverseMoneyAsync(
+   //    Guid fromAccountId,
+   //    Guid transferId, 
+   //    string purpose,
+   //    CancellationToken ct = default
+   // ) => transferUcReverse.ExecuteAsync(fromAccountId, transferId, purpose, ct);
 
    
 }

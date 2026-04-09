@@ -2,7 +2,6 @@ using BankingApi._2_Core.BuildingBlocks;
 using BankingApi._2_Core.BuildingBlocks._3_Domain.Entities;
 using BankingApi._2_Core.BuildingBlocks._3_Domain.Errors;
 using BankingApi._2_Core.Customers._3_Domain.Errors;
-using BankingApi._2_Core.Payments._3_Domain.Enums;
 using BankingApi._2_Core.Payments._3_Domain.Errors;
 using BankingApi._2_Core.Payments._3_Domain.ValueObjects;
 namespace BankingApi._2_Core.Payments._3_Domain.Entities;
@@ -48,24 +47,24 @@ public sealed class Account : AggregateRoot {
    // Domain ctor, to inject IClock for testing
    private Account(
       Guid id,
-      Guid customerId,
       IbanVo ibanVo,
       MoneyVo balanceVo,
+      Guid customerId,
       Guid createdByEmployeeId
    )  {
       Id = id;
-      CustomerId = customerId;
       IbanVo = ibanVo;
       BalanceVo = balanceVo;
+      CustomerId = customerId;
       CreatedByEmployeeId = createdByEmployeeId;
    }
 
    //--- Static Factory --------------------------------------------------------
    // Static factory method to create a new account for an existing cutomer.
    public static Result<Account> Create(
-      Guid customerId,
       IbanVo ibanVo,
-      decimal balance,
+      MoneyVo balanceVo,
+      Guid customerId,
       Guid createdByEmployeeId,
       DateTimeOffset createdAt,
       string? id = null
@@ -76,11 +75,6 @@ public sealed class Account : AggregateRoot {
       
       if (createdByEmployeeId == Guid.Empty)
          return Result<Account>.Failure(AccountErrors.InvalidEmployeeId);
-      
-      var resultVo = MoneyVo.Create(balance,Currency.EUR);
-      if(resultVo.IsFailure)
-         return Result<Account>.Failure(resultVo.Error);
-      var balanceVo = resultVo.Value;
       
       var idResult = Resolve(id, AccountErrors.InvalidId);
       if (idResult.IsFailure)
@@ -124,6 +118,8 @@ public sealed class Account : AggregateRoot {
    #region -------------------- Transactions --------------------------------------------
    // Debit = withdraw money from THIS account (Lastschrift)
    public Result<Transaction> PostDebit(
+      string creditName,
+      IbanVo creditIbanVo,
       MoneyVo amountVo,
       string purpose,
       DateTimeOffset bookedAt,
@@ -147,7 +143,9 @@ public sealed class Account : AggregateRoot {
 
       // create debit transaction
       var result = Transaction.CreateDebit(
-         Id,
+         accountId: Id,
+         creditAccountName: creditName,
+         creditAccountIbanVo: creditIbanVo,
          purpose,
          amountVo,
          BalanceVo,
@@ -166,6 +164,8 @@ public sealed class Account : AggregateRoot {
    
    // Crebit = add money to THIS account (Gutschrift)
    public Result<Transaction> PostCredit(
+      string debitName,    // who is sending the money
+      IbanVo debitIbanVo,  // which sender iban is involved
       MoneyVo amountVo,
       string purpose,
       DateTimeOffset bookedAt,
@@ -185,7 +185,9 @@ public sealed class Account : AggregateRoot {
 
       // create credit transaction
       var result = Transaction.CreateCredit(
-         Id,
+         accountId: Id,
+         debitAccountName: debitName,
+         debitAccountIbanVo: debitIbanVo,
          purpose,
          amountVo,
          BalanceVo,

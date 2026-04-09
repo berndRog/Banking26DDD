@@ -8,12 +8,9 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 namespace BankingApi._1_Controllers.V2;
 
-[ApiVersion("1.0")]
 [ApiVersion("2.0")]
 [Route("banking/v{version:apiVersion}")]
 [ApiController]
-[Consumes("application/json")] // default
-[Produces("application/json")] // default
 public sealed class TransfersController(
    ITransferReadModel transferReadModel,
    ITransferUseCases transferUseCases,
@@ -34,16 +31,16 @@ public sealed class TransfersController(
    /// <returns>The created transfer resource.</returns>
    // [Authorize(Policy = "CustomersOrEmployees")]
    [HttpPost("accounts/{accountId:guid}/transfers", Name = nameof(SendMoneyAsync))]
+   [Consumes("application/json")]
+   [Produces("application/json")]
    [ProducesResponseType<TransferDto>(StatusCodes.Status201Created)]
    [ProducesResponseType<ProblemDetails>(StatusCodes.Status400BadRequest, "application/problem+json")]
    [ProducesResponseType<ProblemDetails>(StatusCodes.Status404NotFound, "application/problem+json")]
    public async Task<ActionResult<TransferDto>> SendMoneyAsync(
       [Description("Unique accountId of the sender account")]
       [FromRoute] Guid accountId,
-
       [Description("Transfer data for the new money transfer")]
       [FromBody] SendMoneyDto sendMoneyDto,
-
       CancellationToken ct
    ) {
       const string context = $"{nameof(TransfersController)}.{nameof(SendMoneyAsync)}";

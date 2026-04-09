@@ -1,11 +1,14 @@
 using System.Runtime.CompilerServices;
 using BankingApi._2_Core.BuildingBlocks;
 using BankingApi._2_Core.BuildingBlocks._1_Ports.Outbound;
+using BankingApi._2_Core.BuildingBlocks._3_Domain.Enums;
 using BankingApi._2_Core.BuildingBlocks._4_IntegrationContracts._1_Ports;
 using BankingApi._2_Core.BuildingBlocks._4_IntegrationContracts._2_Application.Dtos;
 using BankingApi._2_Core.Payments._1_Ports.Outbound;
+using BankingApi._2_Core.Payments._2_Application.Dtos;
 using BankingApi._2_Core.Payments._2_Application.Mappings;
 using BankingApi._2_Core.Payments._3_Domain.Entities;
+using BankingApi._2_Core.Payments._3_Domain.Enums;
 using BankingApi._2_Core.Payments._3_Domain.Errors;
 using BankingApi._2_Core.Payments._3_Domain.ValueObjects;
 using IbanGenerator = BankingApi._2_Core.BuildingBlocks.Utils.IbanGenerator;
@@ -13,6 +16,7 @@ using IbanGenerator = BankingApi._2_Core.BuildingBlocks.Utils.IbanGenerator;
 namespace BankingApi._3_Infrastructure._2_Persistence.Adapters;
 
 internal class AccountContractEf(
+   IEmployeeContract employeeContract,
    IAccountRepository accountRepository,
    IUnitOfWork unitOfWork,
    IClock clock,
@@ -24,10 +28,18 @@ internal class AccountContractEf(
       string? accoutIdString = null,
       string? iban = null,
       decimal balance = 0m,
+      int currency = 1, // EUR
       CancellationToken ct = default!
    ) {
       
-      // Create IBAN (generate if not provided, validate if provided)
+      // 1) Load authorized employee and check if has rights to manage accounts
+      var resultEmployee = 
+         await employeeContract.GetAuthorizedEmployeeAsync(AdminRights.ManageAccounts, ct);   
+      if(resultEmployee.IsFailure)
+         return Result<AccountContractDto>.Failure(resultEmployee.Error);
+      var employeeContractDto = resultEmployee.Value;
+      
+      // 2) Create IBAN (generate if not provided, validate if provided)
       if (string.IsNullOrEmpty(iban)) {
          // generate iban
          iban = IbanGenerator.CreateGermanIban(); 
@@ -42,18 +54,22 @@ internal class AccountContractEf(
             return Result<AccountContractDto>.Failure(AccountErrors.InvalidIbanFormat);
          }
       }
-      
-      // Create Iban VO
       var resultIban = IbanVo.Create(iban);
       if(resultIban.IsFailure)
          return Result<AccountContractDto>.Failure(resultIban.Error);
       var ibanVo = resultIban.Value;
       
-      
+      // 3) Create BalanceVo
+      var resultBalance = MoneyVo.Create(balance, Currency.EUR);
+      if (resultBalance.IsFailure)
+         throw new Exception($"Invalid money in test seed: {resultBalance}");
+      var balanceVo = resultBalance.Value;
+
+      // 4) Create Aggregate root Account 
       var resultAccount = Account.Create(
-         customerId: customerId,
          ibanVo: ibanVo,
-         balance: balance,
+         balanceVo: balanceVo,
+         customerId: customerId,
          createdByEmployeeId:Guid.NewGuid(), // for simplicity, we use a random employee id here, in real life we would get it from the identity gateway
          createdAt: clock.UtcNow,
          id: accoutIdString

@@ -1,10 +1,8 @@
 using BankingApi._2_Core.BuildingBlocks;
-using BankingApi._2_Core.BuildingBlocks._3_Domain;
 using BankingApi._2_Core.BuildingBlocks._3_Domain.Entities;
 using BankingApi._2_Core.Payments._3_Domain.Enums;
 using BankingApi._2_Core.Payments._3_Domain.Errors;
 using BankingApi._2_Core.Payments._3_Domain.ValueObjects;
-
 namespace BankingApi._2_Core.Payments._3_Domain.Entities;
 
 public sealed class Transaction : Entity {
@@ -25,10 +23,14 @@ public sealed class Transaction : Entity {
    // booking timestamp
    public DateTimeOffset BookedAt { get; private set; }
    
-   
+   // debit Account
    // Transaction --> Account  [?] : [1]  (owning account)
    public Guid AccountId { get; private set; }
 
+   // snapshot data for detail transaction display
+   public string OtherAccountName { get; private set; } = string.Empty;
+   public IbanVo OtherAccountIbanVo { get; private set; } = default!;
+   
    // Transaction --> Tranfer  [?] : [0..1]
    public Guid? TransferId { get; private set; }
    
@@ -41,6 +43,8 @@ public sealed class Transaction : Entity {
    private Transaction(
       Guid id,
       Guid accountId,
+      string otherAccountName,
+      IbanVo otherAccountIbanVo,
       TransactionType type,
       MoneyVo amountVo,
       MoneyVo balanceAfterVo,
@@ -49,6 +53,8 @@ public sealed class Transaction : Entity {
    ) {
       Id = id;
       AccountId = accountId;
+      OtherAccountName = otherAccountName;
+      OtherAccountIbanVo = otherAccountIbanVo;
       Type = type;
       AmountVo = amountVo;
       BalanceAfterVo = balanceAfterVo;
@@ -58,21 +64,25 @@ public sealed class Transaction : Entity {
 
    //--- Static Factories ------------------------------------------------------
    public static Result<Transaction> CreateDebit(
-      Guid accountId,
+      Guid accountId,              // DebitAccount
+      string creditAccountName,    // CreditAccount
+      IbanVo creditAccountIbanVo,  // CreditAccount 
       string purpose,
       MoneyVo amountVo,
       MoneyVo balanceAfterVo,
       DateTimeOffset bookedAt,
       string? id = null
    ) {
-      var idResult = Entity.Resolve(id, TransactionErrors.InvalidId);
+      var idResult = Resolve(id, TransactionErrors.InvalidId);
       if (idResult.IsFailure)
          return Result<Transaction>.Failure(idResult.Error);
       var transactionId = idResult.Value;
       
       var transaction =  new Transaction(
          id: transactionId,
-         accountId: accountId,
+         accountId: accountId,        // Debit
+         otherAccountName: creditAccountName,
+         otherAccountIbanVo: creditAccountIbanVo,
          type: TransactionType.Debit,
          purpose: purpose,
          amountVo: amountVo,
@@ -84,7 +94,9 @@ public sealed class Transaction : Entity {
    }
 
    public static Result<Transaction> CreateCredit(
-      Guid accountId,
+      Guid accountId,              // CreditAccountId
+      string debitAccountName,     // DebitName
+      IbanVo debitAccountIbanVo,   // DebitIban
       string purpose,
       MoneyVo amountVo,
       MoneyVo balanceAfterVo,
@@ -100,6 +112,8 @@ public sealed class Transaction : Entity {
       var transaction = new Transaction(
          id: transactionId,
          accountId: accountId,
+         otherAccountName: debitAccountName,
+         otherAccountIbanVo: debitAccountIbanVo,
          type: TransactionType.Credit,
          purpose: purpose,
          amountVo: amountVo,

@@ -1,5 +1,6 @@
 using BankingApi._2_Core.BuildingBlocks;
 using BankingApi._2_Core.BuildingBlocks._1_Ports.Outbound;
+using BankingApi._2_Core.BuildingBlocks._4_IntegrationContracts._1_Ports;
 using BankingApi._2_Core.BuildingBlocks.Utils;
 using BankingApi._2_Core.Payments._1_Ports.Outbound;
 using BankingApi._2_Core.Payments._2_Application.Dtos;
@@ -11,6 +12,7 @@ using BankingApi._2_Core.Payments._3_Domain.ValueObjects;
 namespace BankingApi._2_Core.Payments._2_Application.UseCases;
 
 public sealed class TransferUcSendMoney(
+   ICustomerContract customerContract,
    IAccountRepository accountRepository,
    ITransferRepository transferRepository,
    IUnitOfWork unitOfWork,
@@ -24,13 +26,12 @@ public sealed class TransferUcSendMoney(
       // 1) Validate input -----------------------------------------------------
       // Read the raw amount from the request DTO.
       var amount = dto.Amount;
-
       // Guard clause: a transfer amount must be greater than zero.
       if (amount <= 0)
          return Result<TransferDto>.Failure(TransferErrors.InvalidAmount);
 
       // Convert the primitive amount into a validated Money value object.
-      var resultVo = MoneyVo.Create(amount, Currency.EUR);
+      var resultVo = MoneyVo.Create(amount, (Currency) dto.Currency);
       if (resultVo.IsFailure)
          return Result<TransferDto>.Failure(resultVo.Error);
       var amountVo = resultVo.Value;
@@ -38,22 +39,27 @@ public sealed class TransferUcSendMoney(
       // 2) Load required domain objects ---------------------------------------
       // Load the debit account together with its beneficiaries.
       // The selected beneficiary must belong to this sender account.
-      var debitAccount = await accountRepository.FindAccountByIdWithBeneficiariesAsync(
-         dto.DebitAccountId,
-         ct
-      );
+      var debitAccount = 
+         await accountRepository.FindAccountByIdWithBeneficiariesAsync(dto.DebitAccountId, ct);
       if (debitAccount is null)
          return Result<TransferDto>.Failure(TransferErrors.DebitAccountNotFound);
-
-      // Resolve the beneficiary from the sender account.
-      // This ensures that money can only be sent to a registered recipient.
+      
+      // find customer Displayname
+      var resultDebitName = await customerContract.FindCustomerNameAsync(debitAccount.Id, ct);
+      if(resultDebitName.IsFailure)
+         return Result<TransferDto>.Failure(resultDebitName.Error);
+      var debitName = resultDebitName.Value;
+      
+      // Resolve the beneficiary from the debit account.
       var resultBeneficiary = debitAccount.FindBeneficiary(dto.BeneficiaryId);
       if (resultBeneficiary.IsFailure)
          return Result<TransferDto>.Failure(resultBeneficiary.Error);
       var beneficiary = resultBeneficiary.Value;
+      var creditName = beneficiary.Name;
+      var creditIbanVo = beneficiary.IbanVo;
 
       // Resolve the credit account via the beneficiary's IBAN.
-      var creditAccount = await accountRepository.FindByIbanAsync(beneficiary.IbanVo, ct);
+      var creditAccount = await accountRepository.FindByIbanAsync(creditIbanVo, ct);
       if (creditAccount is null)
          return Result<TransferDto>.Failure(TransferErrors.CreditAccountNotFound);
 
@@ -67,6 +73,8 @@ public sealed class TransferUcSendMoney(
       // 3) Execute domain logic -----------------------------------------------
       // Post the debit transaction on the sender account.
       var resultDebit = debitAccount.PostDebit(
+         creditName: creditName,
+         creditIbanVo: creditIbanVo,
          amountVo: amountVo,
          purpose: dto.Purpose,
          bookedAt: bookedAt,
@@ -78,6 +86,8 @@ public sealed class TransferUcSendMoney(
 
       // Post the credit transaction on the receiver account.
       var resultCredit = creditAccount.PostCredit(
+         debitName: debitName,
+         debitIbanVo: debitAccount.IbanVo,
          amountVo: amountVo,
          purpose: dto.Purpose,
          bookedAt: bookedAt,
