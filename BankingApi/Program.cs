@@ -76,7 +76,7 @@ public class Program {
             }
          });
          
-         await SeedDatabase.EmployeeDataAsync(app.Services);
+         // await SeedDatabase.EmployeeDataAsync(app.Services);
          
       }
       

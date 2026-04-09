@@ -25,6 +25,12 @@ public interface IEmployeeReadModel {
       CancellationToken ct = default
    );
    
+   // Find all employees by %name$ with SQL Like
+   public Task<Result<IEnumerable<EmployeeDto>>> SelectByNameAsync(
+      string name,
+      CancellationToken ct = default
+   );
+      
    // Return all employees
    Task<Result<IEnumerable<EmployeeDto>>> SelectAllAsync(
       CancellationToken ct = default

@@ -5,6 +5,18 @@ namespace BankingApi._2_Core.Employees._2_Application.Mappings;
 
 public static class EmployeeMappings {
 
+   public static EmployeeCreateDto toEmployeeCreateDto(this Employee employee) => new(
+      Id: employee.Id,
+      Firstname: employee.Firstname,
+      Lastname: employee.Lastname,
+      Email: employee.EmailVo.Value,
+      Phone: employee.PhoneVo.Value,
+      Subject: employee.Subject,
+      PersonnelNumber: employee.PersonnelNumber,
+      IsActive: employee.IsActive,
+      AdminRightsInt: (int) employee.AdminRights
+   );
+   
    public static EmployeeDto ToEmployeeDto(this Employee employee) => new(
       Id: employee.Id,
       Firstname: employee.Firstname,

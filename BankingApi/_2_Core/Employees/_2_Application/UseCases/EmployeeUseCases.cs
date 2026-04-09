@@ -31,9 +31,9 @@ public sealed class EmployeeUseCases(
    EmployeeUcSetAdminRights setRightsUc
 ) : IEmployeeUseCases {
    public Task<Result<EmployeeDto>> CreateAsync(
-      EmployeeDto dto,
+      EmployeeCreateDto dto,
       CancellationToken ct = default
-   ) => createUc.ExecuteAsync(employeeDto: dto, ct: ct);
+   ) => createUc.ExecuteAsync(employeeCreateDto: dto, ct: ct);
 
    public Task<Result<EmployeeProvisionDto>> CreateProvisionAsync(
       string? id, 

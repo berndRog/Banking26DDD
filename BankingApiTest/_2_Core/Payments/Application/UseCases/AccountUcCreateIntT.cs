@@ -28,14 +28,14 @@ public sealed class AccountUcCreateIntT : TestBaseIntegration {
       // Employee2 is used as Admin and must exists in the dataabse
       var employee2 = seed.Employee2();
       employeeRepository.Add(employee2);
-      unitOfWork.SaveAllChangesAsync("Employee2 must exist", ct);
+      await unitOfWork.SaveAllChangesAsync("Employee2 must exist", ct);
       unitOfWork.ClearChangeTracker();
       
       var customer = seed.Customer1();
       customerRepository.Add(customer);
       await unitOfWork.SaveAllChangesAsync("Seeding data", ct);
-      
       unitOfWork.ClearChangeTracker(); 
+      
       var account = seed.Account1();
       var accountDto = account.ToAccountDto();
       
