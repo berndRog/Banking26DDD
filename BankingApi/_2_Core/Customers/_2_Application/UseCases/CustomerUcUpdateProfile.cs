@@ -71,7 +71,7 @@ public class CustomerUcUpdateProfile(
       );
       if (updateResult.IsFailure)
          return Result<CustomerDto>.Failure(updateResult.Error)
-            .LogIfFailure(logger, "CustomerUcUpdateProfile.DomainRejected", new { dto = customerDto, subject });
+            .LogIfFailure(logger, "CustomerUcUpdateProfile failed", new { dto = customerDto, subject });
 
       // persist changes with unit of work
       var savedRows = await unitOfWork.SaveAllChangesAsync("Customer profile updated", ct);

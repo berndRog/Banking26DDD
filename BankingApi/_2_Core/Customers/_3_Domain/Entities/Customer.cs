@@ -156,17 +156,17 @@ public sealed class Customer : AggregateRoot {
       var customerId = resultId.Value;
 
       var addressVo = AddressVo.Create(
-         street: "unknown",
-         postalCode: "unknown",
-         city: "unknown",
+         street: "",
+         postalCode: "",
+         city: "",
          country: null
       ).Value;
       
       // Provisioned customer starts with identity data plus required business profile data.
       var customer = new Customer(
          id: customerId,
-         firstname: "unknown",
-         lastname: "unknown",
+         firstname: "",
+         lastname: "",
          companyName: null,
          subject: subject,
          emailVo: emailVo,
